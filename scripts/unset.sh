@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+unset ZENIN_DB_KIND
+unset ZENIN_DB_HOST
+unset ZENIN_DB_PORT
+unset ZENIN_DB_NAME
+unset ZENIN_DB_USER
+unset ZENIN_DB_PASS
+unset ZENIN_DB_CONTAINER
+unset ZENIN_RT_LEVEL
+unset ZENIN_TLS_CERT
+unset ZENIN_TLS_KEY
+unset ZENIN_RT_REDIRECT
