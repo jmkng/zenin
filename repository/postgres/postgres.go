@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	_ "embed"
+	"fmt"
 	"slices"
 
 	"github.com/jmkng/zenin/internal/env"
@@ -15,10 +16,17 @@ import (
 
 // NewPostgresRepository returns a new `PostgresRepository`.
 func NewPostgresRepository(env *env.DatabaseEnv) (*PostgresRepository, error) {
-	db, err := sqlx.Open("pgx", "postgres://username:password@localhost:5432/postgres")
+	conns := fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
+		env.Username,
+		env.Password,
+		env.Host,
+		env.Port,
+		env.Name)
+	db, err := sqlx.Open("pgx", conns)
 	if err != nil {
 		return nil, err
 	}
+	db.SetMaxOpenConns(int(env.MaxCon))
 	return &PostgresRepository{db}, nil
 }
 
