@@ -30,9 +30,10 @@ type Monitor struct {
 // Poll will start a poll action, returning a `Span` for the result.
 func (m Monitor) Poll() measurement.Span {
 	log.Debug("poll starting", "monitor(id)", m.Id)
-	var span measurement.Span
 
+	var span measurement.Span
 	start := time.Now()
+
 	switch x := m.Strategy.Kind; x {
 	case ICMP:
 		span = NewICMPProbe(false).Poll(m)

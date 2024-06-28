@@ -17,8 +17,7 @@ func NewHTTPProbe() HTTPProbe {
 	return HTTPProbe{}
 }
 
-type HTTPProbe struct {
-}
+type HTTPProbe struct{}
 
 // Poll implements `Probe.Poll` for `HTTPProbe`.
 func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {

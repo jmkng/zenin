@@ -7,8 +7,7 @@ func NewTCPProbe() TCPProbe {
 	return TCPProbe{}
 }
 
-type TCPProbe struct {
-}
+type TCPProbe struct{}
 
 // Poll implements `Probe.Poll` for `TCPProbe`.
 func (i TCPProbe) Poll(monitor Monitor) measurement.Span {

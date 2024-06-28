@@ -2,7 +2,7 @@ package distributor
 
 import (
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -67,7 +67,7 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 	// TODO: Rethink this later.
 	var key int
 	for {
-		key = rand.Intn(math.MaxInt)
+		key = rand.IntN(math.MaxInt)
 		if _, exists := d.subscribers[key]; !exists {
 			break
 		}
@@ -98,15 +98,14 @@ func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
 		log.Debug("distributor dropped request to start an active monitor", "id", mon.Id)
 		return
 	}
-
 	channel := make(chan any)
 	d.polling[mon.Id] = channel
 
-	log.Debug("distributor started polling monitor", "id", mon.Id)
 	go func(in <-chan any, loopback chan<- any, mon monitor.Monitor) {
-		// TODO: A small random delay here would help avoid having too many file handles
-		// open, in the event that many monitors with the same interval are started all
-		// at once.
+		delay := rand.IntN(800)
+		log.Debug("distributor started polling monitor", "id", mon.Id, "delay(ms)", delay)
+		time.Sleep(time.Duration(delay) * time.Millisecond)
+
 		interval := time.Duration(mon.Interval)
 	POLLING:
 		for {
@@ -128,7 +127,6 @@ func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
 			case <-time.After(interval * time.Second):
 				action()
 			}
-			log.Debug("distributor stopped polling monitor", "id", mon.Id)
 		}
 		log.Debug("distributor stopped polling monitor")
 	}(channel, loopback, mon)
