@@ -6,10 +6,10 @@ import (
 	"github.com/jmkng/zenin/internal/monitor"
 )
 
-// DistributeMeasurementMessage  is used to distribute a `Measurement` to the
+// DistributeSpanMessage is used to distribute a `Span` to the
 // repository and feed subscribers.
-type DistributeMeasurementMessage struct {
-	Measurement measurement.Measurement
+type DistributeSpanMessage struct {
+	Span measurement.Span
 }
 
 // SubscribeMessage is used to add a new feed subscriber.

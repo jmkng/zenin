@@ -34,7 +34,7 @@ type PostgresRepository struct {
 	db *sqlx.DB
 }
 
-// Validate implements `Validate` for `Repository`.
+// Validate implements `Repository.Validate` for `PostgresRepository`.
 func (p PostgresRepository) Validate() (bool, error) {
 	var rows []string
 	if err := p.db.Select(&rows,
@@ -50,7 +50,7 @@ func (p PostgresRepository) Validate() (bool, error) {
 	return true, nil
 }
 
-// Migrate implements `Migrate` for `Repository`.
+// Migrate implements `Repository.Migrate` for `PostgresRepository`.
 func (p PostgresRepository) Migrate() error {
 	var err error
 	var tx *sql.Tx

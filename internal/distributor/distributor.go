@@ -51,8 +51,8 @@ func (d *Distributor) Listen() chan<- any {
 				d.start(channel, x.Monitor)
 			case StopMessage:
 				d.stop(x.Id)
-			case DistributeMeasurementMessage:
-				d.distributeMeasurement(x.Measurement)
+			case DistributeSpanMessage:
+				d.distributeSpan(x.Span)
 			default:
 				log.Error("distributor dropped unrecognized message: %v", "message", message)
 			}
@@ -111,8 +111,8 @@ func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
 	POLLING:
 		for {
 			action := func() {
-				measurement := mon.Poll()
-				loopback <- DistributeMeasurementMessage{Measurement: measurement}
+				span := mon.Poll()
+				loopback <- DistributeSpanMessage{Span: span}
 			}
 			select {
 			case message, ok := <-in:
@@ -147,9 +147,9 @@ func (d *Distributor) stop(id int) {
 	delete(d.polling, id)
 }
 
-// Distribute will distribute a `Measurement` to the repository and feed subscribers.
-func (d *Distributor) distributeMeasurement(measurement measurement.Measurement) {
-	log.Warn("distributor received a measurement but will do nothing with it") // TODO
+// distributeSpan will distribute a `Span` to the repository and feed subscribers.
+func (d *Distributor) distributeSpan(span measurement.Span) {
+	log.Warn("distributor received a span but will do nothing with it") // TODO
 }
 
 // onClose will block and listen for incoming messages.

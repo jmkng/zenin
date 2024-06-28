@@ -9,7 +9,7 @@ import (
 
 const Argon2SchemeID int = 1
 
-// Argon2Scheme implements `Scheme` using Argon2.
+// Argon2Scheme is a password hashing scheme implemented with Argon2(id).
 type Argon2Scheme struct {
 	Argon2Params
 }
@@ -29,7 +29,7 @@ type Argon2Params struct {
 	KeyLength uint32
 }
 
-// Hash implements `Hash` for `Scheme`.
+// Hash implements `Scheme.Hash` for `Argon2Scheme`.
 func (a Argon2Scheme) Hash(hashable []byte, salt []byte) (VersionedSaltedHash, error) {
 	var err error
 	if len(salt) == 0 {
@@ -54,7 +54,7 @@ var FailedValidateError = errors.New("failed to perform validation")
 // but the values do not match.
 var DidNotMatchError = errors.New("values did not match")
 
-// Validate implements `Validate` for `Scheme`.
+// Validate implements `Scheme.Validate` for `Argon2Scheme`.
 //
 // # Errors:
 //
