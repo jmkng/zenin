@@ -6,8 +6,6 @@ import (
 	"github.com/jmkng/zenin/internal/monitor"
 )
 
-const MigrationMarker string = "--#"
-
 // SchemaTables is a list of the tables expected to be found within a Zenin database.
 var SchemaTables = []string{"account", "monitor", "measurement", "certificate"}
 
