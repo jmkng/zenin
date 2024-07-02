@@ -12,6 +12,6 @@ type ICMPProbe struct {
 }
 
 // Poll implements `Probe.Poll` for `ICMPProbe`.
-func (i ICMPProbe) Poll(monitor Monitor) measurement.Span {
+func (i ICMPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 	panic("todo")
 }

@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -18,60 +19,90 @@ const (
 	Script ProbeKind = "SCRIPT"
 )
 
+type HTTPRange = string
+
+const (
+	Informational HTTPRange = "100-199"
+	Successful    HTTPRange = "200-299"
+	Redirection   HTTPRange = "300-399"
+	ClientError   HTTPRange = "400-499"
+	ServerError   HTTPRange = "500-599"
+)
+
+type HTTPMethod = string
+
+const (
+	Get    HTTPMethod = "GET"
+	Head   HTTPMethod = "HEAD"
+	Post   HTTPMethod = "POST"
+	Put    HTTPMethod = "PUT"
+	Patch  HTTPMethod = "PATCH"
+	Delete HTTPMethod = "GET"
+)
+
 type Probe interface {
-	Poll(monitor Monitor) measurement.Span
+	Poll(monitor Monitor) (measurement.Measurement, error)
 }
 
 type Monitor struct {
-	Id int
-	Strategy
+	Id     *int      `json:"id" db:"id"`
+	Name   string    `json:"name" db:"name"`
+	Kind   ProbeKind `json:"kind" db:"kind"`
+	Active bool      `json:"active" db:"active"`
+	// The time between each poll. (seconds)
+	Interval int `json:"interval" db:"interval"`
+	// The time to wait for a poll to complete before it is considered dead. (seconds)
+	Timeout            int                       `json:"timeout" db:"timeout"`
+	Description        *string                   `json:"description" db:"description"`
+	RemoteAddress      *string                   `json:"remoteAddress" db:"remote_address"`
+	RemotePort         *int16                    `json:"remotePort" db:"remote_port"`
+	ScriptPath         *string                   `json:"scriptPath" db:"script_path"`
+	HTTPRange          *HTTPRange                `json:"httpRange" db:"http_range"`
+	HTTPMethod         *string                   `json:"httpMethod" db:"http_method"`
+	HTTPHeaders        *string                   `json:"httpHeaders" db:"http_request_headers"`
+	HTTPBody           *string                   `json:"httpBody" db:"http_request_body"`
+	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
+	ICMPSize           *int                      `json:"icmpSize" db:"icmp_size"`
+	Measurements       []measurement.Measurement `json:"measurements"`
 }
 
+// ValidationError is an error received when a monitor is being polled in an invalid state.
+//
+// Validation problems should be caught early on, when the monitor is created and stored,
+// so this error should not happen in reality.
+//
+// If it does happen, this will indicate an internal issue.
+var ValidationError = errors.New("probe was stopped by invalid monitor")
+
 // Poll will start a poll action, returning a `Span` for the result.
-func (m Monitor) Poll() measurement.Span {
-	log.Debug("poll starting", "monitor(id)", m.Id)
+func (m Monitor) Poll() (measurement.Measurement, error) {
+	log.Debug("poll starting", "monitor(id)", *m.Id)
 
-	var span measurement.Span
+	var measurement measurement.Measurement
+	var err error
+
 	start := time.Now()
-
-	switch x := m.Strategy.Kind; x {
+	switch m.Kind {
 	case ICMP:
-		span = NewICMPProbe(false).Poll(m)
+		measurement, err = NewICMPProbe(false).Poll(m)
 	case HTTP:
-		span = NewHTTPProbe().Poll(m)
+		measurement, err = NewHTTPProbe().Poll(m)
 	case TCP:
-		span = NewTCPProbe().Poll(m)
+		measurement, err = NewTCPProbe().Poll(m)
 	case Script:
-		span = NewScriptProbe().Poll(m)
+		measurement, err = NewScriptProbe().Poll(m)
 	case Ping:
-		span = NewICMPProbe(true).Poll(m)
+		measurement, err = NewICMPProbe(true).Poll(m)
 	default:
 		panic("unrecognized probe")
 	}
+	if err != nil {
+		return measurement, err
+	}
+
 	diff := time.Since(start)
 	duration := float64(diff) / float64(time.Millisecond)
 
-	log.Debug("poll stopping", "monitor(id)", m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration))
-	return span
-}
-
-// Strategy describes how a monitor is polled.
-type Strategy struct {
-	Name   string
-	Kind   ProbeKind
-	Active bool
-	// The time between each poll. (seconds)
-	Interval int
-	// The time to wait for a poll to complete before it is considered dead. (seconds)
-	Timeout            int
-	Description        *string
-	RemoteAddress      *string
-	RemotePort         *int16
-	ScriptPath         *string
-	HTTPRange          *HTTPRange
-	HTTPMethod         *string
-	HTTPHeaders        *string
-	HTTPBody           *string
-	HTTPExpiredCertMod *string
-	ICMPSize           *int
+	log.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration))
+	return measurement, nil
 }

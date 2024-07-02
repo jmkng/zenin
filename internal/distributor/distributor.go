@@ -34,13 +34,15 @@ type Distributor struct {
 
 // Listen will block and listen for incoming messages.
 //
-// The returned channel can be used to send messages to the `Distributor`.
-// It expects to receive a message type defined in `message.go`,
-// and unrecognized messages are logged and dropped.
+// Returns a channel that can be used to send messages to the `Distributor`.
+//
+// The channel should be sent a message type that is defined `message.go`.
+// Unrecognized messages are logged and dropped.
 func (d *Distributor) Listen() chan<- any {
 	channel := make(chan any, 1)
 	go func(in chan any) {
 		log.Debug("distributor starting")
+
 		for message := range in {
 			switch x := message.(type) {
 			case SubscribeMessage:
@@ -51,14 +53,16 @@ func (d *Distributor) Listen() chan<- any {
 				d.start(channel, x.Monitor)
 			case StopMessage:
 				d.stop(x.Id)
-			case DistributeSpanMessage:
-				d.distributeSpan(x.Span)
+			case DistributeMeasurementMessage:
+				d.distributeMeasurement(x.Measurement)
 			default:
 				log.Error("distributor dropped unrecognized message: %v", "message", message)
 			}
 		}
+
 		log.Debug("distributor stopping")
 	}(channel)
+
 	return channel
 }
 
@@ -87,35 +91,43 @@ func (d *Distributor) unsubscribe(id int) {
 	}
 	err := conn.Close()
 	if err != nil {
-		log.Debug("distributor received error while closing feed connection", "error", err) // TODO: Is this logging right?
+		log.Debug("distributor received error while closing feed connection", "error", err)
 	}
 	delete(d.subscribers, id)
 }
 
 // start will begin polling a `Monitor`.
 func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
-	if _, exists := d.polling[mon.Id]; exists {
-		log.Debug("distributor dropped request to start an active monitor", "id", mon.Id)
+	if _, exists := d.polling[*mon.Id]; exists {
+		log.Debug("distributor dropped request to start an active monitor", "id", *mon.Id)
 		return
 	}
 	channel := make(chan any)
-	d.polling[mon.Id] = channel
+	d.polling[*mon.Id] = channel
 
 	go func(in <-chan any, loopback chan<- any, mon monitor.Monitor) {
 		delay := rand.IntN(800)
-		log.Debug("distributor started polling monitor", "id", mon.Id, "delay(ms)", delay)
-		time.Sleep(time.Duration(delay) * time.Millisecond)
+		log.Debug("distributor started polling monitor", "id", *mon.Id, "delay(ms)", delay)
 
+		time.Sleep(time.Duration(delay) * time.Millisecond)
 		interval := time.Duration(mon.Interval)
+
+		action := func() {
+			measurement, err := mon.Poll()
+			if err != nil {
+				// TODO: Errors here will probably be sent to the client.
+				// Will become more clear as probe implementations mature.
+				log.Error("failed to complete probe", "monitor(id)", mon.Id, "error", err)
+			}
+			loopback <- DistributeMeasurementMessage{Measurement: measurement}
+		}
+
 	POLLING:
 		for {
-			action := func() {
-				span := mon.Poll()
-				loopback <- DistributeSpanMessage{Span: span}
-			}
 			select {
 			case message, ok := <-in:
 				if !ok {
+					log.Warn("distributor is exiting due to closed inbound channel")
 					break POLLING
 				}
 				switch message.(type) {
@@ -139,15 +151,16 @@ func (d *Distributor) stop(id int) {
 		log.Debug("distributor dropped no-op stop request")
 		return
 	}
+
 	// This message goes to the monitor thread, not the distributor,
 	// but we include the id anyway.
 	channel <- StopMessage{Id: id}
 	delete(d.polling, id)
 }
 
-// distributeSpan will distribute a `Span` to the repository and feed subscribers.
-func (d *Distributor) distributeSpan(span measurement.Span) {
-	log.Warn("distributor received a span but will do nothing with it") // TODO
+// distributeMeasurement will distribute a `Measurement` to the repository and feed subscribers.
+func (d *Distributor) distributeMeasurement(measurement measurement.Measurement) {
+	log.Warn("distributor received a measurement but will do nothing with it") // TODO
 }
 
 // onClose will block and listen for incoming messages.

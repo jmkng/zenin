@@ -10,6 +10,6 @@ func NewScriptProbe() ScriptProbe {
 type ScriptProbe struct{}
 
 // Poll implements `Probe.Poll` for `ScriptProbe`.
-func (s ScriptProbe) Poll(monitor Monitor) measurement.Span {
+func (s ScriptProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 	panic("todo")
 }
