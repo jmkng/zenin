@@ -33,16 +33,16 @@ func GetCurrentScheme() Scheme {
 	return Argon2Scheme{DefaultArgon2Params}
 }
 
-// GetSchemeByID returns an implementation of `Scheme` by ID.
+// GetSchemeById returns an implementation of `Scheme` by id.
 //
 // # Panic
 //
-// If the ID is unrecognized, this function will panic.
-// Pass in a constant defined in a package, like `Argon2SchemeID`, etc...
-func GetSchemeByID(id int) (Scheme, error) {
+// If the id is unrecognized, this function will panic.
+// Pass in a constant defined in a package, like `Argon2SchemeId`, etc...
+func GetSchemeById(id int) (Scheme, error) {
 	var impl Scheme
 	switch id {
-	case Argon2SchemeID:
+	case Argon2SchemeId:
 		impl = Argon2Scheme{DefaultArgon2Params}
 	default:
 		return nil, errors.New("unrecognized scheme id")
@@ -50,7 +50,7 @@ func GetSchemeByID(id int) (Scheme, error) {
 	return impl, nil
 }
 
-// NewHashedFromString will parse a string into a new `Hashed`.
+// NewHashedFromString will parse a string into a new `VersionedSaltedHash`.
 func NewHashedFromString(raw string) (VersionedSaltedHash, error) {
 	markers, err := scanMarkerIndexes(raw)
 	if err != nil {
@@ -63,8 +63,8 @@ func NewHashedFromString(raw string) (VersionedSaltedHash, error) {
 // VersionedSaltedHash is a hashed password and other related information.
 type VersionedSaltedHash struct {
 	// A unique scheme identifier, to be compared with the unique identifiers declared
-	// in each implementation of Scheme. `Argon2SchemeID`, etc..
-	SchemeID int
+	// in each implementation of Scheme. `Argon2SchemeId`, etc..
+	SchemeId int
 	// Raw bytes that were used to salt the `Value`.
 	Salt []byte
 	// Raw bytes representing the hashed password.
@@ -83,7 +83,7 @@ func (h VersionedSaltedHash) String() string {
 		StdEncoding.
 		EncodeToString(h.Hash)
 
-	return fmt.Sprintf("%c%d%c%s%c%s", m, h.SchemeID, m, encodedSalt, m, encodedValue)
+	return fmt.Sprintf("%c%d%c%s%c%s", m, h.SchemeId, m, encodedSalt, m, encodedValue)
 }
 
 // scanMarkerIndexes will return a set of indexes that mark the beginning of the scheme version,
@@ -116,14 +116,14 @@ type markers struct {
 
 // extractMarkerValues will return a `Hashed` from the raw string.
 func extractMarkerValues(markers markers, raw string) (VersionedSaltedHash, error) {
-	schemeID, err := strconv.ParseInt(raw[markers.Zero+1:markers.One], 10, 32)
+	schemeId, err := strconv.ParseInt(raw[markers.Zero+1:markers.One], 10, 32)
 	if err != nil {
 		return VersionedSaltedHash{}, errors.New("failed to extract values from versioned salted hash")
 	}
 
 	salt := raw[markers.One+1 : markers.Two]
 	value := raw[markers.Two+1:]
-	return VersionedSaltedHash{SchemeID: int(schemeID), Salt: []byte(salt), Hash: []byte(value)}, nil
+	return VersionedSaltedHash{SchemeId: int(schemeId), Salt: []byte(salt), Hash: []byte(value)}, nil
 }
 
 // getRandomBytes will generate a cryptographically random byte array with the provided length.

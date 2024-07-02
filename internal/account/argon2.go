@@ -7,13 +7,14 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-const Argon2SchemeID int = 1
+const Argon2SchemeId int = 1
 
 // Argon2Scheme is a password hashing scheme implemented with Argon2(id).
 type Argon2Scheme struct {
 	Argon2Params
 }
 
+// DefaultArgon2Params is the default `Argon2Params` used to hash passwords.
 var DefaultArgon2Params = Argon2Params{
 	Time:      2,
 	Memory:    64 * 1024,
@@ -41,7 +42,7 @@ func (a Argon2Scheme) Hash(hashable []byte, salt []byte) (VersionedSaltedHash, e
 
 	hash := argon2.IDKey([]byte(hashable), salt, a.Time, a.Memory, a.Threads, a.KeyLength)
 	return VersionedSaltedHash{
-		SchemeID: Argon2SchemeID,
+		SchemeId: Argon2SchemeId,
 		Salt:     salt,
 		Hash:     hash,
 	}, nil
