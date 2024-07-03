@@ -11,7 +11,7 @@ import (
 // database table.
 type MonitorRepository interface {
 	InsertMonitor(ctx context.Context, monitor Monitor) (int, error)
-	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]Monitor, error)
+	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]MonitorJSON, error)
 }
 
 // SelectParams is a set of parameters used to narrow the scope of the `SelectMonitor`

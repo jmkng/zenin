@@ -2,7 +2,6 @@ package bundle
 
 import (
 	"github.com/jmkng/zenin/internal/account"
-	"github.com/jmkng/zenin/internal/distributor"
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
 	"github.com/jmkng/zenin/internal/repository"
@@ -14,7 +13,7 @@ func NewBundle(repository repository.Repository) Bundle {
 	measurement := measurement.NewMeasurementService(repository)
 
 	// Build the `Distributor` and begin listening.
-	distributor := distributor.NewDistributor(measurement)
+	distributor := monitor.NewDistributor(measurement)
 	sender := distributor.Listen()
 
 	// Construct remaining services and return.

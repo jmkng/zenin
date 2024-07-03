@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-// Injectable represents a type that can interact with a `Builder`,
-// typically to inject some SQL.
+// Injectable is a type that can interact with a `Builder`, typically to inject some SQL.
 type Injectable interface {
 	Inject(builder *Builder)
 }
@@ -131,7 +130,7 @@ func (b *Builder) spreadOpaque(values ...any) {
 }
 
 func (b *Builder) pushMarker() {
-	b.Push(fmt.Sprintf("%v", b.marker))
+	b.Push(b.marker.String())
 }
 
 func (b *Builder) pushArg(arg ...any) {

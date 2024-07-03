@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Account represents the account domain type.
+// Account is the account domain type.
 type Account struct {
 	Id                  *int
 	Username            string
