@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/jmkng/zenin/internal/bundle"
@@ -21,7 +22,13 @@ func main() {
 
 	bundle := bundle.NewBundle(repository)
 
-	// TODO: Server status check
+	// Resume polling active monitors.
+	active, err := bundle.Monitor.GetActive(context.Background())
+	dd(err)
+	log.Debug("resuming active monitors", "count", len(active))
+	for _, m := range active {
+		bundle.Monitor.StartMonitor(m.Monitor)
+	}
 
 	// 🌩️ ->
 	err = server.
