@@ -1,4 +1,4 @@
-package distributor
+package monitor
 
 import (
 	"math"
@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/measurement"
-	"github.com/jmkng/zenin/internal/monitor"
 )
 
 // NewDistributor returns a new `Distributor` using the provided `MeasurementService`
@@ -53,7 +52,7 @@ func (d *Distributor) Listen() chan<- any {
 				d.start(channel, x.Monitor)
 			case StopMessage:
 				d.stop(x.Id)
-			case DistributeMeasurementMessage:
+			case MeasurementMessage:
 				d.distributeMeasurement(x.Measurement)
 			default:
 				log.Error("distributor dropped unrecognized message: %v", "message", message)
@@ -97,7 +96,7 @@ func (d *Distributor) unsubscribe(id int) {
 }
 
 // start will begin polling a `Monitor`.
-func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
+func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 	if _, exists := d.polling[*mon.Id]; exists {
 		log.Debug("distributor dropped request to start an active monitor", "id", *mon.Id)
 		return
@@ -105,7 +104,7 @@ func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
 	channel := make(chan any)
 	d.polling[*mon.Id] = channel
 
-	go func(in <-chan any, loopback chan<- any, mon monitor.Monitor) {
+	go func(in <-chan any, loopback chan<- any, mon Monitor) {
 		delay := rand.IntN(800)
 		log.Debug("distributor started polling monitor", "id", *mon.Id, "delay(ms)", delay)
 
@@ -119,7 +118,7 @@ func (d *Distributor) start(loopback chan<- any, mon monitor.Monitor) {
 				// Will become more clear as probe implementations mature.
 				log.Error("failed to complete probe", "monitor(id)", mon.Id, "error", err)
 			}
-			loopback <- DistributeMeasurementMessage{Measurement: measurement}
+			loopback <- MeasurementMessage{Measurement: measurement}
 		}
 
 	POLLING:

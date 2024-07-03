@@ -1,14 +1,13 @@
-package distributor
+package monitor
 
 import (
 	"github.com/gorilla/websocket"
 	"github.com/jmkng/zenin/internal/measurement"
-	"github.com/jmkng/zenin/internal/monitor"
 )
 
-// DistributeMeasurementMessage is used to distribute a `Measurement` to the
+// MeasurementMessage is used to distribute a `Measurement` to the
 // repository and feed subscribers.
-type DistributeMeasurementMessage struct {
+type MeasurementMessage struct {
 	Measurement measurement.Measurement
 }
 
@@ -25,7 +24,7 @@ type UnsubscribeMessage struct {
 
 // StartMessage is used to begin polling a `Monitor`
 type StartMessage struct {
-	Monitor monitor.Monitor
+	Monitor Monitor
 }
 
 // StopMessage is used to stop polling an active `Monitor`
