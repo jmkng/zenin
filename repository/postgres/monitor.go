@@ -8,6 +8,7 @@ import (
 	"github.com/jmkng/zenin/pkg/sql"
 )
 
+// InsertMonitor implements `MonitorRepository.InsertMonitor` for `PostgresRepository`.
 func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.Monitor) (int, error) {
 	var id int
 	query := `
@@ -45,6 +46,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	return id, nil
 }
 
+// SelectMonitor implements `MonitorRepository.SelectMonitor` for `PostgresRepository`.
 func (p PostgresRepository) SelectMonitor(
 	ctx context.Context,
 	params *monitor.SelectParams,
@@ -56,6 +58,7 @@ func (p PostgresRepository) SelectMonitor(
 	return p.selectMonitor(ctx, params)
 }
 
+// selectMonitor returns monitors based on the provided `SelectParams`.
 func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectParams) ([]monitor.MonitorJSON, error) {
 	var monitors []monitor.MonitorJSON
 	var err error
@@ -86,6 +89,9 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 	return monitors, err
 }
 
+// selectMonitorRelated returns monitors based on the provided `SelectParams`.
+// If `measurements > 0` the `JSON` field of the returned `MonitorJSON` will be populated
+// with a JSON string containing that many measurements at most.
 func (p PostgresRepository) selectMonitorRelated(
 	ctx context.Context,
 	params *monitor.SelectParams,
