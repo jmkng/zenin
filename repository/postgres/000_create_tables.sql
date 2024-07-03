@@ -13,8 +13,8 @@ CREATE TABLE monitor (
     name                  TEXT NOT NULL,
     kind                  TEXT NOT NULL CHECK (kind IN ('HTTP', 'TCP', 'ICMP', 'PING', 'SCRIPT')),
     active                BOOLEAN NOT NULL,
-    "interval"            INTEGER NOT NULL CHECK ("interval" > 0),
-    timeout               INTEGER NOT NULL CHECK (timeout > 0),
+    "interval"            INTEGER NOT NULL CHECK ("interval" > 0), -- Seconds
+    timeout               INTEGER NOT NULL CHECK (timeout > 0), -- Seconds
     description           TEXT,
     remote_address        TEXT,
     remote_port           INTEGER CHECK (remote_port >= 0 AND remote_port <= 65535),
@@ -35,7 +35,7 @@ CREATE TABLE measurement (
     recorded_at           TIMESTAMPTZ NOT NULL,
     state                 TEXT NOT NULL CHECK (state IN ('OK', 'WARN', 'DEAD')),
     state_hint            TEXT,
-    duration              NUMERIC,
+    duration              NUMERIC, -- Milliseconds
     http_status_code      INTEGER,
     http_response_headers TEXT,
     http_response_body    TEXT,
