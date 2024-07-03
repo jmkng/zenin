@@ -25,7 +25,7 @@ VALUES
     (
         'Venus', 
         'HTTP', 
-        false, 
+        true, 
         160, 
         10, 
         NULL,
