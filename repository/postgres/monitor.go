@@ -2,40 +2,11 @@ package postgres
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 
-	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
 	"github.com/jmkng/zenin/pkg/sql"
 )
-
-// MonitorRelatedJSONRow is a `Monitor` that may have a chunk of JSON containing
-// related measurements.
-//
-// Implements a `Measurements` method that will attempt to unmarshal it.
-type MonitorRelatedJSONRow struct {
-	monitor.Monitor
-	MeasurementsJSON *string `db:"measurements_json"`
-}
-
-// Measurements will attempt to unmarshal the data stored in `MeasurementsJSON`.
-//
-// Returns an error on failure, or when it is a nil pointer.
-func (m *MonitorRelatedJSONRow) Measurements() ([]measurement.Measurement, error) {
-	var measurements []measurement.Measurement
-	if m.MeasurementsJSON == nil {
-		return measurements, errors.New("no measurements")
-	}
-	a := *m.MeasurementsJSON
-	fmt.Printf("%v\n\n", a)
-	err := json.Unmarshal([]byte(*m.MeasurementsJSON), &measurements)
-	if err != nil {
-		return nil, err
-	}
-	return measurements, nil
-}
 
 func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.Monitor) (int, error) {
 	var id int
@@ -74,42 +45,56 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	return id, nil
 }
 
-func (p PostgresRepository) SelectMonitor(ctx context.Context, params *monitor.SelectParams, measurements int) ([]monitor.Monitor, error) {
-	var monitors []monitor.Monitor
+func (p PostgresRepository) SelectMonitor(
+	ctx context.Context,
+	params *monitor.SelectParams,
+	measurements int,
+) ([]monitor.MonitorJSON, error) {
+	if measurements > 0 {
+		return p.selectMonitorRelated(ctx, params, measurements)
+	}
+	return p.selectMonitor(ctx, params)
+}
+
+func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectParams) ([]monitor.MonitorJSON, error) {
+	var monitors []monitor.MonitorJSON
 	var err error
 
 	var builder = sql.NewBuilder(sql.Numbered)
+	builder.Push(`SELECT
+            mo.id,
+            mo.name,
+            mo.kind,
+            mo.active,
+            mo.interval,
+            mo.timeout,
+            mo.description,
+            mo.remote_address,
+            mo.remote_port,
+            mo.script_path,
+            mo.http_range,
+            mo.http_method,
+            mo.http_request_headers,
+            mo.http_request_body,
+            mo.http_expired_cert_mod,
+            mo.icmp_size
+        FROM monitor mo`)
+	builder.Inject(params)
+	builder.Push("ORDER BY mo.id;")
 
-	if measurements == 0 {
-		panic("todo")
-	} else {
-		p.selectMonitorRelated(builder, params, measurements)
-		var temp []MonitorRelatedJSONRow
-		err = p.db.SelectContext(ctx, &temp, builder.String(), builder.Args()...)
-		if err != nil {
-			return monitors, err
-		}
-		for _, v := range temp {
-			monitor := v.Monitor
-			if v.MeasurementsJSON != nil {
-				measurements, err := v.Measurements()
-				if err != nil {
-					return monitors, fmt.Errorf("database returned unrecognized json for related measurements: %w", err)
-				}
-				monitor.Measurements = measurements
-			}
-			monitors = append(monitors, monitor)
-		}
-	}
-
+	err = p.db.SelectContext(ctx, &monitors, builder.String(), builder.Args()...)
 	return monitors, err
 }
 
-func (p PostgresRepository) selectMonitor(builder *sql.Builder, params *monitor.SelectParams) {
-	panic("todo")
-}
+func (p PostgresRepository) selectMonitorRelated(
+	ctx context.Context,
+	params *monitor.SelectParams,
+	measurements int,
+) ([]monitor.MonitorJSON, error) {
+	var monitors []monitor.MonitorJSON
+	var err error
 
-func (p PostgresRepository) selectMonitorRelated(builder *sql.Builder, params *monitor.SelectParams, measurements int) {
+	var builder = sql.NewBuilder(sql.Numbered)
 	builder.Push("WITH mo AS (SELECT * FROM monitor")
 	builder.Inject(params)
 	builder.Push(`), ms AS (
@@ -183,4 +168,7 @@ func (p PostgresRepository) selectMonitorRelated(builder *sql.Builder, params *m
     FROM mo
     LEFT JOIN aggregated_ms am ON mo.id = am.monitor_id
     ORDER BY mo.id;`)
+
+	err = p.db.SelectContext(ctx, &monitors, builder.String(), builder.Args()...)
+	return monitors, err
 }
