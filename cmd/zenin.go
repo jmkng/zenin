@@ -32,7 +32,7 @@ func main() {
 
 	// 🌩️ ->
 	err = server.
-		New(server.NewConfiguration(env.Runtime), bundle).
+		NewServer(server.NewConfiguration(env.Runtime), bundle).
 		Serve()
 	dd(err)
 

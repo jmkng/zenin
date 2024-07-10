@@ -3,6 +3,7 @@ module github.com/jmkng/zenin
 go 1.22.4
 
 require (
+	github.com/go-chi/chi/v5 v5.1.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/jackc/pgx/v5 v5.5.2
 	github.com/jmoiron/sqlx v1.3.5

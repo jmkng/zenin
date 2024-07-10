@@ -67,7 +67,7 @@ func (d *Distributor) Listen() chan<- any {
 
 // subscribe will add a new feed subscriber.
 func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn) {
-	// TODO: Rethink this later.
+	// todo Rethink this later.
 	var key int
 	for {
 		key = rand.IntN(math.MaxInt)
@@ -114,7 +114,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 		action := func() {
 			measurement, err := mon.Poll()
 			if err != nil {
-				// TODO: Errors here will probably be sent to the client.
+				// todo Errors here will probably be sent to the client.
 				// Will become more clear as probe implementations mature.
 				log.Error("failed to complete probe", "monitor(id)", mon.Id, "error", err)
 			}
@@ -159,7 +159,7 @@ func (d *Distributor) stop(id int) {
 
 // distributeMeasurement will distribute a `Measurement` to the repository and feed subscribers.
 func (d *Distributor) distributeMeasurement(measurement measurement.Measurement) {
-	log.Warn("distributor received a measurement but will do nothing with it") // TODO
+	log.Warn("distributor received a measurement but will do nothing with it") // todo
 }
 
 // onClose will block and listen for incoming messages.
