@@ -5,40 +5,70 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jmkng/zenin/internal/monitor"
 )
 
-func MonitorMuxV1() http.Handler {
+func NewMonitorHandler(service monitor.MonitorService) MonitorHandler {
+	provider := NewMonitorProvider(service)
+	return MonitorHandler{
+		Provider: provider,
+		mux:      provider.Mux(),
+	}
+}
+
+type MonitorHandler struct {
+	Provider MonitorProvider
+	mux      http.Handler
+}
+
+func (h MonitorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.mux.ServeHTTP(w, r)
+}
+
+func NewMonitorProvider(service monitor.MonitorService) MonitorProvider {
+	return MonitorProvider{
+		Service: service,
+	}
+}
+
+type MonitorProvider struct {
+	Service monitor.MonitorService
+}
+
+func (m MonitorProvider) Mux() http.Handler {
 	router := chi.NewRouter()
-	//router.Use(Authenticator)
-	router.Get("/", HandleGetMonitors)
-	router.Post("/", HandleCreateMonitor)
-	router.Delete("/", HandleDeleteMonitor)
-	router.Patch("/", HandleToggleMonitor)
-	router.Put("/{id}", HandleReplaceMonitor)
-	router.Get("/{id}/poll", HandlePollMonitor)
+	router.Get("/", m.HandleGetMonitors)
+	router.Post("/", m.HandleCreateMonitor)
+	router.Delete("/", m.HandleDeleteMonitor)
+	router.Patch("/", m.HandleToggleMonitor)
+
+	router.Put("/{id}", m.HandleReplaceMonitor)
+	router.Get("/{id}/poll", m.HandlePollMonitor)
+
 	return router
 }
 
-func HandleGetMonitors(w http.ResponseWriter, r *http.Request) {
+func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "get monitor")
 }
 
-func HandleCreateMonitor(w http.ResponseWriter, r *http.Request) {
+func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "create monitor")
 }
 
-func HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
+func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "delete monitor")
 }
 
-func HandleToggleMonitor(w http.ResponseWriter, r *http.Request) {
+func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "toggle monitor")
 }
 
-func HandleReplaceMonitor(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "replace monitor")
+func (m MonitorProvider) HandleReplaceMonitor(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	fmt.Fprintf(w, "replace monitor: id=%v", id)
 }
 
-func HandlePollMonitor(w http.ResponseWriter, r *http.Request) {
+func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "poll monitor")
 }

@@ -34,24 +34,24 @@ func HandleIndex(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Serve() error {
 	log.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
 
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.AllowContentType("application/json"))
-	r.Use(Defaults)
-	//r.Use(middleware.Timeout(60 * time.Second))
+	mux := chi.NewRouter()
+	mux.Use(middleware.RequestID)
+	mux.Use(middleware.Logger)
+	mux.Use(middleware.Recoverer)
+	mux.Use(middleware.AllowContentType("application/json"))
+	mux.Use(Defaults)
+	//mux.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		panic("todo mount ui")
 	})
 
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Mount("/account", AccountMuxV1())
-		r.Mount("/monitor", MonitorMuxV1())
+	mux.Route("/api/v1", func(v1 chi.Router) {
+		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
+		v1.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
 	})
 
-	http.ListenAndServe(s.config.Address.String(), r)
+	http.ListenAndServe(s.config.Address.String(), mux)
 
 	log.Debug("server stopping")
 	return nil
