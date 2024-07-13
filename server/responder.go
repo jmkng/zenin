@@ -25,12 +25,13 @@ type Responder struct {
 
 // Data will send a status code and a chunk of data.
 func (r *Responder) Data(data any, status int) {
+	r.writer.WriteHeader(status)
+
 	response, err := NewDataResponse(data).JSON()
 	if err != nil {
 		log.Error("responder failed to send data response", "error", err)
+		return
 	}
-
-	r.writer.WriteHeader(status)
 	r.writer.Write(response)
 }
 
