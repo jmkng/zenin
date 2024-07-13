@@ -52,7 +52,7 @@ func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 
 	if m.HTTPResponseHeaders != nil {
 		var reqHeaders map[string]string
-		err = json.Unmarshal([]byte(*monitor.HTTPHeaders), reqHeaders)
+		err = json.Unmarshal([]byte(*monitor.HTTPHeaders), &reqHeaders)
 		if err != nil {
 			return m, fmt.Errorf("%w: failed to parse http headers", ValidationError)
 		}
