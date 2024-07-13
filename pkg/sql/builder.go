@@ -107,6 +107,16 @@ func (b *Builder) BindInt(arg int) {
 	b.pushArg(arg)
 }
 
+// SpreadString will spread any number of string arguments into a comma separated list
+// using bind markers.
+func (b *Builder) SpreadString(values ...string) {
+	opaque := make([]any, len(values))
+	for i, v := range values {
+		opaque[i] = v
+	}
+	b.spreadOpaque(opaque...)
+}
+
 // SpreadInt will spread any number of int arguments into a comma separated list
 // using bind markers.
 func (b *Builder) SpreadInt(values ...int) {
