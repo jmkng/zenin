@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 
@@ -35,23 +37,24 @@ func (s *Server) Serve() error {
 	log.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
 
 	mux := chi.NewRouter()
-	mux.Use(middleware.RequestID)
-	mux.Use(middleware.Logger)
-	mux.Use(middleware.Recoverer)
 	mux.Use(middleware.AllowContentType("application/json"))
+	mux.Use(Logger)
 	mux.Use(Defaults)
 	//mux.Use(middleware.Timeout(60 * time.Second))
 
-	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		panic("todo mount ui")
-	})
+	//	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
+	//		panic("todo mount ui")
+	//	})
 
 	mux.Route("/api/v1", func(v1 chi.Router) {
 		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
 		v1.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
 	})
 
-	http.ListenAndServe(s.config.Address.String(), mux)
+	err := http.ListenAndServe(s.config.Address.String(), mux)
+	if err != nil {
+		return err
+	}
 
 	log.Debug("server stopping")
 	return nil
@@ -75,4 +78,10 @@ type Configuration struct {
 type TlsConfiguration struct {
 	Cert []byte
 	Key  []byte
+}
+
+func StrictDecoder(r io.Reader) *json.Decoder {
+	d := json.NewDecoder(r)
+	d.DisallowUnknownFields()
+	return d
 }
