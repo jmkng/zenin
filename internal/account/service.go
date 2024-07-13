@@ -40,9 +40,18 @@ func (a AccountService) AddAccount(ctx context.Context, application Application)
 	return account, nil
 }
 
-// ValidateLogin will compare bytes against an existing `VersionedSaltedHash`,
-// returning an error if they do not match.
 func (a AccountService) ValidateLogin(password []byte, target VersionedSaltedHash) error {
 	return NewSchemeFromId(target.SchemeId).
 		Validate(password, target)
+}
+
+func (a AccountService) AccountExists(ctx context.Context, username string) (bool, error) {
+	account, err := a.Repository.SelectAccountByUsername(ctx, username)
+	if err != nil {
+		return false, err
+	}
+	if account != nil {
+		return true, nil
+	}
+	return false, nil
 }

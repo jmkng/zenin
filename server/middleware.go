@@ -38,11 +38,7 @@ func Authenticator(next http.Handler) http.Handler {
 		}
 		options := []jwt.ParserOption{jwt.WithExpirationRequired(), jwt.WithIssuedAt()}
 		parsed, err := jwt.Parse(token, getSigningKey, options...)
-		if err != nil {
-			responder.Error(err, http.StatusUnauthorized)
-			return
-		}
-		if !parsed.Valid {
+		if err != nil || !parsed.Valid {
 			responder.Status(http.StatusUnauthorized)
 			return
 		}

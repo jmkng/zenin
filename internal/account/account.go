@@ -42,6 +42,9 @@ type Application struct {
 // returning a `Validation` error describing the invalid states.
 func (a Application) Validate() error {
 	len := len(a.PasswordPlainText)
+	if a.Username == "" {
+		return internal.NewValidation("Username is required.")
+	}
 	lenCheck := len < ZeninAccPasswordMin || len > ZeninAccPasswordMax
 	hasLower := false
 	hasUpper := false

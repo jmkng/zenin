@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -118,5 +117,34 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 }
 
 func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "create")
+	responder := NewResponder(w)
+	var application account.Application
+	err := StrictDecoder(r.Body).Decode(&application)
+	if err != nil {
+		responder.Error(internal.NewValidation("Expected `username` and `password` keys."),
+			http.StatusBadRequest)
+		return
+	}
+	if err := application.Validate(); err != nil {
+		responder.Error(err, http.StatusBadRequest)
+		return
+	}
+
+	exists, err := a.Service.AccountExists(r.Context(), application.Username)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	if exists {
+		responder.Error(internal.NewValidation("Username is taken. Try another."),
+			http.StatusBadRequest)
+		return
+	}
+
+	_, err = a.Service.AddAccount(r.Context(), application)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	responder.Status(http.StatusCreated)
 }
