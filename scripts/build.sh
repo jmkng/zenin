@@ -2,7 +2,7 @@
 
 # Remove the old image if it exists
 if docker images | grep -q $ZENIN_CONTAINER; then
-    echo "Removing old image $ZENIN_CONTAINER"
+    echo "removing old image $ZENIN_CONTAINER"
     docker image rm -f $ZENIN_CONTAINER
 fi
 
