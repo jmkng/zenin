@@ -1,6 +1,9 @@
 package env
 
 import (
+	"crypto/rand"
+	"encoding/json"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -13,8 +16,28 @@ const (
 	Prod RuntimeKind = "prod"
 )
 
+type Secret []byte
+
+func (s Secret) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.String())
+}
+
+func (s Secret) String() string {
+	return "***"
+}
+
 // Runtime is an instance of `RuntimeEnv` initialized at startup.
 var Runtime *RuntimeEnv = NewRuntimeEnv()
+
+// getRandomBytes will generate a cryptographically random byte array with the provided length.
+func GetRandomBytes(length int) ([]byte, error) {
+	salt := make([]byte, length)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return salt, fmt.Errorf("failed to generate byte array: %w", err)
+	}
+	return salt, nil
+}
 
 func NewRuntimeEnv() *RuntimeEnv {
 	kind := Prod
@@ -34,7 +57,10 @@ func NewRuntimeEnv() *RuntimeEnv {
 		redirect = uint16(redirectPort)
 	}
 
-	var signSecret []byte = []byte(os.Getenv(rtSignSecretKey))
+	signSecret, err := getSignSecret()
+	if err != nil {
+		panic(err)
+	}
 
 	return &RuntimeEnv{Kind: kind, Port: port, Redirect: redirect, SignSecret: signSecret}
 }
@@ -49,7 +75,19 @@ type RuntimeEnv struct {
 	Redirect uint16
 	// SignSecret is a secret key used to sign tokens. If not found in the environment,
 	// a key will be generated at runtime.
-	SignSecret []byte
+	SignSecret Secret
+}
+
+func getSignSecret() (Secret, error) {
+	signSecretEnv := os.Getenv(rtSignSecretKey)
+	if signSecretEnv != "" {
+		return []byte(signSecretEnv), nil
+	}
+	secret, err := GetRandomBytes(32)
+	if err != nil {
+		return []byte{}, err
+	}
+	return secret, nil
 }
 
 const (

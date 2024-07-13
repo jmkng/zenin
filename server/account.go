@@ -43,7 +43,7 @@ func (a AccountProvider) Mux() http.Handler {
 
 	//// private /////
 	router.Group(func(private chi.Router) {
-		//private.Use(Authenticator)
+		private.Use(Authenticator)
 		private.Post("/create", a.HandleCreate)
 	})
 	//////////////////

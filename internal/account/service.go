@@ -3,6 +3,8 @@ package account
 import (
 	"context"
 	"fmt"
+
+	"github.com/jmkng/zenin/internal/env"
 )
 
 // NewAccountService returns a new `AccountService`.
@@ -16,7 +18,7 @@ type AccountService struct {
 }
 
 func (a AccountService) AddAccount(ctx context.Context, application Application) (Account, error) {
-	salt, err := getRandomBytes(ZeninAccSaltLength)
+	salt, err := env.GetRandomBytes(ZeninAccSaltLength)
 	if err != nil {
 		return Account{}, err
 	}
