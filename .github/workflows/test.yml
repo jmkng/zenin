@@ -1,0 +1,32 @@
+name: Test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+    branches: 
+      - main
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.22.4]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps: 
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - uses: actions/checkout@v4
+      - name: Verify deps
+        run: go mod verify
+      - name: Build
+        run: go build -v ./...
+      - name: Vet
+        run: go vet -v ./...
+      - name: Test
+        run: go test -race -v -vet=off ./...
