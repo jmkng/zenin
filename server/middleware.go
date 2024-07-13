@@ -2,9 +2,16 @@ package server
 
 import (
 	"net/http"
+
+	"github.com/jmkng/zenin/internal/log"
 )
 
-type Middleware = func(http.Handler) http.Handler
+func Logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Info("server request", "remote", r.RemoteAddr, "method", r.Method, "url", r.URL)
+		next.ServeHTTP(w, r)
+	})
+}
 
 // Defaults will set common default headers.
 func Defaults(next http.Handler) http.Handler {
@@ -25,6 +32,6 @@ func Authenticator(next http.Handler) http.Handler {
 		//
 		//}
 
-		//next.ServeHTTP(w, r)
+		// next.ServeHTTP(w, r)
 	})
 }
