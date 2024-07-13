@@ -39,7 +39,7 @@ func newLogger(handler *slog.HandlerOptions) *slog.Logger {
 }
 
 func init() {
-	if env.NewRuntimeEnv().Kind == env.Dev {
+	if env.Runtime.Kind == env.Dev {
 		EnableDebug()
 	}
 }
