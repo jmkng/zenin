@@ -2,7 +2,8 @@ package account
 
 import (
 	"crypto/subtle"
-	"errors"
+	"encoding/base64"
+	"fmt"
 
 	"golang.org/x/crypto/argon2"
 )
@@ -33,41 +34,30 @@ type Argon2Params struct {
 // Hash implements `Scheme.Hash` for `Argon2Scheme`.
 func (a Argon2Scheme) Hash(hashable []byte, salt []byte) (VersionedSaltedHash, error) {
 	var err error
-	if len(salt) == 0 {
-		salt, err = getRandomBytes(ZeninAccSaltLength)
+	if len(salt) < ZeninAccSaltLength {
+		panic("salt length below minimum threshold")
 	}
 	if err != nil {
 		return VersionedSaltedHash{}, err
 	}
 
 	hash := argon2.IDKey([]byte(hashable), salt, a.Time, a.Memory, a.Threads, a.KeyLength)
-	return VersionedSaltedHash{
-		SchemeId: Argon2SchemeId,
-		Salt:     salt,
-		Hash:     hash,
-	}, nil
+	vsh := NewVersionedSaltedHash(Argon2SchemeId, salt, hash)
+	return vsh, nil
 }
 
-// FailedValidateError is an error returned when the password validation process fails.
-var FailedValidateError = errors.New("failed to perform validation")
-
-// DidNotMatchError is an error returned when a password validation is performed,
-// but the values do not match.
-var DidNotMatchError = errors.New("values did not match")
-
 // Validate implements `Scheme.Validate` for `Argon2Scheme`.
-//
-// # Errors:
-//
-//   - FailedValidateError
-//
-//     Returned when the password validation process fails.
-//
-//   - DidNotMatchError
-//
-//     Returned when the password validation was performed, but the values do not match.
-func (a Argon2Scheme) Validate(raw []byte, existing *VersionedSaltedHash) error {
-	incoming, err := a.Hash(raw, existing.Salt)
+func (a Argon2Scheme) Validate(raw []byte, existing VersionedSaltedHash) error {
+	encoding := base64.StdEncoding
+	size := base64.Encoding.Strict(*encoding).DecodedLen(len(existing.Salt))
+	buffer := make([]byte, size)
+	length, err := encoding.Decode(buffer, []byte(existing.Salt))
+	if err != nil {
+		return fmt.Errorf("failed to decode existing salt: %w", err)
+	}
+	salt := buffer[:length]
+
+	incoming, err := a.Hash(raw, salt)
 	if err != nil {
 		return FailedValidateError
 	}

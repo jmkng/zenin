@@ -13,8 +13,7 @@ func TestScanMarkerIndexes(t *testing.T) {
 			One:  b,
 			Two:  c,
 		}
-		markers, err := scanMarkerIndexes(value)
-		debug.AssertNil(t, err)
+		markers := scanMarkerIndexes(value)
 		debug.AssertDeepEqual(t, markers, expected)
 	}
 
@@ -27,13 +26,11 @@ func TestExtractMarkerValues(t *testing.T) {
 	raw := ":102:TUejOZDTcm0ooK08Ac81TA:!!!"
 	expected := VersionedSaltedHash{
 		SchemeId: 102,
-		Salt:     []byte("TUejOZDTcm0ooK08Ac81TA"),
-		Hash:     []byte("!!!"),
+		Salt:     "TUejOZDTcm0ooK08Ac81TA",
+		Hash:     "!!!",
 	}
 
-	markers, err := scanMarkerIndexes(raw)
-	debug.AssertNil(t, err)
-	hashed, err := extractMarkerValues(markers, raw)
-	debug.AssertNil(t, err)
+	markers := scanMarkerIndexes(raw)
+	hashed := extractMarkerValues(markers, raw)
 	debug.AssertDeepEqual(t, hashed, expected)
 }
