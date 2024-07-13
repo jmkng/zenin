@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/account"
 )
 
@@ -50,24 +51,70 @@ func (a AccountProvider) Mux() http.Handler {
 	return router
 }
 
-// Application represents an attempt to create a new `Account`.
-type Application struct {
-	Username          string `json:"username"`
-	PasswordPlainText string `json:"password"`
-}
-
-// Validate will check the `Application` for invalid data,
-// returning a series of user-friendly error messages for each problem.
-func (a Application) Validate() []string {
-	panic("todo application validation")
-}
-
+// HandleClaim reads an `Application` from the request body and attempts to
+// create the first account on the server.
 func (a AccountProvider) HandleClaim(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "claim")
+	responder := NewResponder(w)
+	count, err := a.Service.Repository.SelectAccountTotal(r.Context())
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+
+	}
+	if count > 0 {
+		responder.Error(internal.NewValidation("Server has already been claimed. Try logging in."),
+			http.StatusBadRequest)
+		return
+	}
+
+	var application account.Application
+	err = StrictDecoder(r.Body).Decode(&application)
+	if err != nil {
+		responder.Error(internal.NewValidation("Expected `username` and `password` keys."),
+			http.StatusBadRequest)
+		return
+	}
+	if err := application.Validate(); err != nil {
+		responder.Error(err, http.StatusBadRequest)
+		return
+	}
+
+	account, err := a.Service.AddAccount(r.Context(), application)
+	token, err := account.Token()
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	responder.Data(token, http.StatusOK)
 }
 
 func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "authenticate")
+	responder := NewResponder(w)
+	var application account.Application
+	err := StrictDecoder(r.Body).Decode(&application)
+	if err != nil {
+		responder.Error(internal.NewValidation("Expected `username` and `password` keys."),
+			http.StatusBadRequest)
+		return
+	}
+
+	account, err := a.Service.Repository.SelectAccountByUsername(r.Context(), application.Username)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	if account == nil || a.Service.ValidateLogin([]byte(application.PasswordPlainText), account.VersionedSaltedHash) != nil {
+		responder.Error(internal.NewValidation("Invalid username or password."),
+			http.StatusBadRequest)
+		return
+	}
+
+	token, err := account.Token()
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	responder.Data(token, http.StatusOK)
 }
 
 func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
