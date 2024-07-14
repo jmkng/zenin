@@ -37,6 +37,10 @@ func (s *Server) Serve() error {
 	log.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
 
 	mux := chi.NewRouter()
+	if env.Runtime.Kind == env.Dev {
+		log.Warn("cors checks are disabled")
+		mux.Use(Insecure)
+	}
 	mux.Use(middleware.AllowContentType("application/json"))
 	mux.Use(Logger)
 	mux.Use(Defaults)
