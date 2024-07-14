@@ -27,7 +27,7 @@ func main() {
 	dd(err)
 	log.Debug("resuming active monitors", "count", len(active))
 	for _, m := range active {
-		bundle.Monitor.StartMonitor(m.Monitor)
+		bundle.Monitor.StartMonitor(m)
 	}
 
 	// 🌩️ ->

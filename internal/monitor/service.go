@@ -18,7 +18,7 @@ type MonitorService struct {
 	Repository  MonitorRepository
 }
 
-func (s MonitorService) GetActive(ctx context.Context) ([]MonitorJSON, error) {
+func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 	active := true
 	params := SelectParams{
 		Id:     nil,

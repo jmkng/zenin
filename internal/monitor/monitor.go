@@ -1,9 +1,9 @@
 package monitor
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jmkng/zenin/internal/log"
@@ -19,6 +19,23 @@ const (
 	Ping   ProbeKind = "PING"
 	Script ProbeKind = "SCRIPT"
 )
+
+func ProbeKindFromString(value string) (ProbeKind, error) {
+	switch strings.ToLower(value) {
+	case "http":
+		return HTTP, nil
+	case "tcp":
+		return TCP, nil
+	case "icmp":
+		return ICMP, nil
+	case "ping":
+		return Ping, nil
+	case "script":
+		return Script, nil
+	default:
+		return "", errors.New("invalid monitor kind")
+	}
+}
 
 type HTTPRange = string
 
@@ -47,42 +64,23 @@ type Probe interface {
 
 // Monitor is the monitor domain type.
 type Monitor struct {
-	Id                 *int       `json:"id" db:"id"`
-	Name               string     `json:"name" db:"name"`
-	Kind               ProbeKind  `json:"kind" db:"kind"`
-	Active             bool       `json:"active" db:"active"`
-	Interval           int        `json:"interval" db:"interval"`
-	Timeout            int        `json:"timeout" db:"timeout"`
-	Description        *string    `json:"description" db:"description"`
-	RemoteAddress      *string    `json:"remoteAddress" db:"remote_address"`
-	RemotePort         *int16     `json:"remotePort" db:"remote_port"`
-	ScriptPath         *string    `json:"scriptPath" db:"script_path"`
-	HTTPRange          *HTTPRange `json:"httpRange" db:"http_range"`
-	HTTPMethod         *string    `json:"httpMethod" db:"http_method"`
-	HTTPHeaders        *string    `json:"httpHeaders" db:"http_request_headers"`
-	HTTPBody           *string    `json:"httpBody" db:"http_request_body"`
-	HTTPExpiredCertMod *string    `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
-	ICMPSize           *int       `json:"icmpSize" db:"icmp_size"`
-}
-
-// MonitorJSON is a `Monitor` that may have a chunk of JSON containing
-// related measurements.
-type MonitorJSON struct {
-	Monitor
-	JSON *string `db:"measurements_json"`
-}
-
-// Unmarshal will try to unmarshal the data stored in the JSON field.
-func (m *MonitorJSON) Unmarshal() ([]measurement.Measurement, error) {
-	var measurements []measurement.Measurement
-	if m.JSON == nil {
-		return measurements, nil
-	}
-	err := json.Unmarshal([]byte(*m.JSON), &measurements)
-	if err != nil {
-		return nil, err
-	}
-	return measurements, nil
+	Id                 *int                      `json:"id" db:"id"`
+	Name               string                    `json:"name" db:"name"`
+	Kind               ProbeKind                 `json:"kind" db:"kind"`
+	Active             bool                      `json:"active" db:"active"`
+	Interval           int                       `json:"interval" db:"interval"`
+	Timeout            int                       `json:"timeout" db:"timeout"`
+	Description        *string                   `json:"description,omitempty" db:"description"`
+	RemoteAddress      *string                   `json:"remoteAddress,omitempty" db:"remote_address"`
+	RemotePort         *int16                    `json:"remotePort,omitempty" db:"remote_port"`
+	ScriptPath         *string                   `json:"scriptPath,omitempty" db:"script_path"`
+	HTTPRange          *HTTPRange                `json:"httpRange,omitempty" db:"http_range"`
+	HTTPMethod         *string                   `json:"httpMethod,omitempty" db:"http_method"`
+	HTTPHeaders        *string                   `json:"httpHeaders,omitempty" db:"http_request_headers"`
+	HTTPBody           *string                   `json:"httpBody,omitempty" db:"http_request_body"`
+	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod,omitempty" db:"http_expired_cert_mod"`
+	ICMPSize           *int                      `json:"icmpSize,omitempty" db:"icmp_size"`
+	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
 }
 
 // ValidationError is an error received when a monitor is being polled in an invalid state.

@@ -11,7 +11,7 @@ import (
 // database table.
 type MonitorRepository interface {
 	InsertMonitor(ctx context.Context, monitor Monitor) (int, error)
-	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]MonitorJSON, error)
+	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]Monitor, error)
 }
 
 // SelectParams is a set of parameters used to narrow the scope of the `SelectMonitor`
@@ -25,12 +25,10 @@ type MonitorRepository interface {
 type SelectParams struct {
 	// Group 1
 	Id *[]int
-	// --
 
 	// Group 2
 	Active *bool
 	Kind   *ProbeKind
-	// --
 }
 
 // Inject implements `Injectable.Inject` for `SelectParams`.

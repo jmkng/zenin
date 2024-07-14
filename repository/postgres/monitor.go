@@ -2,10 +2,12 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
+	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
-	"github.com/jmkng/zenin/pkg/sql"
+	zsql "github.com/jmkng/zenin/pkg/sql"
 )
 
 // InsertMonitor implements `MonitorRepository.InsertMonitor` for `PostgresRepository`.
@@ -51,7 +53,7 @@ func (p PostgresRepository) SelectMonitor(
 	ctx context.Context,
 	params *monitor.SelectParams,
 	measurements int,
-) ([]monitor.MonitorJSON, error) {
+) ([]monitor.Monitor, error) {
 	if measurements > 0 {
 		return p.selectMonitorRelated(ctx, params, measurements)
 	}
@@ -59,11 +61,11 @@ func (p PostgresRepository) SelectMonitor(
 }
 
 // selectMonitor returns monitors based on the provided `SelectParams`.
-func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectParams) ([]monitor.MonitorJSON, error) {
-	var monitors []monitor.MonitorJSON
+func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectParams) ([]monitor.Monitor, error) {
+	var monitors []monitor.Monitor
 	var err error
 
-	var builder = sql.NewBuilder(sql.Numbered)
+	var builder = zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT
             mo.id,
             mo.name,
@@ -96,11 +98,11 @@ func (p PostgresRepository) selectMonitorRelated(
 	ctx context.Context,
 	params *monitor.SelectParams,
 	measurements int,
-) ([]monitor.MonitorJSON, error) {
-	var monitors []monitor.MonitorJSON
+) ([]monitor.Monitor, error) {
+	var temp []monitorJSON
 	var err error
 
-	var builder = sql.NewBuilder(sql.Numbered)
+	var builder = zsql.NewBuilder(zsql.Numbered)
 	builder.Push("WITH mo AS (SELECT * FROM monitor")
 	builder.Inject(params)
 	builder.Push(`), ms AS (
@@ -120,6 +122,7 @@ func (p PostgresRepository) selectMonitorRelated(
             monitor_id,
             jsonb_agg(jsonb_build_object(
                 'id', id,
+                'monitorId', monitor_id,
                 'recordedAt', recorded_at,
                 'state', state,
                 'stateHint', state_hint,
@@ -138,6 +141,7 @@ func (p PostgresRepository) selectMonitorRelated(
                 'certificates', (
                     SELECT jsonb_agg(jsonb_build_object(
                         'id', c.id,
+                        'measurementId', measurement_id,
                         'version', c.version,
                         'serialNumber', c.serial_number,
                         'publicKeyAlgorithm', c.public_key_algorithm,
@@ -145,11 +149,11 @@ func (p PostgresRepository) selectMonitorRelated(
                         'subjectCommonName', c.subject_common_name,
                         'notBefore', c.not_before,
                         'notAfter', c.not_after
-                    ))
+                    ) ORDER BY c.id ASC)
                     FROM certificate c
                     WHERE c.measurement_id = ms.id
                 )
-            )) AS measurements
+            ) ORDER BY id DESC) AS measurements
         FROM filtered_ms ms
         GROUP BY monitor_id)
 
@@ -174,7 +178,41 @@ func (p PostgresRepository) selectMonitorRelated(
     FROM mo
     LEFT JOIN aggregated_ms am ON mo.id = am.monitor_id
     ORDER BY mo.id;`)
+	err = p.db.SelectContext(ctx, &temp, builder.String(), builder.Args()...)
 
-	err = p.db.SelectContext(ctx, &monitors, builder.String(), builder.Args()...)
+	monitors := []monitor.Monitor{}
+	for _, v := range temp {
+		monitor := v.Monitor
+		if v.JSON != nil {
+			measurements := []measurement.Measurement{}
+			err := json.Unmarshal([]byte(*v.JSON), &measurements)
+			if err != nil {
+				return monitors, fmt.Errorf("failed to unwrap related measurements for monitor `%v`: %w", v.Id, err)
+			}
+			monitor.Measurements = measurements
+		}
+		monitors = append(monitors, monitor)
+	}
+
 	return monitors, err
+}
+
+// monitorJSON is a `Monitor` that may have a chunk of JSON containing
+// related measurements.
+type monitorJSON struct {
+	monitor.Monitor
+	JSON *string `json:"measurements" db:"measurements_json"`
+}
+
+// Unmarshal will return the `JSON` data as `[]Measurement`.
+func (m *monitorJSON) Unmarshal() ([]measurement.Measurement, error) {
+	var measurements []measurement.Measurement
+	if m.JSON == nil {
+		return measurements, nil
+	}
+	err := json.Unmarshal([]byte(*m.JSON), &measurements)
+	if err != nil {
+		return nil, err
+	}
+	return measurements, nil
 }
