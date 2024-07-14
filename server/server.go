@@ -51,6 +51,7 @@ func (s *Server) Serve() error {
 	//	})
 
 	mux.Route("/api/v1", func(v1 chi.Router) {
+		v1.Mount("/meta", NewMetaHandler(s.bundle.Meta))
 		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
 		v1.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
 	})
