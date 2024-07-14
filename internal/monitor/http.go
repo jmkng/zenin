@@ -108,7 +108,7 @@ func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 		for _, n := range response.TLS.PeerCertificates {
 			var c measurement.Certificate
 			c.Version = n.Version
-			c.SerialNumber = *n.SerialNumber
+			c.SerialNumber = n.SerialNumber.String()
 			c.PublicKeyAlgorithm = n.PublicKeyAlgorithm.String()
 			c.IssuerCommonName = n.Issuer.String()
 			c.SubjectCommonName = n.Subject.CommonName

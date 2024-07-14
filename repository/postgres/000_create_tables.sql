@@ -55,7 +55,7 @@ CREATE TABLE certificate (
   id                   SERIAL PRIMARY KEY,
   measurement_id       INTEGER REFERENCES "measurement"(id),
   version              INTEGER, 
-  serial_number        NUMERIC,
+  serial_number        TEXT,
   public_key_algorithm TEXT,
   issuer_common_name   TEXT,
   subject_common_name  TEXT,

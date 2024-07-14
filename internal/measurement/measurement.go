@@ -1,7 +1,6 @@
 package measurement
 
 import (
-	"math/big"
 	"time"
 )
 
@@ -12,8 +11,9 @@ type Measurement struct {
 	RecordedAt   time.Time     `json:"recordedAt" db:"recorded_at"`
 	Duration     float64       `json:"duration" db:"duration"`
 	State        ProbeState    `json:"state" db:"state"`
-	StateHint    *StateHint    `json:"stateHint" db:"state_hint"`
-	Certificates []Certificate `json:"certificates"`
+	StateHint    *StateHint    `json:"stateHint,omitempty" db:"state_hint"`
+	Certificates []Certificate `json:"certificates,omitempty"`
+
 	HTTPFields
 	ICMPFields
 	ScriptFields
@@ -35,23 +35,23 @@ func (m Measurement) Finalize(state ProbeState) Measurement {
 }
 
 type HTTPFields struct {
-	HTTPStatusCode      *int    `json:"httpStatusCode" db:"http_status_code"`
-	HTTPResponseHeaders *string `json:"httpResponseHeaders" db:"http_response_headers"`
-	HTTPResponseBody    *string `json:"httpResponseBody" db:"http_response_body"`
+	HTTPStatusCode      *int    `json:"httpStatusCode,omitempty" db:"http_status_code"`
+	HTTPResponseHeaders *string `json:"httpResponseHeaders,omitempty" db:"http_response_headers"`
+	HTTPResponseBody    *string `json:"httpResponseBody,omitempty" db:"http_response_body"`
 }
 
 type ICMPFields struct {
-	ICMPPacketsIn  *int     `json:"icmpPacketsIn" db:"icmp_packets_in"`
-	ICMPPacketsOut *int     `json:"icmpPacketsOut" db:"icmp_packets_out"`
-	ICMPMinRTT     *float64 `json:"icmpMinRtt" db:"icmp_min_rtt"`
-	ICMPAvgRTT     *float64 `json:"icmpAvgRtt" db:"icmp_avg_rtt"`
-	ICMPMaxRTT     *float64 `json:"icmpMaxRtt" db:"icmp_max_rtt"`
+	ICMPPacketsIn  *int     `json:"icmpPacketsIn,omitempty" db:"icmp_packets_in"`
+	ICMPPacketsOut *int     `json:"icmpPacketsOut,omitempty" db:"icmp_packets_out"`
+	ICMPMinRTT     *float64 `json:"icmpMinRtt,omitempty" db:"icmp_min_rtt"`
+	ICMPAvgRTT     *float64 `json:"icmpAvgRtt,omitempty" db:"icmp_avg_rtt"`
+	ICMPMaxRTT     *float64 `json:"icmpMaxRtt,omitempty" db:"icmp_max_rtt"`
 }
 
 type ScriptFields struct {
-	ScriptExitCode *int    `json:"scriptExitCode" db:"script_exit_code"`
-	ScriptStdout   *string `json:"scriptStdout" db:"script_stdout"`
-	ScriptStderr   *string `json:"scriptStderr" db:"script_stderr"`
+	ScriptExitCode *int    `json:"scriptExitCode,omitempty" db:"script_exit_code"`
+	ScriptStdout   *string `json:"scriptStdout,omitempty" db:"script_stdout"`
+	ScriptStderr   *string `json:"scriptStderr,omitempty" db:"script_stderr"`
 }
 
 type ProbeState string
@@ -73,7 +73,7 @@ type Certificate struct {
 	Id                 *int      `json:"id" db:"id"`
 	MeasurementId      *int      `json:"measurementId" db:"measurement_id"`
 	Version            int       `json:"version" db:"version"`
-	SerialNumber       big.Int   `json:"serialNumber" db:"serial_number"`
+	SerialNumber       string    `json:"serialNumber" db:"serial_number"`
 	PublicKeyAlgorithm string    `json:"publicKeyAlgorithm" db:"public_key_algorithm"`
 	IssuerCommonName   string    `json:"issuerCommonName" db:"issuer_common_name"`
 	SubjectCommonName  string    `json:"subjectCommonName" db:"subject_common_name"`
