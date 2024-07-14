@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+response=$(curl "http://127.0.0.1:${ZENIN_RT_PORT}/api/v1/account/authenticate" \
+    -H "Content-Type: application/json" \
+    -d "{ \"username\": \"${ZENIN_API_USER}\", \"password\": \"${ZENIN_API_PASS}\" }" \
+    -s)
+if [ $? -ne 0 ]; then
+    echo "curl failed"
+    return 1
+fi
+
+token=$(echo "$response" | jq -r '.data')
+export ZENIN_API_TOKEN="$token"

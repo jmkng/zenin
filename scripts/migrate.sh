@@ -1,7 +1,5 @@
 #!/usr/bin/env sh
 
-source scripts/check.sh
-
 if [ "$ZENIN_DB_KIND" = "postgres" ]; then
     MIGRATION_DIR="repository/postgres"
 else
