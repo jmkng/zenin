@@ -40,6 +40,8 @@ func (r *Responder) Data(data any, status int) {
 // If any are found, the messages are extracted and sent to the client.
 // If none are found, the error is logged.
 func (r *Responder) Error(err error, status int) {
+	r.writer.WriteHeader(status)
+
 	var client []string
 	origin := err
 
@@ -54,7 +56,6 @@ func (r *Responder) Error(err error, status int) {
 		err = errors.Unwrap(err)
 	}
 
-	r.writer.WriteHeader(status)
 	if len(client) > 0 {
 		response, err := NewErrorResponse(client...).JSON()
 		if err != nil {
