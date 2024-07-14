@@ -1,3 +1,8 @@
+INSERT INTO account 
+    (username, versioned_salted_hash)
+VALUES 
+    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=');
+
 INSERT INTO monitor 
     (name, kind, active, interval, timeout, description, 
     remote_address, remote_port, 
