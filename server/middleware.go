@@ -46,6 +46,23 @@ func Authenticator(next http.Handler) http.Handler {
 	})
 }
 
+// Insecure adds headers that are insecure,
+// but may be necessary in development.
+func Insecure(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Preflight
+		if r.Method == http.MethodOptions {
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 // extractBearerToken will extract value of the `Authorization` header,
 // with the "Bearer " prefix removed.
 //
