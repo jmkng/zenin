@@ -1,6 +1,6 @@
 # Zenin 🌩️
 
-A monitoring tool.
+A simple infrastructure monitoring tool.
 
 ## Installation 
 
