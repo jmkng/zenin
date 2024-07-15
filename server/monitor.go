@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/monitor"
 )
 
@@ -45,7 +46,7 @@ func (m MonitorProvider) Mux() http.Handler {
 	router.Delete("/", m.HandleDeleteMonitor)
 	router.Patch("/", m.HandleToggleMonitor)
 
-	router.Put("/{id}", m.HandleReplaceMonitor)
+	router.Put("/{id}", m.HandleUpdateMonitor)
 	router.Get("/{id}/poll", m.HandlePollMonitor)
 
 	return router
@@ -81,9 +82,45 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	fmt.Fprintf(w, "toggle monitor")
 }
 
-func (m MonitorProvider) HandleReplaceMonitor(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	fmt.Fprintf(w, "replace monitor: id=%v", id)
+func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+	param := chi.URLParam(r, "id")
+	parsed, err := strconv.Atoi(param)
+	if err != nil {
+		responder.Error(internal.NewValidation("Expected integer url parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	exists, err := m.Service.CheckMonitorExists(r.Context(), parsed)
+	if err != nil {
+		responder.Status(http.StatusInternalServerError)
+		return
+	}
+	if !exists {
+		message := fmt.Sprintf("monitor with id `%v` does not exist", param)
+		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
+		return
+	}
+	var incoming monitor.Monitor
+	err = StrictDecoder(r.Body).Decode(&incoming)
+	if err != nil {
+		responder.Error(internal.NewValidation("Invalid monitor, keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+			http.StatusBadRequest)
+		return
+	}
+
+	err = incoming.Validate()
+	if err != nil {
+		responder.Error(err, http.StatusBadRequest)
+		return
+	}
+	err = m.Service.UpdateMonitor(r.Context(), incoming)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	responder.Status(http.StatusOK)
 }
 
 func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Request) {

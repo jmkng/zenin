@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/measurement"
 )
@@ -83,14 +84,6 @@ type Monitor struct {
 	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
 }
 
-// ValidationError is an error received when a monitor is being polled in an invalid state.
-//
-// Validation problems should be caught early on, when the monitor is created and stored,
-// so this error should not happen in reality.
-//
-// If it does happen, this will indicate an internal issue.
-var ValidationError = errors.New("probe was stopped by invalid monitor")
-
 // Poll will start a poll action, returning a `Span` for the result.
 func (m Monitor) Poll() (measurement.Measurement, error) {
 	log.Debug("poll starting", "monitor(id)", *m.Id)
@@ -123,3 +116,45 @@ func (m Monitor) Poll() (measurement.Measurement, error) {
 	log.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration))
 	return measurement, nil
 }
+
+// Validate will return an error if the `Monitor` is in an invalid state.
+func (m Monitor) Validate() error {
+	errors := []string{}
+	push := func(value string) {
+		message := fmt.Sprintf("value for field `%v` is required", value)
+		errors = append(errors, message)
+	}
+
+	switch m.Kind {
+	case HTTP:
+		if m.RemoteAddress == nil {
+			push("remoteAddress")
+		}
+		if m.HTTPRange == nil {
+			push("httpRange")
+		}
+	case TCP:
+	case ICMP:
+	case Ping:
+		if m.RemoteAddress == nil {
+			push("remoteAddress")
+		}
+	case Script:
+		if m.ScriptPath == nil {
+			push("scriptPath")
+		}
+	}
+
+	if len(errors) > 0 {
+		return internal.NewValidation(errors...)
+	}
+	return nil
+}
+
+// ValidationError is an error received when a monitor is being polled in an invalid state.
+//
+// Validation problems should be caught early on, when the monitor is created and stored,
+// so this error should not happen in reality.
+//
+// If it does happen, this will indicate an internal issue.
+var ValidationError = errors.New("probe was stopped by invalid monitor")

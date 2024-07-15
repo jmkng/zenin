@@ -38,8 +38,7 @@ type Application struct {
 	PasswordPlainText string `json:"password"`
 }
 
-// Validate will check the `Application` for invalid data,
-// returning a `Validation` error describing the invalid states.
+// Validate will return an error if the `Application` is in an invalid state.
 func (a Application) Validate() error {
 	len := len(a.PasswordPlainText)
 	if a.Username == "" {

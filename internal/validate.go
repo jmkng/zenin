@@ -23,3 +23,8 @@ func (v Validation) Error() string {
 func (v Validation) Messages() []string {
 	return v.messages
 }
+
+// Push adds a new error to the `Validation`.
+func (v *Validation) Push(error string) {
+	v.messages = append(v.messages, error)
+}

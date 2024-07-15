@@ -13,15 +13,14 @@ import (
 // InsertMonitor implements `MonitorRepository.InsertMonitor` for `PostgresRepository`.
 func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.Monitor) (int, error) {
 	var id int
-	query := `
-		INSERT INTO monitor 
+	query := `INSERT INTO monitor 
 		(name, kind, active, interval, timeout, description, remote_address, remote_port,
         script_path, 
         http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
         icmp_size)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-		RETURNING id
-	`
+    VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    RETURNING id`
 	row := p.db.QueryRowContext(
 		ctx,
 		query,
@@ -195,6 +194,44 @@ func (p PostgresRepository) selectMonitorRelated(
 	}
 
 	return monitors, err
+}
+
+func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.Monitor) error {
+	const query string = `UPDATE monitor SET 
+        name = $1,
+        kind = $2,
+        active = $3,
+        interval = $4,
+        timeout = $5,
+        description = $6,
+        remote_address = $7,
+        remote_port = $8,
+        script_path = $9,
+        http_range = $10,
+        http_method = $11,
+        http_request_headers = $12,
+        http_request_body = $13,
+        http_expired_cert_mod = $14,
+        icmp_size = $15
+    WHERE id = $16`
+	_, err := p.db.ExecContext(ctx, query,
+		monitor.Name,
+		monitor.Kind,
+		monitor.Active,
+		monitor.Interval,
+		monitor.Timeout,
+		monitor.Description,
+		monitor.RemoteAddress,
+		monitor.RemotePort,
+		monitor.ScriptPath,
+		monitor.HTTPRange,
+		monitor.HTTPMethod,
+		monitor.HTTPHeaders,
+		monitor.HTTPBody,
+		monitor.HTTPExpiredCertMod,
+		monitor.ICMPSize,
+		monitor.Id)
+	return err
 }
 
 // monitorJSON is a `Monitor` that may have a chunk of JSON containing
