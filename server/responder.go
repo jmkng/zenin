@@ -27,7 +27,7 @@ type Responder struct {
 func (r *Responder) Data(data any, status int) {
 	r.writer.WriteHeader(status)
 
-	response, err := NewDataResponse(data).JSON()
+	response, err := NewDataPacket(data).JSON()
 	if err != nil {
 		log.Error("responder failed to send data response", "error", err)
 		return
@@ -57,7 +57,7 @@ func (r *Responder) Error(err error, status int) {
 	}
 
 	if len(client) > 0 {
-		response, err := NewErrorResponse(client...).JSON()
+		response, err := NewErrorPacket(client...).JSON()
 		if err != nil {
 			log.Error("responder failed to send error response", "error", err)
 			return
@@ -74,20 +74,20 @@ func (r *Responder) Status(status int) {
 	r.writer.WriteHeader(status)
 }
 
-// NewErrorResponse returns a new ErrorResponse.
-func NewErrorResponse(errors ...string) ErrorResponse {
-	return ErrorResponse{
+// NewErrorPacket returns a new `ErrorPacket`.
+func NewErrorPacket(errors ...string) ErrorPacket {
+	return ErrorPacket{
 		Errors: errors,
 	}
 }
 
-// ErrorResponse is used to send a set of user-friendly error messages.
-type ErrorResponse struct {
+// ErrorPacket is used to send a set of user-friendly error messages.
+type ErrorPacket struct {
 	Errors []string `json:"errors"`
 }
 
-// JSON will marshal the `ErrorResponse` as a JSON string, returning the bytes: { "errors": ... }
-func (e ErrorResponse) JSON() ([]byte, error) {
+// JSON will marshal the `ErrorPacket` as a JSON string, returning the bytes: { "errors": ... }
+func (e ErrorPacket) JSON() ([]byte, error) {
 	bytes, err := json.Marshal(e)
 	if err != nil {
 		return bytes, fmt.Errorf("failed to marshal error response: %w", err)
@@ -95,20 +95,20 @@ func (e ErrorResponse) JSON() ([]byte, error) {
 	return bytes, nil
 }
 
-// NewDataResponse returns a new DataResponse.
-func NewDataResponse(data any) DataResponse {
-	return DataResponse{
+// NewDataPacket returns a new `DataPacket`.
+func NewDataPacket(data any) DataPacket {
+	return DataPacket{
 		Data: data,
 	}
 }
 
-// DataResponse contains a set of data.
-type DataResponse struct {
+// DataPacket contains a set of data.
+type DataPacket struct {
 	Data any `json:"data"`
 }
 
-// JSON will marshal the `DataResponse` as a JSON string, returning the bytes: { "data": ... }
-func (d DataResponse) JSON() ([]byte, error) {
+// JSON will marshal the `DataPacket` as a JSON string, returning the bytes: { "data": ... }
+func (d DataPacket) JSON() ([]byte, error) {
 	bytes, err := json.Marshal(d)
 	if err != nil {
 		return bytes, fmt.Errorf("failed to marshal data response: %w", err)
