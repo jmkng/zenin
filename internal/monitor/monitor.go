@@ -77,8 +77,8 @@ type Monitor struct {
 	ScriptPath         *string                   `json:"scriptPath,omitempty" db:"script_path"`
 	HTTPRange          *HTTPRange                `json:"httpRange,omitempty" db:"http_range"`
 	HTTPMethod         *string                   `json:"httpMethod,omitempty" db:"http_method"`
-	HTTPHeaders        *string                   `json:"httpHeaders,omitempty" db:"http_request_headers"`
-	HTTPBody           *string                   `json:"httpBody,omitempty" db:"http_request_body"`
+	HTTPRequestHeaders *string                   `json:"httpRequestHeaders,omitempty" db:"http_request_headers"`
+	HTTPRequestBody    *string                   `json:"httpRequestBody,omitempty" db:"http_request_body"`
 	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod,omitempty" db:"http_expired_cert_mod"`
 	ICMPSize           *int                      `json:"icmpSize,omitempty" db:"icmp_size"`
 	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
@@ -87,34 +87,38 @@ type Monitor struct {
 // Poll will start a poll action, returning a `Span` for the result.
 func (m Monitor) Poll() (measurement.Measurement, error) {
 	log.Debug("poll starting", "monitor(id)", *m.Id)
-
-	var measurement measurement.Measurement
 	var err error
 
+	var result measurement.Measurement
+	result.MonitorId = m.Id
+
+	var span measurement.Span
 	start := time.Now()
 	switch m.Kind {
 	case ICMP:
-		measurement, err = NewICMPProbe(false).Poll(m)
+		span, err = NewICMPProbe(false).Poll(m)
 	case HTTP:
-		measurement, err = NewHTTPProbe().Poll(m)
+		span, err = NewHTTPProbe().Poll(m)
 	case TCP:
-		measurement, err = NewTCPProbe().Poll(m)
+		span, err = NewTCPProbe().Poll(m)
 	case Script:
-		measurement, err = NewScriptProbe().Poll(m)
+		span, err = NewScriptProbe().Poll(m)
 	case Ping:
-		measurement, err = NewICMPProbe(true).Poll(m)
+		span, err = NewICMPProbe(true).Poll(m)
 	default:
 		panic("unrecognized probe")
 	}
 	if err != nil {
-		return measurement, err
+		return result, err
 	}
+	duration := float64(time.Since(start)) / float64(time.Millisecond)
 
-	diff := time.Since(start)
-	duration := float64(diff) / float64(time.Millisecond)
+	result.RecordedAt = start
+	result.Duration = duration
+	result.Span = span
 
 	log.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration))
-	return measurement, nil
+	return result, nil
 }
 
 // Validate will return an error if the `Monitor` is in an invalid state.

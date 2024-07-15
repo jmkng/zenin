@@ -3,7 +3,6 @@ package monitor
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -22,39 +21,35 @@ func NewHTTPProbe() HTTPProbe {
 type HTTPProbe struct{}
 
 // Poll implements `Probe.Poll` for `HTTPProbe`.
-func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
-	start := time.Now()
+func (h HTTPProbe) Poll(monitor Monitor) (measurement.Span, error) {
 	state := measurement.Ok
-
-	var m measurement.Measurement
-	m.MonitorId = monitor.Id
-	m.RecordedAt = start
+	var span measurement.Span
 
 	if monitor.HTTPMethod == nil || !isValidMethod(monitor.HTTPMethod) {
-		return m, fmt.Errorf("%w: http monitor has missing or invalid method", ValidationError)
+		return span, fmt.Errorf("%w: http monitor has missing or invalid method", ValidationError)
 	}
 	method := *monitor.HTTPMethod
 	if monitor.RemoteAddress == nil {
-		return m, fmt.Errorf("%w: http monitor has missing or invalid remote address", ValidationError)
+		return span, fmt.Errorf("%w: http monitor has missing or invalid remote address", ValidationError)
 	}
 	url := *monitor.RemoteAddress
 	var reqBody *bytes.Buffer
-	if monitor.HTTPBody != nil {
-		reqBody = bytes.NewBuffer([]byte(*monitor.HTTPBody))
+	if monitor.HTTPRequestBody != nil {
+		reqBody = bytes.NewBuffer([]byte(*monitor.HTTPRequestBody))
 	} else {
 		reqBody = bytes.NewBuffer([]byte{})
 	}
 
 	request, err := http.NewRequest(method, url, reqBody)
 	if err != nil {
-		return m, fmt.Errorf("%w: http monitor failed to build request", ValidationError)
+		return span, fmt.Errorf("%w: http monitor failed to build request", ValidationError)
 	}
 
-	if m.HTTPResponseHeaders != nil {
+	if span.HTTPResponseHeaders != nil {
 		var reqHeaders map[string]string
-		err = json.Unmarshal([]byte(*monitor.HTTPHeaders), &reqHeaders)
+		err = json.Unmarshal([]byte(*monitor.HTTPRequestHeaders), &reqHeaders)
 		if err != nil {
-			return m, fmt.Errorf("%w: failed to parse http headers", ValidationError)
+			return span, fmt.Errorf("%w: failed to parse http headers", ValidationError)
 		}
 		for key, value := range reqHeaders {
 			request.Header.Add(key, value)
@@ -74,15 +69,18 @@ func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 		if e, ok := err.(net.Error); ok && e.Timeout() {
 			t := measurement.Timeout
 			hint = &t
+		} else {
+			log.Info("http probe request failed", "error", err)
 		}
-		m.StateHint = hint
-		return m.Finalize(measurement.Dead), nil
+		span.State = measurement.Dead
+		span.StateHint = hint
+		return span, nil
 	}
 	defer response.Body.Close()
 
-	resRange, err := newHTTPRangeFromInt(response.StatusCode)
-	m.HTTPStatusCode = &response.StatusCode
-	if resRange != *monitor.HTTPRange || err != nil {
+	resRange := newHTTPRangeFromInt(response.StatusCode)
+	span.HTTPStatusCode = &response.StatusCode
+	if resRange != *monitor.HTTPRange {
 		state = measurement.Dead
 	}
 	resHeaders, err := json.Marshal(response.Header)
@@ -90,7 +88,7 @@ func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 		log.Warn("failed to parse and store response headers", "id", *monitor.Id)
 	} else {
 		headersString := string(resHeaders)
-		m.HTTPResponseHeaders = &headersString
+		span.HTTPResponseHeaders = &headersString
 	}
 
 	// TODO: Capturing body/headers should be opt-in, since they take up space
@@ -100,7 +98,7 @@ func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 		log.Warn("failed to read response body", "id", monitor.Id)
 	} else {
 		bodystring := string(resbody)
-		m.HTTPResponseBody = &bodystring
+		span.HTTPResponseBody = &bodystring
 	}
 
 	if response.TLS != nil {
@@ -116,10 +114,11 @@ func (h HTTPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
 			c.NotAfter = n.NotAfter
 			certificates = append(certificates, c)
 		}
-		m.Certificates = certificates
+		span.Certificates = certificates
 	}
 
-	return m.Finalize(state), nil
+	span.State = state
+	return span, nil
 }
 
 func isValidMethod(value *string) bool {
@@ -133,17 +132,17 @@ func isValidMethod(value *string) bool {
 	return false
 }
 
-func newHTTPRangeFromInt(value int) (HTTPRange, error) {
+func newHTTPRangeFromInt(value int) HTTPRange {
 	if value >= 100 && value < 200 {
-		return Informational, nil
+		return Informational
 	} else if value >= 200 && value < 300 {
-		return Successful, nil
+		return Successful
 	} else if value >= 300 && value < 400 {
-		return Redirection, nil
+		return Redirection
 	} else if value >= 400 && value < 500 {
-		return ClientError, nil
+		return ClientError
 	} else if value >= 500 && value < 600 {
-		return ServerError, nil
+		return ServerError
 	}
-	return "", errors.New("unrecognized status code")
+	panic("unrecognized status code")
 }

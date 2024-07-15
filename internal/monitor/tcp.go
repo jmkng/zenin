@@ -10,6 +10,6 @@ func NewTCPProbe() TCPProbe {
 type TCPProbe struct{}
 
 // Poll implements `Probe.Poll` for `TCPProbe`.
-func (i TCPProbe) Poll(monitor Monitor) (measurement.Measurement, error) {
+func (i TCPProbe) Poll(monitor Monitor) (measurement.Span, error) {
 	panic("todo")
 }

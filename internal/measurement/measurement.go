@@ -6,10 +6,14 @@ import (
 
 // Measurement is the measurement domain type.
 type Measurement struct {
-	Id           *int          `json:"id" db:"id"`
-	MonitorId    *int          `json:"monitorId" db:"monitor_id"`
-	RecordedAt   time.Time     `json:"recordedAt" db:"recorded_at"`
-	Duration     float64       `json:"duration" db:"duration"`
+	Id         *int      `json:"id" db:"id"`
+	MonitorId  *int      `json:"monitorId" db:"monitor_id"`
+	RecordedAt time.Time `json:"recordedAt" db:"recorded_at"`
+	Duration   float64   `json:"duration" db:"duration"`
+	Span
+}
+
+type Span struct {
 	State        ProbeState    `json:"state" db:"state"`
 	StateHint    *StateHint    `json:"stateHint,omitempty" db:"state_hint"`
 	Certificates []Certificate `json:"certificates,omitempty"`
@@ -17,21 +21,6 @@ type Measurement struct {
 	HTTPFields
 	ICMPFields
 	ScriptFields
-}
-
-// Finalize will return a `Measurement` with the state and duration properties set.
-//
-// # Panic
-//
-// This function will panic if the `RecordedAt` property has not been set.
-func (m Measurement) Finalize(state ProbeState) Measurement {
-	if m.RecordedAt.IsZero() {
-		panic("span finalized without setting `RecordedAt` time")
-	}
-	m.State = state
-	duration := time.Since(m.RecordedAt)
-	m.Duration = float64(duration) / float64(time.Millisecond)
-	return m
 }
 
 type HTTPFields struct {
