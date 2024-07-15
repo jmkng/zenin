@@ -22,8 +22,8 @@ func GetHttpMonitor() monitor.Monitor {
 		ScriptPath:         new(string),
 		HTTPRange:          &httpRange,
 		HTTPMethod:         new(string),
-		HTTPHeaders:        new(string),
-		HTTPBody:           new(string),
+		HTTPRequestHeaders: new(string),
+		HTTPRequestBody:    new(string),
 		HTTPExpiredCertMod: new(string),
 		ICMPSize:           new(int),
 	}

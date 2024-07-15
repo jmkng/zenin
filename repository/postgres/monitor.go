@@ -35,8 +35,8 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		monitor.ScriptPath,
 		monitor.HTTPRange,
 		monitor.HTTPMethod,
-		monitor.HTTPHeaders,
-		monitor.HTTPBody,
+		monitor.HTTPRequestHeaders,
+		monitor.HTTPRequestBody,
 		monitor.HTTPExpiredCertMod,
 		monitor.ICMPSize,
 	)
@@ -226,8 +226,8 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		monitor.ScriptPath,
 		monitor.HTTPRange,
 		monitor.HTTPMethod,
-		monitor.HTTPHeaders,
-		monitor.HTTPBody,
+		monitor.HTTPRequestHeaders,
+		monitor.HTTPRequestBody,
 		monitor.HTTPExpiredCertMod,
 		monitor.ICMPSize,
 		monitor.Id)
