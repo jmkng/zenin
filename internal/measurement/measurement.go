@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+type ProbeState string
+
+const (
+	Ok   ProbeState = "OK"
+	Warn ProbeState = "WARN"
+	Dead ProbeState = "DEAD"
+)
+
 // Measurement is the measurement domain type.
 type Measurement struct {
 	Id         *int      `json:"id" db:"id"`
@@ -13,9 +21,26 @@ type Measurement struct {
 	Span
 }
 
+// NewSpan returns a new `Span`.
+//
+// The default `State` is `Dead`. `Certificates` is an empty slice. All other fields are nil.
+func NewSpan(state ProbeState) Span {
+	return Span{
+		State:        state,
+		StateHint:    []string{},
+		Certificates: []Certificate{},
+		HTTPFields:   HTTPFields{},
+		ICMPFields:   ICMPFields{},
+		ScriptFields: ScriptFields{},
+	}
+}
+
+type Hint []string
+
+// Span is a common set of fields for all `Measurement`.
 type Span struct {
 	State        ProbeState    `json:"state" db:"state"`
-	StateHint    *StateHint    `json:"stateHint,omitempty" db:"state_hint"`
+	StateHint    Hint          `json:"stateHint,omitempty" db:"state_hint"`
 	Certificates []Certificate `json:"certificates,omitempty"`
 
 	HTTPFields
@@ -43,19 +68,20 @@ type ScriptFields struct {
 	ScriptStderr   *string `json:"scriptStderr,omitempty" db:"script_stderr"`
 }
 
-type ProbeState string
-
-const (
-	Ok   ProbeState = "OK"
-	Warn ProbeState = "WARN"
-	Dead ProbeState = "DEAD"
-)
-
-type StateHint string
-
-const (
-	Timeout StateHint = "TIMEOUT"
-)
+// Downgrade will set `State` to the provided value if it is "below" the current state.
+//
+// For example, going from `Ok` to `Warn` or `Dead` is allowed,
+// but going from `Dead` to `Warn` is ignored.
+func (s *Span) Downgrade(state ProbeState, hint ...string) {
+	if s.State == Ok {
+		s.State = state
+	} else if s.State == Warn && state == Dead {
+		s.State = Dead
+	}
+	for _, v := range hint {
+		s.StateHint = append(s.StateHint, v)
+	}
+}
 
 // Certificate is an x509 certificate recorded by an HTTP probe.
 type Certificate struct {
