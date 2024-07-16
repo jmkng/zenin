@@ -71,7 +71,25 @@ func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Reques
 }
 
 func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "create monitor")
+	responder := NewResponder(w)
+	var incoming monitor.Monitor
+	err := StrictDecoder(r.Body).Decode(&incoming)
+	if err != nil {
+		responder.Error(internal.
+			NewValidation("Received unexpected data, keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+			http.StatusBadRequest)
+		return
+	}
+	if err := incoming.Validate(); err != nil {
+		responder.Error(err, http.StatusBadRequest)
+		return
+	}
+	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	responder.Data(id, http.StatusCreated)
 }
 
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +123,8 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	var incoming monitor.Monitor
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(internal.NewValidation("Invalid monitor, keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+		responder.Error(internal.
+			NewValidation("Received unexpected data, keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
 			http.StatusBadRequest)
 		return
 	}
