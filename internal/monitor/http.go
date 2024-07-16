@@ -3,13 +3,11 @@ package monitor
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"time"
 
-	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/measurement"
 )
 
@@ -21,104 +19,92 @@ func NewHTTPProbe() HTTPProbe {
 type HTTPProbe struct{}
 
 // Poll implements `Probe.Poll` for `HTTPProbe`.
-func (h HTTPProbe) Poll(monitor Monitor) (measurement.Span, error) {
-	state := measurement.Ok
-	var span measurement.Span
+func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
+	span := measurement.NewSpan(measurement.Ok)
 
-	if monitor.HTTPMethod == nil || !isValidMethod(monitor.HTTPMethod) {
-		return span, fmt.Errorf("%w: http monitor has missing or invalid method", ValidationError)
-	}
-	method := *monitor.HTTPMethod
-	if monitor.RemoteAddress == nil {
-		return span, fmt.Errorf("%w: http monitor has missing or invalid remote address", ValidationError)
-	}
-	url := *monitor.RemoteAddress
-	var reqBody *bytes.Buffer
+	var requestBody *bytes.Buffer
 	if monitor.HTTPRequestBody != nil {
-		reqBody = bytes.NewBuffer([]byte(*monitor.HTTPRequestBody))
+		requestBody = bytes.NewBuffer([]byte(*monitor.HTTPRequestBody))
 	} else {
-		reqBody = bytes.NewBuffer([]byte{})
+		requestBody = bytes.NewBuffer([]byte{})
 	}
 
-	request, err := http.NewRequest(method, url, reqBody)
+	request, err := http.NewRequest(*monitor.HTTPMethod, *monitor.RemoteAddress, requestBody)
 	if err != nil {
-		return span, fmt.Errorf("%w: http monitor failed to build request", ValidationError)
+		span.Downgrade(measurement.Dead, "Field `remote address` may be invalid.")
+		return span
 	}
 
-	if span.HTTPResponseHeaders != nil {
-		var reqHeaders map[string]string
-		err = json.Unmarshal([]byte(*monitor.HTTPRequestHeaders), &reqHeaders)
+	if monitor.HTTPRequestHeaders != nil {
+		var requestHeaders map[string]string
+		err = json.Unmarshal([]byte(*monitor.HTTPRequestHeaders), &requestHeaders)
 		if err != nil {
-			return span, fmt.Errorf("%w: failed to parse http headers", ValidationError)
+			span.Downgrade(measurement.Dead, "Field `request headers` may be invalid.")
+			return span
 		}
-		for key, value := range reqHeaders {
+		for key, value := range requestHeaders {
 			request.Header.Add(key, value)
 		}
 	}
 
 	client := &http.Client{
-		Transport:     nil,
-		CheckRedirect: nil,
-		Jar:           nil,
-		Timeout:       time.Duration(monitor.Timeout) * time.Second,
+		Timeout: time.Duration(monitor.Timeout) * time.Second,
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
-		var hint *measurement.StateHint
 		if e, ok := err.(net.Error); ok && e.Timeout() {
-			t := measurement.Timeout
-			hint = &t
-		} else {
-			log.Info("http probe request failed", "error", err)
+			span.Downgrade(measurement.Dead, "The monitor timed out.")
 		}
-		span.State = measurement.Dead
-		span.StateHint = hint
-		return span, nil
+		return span
 	}
 	defer response.Body.Close()
 
-	resRange := newHTTPRangeFromInt(response.StatusCode)
 	span.HTTPStatusCode = &response.StatusCode
-	if resRange != *monitor.HTTPRange {
-		state = measurement.Dead
+
+	responseRange := newHTTPRangeFromInt(response.StatusCode)
+	if responseRange != *monitor.HTTPRange {
+		span.Downgrade(measurement.Dead, "The response status code is out of range.")
 	}
-	resHeaders, err := json.Marshal(response.Header)
+
+	responseHeaders, err := json.Marshal(response.Header)
 	if err != nil {
-		log.Warn("failed to parse and store response headers", "id", *monitor.Id)
+		span.Downgrade(measurement.Ok,
+			"The response headers were unable to be serialized, and were not captured for this measurement.")
 	} else {
-		headersString := string(resHeaders)
+		headersString := string(responseHeaders)
 		span.HTTPResponseHeaders = &headersString
 	}
 
 	// TODO: Capturing body/headers should be opt-in, since they take up space
 	// and may not be needed.
-	resbody, err := io.ReadAll(response.Body)
+	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Warn("failed to read response body", "id", monitor.Id)
+		span.Downgrade(measurement.Ok,
+			"The response body was unable to be read, and was not captured for this measurement.")
 	} else {
-		bodystring := string(resbody)
-		span.HTTPResponseBody = &bodystring
+		bodyString := string(responseBody)
+		span.HTTPResponseBody = &bodyString
 	}
 
 	if response.TLS != nil {
-		var certificates []measurement.Certificate
 		for _, n := range response.TLS.PeerCertificates {
-			var c measurement.Certificate
-			c.Version = n.Version
-			c.SerialNumber = n.SerialNumber.String()
-			c.PublicKeyAlgorithm = n.PublicKeyAlgorithm.String()
-			c.IssuerCommonName = n.Issuer.String()
-			c.SubjectCommonName = n.Subject.CommonName
-			c.NotBefore = n.NotBefore
-			c.NotAfter = n.NotAfter
-			certificates = append(certificates, c)
+			c := measurement.Certificate{
+				Id:                 nil,
+				MeasurementId:      nil,
+				Version:            n.Version,
+				SerialNumber:       n.SerialNumber.String(),
+				PublicKeyAlgorithm: n.PublicKeyAlgorithm.String(),
+				IssuerCommonName:   n.Issuer.CommonName,
+				SubjectCommonName:  n.Subject.CommonName,
+				NotBefore:          n.NotBefore,
+				NotAfter:           n.NotAfter,
+			}
+			span.Certificates = append(span.Certificates, c)
 		}
-		span.Certificates = certificates
 	}
 
-	span.State = state
-	return span, nil
+	return span
 }
 
 func isValidMethod(value *string) bool {

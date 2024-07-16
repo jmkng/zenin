@@ -59,8 +59,20 @@ const (
 	Delete HTTPMethod = "GET"
 )
 
+// Probe is a type used to build a `Span` describing the state of a resource.
 type Probe interface {
-	Poll(monitor Monitor) (measurement.Measurement, error)
+	// Poll will execute an action that returns a `Span` describing the result.
+	//
+	// No error is returned because this should be an infallible operation,
+	// meaning any validation errors on a type that implements `Probe` should be caught
+	// ahead of time.
+	//
+	// Anything that might look like an "error" should be represented as a `Span` with a
+	// state of `Dead` or `Warn`.
+	//
+	// In this situation, the `Span` can be distributed normally, triggering alerts and
+	// calling attention to the failure.
+	Poll(monitor Monitor) measurement.Span
 }
 
 // Monitor is the monitor domain type.
@@ -84,41 +96,41 @@ type Monitor struct {
 	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
 }
 
-// Poll will start a poll action, returning a `Span` for the result.
-func (m Monitor) Poll() (measurement.Measurement, error) {
+// Poll will invoke a `Probe`, returning a `Measurement` describing the result.
+//
+// This function should only ever be called on a `Monitor` from the database,
+// it requires essential fields (including id) to be populated.
+func (m Monitor) Poll() measurement.Measurement {
 	log.Debug("poll starting", "monitor(id)", *m.Id)
-	var err error
 
 	var result measurement.Measurement
 	result.MonitorId = m.Id
 
-	var span measurement.Span
-	start := time.Now()
+	var probe Probe
 	switch m.Kind {
 	case ICMP:
-		span, err = NewICMPProbe(false).Poll(m)
+		probe = NewICMPProbe(false)
 	case HTTP:
-		span, err = NewHTTPProbe().Poll(m)
+		probe = NewHTTPProbe()
 	case TCP:
-		span, err = NewTCPProbe().Poll(m)
+		probe = NewTCPProbe()
 	case Script:
-		span, err = NewScriptProbe().Poll(m)
+		probe = NewScriptProbe()
 	case Ping:
-		span, err = NewICMPProbe(true).Poll(m)
+		probe = NewICMPProbe(true)
 	default:
 		panic("unrecognized probe")
 	}
-	if err != nil {
-		return result, err
-	}
-	duration := float64(time.Since(start)) / float64(time.Millisecond)
 
+	start := time.Now()
+	span := probe.Poll(m)
+	duration := float64(time.Since(start)) / float64(time.Millisecond)
 	result.RecordedAt = start
 	result.Duration = duration
 	result.Span = span
 
 	log.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration))
-	return result, nil
+	return result
 }
 
 // Validate will return an error if the `Monitor` is in an invalid state.
@@ -154,11 +166,3 @@ func (m Monitor) Validate() error {
 	}
 	return nil
 }
-
-// ValidationError is an error received when a monitor is being polled in an invalid state.
-//
-// Validation problems should be caught early on, when the monitor is created and stored,
-// so this error should not happen in reality.
-//
-// If it does happen, this will indicate an internal issue.
-var ValidationError = errors.New("probe was stopped by invalid monitor")

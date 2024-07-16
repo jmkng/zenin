@@ -110,15 +110,8 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 		interval := time.Duration(mon.Interval)
-
 		action := func() {
-			measurement, err := mon.Poll()
-			if err != nil {
-				// todo Errors here will probably be sent to the client.
-				// Will become more clear as probe implementations mature.
-				log.Error("failed to complete probe", "monitor(id)", mon.Id, "error", err)
-			}
-			loopback <- MeasurementMessage{Measurement: measurement}
+			loopback <- MeasurementMessage{Measurement: mon.Poll()}
 		}
 
 	POLLING:
