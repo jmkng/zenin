@@ -75,6 +75,7 @@ The scripts in `/scripts` may rely on these external tools:
 
 - [curl](https://curl.se/download.html)
 - [jq](https://github.com/jqlang/jq)
+- base64
 
 Several of the upcoming steps rely on your environment variables, so update and source the `export` script before you do anything.
 

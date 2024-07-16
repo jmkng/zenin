@@ -82,10 +82,27 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 			break
 		}
 	}
+
+	log.Debug("distributor added feed subscriber connection", "subscriber(id)", key)
 	d.subscribers[key] = subscriber
-	go onClose(subscriber,
-		func() { loopback <- UnsubscribeMessage{Id: key} },
-		func(err error) { log.Error("distributor failed to read message", "error", err) })
+
+	// Listen for stop message.
+	go func() {
+		for {
+			kind, message, err := subscriber.ReadMessage()
+			if err != nil {
+				log.Error("distributor discarding broken feed connection", "error", err)
+				loopback <- UnsubscribeMessage{Id: key}
+				break
+			} else if kind == websocket.CloseMessage {
+				log.Debug("distributor closed feed connection", "subscriber(id)", key)
+				loopback <- UnsubscribeMessage{Id: key}
+				break
+			} else {
+				log.Info("distributor received feed message", "subscriber(id)", key, "message", string(message))
+			}
+		}
+	}()
 }
 
 // unsubscribe will remove an existing feed subscriber, and close the connection.
@@ -95,6 +112,7 @@ func (d *Distributor) unsubscribe(id int) {
 		log.Warn("distributor dropped no-op unsubscribe request")
 		return
 	}
+
 	err := conn.Close()
 	if err != nil {
 		log.Debug("distributor received error while closing feed connection", "error", err)
@@ -105,7 +123,7 @@ func (d *Distributor) unsubscribe(id int) {
 // start will begin polling a `Monitor` in a loop based on the interval.
 func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 	if _, exists := d.polling[*mon.Id]; exists {
-		log.Debug("distributor dropped request to start an active monitor", "id", *mon.Id)
+		log.Debug("distributor dropped request to start an active monitor", "monitor(id)", *mon.Id)
 		return
 	}
 	channel := make(chan any)
@@ -113,7 +131,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 
 	go func(in <-chan any, loopback chan<- any, mon Monitor) {
 		delay := rand.IntN(800)
-		log.Debug("distributor started polling monitor", "id", *mon.Id, "delay(ms)", delay)
+		log.Debug("distributor started polling monitor", "monitor(id)", *mon.Id, "delay(ms)", delay)
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 		interval := time.Duration(mon.Interval)
 
@@ -165,19 +183,4 @@ func (d *Distributor) stop(id int) {
 // distributeMeasurement will distribute a `Measurement` to the repository and feed subscribers.
 func (d *Distributor) distributeMeasurement(measurement measurement.Measurement) {
 	log.Warn("distributor received a measurement but will do nothing with it") // todo
-}
-
-// onClose will block and listen for incoming messages.
-// If a close message is received, it will execute the provided function.
-func onClose(in *websocket.Conn, onCloseFunc func(), onReadErrFunc func(error)) {
-	for {
-		mt, _, err := in.ReadMessage()
-		if err != nil {
-			onReadErrFunc(err)
-		}
-		if mt != websocket.CloseMessage {
-			continue
-		}
-		onCloseFunc()
-	}
 }

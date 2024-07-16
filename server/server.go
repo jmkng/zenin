@@ -57,6 +57,7 @@ func (s *Server) Serve() error {
 			private.Use(Authenticator)
 			private.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
 		})
+		v1.Mount("/feed", NewFeedHandler(s.bundle.Monitor))
 	})
 
 	err := http.ListenAndServe(s.config.Address.String(), mux)
