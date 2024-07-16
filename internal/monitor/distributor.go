@@ -82,7 +82,6 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 			break
 		}
 	}
-
 	log.Debug("distributor added feed subscriber connection", "subscriber(id)", key)
 	d.subscribers[key] = subscriber
 
@@ -109,13 +108,13 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 func (d *Distributor) unsubscribe(id int) {
 	conn := d.subscribers[id]
 	if conn == nil {
-		log.Warn("distributor dropped no-op unsubscribe request")
+		log.Debug("distributor dropped no-op unsubscribe request")
 		return
 	}
 
 	err := conn.Close()
 	if err != nil {
-		log.Debug("distributor received error while closing feed connection", "error", err)
+		log.Debug("distributor failed to close feed connection", "error", err)
 	}
 	delete(d.subscribers, id)
 }
@@ -129,12 +128,10 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 	channel := make(chan any)
 	d.polling[*mon.Id] = channel
 
-	go func(in <-chan any, loopback chan<- any, mon Monitor) {
+	go func(loopback chan<- any, in <-chan any, mon Monitor) {
 		delay := rand.IntN(800)
 		log.Debug("distributor started polling monitor", "monitor(id)", *mon.Id, "delay(ms)", delay)
 		time.Sleep(time.Duration(delay) * time.Millisecond)
-		interval := time.Duration(mon.Interval)
-
 	POLLING:
 		for {
 			select {
@@ -149,13 +146,13 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 				case PollMessage:
 					d.poll(loopback, mon)
 				}
-			case <-time.After(interval * time.Second):
+			case <-time.After(time.Duration(mon.Interval) * time.Second):
 				d.poll(loopback, mon)
 			}
 		}
 
 		log.Debug("distributor stopped polling monitor")
-	}(channel, loopback, mon)
+	}(loopback, channel, mon)
 }
 
 // poll will begin polling a `Monitor`.
