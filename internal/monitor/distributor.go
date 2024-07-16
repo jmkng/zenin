@@ -44,6 +44,7 @@ func (d *Distributor) Listen() chan<- any {
 
 		for message := range in {
 			switch x := message.(type) {
+
 			case SubscribeMessage:
 				d.subscribe(channel, x.Subscriber)
 			case UnsubscribeMessage:

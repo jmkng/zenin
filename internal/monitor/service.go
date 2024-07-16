@@ -8,13 +8,13 @@ import (
 func NewMonitorService(repository MonitorRepository, distributor chan<- any) MonitorService {
 	return MonitorService{
 		Repository:  repository,
-		distributor: distributor,
+		Distributor: distributor,
 	}
 }
 
 // MonitorService is a service used to interact with the monitor domain type.
 type MonitorService struct {
-	distributor chan<- any
+	Distributor chan<- any
 	Repository  MonitorRepository
 }
 
@@ -30,47 +30,16 @@ func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 	return resume, err
 }
 
-func (s MonitorService) StartMonitor(monitor Monitor) {
-	s.distributor <- StartMessage{
-		Monitor: monitor,
-	}
-}
-
-func (s MonitorService) StopMonitor(id int) {
-	s.distributor <- StopMessage{
-		Id: id,
-	}
-}
-
-func (s MonitorService) CheckMonitorExists(ctx context.Context, id int) (bool, error) {
-	slice := []int{id}
-	params := SelectParams{
-		Id:     &slice,
-		Active: nil,
-		Kind:   nil,
-	}
-
-	monitors, err := s.Repository.SelectMonitor(ctx, &params, 0)
-	if err != nil {
-		return false, err
-	}
-
-	if len(monitors) > 0 {
-		return true, nil
-	}
-	return false, nil
-}
-
 func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) error {
 	if err := s.Repository.UpdateMonitor(ctx, monitor); err != nil {
 		return err
 	}
 
-	s.distributor <- StopMessage{
+	s.Distributor <- StopMessage{
 		Id: *monitor.Id,
 	}
 	if monitor.Active {
-		s.distributor <- StartMessage{
+		s.Distributor <- StartMessage{
 			Monitor: monitor,
 		}
 	}

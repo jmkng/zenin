@@ -7,6 +7,7 @@ import (
 	"github.com/jmkng/zenin/internal/bundle"
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/log"
+	"github.com/jmkng/zenin/internal/monitor"
 	"github.com/jmkng/zenin/repository"
 	"github.com/jmkng/zenin/server"
 )
@@ -26,8 +27,8 @@ func main() {
 	active, err := bundle.Monitor.GetActive(context.Background())
 	dd(err)
 	log.Debug("resuming active monitors", "count", len(active))
-	for _, m := range active {
-		bundle.Monitor.StartMonitor(m)
+	for _, v := range active {
+		bundle.Monitor.Distributor <- monitor.StartMessage{Monitor: v}
 	}
 
 	// 🌩️ ->

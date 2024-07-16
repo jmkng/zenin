@@ -106,7 +106,7 @@ func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Requ
 	}
 
 	for _, v := range *params.Id {
-		m.Service.StopMonitor(v)
+		m.Service.Distributor <- monitor.StopMessage{Id: v}
 	}
 
 	responder.Status(http.StatusOK)
@@ -140,11 +140,11 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 			return
 		}
 		for _, v := range monitors {
-			m.Service.StartMonitor(v)
+			m.Service.Distributor <- monitor.StartMessage{Monitor: v}
 		}
 	} else {
 		for _, v := range *params.Id {
-			m.Service.StopMonitor(v)
+			m.Service.Distributor <- monitor.StopMessage{Id: v}
 		}
 	}
 
@@ -161,16 +161,19 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	exists, err := m.Service.CheckMonitorExists(r.Context(), parsed)
+	found, err := m.Service.Repository.SelectMonitor(r.Context(),
+		&monitor.SelectParams{Id: &[]int{parsed}},
+		0)
 	if err != nil {
 		responder.Status(http.StatusInternalServerError)
 		return
 	}
-	if !exists {
+	if len(found) == 0 {
 		message := fmt.Sprintf("monitor with id `%v` does not exist", param)
 		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
 		return
 	}
+
 	var incoming monitor.Monitor
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
