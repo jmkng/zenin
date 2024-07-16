@@ -93,7 +93,6 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 	params := SelectParamsFromQuery(r.URL.Query())
-
 	if len(*params.Id) == 0 {
 		responder.Error(internal.NewValidation("Expected `id` query parameter."),
 			http.StatusBadRequest)
@@ -114,7 +113,42 @@ func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Requ
 }
 
 func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "toggle monitor")
+	responder := NewResponder(w)
+	params := SelectParamsFromQuery(r.URL.Query())
+
+	validation := internal.NewValidation()
+	if params.Id == nil || len(*params.Id) == 0 {
+		validation.Push("Expected `id` query parameter.")
+	}
+	if params.Active == nil {
+		validation.Push("Expected `active` query parameter.")
+	}
+	if !validation.Empty() {
+		responder.Error(validation, http.StatusBadRequest)
+		return
+	}
+
+	// Make sure `Kind` doesn't interfere with below query.
+	params.Kind = nil
+
+	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active)
+
+	if *params.Active {
+		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), &params, 0)
+		if err != nil {
+			responder.Error(err, http.StatusInternalServerError)
+			return
+		}
+		for _, v := range monitors {
+			m.Service.StartMonitor(v)
+		}
+	} else {
+		for _, v := range *params.Id {
+			m.Service.StopMonitor(v)
+		}
+	}
+
+	responder.Status(http.StatusOK)
 }
 
 func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {

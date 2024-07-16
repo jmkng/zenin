@@ -14,6 +14,7 @@ type MonitorRepository interface {
 	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]Monitor, error)
 	UpdateMonitor(ctx context.Context, monitor Monitor) error
 	DeleteMonitor(ctx context.Context, id []int) error
+	ToggleMonitor(ctx context.Context, id []int, active bool) error
 }
 
 // SelectParams is a set of parameters used to narrow the scope of the `SelectMonitor`
@@ -25,10 +26,12 @@ type MonitorRepository interface {
 // Implements `Injectable.Inject`, so it can automatically apply suitable SQL to
 // a `sql.Builder`.
 type SelectParams struct {
-	// Group 1
+	// Group 1 -----
+
 	Id *[]int
 
-	// Group 2
+	// Group 2 -----
+
 	Active *bool
 	Kind   *ProbeKind
 }

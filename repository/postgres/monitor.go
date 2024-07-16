@@ -246,3 +246,15 @@ func (p PostgresRepository) DeleteMonitor(ctx context.Context, id []int) error {
 	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
 	return err
 }
+
+func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active bool) error {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push("UPDATE monitor SET active = ")
+	builder.BindBool(active)
+	builder.Push("WHERE id IN (")
+	builder.SpreadInt(id...)
+	builder.Push(")")
+
+	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
+	return err
+}
