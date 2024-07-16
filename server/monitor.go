@@ -45,10 +45,8 @@ func (m MonitorProvider) Mux() http.Handler {
 	router.Post("/", m.HandleCreateMonitor)
 	router.Delete("/", m.HandleDeleteMonitor)
 	router.Patch("/", m.HandleToggleMonitor)
-
 	router.Put("/{id}", m.HandleUpdateMonitor)
 	router.Get("/{id}/poll", m.HandlePollMonitor)
-
 	return router
 }
 
@@ -93,7 +91,26 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 }
 
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "delete monitor")
+	responder := NewResponder(w)
+	params := SelectParamsFromQuery(r.URL.Query())
+
+	if len(*params.Id) == 0 {
+		responder.Error(internal.NewValidation("Expected `id` query parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	err := m.Service.Repository.DeleteMonitor(r.Context(), *params.Id)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range *params.Id {
+		m.Service.StopMonitor(v)
+	}
+
+	responder.Status(http.StatusOK)
 }
 
 func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Request) {

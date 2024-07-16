@@ -41,10 +41,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		monitor.ICMPSize,
 	)
 	err := row.Scan(&id)
-	if err != nil {
-		return id, fmt.Errorf("failed to insert monitor: %w", err)
-	}
-	return id, nil
+	return id, err
 }
 
 // SelectMonitor implements `MonitorRepository.SelectMonitor` for `PostgresRepository`.
@@ -88,6 +85,13 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 
 	err = p.db.SelectContext(ctx, &monitors, builder.String(), builder.Args()...)
 	return monitors, err
+}
+
+// monitorJSON is a `Monitor` that may have a chunk of JSON containing
+// related measurements.
+type monitorJSON struct {
+	monitor.Monitor
+	JSON *string `json:"measurements" db:"measurements_json"`
 }
 
 // selectMonitorRelated returns monitors based on the provided `SelectParams`.
@@ -184,8 +188,7 @@ func (p PostgresRepository) selectMonitorRelated(
 		monitor := v.Monitor
 		if v.JSON != nil {
 			measurements := []measurement.Measurement{}
-			err := json.Unmarshal([]byte(*v.JSON), &measurements)
-			if err != nil {
+			if err := json.Unmarshal([]byte(*v.JSON), &measurements); err != nil {
 				return monitors, fmt.Errorf("failed to unwrap related measurements for monitor `%v`: %w", v.Id, err)
 			}
 			monitor.Measurements = measurements
@@ -234,22 +237,12 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 	return err
 }
 
-// monitorJSON is a `Monitor` that may have a chunk of JSON containing
-// related measurements.
-type monitorJSON struct {
-	monitor.Monitor
-	JSON *string `json:"measurements" db:"measurements_json"`
-}
+func (p PostgresRepository) DeleteMonitor(ctx context.Context, id []int) error {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push("DELETE FROM monitor WHERE id in (")
+	builder.SpreadInt(id...)
+	builder.Push(")")
 
-// Unmarshal will return the `JSON` data as `[]Measurement`.
-func (m *monitorJSON) Unmarshal() ([]measurement.Measurement, error) {
-	var measurements []measurement.Measurement
-	if m.JSON == nil {
-		return measurements, nil
-	}
-	err := json.Unmarshal([]byte(*m.JSON), &measurements)
-	if err != nil {
-		return nil, err
-	}
-	return measurements, nil
+	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
+	return err
 }

@@ -13,6 +13,7 @@ type MonitorRepository interface {
 	InsertMonitor(ctx context.Context, monitor Monitor) (int, error)
 	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]Monitor, error)
 	UpdateMonitor(ctx context.Context, monitor Monitor) error
+	DeleteMonitor(ctx context.Context, id []int) error
 }
 
 // SelectParams is a set of parameters used to narrow the scope of the `SelectMonitor`

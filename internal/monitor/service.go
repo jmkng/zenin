@@ -36,6 +36,12 @@ func (s MonitorService) StartMonitor(monitor Monitor) {
 	}
 }
 
+func (s MonitorService) StopMonitor(id int) {
+	s.distributor <- StopMessage{
+		Id: id,
+	}
+}
+
 func (s MonitorService) CheckMonitorExists(ctx context.Context, id int) (bool, error) {
 	slice := []int{id}
 	params := SelectParams{

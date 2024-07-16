@@ -85,7 +85,7 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 func (d *Distributor) unsubscribe(id int) {
 	conn := d.subscribers[id]
 	if conn == nil {
-		log.Debug("distributor dropped no-op unsubscribe request")
+		log.Warn("distributor dropped no-op unsubscribe request")
 		return
 	}
 	err := conn.Close()
@@ -140,7 +140,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 func (d *Distributor) stop(id int) {
 	channel, exists := d.polling[id]
 	if !exists {
-		log.Debug("distributor dropped no-op stop request")
+		log.Warn("distributor dropped no-op stop request")
 		return
 	}
 
