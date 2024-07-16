@@ -28,3 +28,8 @@ func (v Validation) Messages() []string {
 func (v *Validation) Push(error string) {
 	v.messages = append(v.messages, error)
 }
+
+// Empty returns true if the `Validation` is storing no messages.
+func (v Validation) Empty() bool {
+	return len(v.messages) == 0
+}
