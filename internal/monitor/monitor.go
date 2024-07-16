@@ -141,7 +141,20 @@ func (m Monitor) Validate() error {
 		errors = append(errors, message)
 	}
 
-	switch m.Kind {
+	if m.Interval == 0 {
+		push("interval")
+	}
+	if m.Timeout == 0 {
+		push("timeout")
+	}
+	if m.Name == "" {
+		push("name")
+	}
+	kind, err := ProbeKindFromString(string(m.Kind))
+	if err != nil {
+		push("kind")
+	}
+	switch kind {
 	case HTTP:
 		if m.RemoteAddress == nil {
 			push("remoteAddress")
