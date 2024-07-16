@@ -197,7 +197,30 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 }
 
 func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "poll monitor")
+	responder := NewResponder(w)
+	param := chi.URLParam(r, "id")
+	parsed, err := strconv.Atoi(param)
+	if err != nil {
+		responder.Error(internal.NewValidation("Expected integer url parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	found, err := m.Service.Repository.SelectMonitor(r.Context(),
+		&monitor.SelectParams{Id: &[]int{parsed}},
+		0)
+	if err != nil {
+		responder.Status(http.StatusInternalServerError)
+		return
+	}
+	if len(found) == 0 {
+		message := fmt.Sprintf("monitor with id `%v` does not exist", param)
+		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
+		return
+	}
+
+	m.Service.Distributor <- monitor.PollMessage{Monitor: found[0]}
+	responder.Status(http.StatusAccepted)
 }
 
 // SelectParamsFromQuery returns a `SelectParams` by parsing the values from

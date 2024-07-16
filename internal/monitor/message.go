@@ -33,4 +33,6 @@ type StopMessage struct {
 }
 
 // PollMessage is used to manually trigger a poll action.
-type PollMessage struct{}
+type PollMessage struct {
+	Monitor Monitor
+}

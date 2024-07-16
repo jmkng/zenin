@@ -55,6 +55,12 @@ func (d *Distributor) Listen() chan<- any {
 				d.stop(x.Id)
 			case MeasurementMessage:
 				d.distributeMeasurement(x.Measurement)
+			case PollMessage:
+				if monitor, ok := d.polling[*x.Monitor.Id]; ok {
+					monitor <- x
+				} else {
+					d.poll(channel, x.Monitor)
+				}
 			default:
 				log.Error("distributor dropped unrecognized message: %v", "message", message)
 			}
@@ -96,7 +102,7 @@ func (d *Distributor) unsubscribe(id int) {
 	delete(d.subscribers, id)
 }
 
-// start will begin polling a `Monitor`.
+// start will begin polling a `Monitor` in a loop based on the interval.
 func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 	if _, exists := d.polling[*mon.Id]; exists {
 		log.Debug("distributor dropped request to start an active monitor", "id", *mon.Id)
@@ -108,12 +114,8 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 	go func(in <-chan any, loopback chan<- any, mon Monitor) {
 		delay := rand.IntN(800)
 		log.Debug("distributor started polling monitor", "id", *mon.Id, "delay(ms)", delay)
-
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 		interval := time.Duration(mon.Interval)
-		action := func() {
-			loopback <- MeasurementMessage{Measurement: mon.Poll()}
-		}
 
 	POLLING:
 		for {
@@ -127,14 +129,23 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 				case StopMessage:
 					break POLLING
 				case PollMessage:
-					action()
+					d.poll(loopback, mon)
 				}
 			case <-time.After(interval * time.Second):
-				action()
+				d.poll(loopback, mon)
 			}
 		}
+
 		log.Debug("distributor stopped polling monitor")
 	}(channel, loopback, mon)
+}
+
+// poll will begin polling a `Monitor`.
+func (d *Distributor) poll(loopback chan<- any, m Monitor) {
+	measurement := m.Poll()
+	loopback <- MeasurementMessage{
+		Measurement: measurement,
+	}
 }
 
 // stop will stop polling an active `Monitor`.
