@@ -70,7 +70,8 @@ A binary may eventually be available on the [Releases](https://github.com/jmkng/
 #### Prerequisites
 
 1. [Go](https://go.dev/dl/) v1.22.4+
-2. [Node.js](https://nodejs.org/) v20.8.1+ + (NPM v10.1.0+)
+2. [Node.js](https://nodejs.org/) v20.8.1+
+    + npm v10.1.0+
 
 Clone the project.
 
