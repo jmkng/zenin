@@ -42,7 +42,7 @@ Zenin has only one dependency not included in the binary, and that is some kind 
 Decide what database you want to use and get it running somewhere that Zenin will be able to access.
 
 > [!Note]
-> Postgres is currently the only supported database. Suppoty for MySQL and SQLite is planned.
+> Postgres is currently the only supported database. Support for MySQL and SQLite is planned.
 
 Configure your environment variables to point to this new database. 
 
