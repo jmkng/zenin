@@ -34,7 +34,7 @@ VALUES
         30, 
         10, 
         NULL,
-        'https://google.com', 
+        'https://wikipedia.org', 
         NULL,
         NULL,
         '200-299', 
@@ -187,12 +187,12 @@ VALUES
     1, '', 'ls: cannot open directory ''/root'': Permission denied');
 
 INSERT INTO certificate
-    (id, measurement_id, version, serial_number, public_key_algorithm, issuer_common_name, subject_common_name, 
+    (measurement_id, version, serial_number, public_key_algorithm, issuer_common_name, subject_common_name, 
     not_before, not_after)
 VALUES
-    (1, 4, 3, '184328649162696774378172381754866658485', 'ECDSA', 'CN=WR2,O=Google Trust Services,C=US', 'www.google.com', 
+    (4, 3, '184328649162696774378172381754866658485', 'ECDSA', 'WR2', 'www.google.com', 
     '2024-07-01T17:45:24-06:00', '2024-07-01T17:45:24-06:00'),
-    (2, 4, 3, '170058220837755766831192027518741805976', 'RSA', 'CN=GTS Root R1,O=Google Trust Services LLC,C=US', 'WR2', 
+    (4, 3, '170058220837755766831192027518741805976', 'RSA', 'GTS Root R1', 'WR2', 
     '2024-07-01T17:45:24-06:00', '2024-07-01T17:45:24-06:00'),
-    (3, 4, 3, '159159747900478145820483398898491642637', 'RSA', 'CN=GlobalSign Root CA,OU=Root CA,O=GlobalSign nv-sa,C=BE', 
-    'GTS Root R1', '2024-07-01T17:45:24-06:00', '2024-07-01T17:45:24-06:00');
+    (4, 3, '159159747900478145820483398898491642637', 'RSA', 'GlobalSign Root CA', 'GTS Root R1', 
+    '2024-07-01T17:45:24-06:00', '2024-07-01T17:45:24-06:00');
