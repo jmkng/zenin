@@ -65,15 +65,20 @@ export ZENIN_DB_PASSWORD=password
 
 Supported environment variables are documented below.
 
-| Name              | Explanation                                               | Accepted Values     | Example                           | Default
-| :---------------- | :-------------------------------------------------------- | :------------------ | :-------------------------------- | :-------
-| ZENIN_DB_KIND     | The database kind.                                        | postgres            | export ZENIN_DB_KIND=postgres     | n/a
-| ZENIN_DB_HOST     | The address of the server that is running the database.   | any x.x.x.x address | export ZENIN_DB_HOST=0.0.0.0.0    | n/a
-| ZENIN_DB_PORT     | The port that the database is listening on.               | any u16             | export ZENIN_DB_PORT=5432         | n/a
-| ZENIN_DB_NAME     | The name of the database.                                 | any string          | export ZENIN_DB_NAME=postgres     | n/a
-| ZENIN_DB_USERNAME | The username used to sign in to the database.             | any string          | export ZENIN_DB_USERNAME=username | n/a
-| ZENIN_DB_PASSWORD | The password used to sign in the database.                | any string          | export ZENIN_DB_PASSWORD=password | n/a
-| ZENIN_RT_PORT     | A port number for Zenin to run on.                        | any u16             | export ZENIN_RT_PORT=4884         | 50010
+| Name                 | Explanation                                               | Accepted Values      | Example                                     | Default
+| :------------------- | :-------------------------------------------------------- | :------------------- | :------------------------------------------ | :-------
+| ZENIN_DB_KIND        | The database kind.                                        | postgres             | export ZENIN_DB_KIND=postgres               | n/a
+| ZENIN_DB_HOST        | The address of the server that is running the database.   | any x.x.x.x address  | export ZENIN_DB_HOST=0.0.0.0.0              | n/a
+| ZENIN_DB_PORT        | The port that the database is listening on.               | any u16              | export ZENIN_DB_PORT=5432                   | n/a
+| ZENIN_DB_NAME        | The name of the database.                                 | any string           | export ZENIN_DB_NAME=postgres               | n/a
+| ZENIN_DB_USERNAME    | The username used to sign in to the database.             | any string           | export ZENIN_DB_USERNAME=username           | n/a
+| ZENIN_DB_PASSWORD    | The password used to sign in the database.                | any string           | export ZENIN_DB_PASSWORD=password           | n/a
+| ZENIN_DB_MAX_CONN    | The maximum number of open database connections.          | any number           | export ZENIN_DB_MAX_CONN=5                  | n/a
+| ZENIN_RT_LEVEL       | The process run level. (optional)                         | prod, dev            | export ZENIN_RT_LEVEL=prod                  | prod
+| ZENIN_RT_PORT        | A port number for Zenin to run on. (optional)             | any u16              | export ZENIN_RT_PORT=4884                   | 50010
+| ZENIN_RT_SIGN_SECRET | A sequence used to sign tokens. (optional)[^1]                | any >=16 byte string | export ZENIN_RT_SIGN_SECRET=ab93Be(...) | random
+
+[^1]: If you don't specify this key, Zenin will generate a key for you on startup. If the Zenin server restarts, all tokens will become unrecognized, effectively signing out every user. If you specify a key, Zenin will use the same one when it starts back up, and existing tokens will remain valid (until they expire in one week).
 
 Next, acquire a Zenin binary.
 
@@ -118,8 +123,7 @@ You can now run the binary.
 
 ## Usage
 
-On first start, you will be prompted to claim the server by entering a username and password. 
-This will create the first account on the server.
+On first start, you will be prompted to claim the server by entering a username and password. This will create the first account on the server.
 
 After this, additional accounts can only be created by an existing account. The server is invite only.
 

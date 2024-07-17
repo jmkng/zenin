@@ -60,5 +60,5 @@ const (
 	dbHostKey     = "ZENIN_DB_HOST"
 	dbPortKey     = "ZENIN_DB_PORT"
 	dbNameKey     = "ZENIN_DB_NAME"
-	dbMaxKey      = "ZENIN_DB_MAX_CON"
+	dbMaxKey      = "ZENIN_DB_MAX_CONN"
 )
