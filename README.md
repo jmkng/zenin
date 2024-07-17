@@ -5,7 +5,7 @@ A simple infrastructure monitoring tool.
 ![Zenin](../assets/01.png?raw=true)
 
 > [!Tip]
-> Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. The code is not yet merged into the main branch, but will be available soon. Feel free to provide feedback on the design.
+> Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. Feel free to provide feedback on the design.
 
 ## Summary
 
@@ -27,19 +27,13 @@ It is an evolution of other tools like Nagios and Uptime Kuma.
 Zenin exposes an API that can be used to retrieve information, but similar to Uptime Kuma, makes use of WebSocket to actively distribute measurement information to connected clients, known as "feed subscribers".
 
 > [!Note]
-> The API is functional and being used internally, but is not yet documented.
+> The API is not yet documented.
 
 This means that you can connect to the client and be alerted to ongoing issues, see monitor statistics change, and watch messages being passed back and forth between the client and server in real time, without reloading the page.
 
 Performance is also a priority for this project. Zenin will poll each monitor in its own thread, leaving the distribution of information to a separate "distributor" thread. Access to this distributor is serialized by way of a message passing architecture. Zenin should be able to poll thousands of monitors this way, with the performance bottleneck generally being the network, or database.
 
-> [!Note]
-> I'm confident in this claim, but no benchmarks are currently available.
-
 ## Installation 
-
-> [!Important]
-> As mentioned above, the source code for the user interface is not merged into main. The project cannot be built and used by anyone right now, unless you just want to tinker with the server. This will change shortly, and the process below describes how I think installation will work.
 
 Zenin has only one dependency not included in the binary, and that is some kind of database.
 
@@ -47,7 +41,8 @@ Zenin has only one dependency not included in the binary, and that is some kind 
 
 Decide what database you want to use and get it running somewhere that Zenin will be able to access.
 
-> **Note:** only Postgres is supported right now, MySQL and SQLite support is planned.
+> [!Note]
+> Postgres is currently the only supported database. Suppoty for MySQL and SQLite is planned.
 
 Configure your environment variables to point to this new database. 
 
@@ -70,7 +65,7 @@ export ZENIN_DB_PASS="password"
 
 Next, acquire a Zenin binary.
 
-A binary may be available directly from the [Releases](https://github.com/jmkng/zenin/releases) page on Github, but if not, you can build the project from source.
+A binary may eventually be available on the [Releases](https://github.com/jmkng/zenin/releases) page, but until then, you can get going by following these instructions.
 
 #### Prerequisites
 
@@ -104,7 +99,8 @@ You can now run the binary.
 
 ### Docker
 
-A Docker image is not yet available.
+> [!Note]
+> A Docker image is not yet available.
 
 ## Hacking
 
