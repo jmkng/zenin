@@ -2,6 +2,8 @@
 
 A simple infrastructure monitoring tool.
 
+![Zenin](../assets/01.png?raw=true)
+
 ## Installation 
 
 Zenin has only one dependency not included in the binary, and that is some kind of database.
