@@ -3,6 +3,6 @@ cert.pem
 csr.pem
 key.pem
 doc
-web
 .vite
 server/build
+node_modules

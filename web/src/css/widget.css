@@ -1,0 +1,6 @@
+.zenin__widget {
+  height: 100%;
+  background: var(--off-b);
+  padding: 1px var(--px-b);
+  border-radius: var(--rounded);
+}

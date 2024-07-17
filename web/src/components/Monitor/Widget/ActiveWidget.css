@@ -1,0 +1,14 @@
+.zenin__active_widget {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.zenin__active_widget[data-active="Inactive"] {
+  color: var(--warn);
+}
+
+.zenin__active_widget[data-active="Active"] {
+  color: var(--mid);
+}

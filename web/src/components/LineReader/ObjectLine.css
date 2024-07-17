@@ -1,0 +1,12 @@
+.zenin__series_tick.Ok {
+    background: var(--ok);
+  }
+  
+  .zenin__series_tick.Warn {
+    background: var(--warn);
+  }
+  
+  .zenin__series_tick.Dead {
+    background: var(--dead-a);
+  }
+  

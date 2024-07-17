@@ -1,0 +1,17 @@
+.zenin__dashboard_menu {
+    display: flex;
+    align-items: center;
+}
+
+.zenin__menu_monitor_bulk_container {
+    display: flex;
+    align-items: center;
+}
+
+.zenin__menu_selected_count {
+  margin: 0 var(--px-b);
+}
+
+.zenin__menu_margin {
+  margin-right: var(--px-b);
+}

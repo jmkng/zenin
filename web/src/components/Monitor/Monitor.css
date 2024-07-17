@@ -1,0 +1,101 @@
+.zenin__monitor {
+  background: var(--background);
+  border: 1px solid var(--off-b);
+  border-radius: var(--rounded);
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--fast) ease-in-out;
+}
+
+.zenin__monitor.selected {
+  border-color: var(--foreground);
+}
+
+.zenin__monitor_top, .zenin__monitor_middle, .zenin__monitor_bottom {
+  display: flex;
+}
+
+.zenin__monitor_top {
+  flex-direction: column;
+  justify-content: flex-end;
+  user-select: none;
+}
+
+.zenin__monitor_top_upper {
+  display: flex;
+  align-items: center;
+  padding: var(--px-c) var(--px-c) 0 var(--px-c);
+}
+
+.zenin__monitor_top_upper .zenin__button {
+  align-self: flex-start;
+}
+
+.zenin__monitor_top_lower {
+  display: flex;
+  padding: var(--px-b) var(--px-c) var(--px-c) var(--px-c);
+}
+
+.zenin__monitor_top_lower > * {
+  margin-right: var(--px-a);
+}
+
+.zenin__monitor_name {
+  font-weight: 500;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
+  padding-right: var(--px-g);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.zenin__monitor_name:hover {
+  text-decoration: underline;
+}
+
+.zenin__monitor_middle {
+  flex: 1;
+}
+ 
+.zenin__monitor_bottom {
+  display: flex;
+  flex-direction: row-reverse;
+  transition: 
+    background var(--fast) ease-in-out;
+  max-height: var(--px-f);
+  min-height: var(--px-f);
+}
+
+.zenin__monitor_bottom:hover {
+  background: var(--off-a);
+}
+
+.zenin__monitor_top_left {
+  overflow: hidden;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.zenin__monitor_top_right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.zenin__monitor_menu_container {
+  margin-left: var(--px-b);
+}
+
+.zenin__monitor_middle {
+  display: flex;
+  flex: 1;
+  padding: var(--px-c);
+}
+
+.zenin__monitor_name_container {
+  display: flex;
+  flex-direction: column;
+}

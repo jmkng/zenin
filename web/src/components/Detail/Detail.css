@@ -1,0 +1,45 @@
+.zenin__detail_component {
+  border-radius: var(--rounded);
+  margin: auto;
+  display: flex;
+  padding-right: var(--px-a);
+  flex-direction: column;
+}
+
+.zenin__detail_editor_body {
+  overflow: auto;
+  padding: var(--px-c);
+  border: 1px solid var(--off-b);
+  border-bottom: none;
+  border-top-right-radius: var(--rounded);
+  border-top-left-radius: var(--rounded);
+}
+
+.zenin__detail_monitor_state {
+  background: var(--off-b);
+  flex: .10;
+  flex-basis: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--off-b);
+  padding: var(--px-c);
+}
+
+.zenin__detail_validation {
+  display: block;
+  margin-top: var(--px-c);
+}
+
+.zenin__detail_delete_button {
+  margin-left: auto;
+}
+
+.zenin__detail_spaced:not(:last-of-type) {
+  margin-bottom: var(--px-e);
+}
+
+.zenin__text_area_input_box {
+  height: 150px;
+}
+

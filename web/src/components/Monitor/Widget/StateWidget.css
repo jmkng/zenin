@@ -1,0 +1,11 @@
+.zenin__state_widget[data-state="OK"] {
+  color: var(--ok);
+}
+
+.zenin__state_widget[data-state="WARN"] {
+  color: var(--warn);
+}
+
+.zenin__state_widget[data-state="DEAD"] {
+  color: var(--dead-a);
+}

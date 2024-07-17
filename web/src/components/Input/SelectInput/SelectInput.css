@@ -1,0 +1,37 @@
+.zenin__select_input_box {
+  background: none;
+  width: 100%;
+  appearance: none;
+  color: var(--foreground);
+  outline: none;
+  cursor: pointer;
+  padding: 8px 22px 8px var(--px-c) !important;
+  border-radius: var(--rounded);
+  border: 1px solid var(--off-b);
+}
+
+.zenin__select_input_box:focus {
+  border-color: var(--foreground);
+}
+
+.zenin__select_input_controls_container {
+  position: relative;
+}
+
+.zenin__select_input_icon_container {
+  position: absolute;
+  cursor: pointer;
+  right: var(--px-c);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: -1999;
+}
+
+.zenin__select.transition select {
+  transition: border-color var(--slow) ease-in-out;
+  position: relative;
+  width: 100%;
+}

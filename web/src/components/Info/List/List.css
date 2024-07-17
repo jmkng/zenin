@@ -1,0 +1,42 @@
+.zenin__list_component {
+    border: 1px solid var(--off-b);
+    border-radius: var(--rounded);
+}
+
+.zenin__list_intro, .zenin__list_body_pair {
+    height: var(--px-h);
+}
+
+.zenin__list_intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--px-b) var(--px-d);
+    border-bottom: 1px solid var(--off-b);
+    color: var(--mid);
+}
+
+.zenin__list_intro:hover, .zenin__list_body_pair:hover {
+    background: var(--off-a);
+}
+
+.zenin__list_intro_help {
+    display: flex;
+    align-items: center;
+    border-radius: var(--rounded);
+    background: var(--background);
+    padding: var(--px-b) var(--px-d);
+}
+
+
+.zenin__list_body_pair {
+    height: var(--px-h);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--px-b) var(--px-d);
+}
+
+.zenin__list_body_pair:not(:last-child) {
+    border-bottom: 1px solid var(--off-b);
+}

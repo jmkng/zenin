@@ -1,0 +1,99 @@
+@font-face {
+    font-family: "Geist Mono";
+    src: url("@fonts/geistmono.ttf");
+}
+@font-face {
+    font-family: "Geist Sans";
+    src: url("@fonts/geistsans.ttf");
+}
+
+:root {
+    --white: rgb(245, 245, 247);
+    --black: rgb(18, 18, 18);
+    --fast: .15s;
+    --slow: .45s;
+    --rounded: 4px;
+    --px-a: 3px;
+    --px-b: 6px;
+    --px-c: 9px;
+    --px-d: 12px;
+    --px-e: 15px;
+    --px-f: 28px;
+    --px-g: 36px;
+    --px-h: 38px;
+    --px-i: 57px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: var(--black);
+        --foreground: var(--white);
+        --primary-hl: rgb(225, 225, 227);
+        --subtle: rgb(150, 150, 50);
+        --mid: rgb(180, 180, 182);
+        --link: rgb(60, 100, 255);
+        --off-a: rgb(28, 28, 30);
+        --off-b: rgb(34, 34, 37);
+        --off-c: rgb(55, 55, 57);
+        --off-d: rgb(65, 65, 67);
+        /* --ok: rgb(21, 146, 96);
+        --warn: rgb(255, 176, 59);
+        --dead-a: rgb(190, 65, 75);
+        --dead-b: rgb(200, 65, 75);  */
+        --ok: rgb(148, 166, 127);
+        --warn: rgb(242, 189, 72);
+        --dead-a: rgb(223, 101, 88);
+        --dead-b: rgb(213, 91, 78); 
+        --darken: 0.5;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --background: var(--white);
+        --foreground: var(--black);
+        --primary-hl: rgb(24, 24, 26);
+        --subtle: rgb(150, 150, 50);
+        --mid: rgb(100, 100, 102);
+        --link: rgb(60, 100, 255);
+        --off-a: rgb(235, 235, 237);
+        --off-b: rgb(220, 220, 222);
+        --off-c: rgb(202, 202, 204);
+        --off-d: rgb(185, 185, 187);
+        --ok: rgb(14, 200, 125);
+        --warn: rgb(209, 129, 9);
+        --dead-a: rgb(235, 55, 45);
+        --dead-b: rgb(245, 55, 45);
+        --darken: 0.25;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+body {
+  overflow: hidden !important;
+  font-weight: normal;
+}
+
+body.layout-adjust {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important; 
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+a {
+  color: var(--link);
+}

@@ -1,0 +1,71 @@
+.zenin__login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.zenin__login_header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: var(--px-b);
+}
+
+.zenin__login_logo_container {
+  margin-bottom: var(--px-f);
+}
+
+.zenin__login_form_container { 
+  width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.zenin__login_logo_container {
+  width: 125px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.zenin__login_spaced {
+  margin-bottom: var(--px-f);
+}
+
+.zenin__login_controls {
+  display: flex;
+}
+
+.zenin__login_controls > * {
+  margin-right: var(--px-c);
+}
+
+.zenin__login_message_container {
+  margin-top: 25px;
+}
+
+.zenin__login_message_container > * {
+  max-width: 700px;
+  margin: auto;
+}
+
+.zenin__login_message_container > *:not(:last-of-type) {
+  margin-bottom: 10px;
+}
+
+.zenin__login_message {
+  border: 1px solid var(--foreground);
+  border-radius: var(--rounded);
+  padding: var(--px-d);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.zenin__login_message.error {
+  color: var(--dead-a);
+  border-color: var(--dead-a);
+}

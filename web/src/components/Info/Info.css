@@ -1,0 +1,23 @@
+.zenin__info_name {
+    margin: 0 0 var(--px-e) 0;
+}
+
+.zenin__info_component {
+    height: 100%;
+    padding-right: var(--px-a);
+}
+
+.zenin__info_component_body {
+    padding: var(--px-c);
+    border-top-right-radius: var(--rounded);
+    border-top-left-radius: var(--rounded);
+    border: 1px solid var(--off-b);
+    border-bottom: none;
+}
+
+.zenin__info_table_container, 
+.zenin__info_uptime_container, 
+.zenin__info_summary_container, 
+.zenin__info_aggregate_container {
+    margin-top: var(--px-e);
+}

@@ -1,0 +1,89 @@
+.zenin__button {  
+  appearance: none;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border-radius: var(--rounded);
+  user-select: none;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--foreground);
+  fill: var(--foreground);
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.zenin__button_icon {
+  display: flex;
+  margin-right: var(--px-b);
+}
+
+.zenin__button.border {
+  border-color: var(--off-b);
+}
+
+.zenin__button.background {
+  background-color: var(--off-b);
+}
+
+.zenin__button.disabled {
+  color: var(--off-d);
+  fill: var(--off-d);
+  cursor: not-allowed;
+}
+
+.zenin__button:not(.disabled).primary {
+  color: var(--background);
+  fill: var(--background);
+  background: var(--foreground);
+}
+
+.zenin__button:not(.disabled).destructive {
+  background: var(--dead-a);
+  color: var(--white);
+}
+
+.zenin__button:not(.disabled).destructive:hover {
+  background: var(--dead-b);
+}
+
+.zenin__button:not(.disabled).primary:hover {
+  background: var(--primary-hl);  
+}
+
+.zenin__button:not(.disabled).default:hover {
+  background: var(--off-b);  
+}
+
+.zenin__tooltip {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  background: var(--foreground);
+  color: var(--background);
+  top: calc(100% + var(--px-b)); /* Appear below button. */
+  font-size: 1rem;
+  padding: var(--px-b);
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.zenin__tooltip.visible {
+  display: block;
+}
+
+.zenin__tooltip.limit_center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.zenin__tooltip.limit_right {
+  right: 0; 
+}
+
+.zenin__tooltip.limit_left {
+  left: 0;
+}

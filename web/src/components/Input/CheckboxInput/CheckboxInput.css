@@ -1,0 +1,20 @@
+.zenin__checkbox_input {
+    appearance: none;
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 14px;
+    width: 14px;
+    border-radius: var(--rounded);
+    user-select: none;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--background);
+    border: 1px solid var(--foreground);
+}
+
+.zenin__checkbox_input.checked {
+    background: var(--foreground);
+}

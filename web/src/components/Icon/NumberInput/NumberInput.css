@@ -1,0 +1,22 @@
+.zenin__number_input_box {
+    border: none;
+    font-family: inherit;
+    appearance: none;
+    border-radius: var(--rounded);
+    background: none;
+    color: var(--foreground);
+    transition: 
+        background var(--slow) ease-in-out;
+    width: 100%;
+    outline: none;
+    border: 1px solid var(--off-b);
+    padding: 0 var(--px-c);
+}
+
+.zenin__number_input_box:focus {
+  border-color: var(--foreground);
+}
+
+.zenin__number_input_box::before {
+    content: 'up'
+}

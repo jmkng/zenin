@@ -1,0 +1,41 @@
+.zenin__series {
+  display: flex;
+  width: 100%;
+  border-bottom-right-radius: var(--rounded);
+  border-bottom-left-radius: var(--rounded);
+  padding: 0 2px;
+}
+
+.zenin__series_slot_container {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.zenin__monitor.selected .zenin__series_slot {
+  height: 5px;
+}
+
+.zenin__series_slot_container:hover > .zenin__series_slot {
+  height: 100%;
+}
+
+.zenin__series_slot {
+  transition: 
+    height var(--fast) ease-in-out;
+  height: 2px;
+  border-top-right-radius: 1px;
+  border-top-left-radius: 1px;
+}
+
+.zenin__series_slot.OK {
+  background: var(--ok);
+}
+
+.zenin__series_slot.WARN {
+  background: var(--warn);
+}
+
+.zenin__series_slot.DEAD {
+  background: var(--dead-a);
+}

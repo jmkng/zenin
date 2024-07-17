@@ -1,0 +1,18 @@
+::-webkit-scrollbar {
+    width: inherit;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--off-b);
+    border-radius: var(--rounded);
+    min-height: 25px;
+}
+
+::-webkit-scrollbar-track {
+    border-top-right-radius: var(--rounded);
+    border-bottom-right-radius: var(--rounded);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}

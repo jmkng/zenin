@@ -1,0 +1,104 @@
+.zenin__h_center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.zenin__h_right {
+  margin-left: auto;
+}
+
+.zenin__h_bottom {
+  margin-top: auto;
+}
+
+.zenin__h_top {
+  margin-bottom: auto;
+}
+
+.zenin__h_left {
+  margin-right: auto;
+}
+
+.zenin__h_green {
+  color: var(--ok);
+}
+
+.zenin__h_orange {
+  color: var(--warn);
+}
+
+.zenin__h_red {
+  color: var(--dead-a);
+}
+
+.zenin__h_mid {
+  color: var(--mid);
+}
+
+.zenin__h_limit_top {
+  bottom: unset !important;
+  top: 0 !important;
+}
+
+.zenin__h_limit_right {
+  left: unset !important;
+  right: 0 !important;
+}
+
+.zenin__h_limit_bottom {
+  top: unset !important;
+  bottom: 0 !important;
+}
+
+.zenin__h_limit_left {
+  right: unset !important;
+  left: 0 !important;
+}
+
+.zenin__h_default {
+  color: var(--foreground);
+}
+
+.zenin__h_boxed {
+  border-radius: var(--rounded);
+  border: 1px solid var(--off-b);
+  padding: var(--px-d);
+}
+
+.zenin__h_underline {
+  text-decoration: underline;
+}
+
+.zenin__h_highlight {
+  background: var(--foreground);
+  color: var(--background);
+  border-radius: var(--rounded);
+  padding: 0 var(--px-b);
+  display: inline;
+}
+
+.zenin__h_bold {
+  font-weight: 600;
+}
+
+.zenin__h_stack_vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.zenin__h_advice {
+  color: var(--warn);
+}
+
+.zenin__h_error {
+  color: var(--dead-a);
+}
+
+.zenin__h_monospace {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace, "Geist Mono";
+}
+
+.zenin__h_sans {
+  font-family: system-ui, sans-serif, "Geist Sans";
+}

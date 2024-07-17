@@ -1,0 +1,65 @@
+.zenin__line_reader {
+  overflow-y: auto;
+  padding-right: var(--px-a);
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+.zenin__line_reader_row {
+  padding: var(--px-b);
+  border-radius: var(--rounded);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.zenin__line_reader_row:nth-child(even) {
+  background: var(--off-a);
+}
+
+.zenin__line_reader_row:first-of-type {
+  border-top: none;
+}
+
+.zenin__line_reader_row_number {
+  display: inline-block;
+  padding-right: 8px;
+}
+
+.zenin__line_reader_row_message {
+  margin-right: var(--px-c)
+}
+
+.zenin__line_reader_row_gutter {
+  text-wrap: nowrap;
+  user-select: none;
+  margin-right: var(--px-c);
+  align-items: center;
+  color: var(--off-d);
+}
+
+.zenin__line_reader_row.urgent .zenin__line_reader_row_gutter {
+  color: var(--warn);
+}
+
+.zenin__line_reader_row_gutter.local {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+.zenin__line_value {
+  font-weight: 700;
+}
+
+.zenin__line_value.Ok {
+  color: var(--ok);
+}
+
+.zenin__line_value.Warn {
+  color: var(--warn);
+}
+
+.zenin__line_value.Dead {
+  color: var(--dead-a);
+}
+

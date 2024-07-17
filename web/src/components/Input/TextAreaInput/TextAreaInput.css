@@ -1,0 +1,21 @@
+.zenin__text_area_input_box {
+  border: 1px solid var(--off-b);
+  appearance: none;
+  background: var(--background);
+  color: var(--foreground);
+  transition: 
+    background var(--slow) ease-in-out;
+  width: 100%;
+  outline: none;
+  padding: var(--px-c);
+  border-radius: var(--rounded);
+  resize: vertical;
+}
+
+.zenin__text_area_input_box:focus {
+  border-color: var(--foreground);
+}
+
+.zenin__text_area_input_label {
+  color: var(--foreground);
+}
