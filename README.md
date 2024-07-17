@@ -55,12 +55,12 @@ docker run --name zenin-db -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRE
 You might export variables like these:
 
 ```
-export ZENIN_DB_KIND="postgres"
-export ZENIN_DB_HOST="0.0.0.0"
-export ZENIN_DB_PORT="5432"
-export ZENIN_DB_NAME="postgres"
-export ZENIN_DB_USERNAME="username"
-export ZENIN_DB_PASSWORD="password"
+export ZENIN_DB_KIND=postgres
+export ZENIN_DB_HOST=0.0.0.0
+export ZENIN_DB_PORT=5432
+export ZENIN_DB_NAME=postgres
+export ZENIN_DB_USERNAME=username
+export ZENIN_DB_PASSWORD=password
 ```
 
 Supported environment variables are documented below.
