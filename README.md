@@ -4,6 +4,8 @@ A simple infrastructure monitoring tool.
 
 ![Zenin](../assets/01.png?raw=true)
 
+> Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch.
+
 ## Installation 
 
 Zenin has only one dependency not included in the binary, and that is some kind of database.
