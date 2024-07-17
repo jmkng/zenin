@@ -53,8 +53,9 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 
 	response, err := client.Do(request)
 	if err != nil {
+		span.Downgrade(measurement.Dead)
 		if e, ok := err.(net.Error); ok && e.Timeout() {
-			span.Downgrade(measurement.Dead, "The monitor timed out.")
+			span.Hint("The monitor timed out.")
 		}
 		return span
 	}
