@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
+	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/monitor"
 )
@@ -44,6 +45,12 @@ func (f FeedProvider) Mux() http.Handler {
 
 func (f FeedProvider) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{}
+	if env.Runtime.Kind == env.Dev {
+		// Disable origin check.
+		upgrader.CheckOrigin = func(r *http.Request) bool {
+			return true
+		}
+	}
 	connection, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Debug("rejected feed subscriber connection upgrade", "error", err)
