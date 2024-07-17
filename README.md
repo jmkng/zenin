@@ -116,6 +116,15 @@ You can now run the binary.
 > [!Note]
 > A Docker image is not yet available.
 
+## Usage
+
+On first start, you will be prompted to claim the server by entering a username and password. 
+This will create the first account on the server.
+
+After this, additional accounts can only be created by an existing account. The server is invite only.
+
+Once you are signed in, an empty dashboard will be displayed, and you can begin creating monitors.
+
 ## Hacking
 
 The scripts in `/scripts` may rely on these external tools:
