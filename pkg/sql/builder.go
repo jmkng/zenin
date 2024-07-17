@@ -74,6 +74,11 @@ func (b Builder) Args() []any {
 	return b.args
 }
 
+// PushArgs will push a series of arguments to the argument stack.
+func (b *Builder) PushArgs(args ...any) {
+	b.args = append(b.args, args...)
+}
+
 // Push will add a new string to the internal buffer.
 //
 // It will automatically add whitespace to the beginning of the provided string,
@@ -114,7 +119,7 @@ func (b *Builder) SpreadString(values ...string) {
 	for i, v := range values {
 		opaque[i] = v
 	}
-	b.spreadOpaque(opaque...)
+	b.SpreadOpaque(opaque...)
 }
 
 // SpreadInt will spread any number of int arguments into a comma separated list
@@ -124,10 +129,10 @@ func (b *Builder) SpreadInt(values ...int) {
 	for i, v := range values {
 		opaque[i] = v
 	}
-	b.spreadOpaque(opaque...)
+	b.SpreadOpaque(opaque...)
 }
 
-func (b *Builder) spreadOpaque(values ...any) {
+func (b *Builder) SpreadOpaque(values ...any) {
 	for i, v := range values {
 		b.pushArg(v)
 		if i+1 < len(values) {
