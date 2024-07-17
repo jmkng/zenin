@@ -1,6 +1,8 @@
 package monitor
 
 import (
+	"context"
+	"encoding/json"
 	"math"
 	"math/rand/v2"
 	"time"
@@ -54,7 +56,7 @@ func (d *Distributor) Listen() chan<- any {
 			case StopMessage:
 				d.stop(x.Id)
 			case MeasurementMessage:
-				d.distributeMeasurement(x.Measurement)
+				d.distributeMeasurement(channel, x.Measurement)
 			case PollMessage:
 				if monitor, ok := d.polling[*x.Monitor.Id]; ok {
 					monitor <- x
@@ -82,7 +84,7 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 			break
 		}
 	}
-	log.Debug("distributor added feed subscriber connection", "subscriber(id)", key)
+	log.Debug("distributor added feed subscriber", "subscriber(id)", key)
 	d.subscribers[key] = subscriber
 
 	// Listen for stop message.
@@ -90,11 +92,11 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 		for {
 			kind, message, err := subscriber.ReadMessage()
 			if err != nil {
-				log.Error("distributor discarding broken feed connection", "error", err)
+				log.Error("distributor discarding broken feed subscriber connection", "subscriber(id)", key, "error", err)
 				loopback <- UnsubscribeMessage{Id: key}
 				break
 			} else if kind == websocket.CloseMessage {
-				log.Debug("distributor closed feed connection", "subscriber(id)", key)
+				log.Debug("distributor closed feed subscriber connection", "subscriber(id)", key)
 				loopback <- UnsubscribeMessage{Id: key}
 				break
 			} else {
@@ -114,8 +116,9 @@ func (d *Distributor) unsubscribe(id int) {
 
 	err := conn.Close()
 	if err != nil {
-		log.Debug("distributor failed to close feed connection", "error", err)
+		log.Debug("distributor failed to close feed subscriber connection", "subscriber(id)", id, "error", err)
 	}
+	log.Debug("distributor removed feed subscriber connection", "subscriber(id)", id)
 	delete(d.subscribers, id)
 }
 
@@ -140,6 +143,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 					log.Warn("distributor is exiting due to closed inbound channel")
 					break POLLING
 				}
+
 				switch message.(type) {
 				case StopMessage:
 					break POLLING
@@ -151,7 +155,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 			}
 		}
 
-		log.Debug("distributor stopped polling monitor")
+		log.Debug("distributor stopped polling monitor", "monitor(id)", *mon.Id)
 	}(loopback, channel, mon)
 }
 
@@ -178,6 +182,29 @@ func (d *Distributor) stop(id int) {
 }
 
 // distributeMeasurement will distribute a `Measurement` to the repository and feed subscribers.
-func (d *Distributor) distributeMeasurement(measurement measurement.Measurement) {
-	log.Warn("distributor received a measurement but will do nothing with it") // todo
+func (d *Distributor) distributeMeasurement(loopback chan<- any, m measurement.Measurement) {
+	id, err := d.measurement.Repository.InsertMeasurement(context.Background(), m)
+	if err != nil {
+		log.Error("distributor failed to send measurement to repository (aborted distribution)", "error", err)
+		return
+	}
+	m.Id = &id
+	log.Info("distributing measurement", "measurement(id)", id, "subscribers(count)", len(d.subscribers))
+
+	message, err := json.Marshal(m)
+	if err != nil {
+		log.Error("distributor failed to serialize measurement (aborted distribution)", "measurement", m, "error", err)
+		return
+	}
+	discard := []int{}
+	for i, v := range d.subscribers {
+		err := v.WriteMessage(websocket.TextMessage, message)
+		if err != nil {
+			discard = append(discard, i)
+			log.Warn("distributor failed to send message to feed subscriber (discarding connection)")
+		}
+	}
+	for _, v := range discard {
+		loopback <- UnsubscribeMessage{Id: v}
+	}
 }
