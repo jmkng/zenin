@@ -96,12 +96,34 @@ type Monitor struct {
 	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
 }
 
+func (m Monitor) Fields() []any {
+	fields := []any{}
+	fields = append(fields, "name", m.Name, "kind", m.Kind, "timeout", m.Timeout)
+	if m.Kind != Script {
+		fields = append(fields, "remote address", *m.RemoteAddress)
+		if m.RemotePort != nil {
+			fields = append(fields, "remote port", *m.RemotePort)
+		}
+	}
+	switch m.Kind {
+	case HTTP:
+		fields = append(fields, "http range", *m.HTTPRange, "http method", *m.HTTPMethod)
+	case ICMP:
+		fields = append(fields, "icmp packet size", *m.ICMPSize)
+	case Script:
+		fields = append(fields, "script path", *m.ScriptPath)
+	}
+
+	return fields
+}
+
 // Poll will invoke a `Probe`, returning a `Measurement` describing the result.
 //
 // This function should only ever be called on a `Monitor` from the database,
 // it requires essential fields (including id) to be populated.
 func (m Monitor) Poll() measurement.Measurement {
-	log.Debug("poll starting", "monitor(id)", *m.Id)
+	fields := append([]any{"monitor(id)", *m.Id}, m.Fields()...)
+	log.Debug("poll starting", fields...)
 
 	var result measurement.Measurement
 	result.MonitorId = m.Id
@@ -129,7 +151,9 @@ func (m Monitor) Poll() measurement.Measurement {
 	result.Duration = duration
 	result.Span = span
 
-	log.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration))
+	log.Debug("poll stopping",
+		"monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
+		"state", result.State, "hint", result.StateHint)
 	return result
 }
 

@@ -92,7 +92,7 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 		for {
 			kind, message, err := subscriber.ReadMessage()
 			if err != nil {
-				log.Error("distributor discarding broken feed subscriber connection", "subscriber(id)", key, "error", err)
+				log.Error("distributor discarding broken feed subscriber connection", "subscriber(id)", key)
 				loopback <- UnsubscribeMessage{Id: key}
 				break
 			} else if kind == websocket.CloseMessage {
@@ -118,7 +118,6 @@ func (d *Distributor) unsubscribe(id int) {
 	if err != nil {
 		log.Debug("distributor failed to close feed subscriber connection", "subscriber(id)", id, "error", err)
 	}
-	log.Debug("distributor removed feed subscriber connection", "subscriber(id)", id)
 	delete(d.subscribers, id)
 }
 
@@ -185,15 +184,19 @@ func (d *Distributor) stop(id int) {
 func (d *Distributor) distributeMeasurement(loopback chan<- any, m measurement.Measurement) {
 	id, err := d.measurement.Repository.InsertMeasurement(context.Background(), m)
 	if err != nil {
-		log.Error("distributor failed to send measurement to repository (aborted distribution)", "error", err)
+		log.Error("distributor failed to send measurement to repository (aborted distribution)",
+			"error", err)
 		return
 	}
 	m.Id = &id
-	log.Info("distributing measurement", "measurement(id)", id, "subscribers(count)", len(d.subscribers))
+	log.Info("distributing measurement",
+		"measurement(id)", id,
+		"subscribers(count)", len(d.subscribers))
 
 	message, err := json.Marshal(m)
 	if err != nil {
-		log.Error("distributor failed to serialize measurement (aborted distribution)", "measurement", m, "error", err)
+		log.Error("distributor failed to serialize measurement (aborted distribution)",
+			"measurement", m, "error", err)
 		return
 	}
 	discard := []int{}
@@ -205,6 +208,8 @@ func (d *Distributor) distributeMeasurement(loopback chan<- any, m measurement.M
 		}
 	}
 	for _, v := range discard {
+		log.Error("distributor discarding broken feed subscriber connection",
+			"subscriber(id)", v)
 		loopback <- UnsubscribeMessage{Id: v}
 	}
 }

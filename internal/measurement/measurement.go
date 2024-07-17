@@ -83,6 +83,11 @@ func (s *Span) Downgrade(state ProbeState, hint ...string) {
 	}
 }
 
+// Hint will add hints to the `Span`.
+func (s *Span) Hint(hint ...string) {
+	s.StateHint = append(s.StateHint, hint...)
+}
+
 // Certificate is an x509 certificate recorded by an HTTP probe.
 type Certificate struct {
 	Id                 *int      `json:"id" db:"id"`
