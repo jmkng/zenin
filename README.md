@@ -59,8 +59,8 @@ export ZENIN_DB_KIND="postgres"
 export ZENIN_DB_HOST="0.0.0.0"
 export ZENIN_DB_PORT="5432"
 export ZENIN_DB_NAME="postgres"
-export ZENIN_DB_USER="username"
-export ZENIN_DB_PASS="password"
+export ZENIN_DB_USERNAME="username"
+export ZENIN_DB_PASSWORD="password"
 ```
 
 Next, acquire a Zenin binary.
@@ -70,6 +70,7 @@ A binary may eventually be available on the [Releases](https://github.com/jmkng/
 #### Prerequisites
 
 1. [Go](https://go.dev/dl/) v1.22.4+
+2. [Node.js](https://nodejs.org/) v20.8.1+ + (NPM v10.1.0+)
 
 Clone the project.
 
@@ -77,7 +78,7 @@ Clone the project.
 git clone https://github.com/jmkng/zenin
 ```
 
-Build the user interface. This should create a "dist" folder inside of "web". This needs to be done first because Zenin will embed these files.
+Build the user interface. This should create a "build" folder inside of "server". This needs to be done first because Zenin will embed these files.
 
 ```
 cd zenin/web
