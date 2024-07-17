@@ -4,3 +4,5 @@ csr.pem
 key.pem
 doc
 web
+.vite
+server/build

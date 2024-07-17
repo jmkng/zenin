@@ -1,11 +1,13 @@
 package server
 
 import (
+	"embed"
 	"encoding/json"
-	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,10 +30,6 @@ type Server struct {
 	bundle bundle.Bundle
 }
 
-func HandleIndex(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "index")
-}
-
 // Listen will block and start listening.
 func (s *Server) Serve() error {
 	log.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
@@ -41,16 +39,22 @@ func (s *Server) Serve() error {
 		log.Warn("cors checks are disabled")
 		mux.Use(Insecure)
 	}
-	mux.Use(middleware.AllowContentType("application/json"))
 	mux.Use(Logger)
-	mux.Use(Defaults)
-	//mux.Use(middleware.Timeout(60 * time.Second))
+	mux.Use(middleware.Timeout(60 * time.Second))
 
-	//	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
-	//		panic("todo mount ui")
-	//	})
+	// UI ->
+	var webFS = fs.FS(web)
+	sub, err := fs.Sub(webFS, "build")
+	if err != nil {
+		panic("failed to set web embed sub directory to `build`")
+	}
+	webHandler := http.FileServerFS(sub)
+	mux.NotFound(webHandler.ServeHTTP)
 
+	// API ->
 	mux.Route("/api/v1", func(v1 chi.Router) {
+		v1.Use(Defaults)
+		v1.Use(middleware.AllowContentType("application/json"))
 		v1.Mount("/meta", NewMetaHandler(s.bundle.Meta))
 		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
 		v1.Group(func(private chi.Router) {
@@ -60,7 +64,7 @@ func (s *Server) Serve() error {
 		v1.Mount("/feed", NewFeedHandler(s.bundle.Monitor))
 	})
 
-	err := http.ListenAndServe(s.config.Address.String(), mux)
+	err = http.ListenAndServe(s.config.Address.String(), mux)
 	if err != nil {
 		return err
 	}
@@ -94,3 +98,6 @@ func StrictDecoder(r io.Reader) *json.Decoder {
 	d.DisallowUnknownFields()
 	return d
 }
+
+//go:embed build
+var web embed.FS
