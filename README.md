@@ -99,6 +99,13 @@ You can now run the binary.
 ./zenin
 ```
 
+Additional environment variables can be exported to configure the server:
+
+```
+# Set the port that the server will bind on.
+export ZENIN_RT_PORT=4884
+```
+
 ### Docker
 
 > [!Note]
