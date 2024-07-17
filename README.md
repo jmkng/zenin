@@ -4,9 +4,42 @@ A simple infrastructure monitoring tool.
 
 ![Zenin](../assets/01.png?raw=true)
 
-> Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch.
+> [!Tip]
+> Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. The code is not yet merged into the main branch, but will be available soon. Feel free to provide feedback on the design.
+
+## Summary
+
+> [!WARNING]  
+> The information below may describe how something is *planned* to work, but because the project is young, the implementation may be a work in progress. A note will be left for these cases.
+
+Zenin is an infrastructure monitoring tool. It is something you can host on your own hardware (or not) to help you understand which of your services are considered "ok", which are "dead" and which may be in a degraded "warn" state.
+
+It is an evolution of other tools like Nagios and Uptime Kuma.
+
+|            | Nagios              | Uptime Kuma        | Zenin                  |
+| ---------- | :-----------------: | :----------------: | :--------------------: |
+| Performant | :heavy_check_mark:  | :x:                | :heavy_check_mark:     |
+| Simple     | :x:                 | :heavy_check_mark: | :heavy_check_mark:     |
+| Versatile  | :heavy_check_mark:  | :warning:          | :heavy_check_mark:     |
+
+:warning: Uptime Kuma is generally quite versatile, but Zenin was originally created to fill in a couple missing pieces.
+
+Zenin exposes an API that can be used to retrieve information, but similar to Uptime Kuma, makes use of WebSocket to actively distribute measurement information to connected clients, known as "feed subscribers".
+
+> [!Note]
+> The API is functional and being used internally, but is not yet documented.
+
+This means that you can connect to the client and be alerted to ongoing issues, see monitor statistics change, and watch messages being passed back and forth between the client and server in real time, without reloading the page.
+
+Performance is also a priority for this project. Zenin will poll each monitor in its own thread, leaving the distribution of information to a separate "distributor" thread. Access to this distributor is serialized by way of a message passing architecture. Zenin should be able to poll thousands of monitors this way, with the performance bottleneck generally being the network, or database.
+
+> [!Note]
+> I'm confident in this claim, but no benchmarks are currently available.
 
 ## Installation 
+
+> [!Important]
+> As mentioned above, the source code for the user interface is not merged into main. The project cannot be built and used by anyone right now, unless you just want to tinker with the server. This will change shortly, and the process below describes how I think installation will work.
 
 Zenin has only one dependency not included in the binary, and that is some kind of database.
 
