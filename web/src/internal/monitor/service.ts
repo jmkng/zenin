@@ -38,6 +38,7 @@ class MonitorService extends Service {
     }
 
     async update(token: string, id: number, monitor: Monitor) {
+        monitor.measurements = null;
         const body = JSON.stringify(monitor);
         const address = `/monitor/${id}`;
         const request = new AuthenticatedRequest(token, address)
