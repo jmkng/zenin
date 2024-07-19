@@ -62,7 +62,12 @@ func NewRuntimeEnv() *RuntimeEnv {
 		panic(err)
 	}
 
-	return &RuntimeEnv{Kind: kind, Port: port, Redirect: redirect, SignSecret: signSecret}
+	return &RuntimeEnv{
+		Kind:       kind,
+		Port:       port,
+		Redirect:   redirect,
+		SignSecret: signSecret,
+	}
 }
 
 type RuntimeEnv struct {

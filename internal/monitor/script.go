@@ -1,6 +1,8 @@
 package monitor
 
-import "github.com/jmkng/zenin/internal/measurement"
+import (
+	"github.com/jmkng/zenin/internal/measurement"
+)
 
 // NewScriptProbe returns a new `ScriptProbe`
 func NewScriptProbe() ScriptProbe {

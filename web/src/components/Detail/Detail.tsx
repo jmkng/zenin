@@ -3,6 +3,7 @@ import * as sapi from "../../server";
 import * as im from "../../internal/monitor";
 
 import TextInput from "../Input/TextInput/TextInput";
+import ArrayInput from "../Input/ArrayInput/ArrayInput";
 import Button from "../Button/Button";
 import NumberInput from "../Icon/NumberInput/NumberInput";
 import SelectInput from "../Input/SelectInput/SelectInput";
@@ -33,7 +34,8 @@ const defaultDraft: im.Draft = {
     description: null,
     remoteAddress: null,
     remotePort: null,
-    scriptPath: null,
+    scriptCommand: null,
+    scriptArgs: [],
     httpRange: sapi.SUCCESSFUL_API,
     httpMethod: sapi.GET_API,
     httpRequestHeaders: null,
@@ -63,7 +65,7 @@ export default function DetailComponent(props: DetailProps) {
     const hasValidRemotePort = useMemo(() => im.isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
     const hasValidHttpBody = useMemo(() => im.isValidJson(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
     const hasValidHttpHeaders = useMemo(() => im.isValidJson(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
-    const hasValidScriptPath = useMemo(() => im.isValidScriptPath(editor.draft.scriptPath), [editor.draft.scriptPath])
+    const hasValidScriptCommand = useMemo(() => im.isValidScriptCommand(editor.draft.scriptCommand), [editor.draft.scriptCommand])
     const hasValidIcmpSize = useMemo(() => im.isValidIcmpSize(editor.draft.icmpSize), [editor.draft.icmpSize]);
 
     useEffect(() => {
@@ -324,22 +326,32 @@ export default function DetailComponent(props: DetailProps) {
                     : null}
 
                 {editor.draft.kind == sapi.SCRIPT_API ?
-                    <div className="zenin__detail_spaced zenin__detail_script_container">
-                        <TextInput
-                            label={<span className={hasValidScriptPath ? "" : "zenin__h_error"}>
-                                Script Path
-                            </span>}
-                            name="zenin__detail_monitor_script"
-                            value={editor.draft.scriptPath} /* TODO: Add documentation link. */
-                            subtext={<span>Provide a path to a <a href="#">plugin</a> file.</span>}
-                            placeholder="plugins/check.sh"
-                            onChange={(scriptPath: string | null) =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, scriptPath } }))}
-                        />
-                        {!hasValidScriptPath ?
-                            <span className="zenin__detail_validation zenin__h_error">Must specify script path</span>
-                            :
-                            null}
+                    <div className="zenin__detail_script_container">
+                        <div className="zenin__detail_spaced">
+                            <ArrayInput
+                                name="zenin__detail_monitor_script_args"
+                                value={[...editor.draft.scriptArgs, ""]}
+                                label={<span>Arguments</span>}
+                                onChange={(index: number, value: string | null) =>
+                                    setEditor(prev => ({
+                                        ...prev,
+                                        draft: {
+                                            ...prev.draft,
+                                            scriptArgs: value != null ? prev.draft.scriptArgs.toSpliced(index, 1, value)
+                                                : prev.draft.scriptArgs.toSpliced(index, 1)
+                                        }
+                                    }))
+                                }
+                            />
+                        </div>
+                        <div className="zenin__detail_spaced">
+                            <TextInput
+                                name="zenin__detail_monitor_script_command"
+                                label={<span className={hasValidScriptCommand ? "" : "zenin__h_error"}>Command</span>}
+                                value={editor.draft.scriptCommand}
+                                onChange={(value: string | null) => { setEditor(prev => ({ ...prev, draft: { ...prev.draft, scriptCommand: value } })) }}
+                            />
+                        </div>
                     </div>
                     :
                     null}
@@ -391,7 +403,7 @@ function sanitizeToMonitor(draft: im.Draft): im.Monitor {
 
 function sanitizeHTTP(monitor: im.Monitor) {
     monitor.icmpSize = null;
-    monitor.scriptPath = null;
+    monitor.scriptCommand = null;
 }
 
 function sanitizeTCP(strategy: im.Monitor) {
@@ -401,7 +413,7 @@ function sanitizeTCP(strategy: im.Monitor) {
     strategy.httpMethod = null;
     strategy.httpRange = null;
     strategy.icmpSize = null;
-    strategy.scriptPath = null;
+    strategy.scriptCommand = null;
 }
 
 function sanitizeICMP(strategy: im.Monitor) {
@@ -411,7 +423,7 @@ function sanitizeICMP(strategy: im.Monitor) {
     strategy.httpExpiredCertMod = null;
     strategy.httpMethod = null;
     strategy.httpRange = null;
-    strategy.scriptPath = null;
+    strategy.scriptCommand = null;
 }
 
 function sanitizeScript(strategy: im.Monitor) {

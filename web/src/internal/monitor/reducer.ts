@@ -69,7 +69,7 @@ const toggleAction = (state: MonitorState, action: ToggleAction) => {
     for (const n of action.monitors) {
         const found = monitors.get(n);
         if (!found) {
-            console.error(`failed to update active state, monitor not in state: id=${n}`);
+            console.error(`failed to update active state, monitor not in inventory: id=${n}`);
             continue;
         }
         found.active = action.active;
@@ -135,7 +135,7 @@ const pollAction = (state: MonitorState, action: PollAction) => {
     }
     const monitor = monitors.get(action.measurement.monitorId);
     if (!monitor) {
-        console.error(`failed to add measurement to monitor, monitor not in state: id=${action.measurement.monitorId}`);
+        console.error(`failed to add measurement to monitor, monitor not in inventory: id=${action.measurement.monitorId}`);
         return state;
     }
     if (monitor.measurements == null) monitor.measurements = [];

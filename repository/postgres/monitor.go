@@ -15,11 +15,11 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	var id int
 	query := `INSERT INTO monitor 
 		(name, kind, active, interval, timeout, description, remote_address, remote_port,
-        script_path, 
+        script_command, script_args
         http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
         icmp_size)
     VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     RETURNING id`
 	row := p.db.QueryRowContext(
 		ctx,
@@ -32,7 +32,8 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		monitor.Description,
 		monitor.RemoteAddress,
 		monitor.RemotePort,
-		monitor.ScriptPath,
+		monitor.ScriptCommand,
+		monitor.ScriptArgs,
 		monitor.HTTPRange,
 		monitor.HTTPMethod,
 		monitor.HTTPRequestHeaders,
@@ -72,7 +73,8 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
             mo.description,
             mo.remote_address,
             mo.remote_port,
-            mo.script_path,
+            mo.script_command,
+            mo.script_args,
             mo.http_range,
             mo.http_method,
             mo.http_request_headers,
@@ -170,7 +172,8 @@ func (p PostgresRepository) selectMonitorRelated(
         mo.description,
         mo.remote_address,
         mo.remote_port,
-        mo.script_path,
+        mo.script_command,
+        mo.script_args,
         mo.http_range,
         mo.http_method,
         mo.http_request_headers,
@@ -209,14 +212,15 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
         description = $6,
         remote_address = $7,
         remote_port = $8,
-        script_path = $9,
-        http_range = $10,
-        http_method = $11,
-        http_request_headers = $12,
-        http_request_body = $13,
-        http_expired_cert_mod = $14,
-        icmp_size = $15
-    WHERE id = $16`
+        script_command = $9,
+        script_args = $10,
+        http_range = $11,
+        http_method = $12,
+        http_request_headers = $13,
+        http_request_body = $14,
+        http_expired_cert_mod = $15,
+        icmp_size = $16
+    WHERE id = $17`
 	_, err := p.db.ExecContext(ctx, query,
 		monitor.Name,
 		monitor.Kind,
@@ -226,7 +230,8 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		monitor.Description,
 		monitor.RemoteAddress,
 		monitor.RemotePort,
-		monitor.ScriptPath,
+		monitor.ScriptCommand,
+		monitor.ScriptArgs,
 		monitor.HTTPRange,
 		monitor.HTTPMethod,
 		monitor.HTTPRequestHeaders,

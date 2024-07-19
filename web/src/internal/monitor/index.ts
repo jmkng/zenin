@@ -28,7 +28,8 @@ export interface Monitor {
     description: string | null,
     remoteAddress: string | null,
     remotePort: number | null,
-    scriptPath: string | null,
+    scriptCommand: string | null,
+    scriptArgs: string[] | null,
     httpRange: string | null,
     httpMethod: string | null,
     httpRequestHeaders: string | null,
@@ -58,7 +59,8 @@ export interface Draft {
     description: string | null,
     remoteAddress: string | null,
     remotePort: number | null,
-    scriptPath: string | null,
+    scriptCommand: string | null,
+    scriptArgs: string[],
     httpRange: string,
     httpMethod: string | null,
     httpRequestHeaders: string | null,
@@ -76,7 +78,8 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.description == b.description
         && a.remoteAddress == b.remoteAddress
         && a.remotePort == b.remotePort
-        && a.scriptPath == b.scriptPath
+        && a.scriptCommand == b.scriptCommand
+        && a.scriptArgs == b.scriptArgs
         && a.httpRange == b.httpRange
         && a.httpMethod == b.httpMethod
         && a.httpRequestHeaders == b.httpRequestHeaders
@@ -144,7 +147,7 @@ function isValidTCP(draft: Draft): boolean {
 }
 
 function isValidScript(draft: Draft): boolean {
-    if (!draft.scriptPath) return false;
+    if (!draft.scriptCommand) return false;
     return true;
 }
 
@@ -199,7 +202,7 @@ export function isValidJson(body: string | null): boolean {
     }
 }
 
-export function isValidScriptPath(script: string | null): boolean {
+export function isValidScriptCommand(script: string | null): boolean {
     return script != null && script.trim() != "";
 }
 

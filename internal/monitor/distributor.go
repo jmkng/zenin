@@ -64,7 +64,7 @@ func (d *Distributor) Listen() chan<- any {
 					d.poll(channel, x.Monitor)
 				}
 			default:
-				log.Error("distributor dropped unrecognized message: %v", "message", message)
+				log.Debug("distributor dropped unrecognized message: %v", "message", message)
 			}
 		}
 

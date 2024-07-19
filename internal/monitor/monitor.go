@@ -1,6 +1,8 @@
 package monitor
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -75,6 +77,31 @@ type Probe interface {
 	Poll(monitor Monitor) measurement.Span
 }
 
+type Args []string
+
+// Scan implements `sql.Valuer` for `Args`.
+func (s Args) Value() (driver.Value, error) {
+	result, err := json.Marshal(s)
+	if err != nil {
+		return nil, err
+	}
+	return string(result), nil
+}
+
+// Scan implements `sql.Scanner` for `Args`.
+func (s *Args) Scan(value interface{}) error {
+	if value == nil {
+		s = &Args{}
+		return nil
+	}
+	str, ok := value.(string)
+	if !ok {
+		panic("expected string input when scanning script args")
+	}
+
+	return json.Unmarshal([]byte(str), s)
+}
+
 // Monitor is the monitor domain type.
 type Monitor struct {
 	Id                 *int                      `json:"id" db:"id"`
@@ -86,7 +113,8 @@ type Monitor struct {
 	Description        *string                   `json:"description,omitempty" db:"description"`
 	RemoteAddress      *string                   `json:"remoteAddress,omitempty" db:"remote_address"`
 	RemotePort         *int16                    `json:"remotePort,omitempty" db:"remote_port"`
-	ScriptPath         *string                   `json:"scriptPath,omitempty" db:"script_path"`
+	ScriptCommand      *string                   `json:"scriptCommand,omitempty" db:"script_command"`
+	ScriptArgs         Args                      `json:"scriptArgs,omitempty" db:"script_args"`
 	HTTPRange          *HTTPRange                `json:"httpRange,omitempty" db:"http_range"`
 	HTTPMethod         *string                   `json:"httpMethod,omitempty" db:"http_method"`
 	HTTPRequestHeaders *string                   `json:"httpRequestHeaders,omitempty" db:"http_request_headers"`
@@ -100,18 +128,18 @@ func (m Monitor) Fields() []any {
 	fields := []any{}
 	fields = append(fields, "name", m.Name, "kind", m.Kind, "timeout", m.Timeout)
 	if m.Kind != Script {
-		fields = append(fields, "remote address", *m.RemoteAddress)
+		fields = append(fields, "address", *m.RemoteAddress)
 		if m.RemotePort != nil {
-			fields = append(fields, "remote port", *m.RemotePort)
+			fields = append(fields, "port", *m.RemotePort)
 		}
 	}
 	switch m.Kind {
 	case HTTP:
-		fields = append(fields, "http range", *m.HTTPRange, "http method", *m.HTTPMethod)
+		fields = append(fields, "range", *m.HTTPRange, "method", *m.HTTPMethod)
 	case ICMP:
-		fields = append(fields, "icmp packet size", *m.ICMPSize)
+		fields = append(fields, "packet(bytes)", *m.ICMPSize)
 	case Script:
-		fields = append(fields, "script path", *m.ScriptPath)
+		fields = append(fields, "command", *m.ScriptCommand, "args", m.ScriptArgs)
 	}
 
 	return fields
@@ -193,8 +221,8 @@ func (m Monitor) Validate() error {
 			push("remoteAddress")
 		}
 	case Script:
-		if m.ScriptPath == nil {
-			push("scriptPath")
+		if m.ScriptCommand == nil {
+			push("scriptCommand")
 		}
 	}
 
