@@ -122,6 +122,9 @@ func (v VersionedSaltedHash) String() string {
 
 // Scan implements `sql.Scanner` for `VersionedSaltedHash`.
 func (vsh *VersionedSaltedHash) Scan(value interface{}) error {
+	if value == nil {
+		panic("versioned salted hash value missing from account")
+	}
 	str, ok := value.(string)
 	if !ok {
 		panic("expected string input when scanning versioned salted hash")
