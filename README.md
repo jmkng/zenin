@@ -76,7 +76,9 @@ Supported environment variables are documented below.
 | ZENIN_DB_MAX_CONN    | The maximum number of open database connections.          | any number           | export ZENIN_DB_MAX_CONN=5                  | n/a
 | ZENIN_RT_LEVEL       | The process run level. (optional)                         | prod, dev            | export ZENIN_RT_LEVEL=prod                  | prod
 | ZENIN_RT_PORT        | A port number for Zenin to run on. (optional)             | any u16              | export ZENIN_RT_PORT=4884                   | 50010
-| ZENIN_RT_SIGN_SECRET | A sequence used to sign tokens. (optional)[^1]                | any >=16 byte string | export ZENIN_RT_SIGN_SECRET=ab93Be(...) | random
+| ZENIN_RT_SIGN_SECRET | A sequence used to sign tokens. (optional)[^1]            | any >=16 byte string | export ZENIN_RT_SIGN_SECRET=ab93Be(...)     | random
+| ZENIN_RT_BASE_DIR    | A base directory used to store files accessible to Zenin. | absolute path        | export ZENIN_RT_BASE_DIR=/usr/local/x       | /usr/local/zenin
+| ZENIN_RT_PLUGIN_DIR  | A directory used to store executable plugins.             | absolute path        | export ZENIN_RT_PLUGIN_DIR=/usr/local/p     | /usr/local/zenin/plugins
 
 [^1]: If you don't specify this key, Zenin will generate a key for you on startup. If the Zenin server restarts, all tokens will become unrecognized, effectively signing out every user. If you specify a key, Zenin will use the same one when it starts back up, and existing tokens will remain valid (until they expire in one week).
 
