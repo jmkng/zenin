@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 
 	"github.com/jmkng/zenin/internal/bundle"
@@ -14,6 +15,12 @@ import (
 
 func main() {
 	log.Debug("main starting")
+	if env.Runtime.Kind == env.Dev {
+		log.EnableDebug()
+	}
+
+	// Check environment.
+	dd(check())
 
 	repository, err := repository.
 		Builder(env.Database).
@@ -47,4 +54,17 @@ func dd(err error) {
 	}
 	log.Error("fatal error", "error", err)
 	os.Exit(1)
+}
+
+// check will look for problems with environment variables.
+func check() error {
+	var err error
+	log.Debug("environment validation starting")
+
+	err = errors.Join(err, env.Runtime.Validate())
+
+	if err == nil {
+		log.Debug("environment normal")
+	}
+	return err
 }

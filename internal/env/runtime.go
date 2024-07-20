@@ -3,10 +3,14 @@ package env
 import (
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/jmkng/zenin/internal/log"
 )
 
 type RuntimeKind string
@@ -62,11 +66,35 @@ func NewRuntimeEnv() *RuntimeEnv {
 		panic(err)
 	}
 
+	var baseDir string
+	switch runtime.GOOS {
+	case "windows":
+		baseDir = "C\\ProgramData\\zenin"
+	case "darwin", "linux":
+		baseDir = "/usr/local/zenin"
+	}
+
+	if base := os.Getenv(rtBaseDir); base != "" {
+		baseDir = base
+	}
+	var pluginsDir string
+	switch runtime.GOOS {
+	case "windows":
+		pluginsDir = "C\\ProgramData\\zenin\\plugins"
+	case "darwin", "linux":
+		pluginsDir = "/usr/local/zenin/plugins"
+	}
+	if plugins := os.Getenv(rtPluginDir); plugins != "" {
+		pluginsDir = plugins
+	}
+
 	return &RuntimeEnv{
 		Kind:       kind,
 		Port:       port,
 		Redirect:   redirect,
 		SignSecret: signSecret,
+		BaseDir:    baseDir,
+		PluginDir:  pluginsDir,
 	}
 }
 
@@ -81,6 +109,42 @@ type RuntimeEnv struct {
 	// SignSecret is a secret key used to sign tokens. If not found in the environment,
 	// a key will be generated at runtime.
 	SignSecret Secret
+	// BaseDir is a directory used to store files accessible to Zenin.
+	BaseDir string
+	// PluginDir is a directory used to store executable plugins.
+	PluginDir string
+}
+
+var EnvironmentError = errors.New("the environment is invalid")
+
+func (r RuntimeEnv) Validate() error {
+	var err error
+	if r.Kind == Prod && len(r.SignSecret) < 16 {
+		log.Error("sign secret must be >=16 bytes, provide a longer secret or unset `ZENIN_RT_SIGN_SECRET` to generate one",
+			"length", len(r.SignSecret))
+		err = EnvironmentError
+	}
+
+	// Not returning as error right now, because these may not even be required.
+	// Right now you only need them to set up plugin (script) monitors.
+	baseInfo, err := os.Stat(r.BaseDir)
+	if err != nil {
+		log.Warn("base directory not found", "path", r.BaseDir)
+	} else {
+		if _, err := os.Open(r.BaseDir); err != nil || !baseInfo.IsDir() {
+			log.Warn("base directory is inaccessible", "path", r.BaseDir)
+		}
+	}
+	pluginsDir, err := os.Stat(r.PluginDir)
+	if err != nil {
+		log.Warn("plugins directory not found", "path", r.PluginDir)
+	} else {
+		if _, err := os.Open(r.PluginDir); err != nil || !pluginsDir.IsDir() {
+			log.Warn("plugin directory is inaccessible", "path", r.PluginDir)
+		}
+	}
+
+	return nil
 }
 
 func getSignSecret() (Secret, error) {
@@ -100,4 +164,6 @@ const (
 	rtPortKey       = "ZENIN_RT_PORT"
 	rtRedirectKey   = "ZENIN_RT_REDIRECT"
 	rtSignSecretKey = "ZENIN_RT_SIGN_SECRET"
+	rtBaseDir       = "ZENIN_RT_BASE_DIR"
+	rtPluginDir     = "ZENIN_RT_PLUGIN_DIR"
 )

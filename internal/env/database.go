@@ -26,10 +26,10 @@ func NewDatabaseEnv() *DatabaseEnv {
 	host := os.Getenv(dbHostKey)
 	port := os.Getenv(dbPortKey)
 	name := os.Getenv(dbNameKey)
-	var maxCon uint16
-	envMaxcon, err := strconv.ParseUint(os.Getenv(rtPortKey), 10, 16)
+	var maxConn uint16
+	envMaxConn, err := strconv.ParseUint(os.Getenv(rtPortKey), 10, 16)
 	if err == nil {
-		maxCon = uint16(envMaxcon)
+		maxConn = uint16(envMaxConn)
 	}
 
 	return &DatabaseEnv{
@@ -39,7 +39,7 @@ func NewDatabaseEnv() *DatabaseEnv {
 		Host:     host,
 		Port:     port,
 		Name:     name,
-		MaxCon:   maxCon,
+		MaxConn:  maxConn,
 	}
 }
 
@@ -50,7 +50,7 @@ type DatabaseEnv struct {
 	Host     string
 	Port     string
 	Name     string
-	MaxCon   uint16
+	MaxConn  uint16
 }
 
 const (
