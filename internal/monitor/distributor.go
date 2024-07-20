@@ -61,7 +61,7 @@ func (d *Distributor) Listen() chan<- any {
 				if monitor, ok := d.polling[*x.Monitor.Id]; ok {
 					monitor <- x
 				} else {
-					d.poll(channel, x.Monitor)
+					go d.poll(channel, x.Monitor)
 				}
 			default:
 				log.Debug("distributor dropped unrecognized message: %v", "message", message)
@@ -145,12 +145,13 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 
 				switch message.(type) {
 				case StopMessage:
+					log.Debug("monitor received stop signal", "monitor(id)", *mon.Id)
 					break POLLING
 				case PollMessage:
-					d.poll(loopback, mon)
+					go d.poll(loopback, mon)
 				}
 			case <-time.After(time.Duration(mon.Interval) * time.Second):
-				d.poll(loopback, mon)
+				go d.poll(loopback, mon)
 			}
 		}
 
