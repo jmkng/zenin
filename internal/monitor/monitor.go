@@ -112,7 +112,10 @@ func (m Monitor) Fields() []any {
 	case ICMP:
 		fields = append(fields, "packet(bytes)", *m.ICMPSize)
 	case Plugin:
-		fields = append(fields, "name", *m.PluginName, "args", m.PluginArgs)
+		fields = append(fields, "name", *m.PluginName)
+		if m.PluginArgs != nil {
+			fields = append(fields, "args", *m.PluginArgs)
+		}
 	}
 
 	return fields

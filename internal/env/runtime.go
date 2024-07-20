@@ -67,22 +67,17 @@ func NewRuntimeEnv() *RuntimeEnv {
 	}
 
 	var baseDir string
-	switch runtime.GOOS {
-	case "windows":
-		baseDir = "C\\ProgramData\\zenin"
-	case "darwin", "linux":
-		baseDir = "/usr/local/zenin"
-	}
-
-	if base := os.Getenv(rtBaseDir); base != "" {
-		baseDir = base
-	}
 	var pluginsDir string
 	switch runtime.GOOS {
 	case "windows":
+		baseDir = "C\\ProgramData\\zenin"
 		pluginsDir = "C\\ProgramData\\zenin\\plugins"
 	case "darwin", "linux":
+		baseDir = "/usr/local/zenin"
 		pluginsDir = "/usr/local/zenin/plugins"
+	}
+	if base := os.Getenv(rtBaseDir); base != "" {
+		baseDir = base
 	}
 	if plugins := os.Getenv(rtPluginDir); plugins != "" {
 		pluginsDir = plugins
@@ -127,20 +122,18 @@ func (r RuntimeEnv) Validate() error {
 
 	// Not returning as error right now, because these may not even be required.
 	// Right now you only need them to set up plugin (script) monitors.
-	baseInfo, err := os.Stat(r.BaseDir)
-	if err != nil {
-		log.Warn("base directory not found", "path", r.BaseDir)
-	} else {
-		if _, err := os.Open(r.BaseDir); err != nil || !baseInfo.IsDir() {
-			log.Warn("base directory is inaccessible", "path", r.BaseDir)
-		}
+	baseDir, err := os.Stat(r.PluginDir)
+	if err != nil || !baseDir.IsDir() {
+		log.Warn("plugin directory is inaccessible", "path", r.PluginDir)
 	}
 	pluginsDir, err := os.Stat(r.PluginDir)
-	if err != nil {
-		log.Warn("plugins directory not found", "path", r.PluginDir)
-	} else {
-		if _, err := os.Open(r.PluginDir); err != nil || !pluginsDir.IsDir() {
-			log.Warn("plugin directory is inaccessible", "path", r.PluginDir)
+	if err != nil || !pluginsDir.IsDir() {
+		log.Warn("plugin directory is inaccessible", "path", r.PluginDir)
+	}
+	switch runtime.GOOS {
+	case "darwin", "linux":
+		if _, exists := os.LookupEnv("SHELL"); !exists {
+			log.Warn("env variable `$SHELL` must be set to execute shell script plugins")
 		}
 	}
 

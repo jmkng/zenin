@@ -50,7 +50,6 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 	client := &http.Client{
 		Timeout: time.Duration(monitor.Timeout) * time.Second,
 	}
-
 	response, err := client.Do(request)
 	if err != nil {
 		span.Downgrade(measurement.Dead)
@@ -62,12 +61,10 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 	defer response.Body.Close()
 
 	span.HTTPStatusCode = &response.StatusCode
-
 	responseRange := newHTTPRangeFromInt(response.StatusCode)
 	if responseRange != *monitor.HTTPRange {
 		span.Downgrade(measurement.Dead, "The response status code is out of range.")
 	}
-
 	responseHeaders, err := json.Marshal(response.Header)
 	if err != nil {
 		span.Downgrade(measurement.Ok,
