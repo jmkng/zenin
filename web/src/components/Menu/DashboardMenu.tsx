@@ -67,12 +67,18 @@ export default function DashboardMenuComponent() {
                     ?
                     <div className="zenin__menu_monitor_bulk_container">
                         <div className="zenin__menu_margin">
-                            <Button tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}>
+                            <Button
+                                disabled={!monitor.context.state.selected.some(n => !n.active)}
+                                tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}
+                            >
                                 <PlayIcon />
                             </Button>
                         </div>
                         <div className="zenin__menu_margin">
-                            <Button tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}>
+                            <Button
+                                disabled={!monitor.context.state.selected.some(n => n.active)}
+                                tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}
+                            >
                                 <PauseIcon />
                             </Button>
                         </div>
