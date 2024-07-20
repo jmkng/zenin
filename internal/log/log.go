@@ -3,8 +3,6 @@ package log
 import (
 	"log/slog"
 	"os"
-
-	"github.com/jmkng/zenin/internal/env"
 )
 
 // Info will log a message to stdout at "Info" level.
@@ -36,10 +34,4 @@ var logger = newLogger(standardOptions())
 
 func newLogger(handler *slog.HandlerOptions) *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, handler))
-}
-
-func init() {
-	if env.Runtime.Kind == env.Dev {
-		EnableDebug()
-	}
 }
