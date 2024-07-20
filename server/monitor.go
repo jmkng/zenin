@@ -169,7 +169,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	if len(found) == 0 {
-		message := fmt.Sprintf("monitor with id `%v` does not exist", param)
+		message := fmt.Sprintf("Monitor with id `%v` does not exist.", param)
 		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
 		return
 	}
