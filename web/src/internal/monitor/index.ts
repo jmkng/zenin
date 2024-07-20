@@ -7,7 +7,7 @@ export const
     ICMP_UI = 'ICMP',
     TCP_UI = 'TCP',
     PING_UI = 'Ping',
-    SCRIPT_UI = 'Script',
+    PLUGIN_UI = 'Plugin',
     ACTIVE_UI = 'Active',
     INACTIVE_UI = 'Inactive',
     OK_UI = 'Ok',
@@ -28,8 +28,8 @@ export interface Monitor {
     description: string | null,
     remoteAddress: string | null,
     remotePort: number | null,
-    scriptCommand: string | null,
-    scriptArgs: string[] | null,
+    pluginName: string | null,
+    pluginArgs: string | null,
     httpRange: string | null,
     httpMethod: string | null,
     httpRequestHeaders: string | null,
@@ -59,8 +59,8 @@ export interface Draft {
     description: string | null,
     remoteAddress: string | null,
     remotePort: number | null,
-    scriptCommand: string | null,
-    scriptArgs: string[],
+    pluginName: string | null,
+    pluginArgs: string | null,
     httpRange: string,
     httpMethod: string | null,
     httpRequestHeaders: string | null,
@@ -78,8 +78,8 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.description == b.description
         && a.remoteAddress == b.remoteAddress
         && a.remotePort == b.remotePort
-        && a.scriptCommand == b.scriptCommand
-        && a.scriptArgs == b.scriptArgs
+        && a.pluginName == b.pluginName
+        && a.pluginArgs == b.pluginArgs
         && a.httpRange == b.httpRange
         && a.httpMethod == b.httpMethod
         && a.httpRequestHeaders == b.httpRequestHeaders
@@ -103,9 +103,9 @@ export interface Measurement {
     icmpMinRtt: number | null,
     icmpAvgRtt: number | null,
     icmpMaxRtt: number | null,
-    scriptExitCode: string | null,
-    scriptStdout: string | null,
-    scriptStderr: string | null,
+    pluginExitCode: string | null,
+    pluginStdout: string | null,
+    pluginStderr: string | null,
 }
 
 // eslint-disable-next-line
@@ -125,17 +125,16 @@ export function isValidMonitor(draft: Draft): boolean {
 
     switch (draft.kind) {
         case sapi.HTTP_API: return isValidHTTP(draft)
-        case sapi.PING_API:
-        case sapi.ICMP_API: return isValidICMP(draft)
+        case sapi.PING_API, sapi.ICMP_API: return isValidICMP(draft)
         case sapi.TCP_API: return isValidTCP(draft)
-        case sapi.SCRIPT_API: return isValidScript(draft)
+        case sapi.PLUGIN_API: return isValidPlugin(draft)
         default: throw new Error("unrecognized probe")
     }
 }
 
 function isValidHTTP(draft: Draft): boolean {
     return isValidRemoteAddress(draft.remoteAddress) && isValidHeaderRange(draft.httpRange)
-        && isValidJson(draft.httpRequestHeaders) && isValidJson(draft.httpRequestBody);
+        && isValidJSON(draft.httpRequestHeaders) && isValidJSON(draft.httpRequestBody);
 }
 
 function isValidICMP(draft: Draft): boolean {
@@ -146,8 +145,8 @@ function isValidTCP(draft: Draft): boolean {
     return isValidRemoteAddress(draft.remoteAddress) && isValidRemotePort(draft.remotePort)
 }
 
-function isValidScript(draft: Draft): boolean {
-    if (!draft.scriptCommand) return false;
+function isValidPlugin(draft: Draft): boolean {
+    if (!draft.pluginName) return false;
     return true;
 }
 
@@ -156,7 +155,7 @@ export function isValidName(name: string | null): boolean {
 }
 
 export function isValidKind(kind: string | null): boolean {
-    return kind != null && [sapi.HTTP_API, sapi.ICMP_API, sapi.TCP_API, sapi.PING_API, sapi.SCRIPT_API].includes(kind)
+    return kind != null && [sapi.HTTP_API, sapi.ICMP_API, sapi.TCP_API, sapi.PING_API, sapi.PLUGIN_API].includes(kind)
 }
 
 export function isValidState(state: boolean): boolean {
@@ -192,7 +191,8 @@ export function isValidHeaderRange(range: string | null): boolean {
     return true;
 }
 
-export function isValidJson(body: string | null): boolean {
+/** Return true if the provided string is valid JSON. **/
+export function isValidJSON(body: string | null): boolean {
     if (body == null) return true;
     try {
         JSON.parse(body);
@@ -202,8 +202,21 @@ export function isValidJson(body: string | null): boolean {
     }
 }
 
-export function isValidScriptCommand(script: string | null): boolean {
-    return script != null && script.trim() != "";
+/** Return true if the provided string is a valid JSON array.
+    Any other type is considered invalid. **/
+export function isValidJSONArray(body: string | null): boolean {
+    if (body == null) return true;
+    try {
+        const result = JSON.parse(body);
+        if (Array.isArray(result)) return true;
+        return false;
+    } catch {
+        return false;
+    }
+};
+
+export function isValidPluginName(name: string | null): boolean {
+    return name != null && name.trim() != "";
 }
 
 export function isValidIcmpSize(size: number | null): boolean {
@@ -216,7 +229,7 @@ export function kindAPItoUI(value: string) {
         case sapi.ICMP_API: return ICMP_UI
         case sapi.TCP_API: return TCP_UI
         case sapi.PING_API: return PING_UI
-        case sapi.SCRIPT_API: return SCRIPT_UI
+        case sapi.PLUGIN_API: return PLUGIN_UI
         default: return ""
     }
 }

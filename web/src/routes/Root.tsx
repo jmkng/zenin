@@ -6,6 +6,8 @@ import { useLogContext } from '../internal/log';
 import { Monitor, useMonitorContext } from '../internal/monitor';
 import { useDefaultMonitorService } from '../internal/monitor/service';
 import { useLayoutContext } from '../internal/layout';
+import { useDefaultMetaService } from '../internal/meta/service';
+import { useMetaContext } from '../internal/meta';
 import { DataPacket } from '../server';
 import { FEED, handleConnect, handleDisconnect } from '../server/feed';
 import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
@@ -24,6 +26,10 @@ export default function RootComponent() {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
     }
+    const meta = {
+        context: useMetaContext(),
+        service: useDefaultMetaService()
+    };
     const log = useLogContext();
     const location = useLocation();
     const dispatch = useFlaggedDispatch();
@@ -42,22 +48,26 @@ export default function RootComponent() {
 
     useEffect(() => {
         if (account.state.authenticated) {
-            if (log.state.connected && !FEED) handleConnect(handleMessage);
+            if (log.state.connected && !FEED) handleConnect((event: MessageEvent) =>
+                dispatch(JSON.parse(event.data)));
             else if (!log.state.connected && FEED) handleDisconnect()
         }
         else handleDisconnect();
     }, [account.state.authenticated, log.state.connected])
 
-    const handleMessage = (event: MessageEvent) => {
-        const parsed = JSON.parse(event.data);
-        dispatch(parsed);
-    }
-
     const handleInitialize = async (token: string) => {
-        const extract = await monitor.service.get(token, 35);
-        if (!extract.ok()) return;
-        const monitors: DataPacket<Monitor[]> = await extract.json();
-        monitor.context.dispatch({ type: 'reset', monitors: monitors.data })
+        const plugins = await meta.service.plugins(token);
+        if (plugins.ok()) {
+            const packet: DataPacket<string[]> = await plugins.json();
+            if (packet) meta.context.dispatch({ type: 'reset', plugins: packet.data })
+        }
+        const monitors = await monitor.service.get(token, 35);
+        if (monitors.ok()) {
+            const packet: DataPacket<Monitor[]> = await monitors.json();
+            if (packet) monitor.context.dispatch({ type: 'reset', monitors: packet.data });
+        }
+        if (!plugins.ok() || !monitors.ok()) return;
+
         const loading = false;
         layout.dispatch({ type: 'load', loading })
     }

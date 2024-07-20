@@ -57,10 +57,14 @@ func (s *Server) Serve() error {
 		v1.Use(middleware.AllowContentType("application/json"))
 		v1.Mount("/meta", NewMetaHandler(s.bundle.Meta))
 		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
+
+		//// private /////
 		v1.Group(func(private chi.Router) {
 			private.Use(Authenticator)
 			private.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
 		})
+		//////////////////
+
 		v1.Mount("/feed", NewFeedHandler(s.bundle.Monitor))
 	})
 
@@ -93,6 +97,7 @@ type TlsConfiguration struct {
 	Key  []byte
 }
 
+// StrictDecoder returns a `*json.Decoder` with `DisallowUnknownFields` set.
 func StrictDecoder(r io.Reader) *json.Decoder {
 	d := json.NewDecoder(r)
 	d.DisallowUnknownFields()

@@ -1,8 +1,6 @@
 package monitor
 
 import (
-	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -20,7 +18,7 @@ const (
 	TCP    ProbeKind = "TCP"
 	ICMP   ProbeKind = "ICMP"
 	Ping   ProbeKind = "PING"
-	Script ProbeKind = "SCRIPT"
+	Plugin ProbeKind = "PLUGIN"
 )
 
 func ProbeKindFromString(value string) (ProbeKind, error) {
@@ -33,8 +31,8 @@ func ProbeKindFromString(value string) (ProbeKind, error) {
 		return ICMP, nil
 	case "ping":
 		return Ping, nil
-	case "script":
-		return Script, nil
+	case "plugin":
+		return Plugin, nil
 	default:
 		return "", errors.New("invalid monitor kind")
 	}
@@ -77,31 +75,6 @@ type Probe interface {
 	Poll(monitor Monitor) measurement.Span
 }
 
-type Args []string
-
-// Scan implements `sql.Valuer` for `Args`.
-func (s Args) Value() (driver.Value, error) {
-	result, err := json.Marshal(s)
-	if err != nil {
-		return nil, err
-	}
-	return string(result), nil
-}
-
-// Scan implements `sql.Scanner` for `Args`.
-func (s *Args) Scan(value interface{}) error {
-	if value == nil {
-		s = &Args{}
-		return nil
-	}
-	str, ok := value.(string)
-	if !ok {
-		panic("expected string input when scanning script args")
-	}
-
-	return json.Unmarshal([]byte(str), s)
-}
-
 // Monitor is the monitor domain type.
 type Monitor struct {
 	Id                 *int                      `json:"id" db:"id"`
@@ -113,8 +86,8 @@ type Monitor struct {
 	Description        *string                   `json:"description,omitempty" db:"description"`
 	RemoteAddress      *string                   `json:"remoteAddress,omitempty" db:"remote_address"`
 	RemotePort         *int16                    `json:"remotePort,omitempty" db:"remote_port"`
-	ScriptCommand      *string                   `json:"scriptCommand,omitempty" db:"script_command"`
-	ScriptArgs         Args                      `json:"scriptArgs,omitempty" db:"script_args"`
+	PluginName         *string                   `json:"pluginName,omitempty" db:"plugin_name"`
+	PluginArgs         *string                   `json:"pluginArgs,omitempty" db:"plugin_args"`
 	HTTPRange          *HTTPRange                `json:"httpRange,omitempty" db:"http_range"`
 	HTTPMethod         *string                   `json:"httpMethod,omitempty" db:"http_method"`
 	HTTPRequestHeaders *string                   `json:"httpRequestHeaders,omitempty" db:"http_request_headers"`
@@ -127,7 +100,7 @@ type Monitor struct {
 func (m Monitor) Fields() []any {
 	fields := []any{}
 	fields = append(fields, "name", m.Name, "kind", m.Kind, "timeout", m.Timeout)
-	if m.Kind != Script {
+	if m.Kind != Plugin {
 		fields = append(fields, "address", *m.RemoteAddress)
 		if m.RemotePort != nil {
 			fields = append(fields, "port", *m.RemotePort)
@@ -138,8 +111,8 @@ func (m Monitor) Fields() []any {
 		fields = append(fields, "range", *m.HTTPRange, "method", *m.HTTPMethod)
 	case ICMP:
 		fields = append(fields, "packet(bytes)", *m.ICMPSize)
-	case Script:
-		fields = append(fields, "command", *m.ScriptCommand, "args", m.ScriptArgs)
+	case Plugin:
+		fields = append(fields, "name", *m.PluginName, "args", m.PluginArgs)
 	}
 
 	return fields
@@ -164,8 +137,8 @@ func (m Monitor) Poll() measurement.Measurement {
 		probe = NewHTTPProbe()
 	case TCP:
 		probe = NewTCPProbe()
-	case Script:
-		probe = NewScriptProbe()
+	case Plugin:
+		probe = NewPluginProbe()
 	case Ping:
 		probe = NewICMPProbe(true)
 	default:
@@ -214,15 +187,13 @@ func (m Monitor) Validate() error {
 		if m.HTTPRange == nil {
 			push("httpRange")
 		}
-	case TCP:
-	case ICMP:
-	case Ping:
+	case TCP, ICMP, Ping:
 		if m.RemoteAddress == nil {
 			push("remoteAddress")
 		}
-	case Script:
-		if m.ScriptCommand == nil {
-			push("scriptCommand")
+	case Plugin:
+		if m.PluginName == nil {
+			push("pluginName")
 		}
 	}
 

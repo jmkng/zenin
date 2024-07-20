@@ -47,17 +47,17 @@ export default function SelectInput(props: SelectProps) {
                     className="zenin__input zenin__select_input_box"
                     name={name}
                     id={name}
-                    value={value}
+                    value={value || undefined}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
                 >
-                    {options.every(isGroup) ?
-                        options.map((n, i) =>
-                            <optgroup key={i} label={n.label}>
-                                {n.options.map((m, o) => <option key={o} value={m.value}>{m.text}</option>)}
-                            </optgroup>
-                        )
-                        :
-                        options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
+                    {
+                        options.length == 0 ? null :
+                            options.every(isGroup) ? options.map((n, i) =>
+                                <optgroup key={i} label={n.label}>
+                                    {n.options.map((m, o) => <option key={o} value={m.value}>{m.text}</option>)}
+                                </optgroup>)
+                                :
+                                options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
                     }
                 </select>
 

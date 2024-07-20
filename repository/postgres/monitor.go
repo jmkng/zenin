@@ -15,7 +15,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	var id int
 	query := `INSERT INTO monitor 
 		(name, kind, active, interval, timeout, description, remote_address, remote_port,
-        script_command, script_args
+        plugin_command, plugin_args
         http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
         icmp_size)
     VALUES 
@@ -32,8 +32,8 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		monitor.Description,
 		monitor.RemoteAddress,
 		monitor.RemotePort,
-		monitor.ScriptCommand,
-		monitor.ScriptArgs,
+		monitor.PluginName,
+		monitor.PluginArgs,
 		monitor.HTTPRange,
 		monitor.HTTPMethod,
 		monitor.HTTPRequestHeaders,
@@ -73,8 +73,8 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
             mo.description,
             mo.remote_address,
             mo.remote_port,
-            mo.script_command,
-            mo.script_args,
+            mo.plugin_name,
+            mo.plugin_args,
             mo.http_range,
             mo.http_method,
             mo.http_request_headers,
@@ -140,9 +140,9 @@ func (p PostgresRepository) selectMonitorRelated(
                 'icmpMinRtt', icmp_min_rtt,
                 'icmpAvgRtt', icmp_avg_rtt,
                 'icmpMaxRtt', icmp_max_rtt,
-                'scriptExitCode', script_exit_code,
-                'scriptStdout', script_stdout,
-                'scriptStderr', script_stderr,
+                'pluginExitCode', plugin_exit_code,
+                'pluginStdout', plugin_stdout,
+                'pluginStderr', plugin_stderr,
                 'certificates', (
                     SELECT jsonb_agg(jsonb_build_object(
                         'id', c.id,
@@ -172,8 +172,8 @@ func (p PostgresRepository) selectMonitorRelated(
         mo.description,
         mo.remote_address,
         mo.remote_port,
-        mo.script_command,
-        mo.script_args,
+        mo.plugin_name,
+        mo.plugin_args,
         mo.http_range,
         mo.http_method,
         mo.http_request_headers,
@@ -212,8 +212,8 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
         description = $6,
         remote_address = $7,
         remote_port = $8,
-        script_command = $9,
-        script_args = $10,
+        plugin_name = $9,
+        plugin_args = $10,
         http_range = $11,
         http_method = $12,
         http_request_headers = $13,
@@ -230,8 +230,8 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		monitor.Description,
 		monitor.RemoteAddress,
 		monitor.RemotePort,
-		monitor.ScriptCommand,
-		monitor.ScriptArgs,
+		monitor.PluginName,
+		monitor.PluginArgs,
 		monitor.HTTPRange,
 		monitor.HTTPMethod,
 		monitor.HTTPRequestHeaders,

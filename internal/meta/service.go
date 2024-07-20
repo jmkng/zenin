@@ -2,8 +2,10 @@ package meta
 
 import (
 	"context"
+	"os"
 
 	"github.com/jmkng/zenin/internal/account"
+	"github.com/jmkng/zenin/internal/env"
 )
 
 // NewMetaService returns a new `MetaService`.
@@ -25,4 +27,16 @@ func (m MetaService) GetSummary(ctx context.Context) (Meta, error) {
 	return Meta{
 		IsClaimed: total > 0,
 	}, nil
+}
+
+func (m MetaService) GetPlugins() ([]string, error) {
+	var plugins []string
+	entries, err := os.ReadDir(env.Runtime.PluginDir)
+	if err != nil {
+		return plugins, err
+	}
+	for _, v := range entries {
+		plugins = append(plugins, v.Name())
+	}
+	return plugins, nil
 }

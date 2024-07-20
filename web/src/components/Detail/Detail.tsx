@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+
 import * as sapi from "../../server";
 import * as im from "../../internal/monitor";
-
 import TextInput from "../Input/TextInput/TextInput";
-import ArrayInput from "../Input/ArrayInput/ArrayInput";
 import Button from "../Button/Button";
 import NumberInput from "../Icon/NumberInput/NumberInput";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TrashIcon from "../Icon/TrashIcon/TrashIcon";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
+import { useMetaContext } from "../../internal/meta";
 
 import "./Detail.css";
 
@@ -34,8 +34,8 @@ const defaultDraft: im.Draft = {
     description: null,
     remoteAddress: null,
     remotePort: null,
-    scriptCommand: null,
-    scriptArgs: [],
+    pluginName: null,
+    pluginArgs: null,
     httpRange: sapi.SUCCESSFUL_API,
     httpMethod: sapi.GET_API,
     httpRequestHeaders: null,
@@ -51,6 +51,9 @@ export default function DetailComponent(props: DetailProps) {
         onClose,
         onDelete
     } = props;
+    const meta = {
+        context: useMetaContext()
+    };
     const [id, reset] = useMemo(() => subject ? resetToDraft(subject) : [null, defaultDraft], [subject])
     const [editor, setEditor] = useState<DetailState>({ draft: reset, original: reset })
 
@@ -63,9 +66,9 @@ export default function DetailComponent(props: DetailProps) {
     const hasValidTimeout = useMemo(() => im.isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
     const hasValidRemoteAddress = useMemo(() => im.isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
     const hasValidRemotePort = useMemo(() => im.isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
-    const hasValidHttpBody = useMemo(() => im.isValidJson(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
-    const hasValidHttpHeaders = useMemo(() => im.isValidJson(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
-    const hasValidScriptCommand = useMemo(() => im.isValidScriptCommand(editor.draft.scriptCommand), [editor.draft.scriptCommand])
+    const hasValidHttpBody = useMemo(() => im.isValidJSON(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
+    const hasValidHttpHeaders = useMemo(() => im.isValidJSON(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
+    const hasValidPluginArguments = useMemo(() => im.isValidJSONArray(editor.draft.pluginArgs), [editor.draft.pluginArgs]);
     const hasValidIcmpSize = useMemo(() => im.isValidIcmpSize(editor.draft.icmpSize), [editor.draft.icmpSize]);
 
     useEffect(() => {
@@ -93,7 +96,7 @@ export default function DetailComponent(props: DetailProps) {
                         name="zenin__detail_monitor_name"
                         value={editor.draft.name}
                         subtext="The monitor display name."
-                        onChange={(name: string | null) =>
+                        onChange={name =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, name } }))}
                     ></TextInput>
                     {!hasValidName ?
@@ -108,7 +111,7 @@ export default function DetailComponent(props: DetailProps) {
                         name="zenin__detail_monitor_description"
                         value={editor.draft.description}
                         subtext="The monitor description."
-                        onChange={(description: string | null) =>
+                        onChange={description =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, description } }))}
                     />
                 </div>
@@ -122,7 +125,7 @@ export default function DetailComponent(props: DetailProps) {
                             { value: "true", text: im.ACTIVE_UI },
                             { value: "false", text: im.INACTIVE_UI }
                         ]}
-                        onChange={(value: string) =>
+                        onChange={value =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === 'true' } }))
                         }
                     />
@@ -134,7 +137,7 @@ export default function DetailComponent(props: DetailProps) {
                         name="zenin__detail_monitor_interval"
                         value={editor.draft.interval}
                         subtext="The time between each measurement when the monitor is active."
-                        onChange={(interval: number | null) =>
+                        onChange={interval =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, interval } }))}
                     />
                     {!hasValidInterval ?
@@ -149,7 +152,7 @@ export default function DetailComponent(props: DetailProps) {
                         name="zenin__detail_monitor_timeout"
                         value={editor.draft.timeout}
                         subtext="The time to wait before declaring the measurement dead."
-                        onChange={(timeout: number | null) =>
+                        onChange={timeout =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, timeout } }))}
                     />
                     {!hasValidTimeout ?
@@ -164,22 +167,14 @@ export default function DetailComponent(props: DetailProps) {
                         name="zenin__detail_monitor_kind"
                         value={editor.draft.kind}
                         options={[
-                            {
-                                label: 'Standard', options: [
-                                    { value: sapi.HTTP_API, text: im.HTTP_UI },
-                                    { value: sapi.TCP_API, text: im.TCP_UI },
-                                    { value: sapi.ICMP_API, text: im.ICMP_UI },
-                                    { value: sapi.PING_API, text: im.PING_UI },
-                                ]
-                            },
-                            {
-                                label: 'Custom', options: [
-                                    { value: sapi.SCRIPT_API, text: im.SCRIPT_UI }
-                                ]
-                            }
+                            { value: sapi.HTTP_API, text: im.HTTP_UI },
+                            { value: sapi.TCP_API, text: im.TCP_UI },
+                            { value: sapi.ICMP_API, text: im.ICMP_UI },
+                            { value: sapi.PING_API, text: im.PING_UI },
+                            { value: sapi.PLUGIN_API, text: im.PLUGIN_UI }
                         ]}
                         subtext={<span>Specify the <a href="#">probe</a> type.</span>} /* TODO: Add documentation link. */
-                        onChange={(value: string) =>
+                        onChange={value =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, kind: value } }))}
                     />
                 </div>
@@ -191,7 +186,7 @@ export default function DetailComponent(props: DetailProps) {
                             name="zenin__detail_monitor_remote_address"
                             value={editor.draft.remoteAddress}
                             subtext="The address of the remote server." /* TODO: Provide instructions on valid format, should it include "http", etc.. */
-                            onChange={(remoteAddress: string | null) =>
+                            onChange={remoteAddress =>
                                 setEditor(prev => ({ ...prev, draft: { ...prev.draft, remoteAddress } }))}
                         ></TextInput>
                         {!hasValidRemoteAddress ?
@@ -209,7 +204,7 @@ export default function DetailComponent(props: DetailProps) {
                             name="zenin__detail_monitor_remote_port"
                             value={editor.draft.remotePort}
                             subtext="The port number on the remote server."
-                            onChange={(remotePort: number | null) =>
+                            onChange={remotePort =>
                                 setEditor(prev => ({ ...prev, draft: { ...prev.draft, remotePort } }))}
                         />
                         {!hasValidRemotePort ?
@@ -227,8 +222,8 @@ export default function DetailComponent(props: DetailProps) {
                                 name="zenin__detail_monitor_http_headers"
                                 value={editor.draft.httpRequestHeaders}
                                 subtext="Headers to send with the HTTP request."
-                                onChange={(httpRequestHeaders: string | null) =>
-                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestHeaders: httpRequestHeaders } }))}
+                                onChange={httpRequestHeaders =>
+                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestHeaders } }))}
                             />
                             {!hasValidHttpHeaders ?
                                 <span className="zenin__detail_validation zenin__h_error">Request headers must be valid JSON</span>
@@ -242,8 +237,8 @@ export default function DetailComponent(props: DetailProps) {
                                 name="zenin__detail_monitor_http_body"
                                 value={editor.draft.httpRequestBody}
                                 subtext="A body to send with the HTTP request."
-                                onChange={(httpRequestBody: string | null) =>
-                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestBody: httpRequestBody } }))}
+                                onChange={httpRequestBody =>
+                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestBody } }))}
                             />
                             {!hasValidHttpBody ?
                                 <span className="zenin__detail_validation zenin__h_error">Request body must be valid JSON</span>
@@ -266,7 +261,7 @@ export default function DetailComponent(props: DetailProps) {
                                 ]}
                                 subtext={<span>Set the HTTP <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">method</a> used to make the request.</span>}
                                 value={editor.draft.httpMethod!}
-                                onChange={(httpMethod: string) =>
+                                onChange={httpMethod =>
                                     setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpMethod } }))}
                             />
                         </div>
@@ -284,7 +279,7 @@ export default function DetailComponent(props: DetailProps) {
                                 ]}
                                 subtext={<span>Specify the range of <a href="https://datatracker.ietf.org/doc/html/rfc2616#section-10">status codes</a> that will indicate a successful probe.</span>}
                                 value={editor.draft.httpRange}
-                                onChange={(httpRange: string) =>
+                                onChange={httpRange =>
                                     setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRange } }))}
                             />
                         </div>
@@ -300,7 +295,7 @@ export default function DetailComponent(props: DetailProps) {
                                 ]}
                                 subtext="Modify the probe result when an expired certificate is found."
                                 value={editor.draft.httpExpiredCertMod || im.OFF_UI}
-                                onChange={(value: string) =>
+                                onChange={value =>
                                     setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpExpiredCertMod: value == im.OFF_UI ? null : value } }))}
                             />
                         </div>
@@ -315,8 +310,7 @@ export default function DetailComponent(props: DetailProps) {
                             name="zenin__detail_monitor_icmp_size"
                             value={editor.draft.icmpSize}
                             subtext="The packet size in bytes."
-                            onChange={(icmpSize: number | null) =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpSize } }))}
+                            onChange={icmpSize => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpSize } }))}
                         />
                         {!hasValidIcmpSize ?
                             <span className="zenin__detail_validation zenin__h_error">Packet size must be greater than 0</span>
@@ -325,32 +319,38 @@ export default function DetailComponent(props: DetailProps) {
                     </div>
                     : null}
 
-                {editor.draft.kind == sapi.SCRIPT_API ?
-                    <div className="zenin__detail_script_container">
+                {editor.draft.kind == sapi.PLUGIN_API ?
+                    <div className="zenin__detail_plugin_container">
                         <div className="zenin__detail_spaced">
-                            <ArrayInput
-                                name="zenin__detail_monitor_script_args"
-                                value={[...editor.draft.scriptArgs, ""]}
-                                label={<span>Arguments</span>}
-                                onChange={(index: number, value: string | null) =>
-                                    setEditor(prev => ({
-                                        ...prev,
-                                        draft: {
-                                            ...prev.draft,
-                                            scriptArgs: value != null ? prev.draft.scriptArgs.toSpliced(index, 1, value)
-                                                : prev.draft.scriptArgs.toSpliced(index, 1)
-                                        }
-                                    }))
+
+                        </div>
+                        <div className="zenin__detail_spaced">
+                            <SelectInput
+                                label="Name"
+                                name="zenin__detail_monitor_method"
+                                subtext={<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>}
+                                value={editor.draft.pluginName!}
+                                onChange={pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))}
+                                options={Array.from(
+                                    new Set([...meta.context.state.plugins, editor.draft.pluginName!]))
+                                    .map(n => ({ text: n }))
                                 }
                             />
                         </div>
                         <div className="zenin__detail_spaced">
-                            <TextInput
-                                name="zenin__detail_monitor_script_command"
-                                label={<span className={hasValidScriptCommand ? "" : "zenin__h_error"}>Command</span>}
-                                value={editor.draft.scriptCommand}
-                                onChange={(value: string | null) => { setEditor(prev => ({ ...prev, draft: { ...prev.draft, scriptCommand: value } })) }}
+                            <TextAreaInput
+                                label={<span className={hasValidPluginArguments ? "" : "zenin__h_error"}>Arguments</span>}
+                                name="zenin__detail_monitor_http_headers"
+                                placeholder={"[ \"-c\", \"100\" ]"}
+                                value={editor.draft.pluginArgs}
+                                subtext="Arguments passed to the plugin."
+                                onChange={pluginArgs =>
+                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))}
                             />
+                            {!hasValidPluginArguments ?
+                                <span className="zenin__detail_validation zenin__h_error">Request headers must be a valid JSON array</span>
+                                :
+                                null}
                         </div>
                     </div>
                     :
@@ -390,12 +390,11 @@ function sanitizeToMonitor(draft: im.Draft): im.Monitor {
         case sapi.TCP_API:
             sanitizeTCP(monitor);
             break;
-        case sapi.PING_API:
-        case sapi.ICMP_API:
+        case sapi.PING_API, sapi.ICMP_API:
             sanitizeICMP(monitor);
             break;
-        case sapi.SCRIPT_API:
-            sanitizeScript(monitor);
+        case sapi.PLUGIN_API:
+            sanitizePlugin(monitor);
             break;
     }
     return monitor;
@@ -403,7 +402,7 @@ function sanitizeToMonitor(draft: im.Draft): im.Monitor {
 
 function sanitizeHTTP(monitor: im.Monitor) {
     monitor.icmpSize = null;
-    monitor.scriptCommand = null;
+    monitor.pluginName = null;
 }
 
 function sanitizeTCP(strategy: im.Monitor) {
@@ -413,7 +412,7 @@ function sanitizeTCP(strategy: im.Monitor) {
     strategy.httpMethod = null;
     strategy.httpRange = null;
     strategy.icmpSize = null;
-    strategy.scriptCommand = null;
+    strategy.pluginName = null;
 }
 
 function sanitizeICMP(strategy: im.Monitor) {
@@ -423,10 +422,10 @@ function sanitizeICMP(strategy: im.Monitor) {
     strategy.httpExpiredCertMod = null;
     strategy.httpMethod = null;
     strategy.httpRange = null;
-    strategy.scriptCommand = null;
+    strategy.pluginName = null;
 }
 
-function sanitizeScript(strategy: im.Monitor) {
+function sanitizePlugin(strategy: im.Monitor) {
     strategy.remoteAddress = null;
     strategy.remotePort = null;
     strategy.httpRequestHeaders = null;
@@ -437,13 +436,8 @@ function sanitizeScript(strategy: im.Monitor) {
     strategy.icmpSize = null;
 }
 
+/** Reset a `Monitor` to `Draft`, setting useful defaults to make editing easier. */
 function resetToDraft(value: im.Monitor): [number | null, im.Draft] {
-    const [id, draft] = [value.id, { ...value } as im.Draft];
-    for (const [key, value] of Object.entries(draft)) {
-        if (value === null) {
-            //@ts-expect-error Ignore type for assignment.
-            draft[key] = defaultDraft[key];
-        }
-    }
-    return [id, draft];
+    const draft: im.Draft = { ...defaultDraft, ...(value as im.Draft) };
+    return [value.id, draft];
 }

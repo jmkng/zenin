@@ -14,7 +14,7 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 		(monitor_id, recorded_at, state, duration, 
         http_status_code, http_response_headers, http_response_body,
         icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt,
-        script_exit_code, script_stdout, script_stderr)
+        plugin_exit_code, plugin_stdout, plugin_stderr)
     VALUES 
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING id`
@@ -37,9 +37,9 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 		m.ICMPMinRTT,
 		m.ICMPAvgRTT,
 		m.ICMPMaxRTT,
-		m.ScriptExitCode,
-		m.ScriptStdout,
-		m.ScriptStderr,
+		m.PluginExitCode,
+		m.PluginStdout,
+		m.PluginStderr,
 	)
 	err = row.Scan(&id)
 	if err != nil {

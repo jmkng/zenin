@@ -6,7 +6,7 @@ VALUES
 INSERT INTO monitor 
     (name, kind, active, interval, timeout, description, 
     remote_address, remote_port, 
-    script_command, script_args,
+    plugin_name, plugin_args,
     http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod, 
     icmp_size)
 VALUES
@@ -48,14 +48,14 @@ VALUES
     ),
     (
         'Earth', 
-        'SCRIPT', 
+        'PLUGIN', 
         false, 
         137, 
         10, 
         'Earth Description',
         NULL, 
         NULL, 
-        'test.sh',
+        'helloworld.sh',
         '[ "one", "two" ]',
         NULL,
         NULL,
@@ -159,7 +159,7 @@ INSERT INTO measurement
     (monitor_id, recorded_at, state, state_hint, duration, 
     http_status_code, http_response_headers, http_response_body, 
     icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt, 
-    script_exit_code, script_stdout, script_stderr)
+    plugin_exit_code, plugin_stdout, plugin_stderr)
 VALUES
     (1, '2024-07-01T17:45:24-06:00', 'OK', NULL, 364.22, 
     NULL, NULL, NULL, 

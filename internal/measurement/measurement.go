@@ -31,7 +31,7 @@ func NewSpan(state ProbeState) Span {
 		Certificates: []Certificate{},
 		HTTPFields:   HTTPFields{},
 		ICMPFields:   ICMPFields{},
-		ScriptFields: ScriptFields{},
+		PluginFields: PluginFields{},
 	}
 }
 
@@ -45,7 +45,7 @@ type Span struct {
 
 	HTTPFields
 	ICMPFields
-	ScriptFields
+	PluginFields
 }
 
 type HTTPFields struct {
@@ -62,10 +62,10 @@ type ICMPFields struct {
 	ICMPMaxRTT     *float64 `json:"icmpMaxRtt,omitempty" db:"icmp_max_rtt"`
 }
 
-type ScriptFields struct {
-	ScriptExitCode *int    `json:"scriptExitCode,omitempty" db:"script_exit_code"`
-	ScriptStdout   *string `json:"scriptStdout,omitempty" db:"script_stdout"`
-	ScriptStderr   *string `json:"scriptStderr,omitempty" db:"script_stderr"`
+type PluginFields struct {
+	PluginExitCode *int    `json:"pluginExitCode,omitempty" db:"plugin_exit_code"`
+	PluginStdout   *string `json:"pluginStdout,omitempty" db:"plugin_stdout"`
+	PluginStderr   *string `json:"pluginStderr,omitempty" db:"plugin_stderr"`
 }
 
 // Downgrade will set `State` to the provided value if it is "below" the current state.

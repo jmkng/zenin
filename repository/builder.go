@@ -40,6 +40,7 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 	}
 
 	if b.withValidate {
+		log.Debug("repository validation starting")
 		if err = b.validate(repository); err != nil {
 			return repository, fmt.Errorf("failed to connect repository: %w", err)
 		}

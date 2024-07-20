@@ -26,7 +26,7 @@ func NewPostgresRepository(env *env.DatabaseEnv) (*PostgresRepository, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxOpenConns(int(env.MaxCon))
+	db.SetMaxOpenConns(int(env.MaxConn))
 	return &PostgresRepository{db}, nil
 }
 
