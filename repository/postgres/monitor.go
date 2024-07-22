@@ -2,8 +2,6 @@ package postgres
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
@@ -15,7 +13,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	var id int
 	query := `INSERT INTO monitor 
 		(name, kind, active, interval, timeout, description, remote_address, remote_port,
-        plugin_command, plugin_args
+        plugin_name, plugin_args,
         http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
         icmp_size)
     VALUES 
@@ -57,14 +55,13 @@ func (p PostgresRepository) SelectMonitor(
 	return p.selectMonitor(ctx, params)
 }
 
-// selectMonitor returns monitors based on the provided `SelectParams`.
 func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectParams) ([]monitor.Monitor, error) {
 	var monitors []monitor.Monitor
 	var err error
 
 	var builder = zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT
-            mo.id,
+            mo.id "monitor_id",
             mo.name,
             mo.kind,
             mo.active,
@@ -89,117 +86,63 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 	return monitors, err
 }
 
-// monitorJSON is a `Monitor` that may have a chunk of JSON containing
-// related measurements.
-type monitorJSON struct {
-	monitor.Monitor
-	JSON *string `json:"measurements" db:"measurements_json"`
-}
-
-// selectMonitorRelated returns monitors based on the provided `SelectParams`.
-// If `measurements > 0` the `JSON` field of the returned `MonitorJSON` will be populated
-// with a JSON string containing that many measurements at most.
-func (p PostgresRepository) selectMonitorRelated(
-	ctx context.Context,
-	params *monitor.SelectParams,
-	measurements int,
-) ([]monitor.Monitor, error) {
-	var temp []monitorJSON
-	var err error
-
-	var builder = zsql.NewBuilder(zsql.Numbered)
-	builder.Push("WITH mo AS (SELECT * FROM monitor")
-	builder.Inject(params)
-	builder.Push(`), ms AS (
-        SELECT
-            m.*,
-            ROW_NUMBER() OVER (PARTITION BY m.monitor_id ORDER BY m.recorded_at DESC) AS rnk
-        FROM measurement m
-        WHERE m.monitor_id IN (SELECT id FROM mo)
-        ORDER BY m.id
-    ), filtered_ms AS (
-        SELECT * 
-        FROM ms
-        WHERE rnk <=`)
-	builder.BindInt(measurements)
-	builder.Push(`), aggregated_ms AS (
-        SELECT
-            monitor_id,
-            jsonb_agg(jsonb_build_object(
-                'id', id,
-                'monitorId', monitor_id,
-                'recordedAt', recorded_at,
-                'state', state,
-                'stateHint', state_hint,
-                'duration', duration,
-                'httpStatusCode', http_status_code,
-                'httpResponseHeaders', http_response_headers,
-                'httpResponseBody', http_response_body,
-                'icmpPacketsIn', icmp_packets_in,
-                'icmpPacketsOut', icmp_packets_out,
-                'icmpMinRtt', icmp_min_rtt,
-                'icmpAvgRtt', icmp_avg_rtt,
-                'icmpMaxRtt', icmp_max_rtt,
-                'pluginExitCode', plugin_exit_code,
-                'pluginStdout', plugin_stdout,
-                'pluginStderr', plugin_stderr,
-                'certificates', (
-                    SELECT jsonb_agg(jsonb_build_object(
-                        'id', c.id,
-                        'measurementId', measurement_id,
-                        'version', c.version,
-                        'serialNumber', c.serial_number,
-                        'publicKeyAlgorithm', c.public_key_algorithm,
-                        'issuerCommonName', c.issuer_common_name,
-                        'subjectCommonName', c.subject_common_name,
-                        'notBefore', c.not_before,
-                        'notAfter', c.not_after
-                    ) ORDER BY c.id ASC)
-                    FROM certificate c
-                    WHERE c.measurement_id = ms.id
-                )
-            ) ORDER BY id DESC) AS measurements
-        FROM filtered_ms ms
-        GROUP BY monitor_id)
-
-        SELECT
-        mo.id,
-        mo.name,
-        mo.kind,
-        mo.active,
-        mo.interval,
-        mo.timeout,
-        mo.description,
-        mo.remote_address,
-        mo.remote_port,
-        mo.plugin_name,
-        mo.plugin_args,
-        mo.http_range,
-        mo.http_method,
-        mo.http_request_headers,
-        mo.http_request_body,
-        mo.http_expired_cert_mod,
-        mo.icmp_size,
-        am.measurements "measurements_json"
-    FROM mo
-    LEFT JOIN aggregated_ms am ON mo.id = am.monitor_id
-    ORDER BY mo.id;`)
-	err = p.db.SelectContext(ctx, &temp, builder.String(), builder.Args()...)
-
-	monitors := []monitor.Monitor{}
-	for _, v := range temp {
-		monitor := v.Monitor
-		if v.JSON != nil {
-			measurements := []measurement.Measurement{}
-			if err := json.Unmarshal([]byte(*v.JSON), &measurements); err != nil {
-				return monitors, fmt.Errorf("failed to unwrap related measurements for monitor `%v`: %w", v.Id, err)
-			}
-			monitor.Measurements = measurements
-		}
-		monitors = append(monitors, monitor)
+func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *monitor.SelectParams, measurements int) ([]monitor.Monitor, error) {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push(`SELECT 
+		id "monitor_id", name, kind, active, interval, timeout, description, 
+		remote_address, remote_port, 
+		plugin_name, plugin_args, 
+		http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod, 
+		icmp_size 
+	FROM monitor`)
+	if params != nil {
+		builder.Inject(params)
 	}
 
-	return monitors, err
+	store := make(map[int]*monitor.Monitor)
+	var distinct []int
+
+	mo := []monitor.Monitor{}
+	err := p.db.SelectContext(ctx, &mo, builder.String(), builder.Args()...)
+	if err != nil {
+		return []monitor.Monitor{}, err
+	}
+	for _, v := range mo {
+		distinct = append(distinct, *v.Id)
+		store[*v.Id] = &v
+	}
+
+	builder.Reset()
+	builder.Push(`WITH raw AS (SELECT
+		m.*,
+		ROW_NUMBER() OVER (PARTITION BY m.monitor_id ORDER BY m.recorded_at DESC) AS rank
+	FROM measurement m
+	WHERE m.monitor_id IN (`)
+	builder.SpreadInt(distinct...)
+	builder.Push(`) ORDER BY m.id)
+	SELECT 
+		id "measurement_id", monitor_id "measurement_monitor_id",
+		recorded_at, state, state_hint, duration, http_status_code, http_response_headers, http_response_body,
+		icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt,
+		plugin_exit_code, plugin_stdout, plugin_stderr
+	FROM raw WHERE rank <=`)
+	builder.BindInt(measurements)
+
+	me := []measurement.Measurement{}
+	err = p.db.SelectContext(ctx, &me, builder.String(), builder.Args()...)
+	if err != nil {
+		return []monitor.Monitor{}, err
+	}
+	for _, v := range me {
+		owner := store[*v.MonitorId]
+		owner.Measurements = append(owner.Measurements, v)
+	}
+
+	result := []monitor.Monitor{}
+	for _, v := range store {
+		result = append(result, *v)
+	}
+	return result, nil
 }
 
 func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.Monitor) error {

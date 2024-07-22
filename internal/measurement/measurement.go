@@ -24,7 +24,6 @@ type Measurement struct {
 }
 
 // NewSpan returns a new `Span`.
-//
 // The default `State` is `Dead`. `Certificates` is an empty slice. All other fields are nil.
 func NewSpan(state ProbeState) Span {
 	return Span{
@@ -106,26 +105,6 @@ type PluginFields struct {
 	PluginExitCode *int    `json:"pluginExitCode,omitempty" db:"plugin_exit_code"`
 	PluginStdout   *string `json:"pluginStdout,omitempty" db:"plugin_stdout"`
 	PluginStderr   *string `json:"pluginStderr,omitempty" db:"plugin_stderr"`
-}
-
-// Downgrade will set `State` to the provided value if it is "below" the current state.
-//
-// For example, going from `Ok` to `Warn` or `Dead` is allowed,
-// but going from `Dead` to `Warn` is ignored.
-func (s *Span) Downgrade(state ProbeState, hint ...string) {
-	if s.State == Ok {
-		s.State = state
-	} else if s.State == Warn && state == Dead {
-		s.State = Dead
-	}
-	for _, v := range hint {
-		s.StateHint = append(s.StateHint, v)
-	}
-}
-
-// Hint will add hints to the `Span`.
-func (s *Span) Hint(hint ...string) {
-	s.StateHint = append(s.StateHint, hint...)
 }
 
 // Certificate is an x509 certificate recorded by an HTTP probe.

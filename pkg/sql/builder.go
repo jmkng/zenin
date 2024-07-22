@@ -57,6 +57,13 @@ type Builder struct {
 	marker *MarkerBuilder
 }
 
+// Reset will reset the `Builder` to the state returned by `NewBuilder`.
+func (b *Builder) Reset() {
+	b.query.Reset()
+	b.args = nil
+	b.marker.Reset()
+}
+
 // Inject will apply an `Injectable` to the `Builder`.
 func (b *Builder) Inject(i Injectable) {
 	i.Inject(b)
@@ -180,6 +187,11 @@ func NewMarkerBuilder(marker BindMarker) *MarkerBuilder {
 type MarkerBuilder struct {
 	count  int
 	marker BindMarker
+}
+
+// Reset will reset the `MarkerBuilder` to the state returned by `NewMarkerBuilder`.
+func (m *MarkerBuilder) Reset() {
+	m.count = 1
 }
 
 // String implements `Stringer` for `MarkerBuilder`.
