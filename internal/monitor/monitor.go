@@ -77,7 +77,7 @@ type Probe interface {
 
 // Monitor is the monitor domain type.
 type Monitor struct {
-	Id                 *int                      `json:"id" db:"id"`
+	Id                 *int                      `json:"id" db:"monitor_id"`
 	Name               string                    `json:"name" db:"name"`
 	Kind               ProbeKind                 `json:"kind" db:"kind"`
 	Active             bool                      `json:"active" db:"active"`

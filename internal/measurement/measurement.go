@@ -15,10 +15,11 @@ const (
 
 // Measurement is the measurement domain type.
 type Measurement struct {
-	Id         *int      `json:"id" db:"id"`
-	MonitorId  *int      `json:"monitorId" db:"monitor_id"`
+	Id         *int      `json:"id" db:"measurement_id"`
+	MonitorId  *int      `json:"monitorId" db:"measurement_monitor_id"`
 	RecordedAt time.Time `json:"recordedAt" db:"recorded_at"`
 	Duration   float64   `json:"duration" db:"duration"`
+
 	Span
 }
 
@@ -67,6 +68,26 @@ type Span struct {
 	PluginFields
 }
 
+// Downgrade will set `State` to the provided value if it is "below" the current state.
+//
+// For example, going from `Ok` to `Warn` or `Dead` is allowed,
+// but going from `Dead` to `Warn` is ignored.
+func (s *Span) Downgrade(state ProbeState, hint ...string) {
+	if s.State == Ok {
+		s.State = state
+	} else if s.State == Warn && state == Dead {
+		s.State = Dead
+	}
+	for _, v := range hint {
+		s.StateHint = append(s.StateHint, v)
+	}
+}
+
+// Hint will add hints to the `Span`.
+func (s *Span) Hint(hint ...string) {
+	s.StateHint = append(s.StateHint, hint...)
+}
+
 type HTTPFields struct {
 	HTTPStatusCode      *int    `json:"httpStatusCode,omitempty" db:"http_status_code"`
 	HTTPResponseHeaders *string `json:"httpResponseHeaders,omitempty" db:"http_response_headers"`
@@ -109,8 +130,8 @@ func (s *Span) Hint(hint ...string) {
 
 // Certificate is an x509 certificate recorded by an HTTP probe.
 type Certificate struct {
-	Id                 *int      `json:"id" db:"id"`
-	MeasurementId      *int      `json:"measurementId" db:"measurement_id"`
+	Id                 *int      `json:"id" db:"certificate_id"`
+	MeasurementId      *int      `json:"measurementId" db:"certificate_measurement_id"`
 	Version            int       `json:"version" db:"version"`
 	SerialNumber       string    `json:"serialNumber" db:"serial_number"`
 	PublicKeyAlgorithm string    `json:"publicKeyAlgorithm" db:"public_key_algorithm"`
