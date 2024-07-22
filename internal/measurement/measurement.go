@@ -1,6 +1,7 @@
 package measurement
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -35,7 +36,25 @@ func NewSpan(state ProbeState) Span {
 	}
 }
 
+// Hint is a series of user-friendly messages that may indicate how a Probe was created.
 type Hint []string
+
+// Scan implements `sql.Scanner` for `Hint`.
+// This allows storing and fetching the `Hint` as a JSON array.
+func (h *Hint) Scan(value any) error {
+	if value == nil {
+		*h = []string{}
+		return nil
+	}
+	var err error
+	switch x := value.(type) {
+	case string:
+		err = json.Unmarshal([]byte(x), h)
+	case []byte:
+		err = json.Unmarshal(x, h)
+	}
+	return err
+}
 
 // Span is a common set of fields for all `Measurement`.
 type Span struct {

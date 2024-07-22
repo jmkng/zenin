@@ -161,7 +161,7 @@ INSERT INTO measurement
     icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt, 
     plugin_exit_code, plugin_stdout, plugin_stderr)
 VALUES
-    (1, '2024-07-01T17:45:24-06:00', 'OK', NULL, 364.22, 
+    (1, '2024-07-01T17:45:24-06:00', 'OK', '[ "Hint One", "Hint Two"]', 364.22, 
     NULL, NULL, NULL, 
     5, 5, 1.99, 2.22, 2.46, 
     NULL, NULL, NULL),
