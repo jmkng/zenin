@@ -119,7 +119,7 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	FROM measurement m
 	WHERE m.monitor_id IN (`)
 	builder.SpreadInt(distinct...)
-	builder.Push(`) ORDER BY m.id)
+	builder.Push(`) ORDER BY m.id DESC)
 	SELECT 
 		id "measurement_id", monitor_id "measurement_monitor_id",
 		recorded_at, state, state_hint, duration, http_status_code, http_response_headers, http_response_body,
