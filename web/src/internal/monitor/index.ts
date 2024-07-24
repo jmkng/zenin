@@ -35,6 +35,8 @@ export interface Monitor {
     httpRequestHeaders: string | null,
     httpRequestBody: string | null
     httpExpiredCertMod: string | null,
+    httpCaptureHeaders: boolean | null,
+    httpCaptureBody: boolean | null,
     icmpSize: number | null
     measurements: Measurement[] | null
 }
@@ -66,6 +68,8 @@ export interface Draft {
     httpRequestHeaders: string | null,
     httpRequestBody: string | null
     httpExpiredCertMod: string | null,
+    httpCaptureHeaders: boolean,
+    httpCaptureBody: boolean,
     icmpSize: number | null
 }
 
@@ -85,6 +89,8 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.httpRequestHeaders == b.httpRequestHeaders
         && a.httpRequestBody == b.httpRequestBody
         && a.httpExpiredCertMod == b.httpExpiredCertMod
+        && a.httpCaptureHeaders == b.httpCaptureHeaders
+        && a.httpCaptureBody == b.httpCaptureBody
         && a.icmpSize == b.icmpSize
 }
 

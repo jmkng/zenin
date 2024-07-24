@@ -7,7 +7,8 @@ INSERT INTO monitor
     (name, kind, active, interval, timeout, description, 
     remote_address, remote_port, 
     plugin_name, plugin_args,
-    http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod, 
+    http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
+    http_capture_headers, http_capture_body,
     icmp_size)
 VALUES
     (
@@ -22,6 +23,8 @@ VALUES
         NULL,
         NULL,
         NULL, 
+        NULL,
+        NULL,
         NULL,
         NULL,
         NULL,
@@ -44,6 +47,8 @@ VALUES
         '{"X-Debug-Info": "Value"}',
         '{"KeyA": "ValueA", "KeyB": "ValueB"}',
         'WARN',
+        NULL,
+        NULL,
         NULL
     ),
     (
@@ -57,6 +62,8 @@ VALUES
         NULL, 
         'helloworld.sh',
         '[ "one", "two" ]',
+        NULL,
+        NULL,
         NULL,
         NULL,
         NULL,
@@ -80,6 +87,8 @@ VALUES
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
         NULL
     ),
     (
@@ -98,6 +107,8 @@ VALUES
         '"{\n\"X-Debug-Info\": \"Value\"\n}"',
         '"{\n\"KeyA\": \"ValueA\",\n\"KeyB\": \"ValueB\"\n}"',
         NULL,
+        NULL,
+        NULL,
         NULL
     ),
     (
@@ -113,6 +124,8 @@ VALUES
         NULL,
         '200-299', 
         'GET',
+        NULL,
+        NULL,
         NULL,
         NULL,
         NULL,
@@ -134,6 +147,8 @@ VALUES
         NULL,
         NULL,
         NULL,
+        NULL,
+        NULL,
         NULL
     ),
     (
@@ -149,6 +164,8 @@ VALUES
         NULL,
         '200-299', 
         'GET',
+        NULL,
+        NULL,
         NULL,
         NULL,
         NULL,

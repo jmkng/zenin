@@ -63,26 +63,26 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 	span.HTTPStatusCode = &response.StatusCode
 	responseRange := newHTTPRangeFromInt(response.StatusCode)
 	if responseRange != *monitor.HTTPRange {
-		span.Downgrade(measurement.Dead, "The response status code is out of range.")
-	}
-	responseHeaders, err := json.Marshal(response.Header)
-	if err != nil {
-		span.Downgrade(measurement.Ok,
-			"The response headers were unable to be serialized, and were not captured for this measurement.")
-	} else {
-		headersString := string(responseHeaders)
-		span.HTTPResponseHeaders = &headersString
+		span.Downgrade(measurement.Dead, "Response status code is out of range.")
 	}
 
-	// TODO: Capturing body/headers should be opt-in, since they take up space
-	// and may not be needed.
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		span.Downgrade(measurement.Ok,
-			"The response body was unable to be read, and was not captured for this measurement.")
-	} else {
-		bodyString := string(responseBody)
-		span.HTTPResponseBody = &bodyString
+	if monitor.HTTPCaptureHeaders != nil && *monitor.HTTPCaptureHeaders {
+		responseHeaders, err := json.Marshal(response.Header)
+		if err != nil {
+			span.Downgrade(measurement.Warn, "Response headers could not be serialized.")
+		} else {
+			headersString := string(responseHeaders)
+			span.HTTPResponseHeaders = &headersString
+		}
+	}
+	if monitor.HTTPCaptureBody != nil && *monitor.HTTPCaptureBody {
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			span.Downgrade(measurement.Warn, "Response body could not be read.")
+		} else {
+			bodyString := string(responseBody)
+			span.HTTPResponseBody = &bodyString
+		}
 	}
 
 	if response.TLS != nil {
@@ -103,17 +103,6 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 	}
 
 	return span
-}
-
-func isValidMethod(value *string) bool {
-	if value == nil {
-		return false
-	}
-	v := *value
-	if v == Get || v == Head || v == Post || v == Put || v == Patch || v == Delete {
-		return true
-	}
-	return false
 }
 
 func newHTTPRangeFromInt(value int) HTTPRange {

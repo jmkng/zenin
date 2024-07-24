@@ -9,9 +9,11 @@ import NumberInput from "../Icon/NumberInput/NumberInput";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TrashIcon from "../Icon/TrashIcon/TrashIcon";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
+import ToggleInput from "../Input/ToggleInput/ToggleInput";
 import { useMetaContext } from "../../internal/meta";
 
 import "./Editor.css";
+
 
 interface EditorProps {
     state: EditorState
@@ -37,6 +39,8 @@ const defaultDraft: im.Draft = {
     httpRequestHeaders: null,
     httpRequestBody: null,
     httpExpiredCertMod: sapi.OFF_API,
+    httpCaptureHeaders: false,
+    httpCaptureBody: false,
     icmpSize: 56
 }
 
@@ -284,18 +288,21 @@ export default function EditorComponent(props: EditorProps) {
                         </div>
 
                         <div className="zenin__detail_spaced">
-                            <SelectInput
-                                label="Expired Certificate Modifier"
-                                name="zenin__detail_monitor_expired_cert_mod"
-                                options={[
-                                    { text: im.OFF_UI },
-                                    { value: sapi.WARN_API, text: im.WARN_UI },
-                                    { value: sapi.DEAD_API, text: im.DEAD_UI },
-                                ]}
-                                subtext="Modify the probe result when an expired certificate is found."
-                                value={editor.draft.httpExpiredCertMod || im.OFF_UI}
-                                onChange={value =>
-                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpExpiredCertMod: value == im.OFF_UI ? null : value } }))}
+                            <ToggleInput
+                                name={"zenin__detail_capture_header"}
+                                label="Capture Response Headers"
+                                value={editor.draft.httpCaptureHeaders}
+                                onChange={httpCaptureHeaders =>
+                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureHeaders } }))}
+                            />
+                        </div>
+                        <div className="zenin__detail_spaced">
+                            <ToggleInput
+                                name={"zenin__detail_capture_body"}
+                                label="Capture Response Body"
+                                value={editor.draft.httpCaptureBody}
+                                onChange={httpCaptureBody =>
+                                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureBody } }))}
                             />
                         </div>
                     </div>
@@ -408,6 +415,8 @@ function sanitizeTCP(strategy: im.Monitor) {
     strategy.httpRequestHeaders = null;
     strategy.httpRequestBody = null;
     strategy.httpExpiredCertMod = null;
+    strategy.httpCaptureHeaders = null;
+    strategy.httpCaptureBody = null;
     strategy.httpMethod = null;
     strategy.httpRange = null;
     strategy.icmpSize = null;
@@ -419,6 +428,8 @@ function sanitizeICMP(strategy: im.Monitor) {
     strategy.httpRequestHeaders = null;
     strategy.httpRequestBody = null;
     strategy.httpExpiredCertMod = null;
+    strategy.httpCaptureHeaders = null;
+    strategy.httpCaptureBody = null;
     strategy.httpMethod = null;
     strategy.httpRange = null;
     strategy.pluginName = null;
@@ -430,6 +441,8 @@ function sanitizePlugin(strategy: im.Monitor) {
     strategy.httpRequestHeaders = null;
     strategy.httpRequestBody = null;
     strategy.httpExpiredCertMod = null;
+    strategy.httpCaptureHeaders = null;
+    strategy.httpCaptureBody = null;
     strategy.httpMethod = null;
     strategy.httpRange = null;
     strategy.icmpSize = null;

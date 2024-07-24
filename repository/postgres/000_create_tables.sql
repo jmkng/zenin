@@ -25,6 +25,8 @@ CREATE TABLE monitor (
     http_request_headers  TEXT,
     http_request_body     TEXT,
     http_expired_cert_mod TEXT CHECK (http_expired_cert_mod IN ('WARN', 'DEAD')),
+    http_capture_headers  BOOLEAN,
+    http_capture_body     BOOLEAN,
     icmp_size             INTEGER CHECK (icmp_size > 0)
 );
 

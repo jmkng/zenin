@@ -93,6 +93,8 @@ type Monitor struct {
 	HTTPRequestHeaders *string                   `json:"httpRequestHeaders,omitempty" db:"http_request_headers"`
 	HTTPRequestBody    *string                   `json:"httpRequestBody,omitempty" db:"http_request_body"`
 	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod,omitempty" db:"http_expired_cert_mod"`
+	HTTPCaptureHeaders *bool                     `json:"httpCaptureHeaders,omitempty" db:"http_capture_headers"`
+	HTTPCaptureBody    *bool                     `json:"httpCaptureBody,omitempty" db:"http_capture_body"`
 	ICMPSize           *int                      `json:"icmpSize,omitempty" db:"icmp_size"`
 	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
 }
