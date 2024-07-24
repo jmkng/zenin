@@ -64,9 +64,9 @@ func (r *Responder) Error(err error, status int) {
 		}
 
 		r.writer.Write(response)
-	} else {
-		log.Error(origin.Error())
 	}
+
+	log.Error(origin.Error())
 }
 
 // Status will send a status code.
