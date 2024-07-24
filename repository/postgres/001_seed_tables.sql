@@ -12,7 +12,7 @@ INSERT INTO monitor
 VALUES
     (
         'Mercury', 
-        'ICMP', 
+        'ICMP',
         false, 
         30,
         10, 
@@ -21,11 +21,11 @@ VALUES
         NULL,
         NULL,
         NULL,
-        '200-299', 
-        'GET',
-        '"{\n  \"Content-Type\": \"application/json\",\n  \"Accept\": \"application/json\"\n}"',
-        '"{\n  \"KeyA\": \"ValueA\",\n  \"KeyB\": \"ValueB\"\n}"',
-        'WARN',
+        NULL, 
+        NULL,
+        NULL,
+        NULL,
+        NULL,
         30
     ),
     (
@@ -41,9 +41,9 @@ VALUES
         NULL,
         '200-299', 
         'GET',
-        NULL,
-        NULL,
-        NULL,
+        '{"X-Debug-Info": "Value"}',
+        '{"KeyA": "ValueA", "KeyB": "ValueB"}',
+        'WARN',
         NULL
     ),
     (
@@ -94,9 +94,9 @@ VALUES
         NULL,
         NULL,
         '200-299', 
-        'GET',
-        NULL,
-        NULL,
+        'POST',
+        '"{\n\"X-Debug-Info\": \"Value\"\n}"',
+        '"{\n\"KeyA\": \"ValueA\",\n\"KeyB\": \"ValueB\"\n}"',
         NULL,
         NULL
     ),
@@ -161,13 +161,13 @@ INSERT INTO measurement
     icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt, 
     plugin_exit_code, plugin_stdout, plugin_stderr)
 VALUES
-    (1, '2024-07-01T17:45:24-06:00', 'OK', '[ "Hint One", "Hint Two"]', 364.22, 
+    (1, '2024-07-01T17:45:24-06:00', 'OK', NULL, 364.22, 
     NULL, NULL, NULL, 
     5, 5, 1.99, 2.22, 2.46, 
     NULL, NULL, NULL),
-    (1, '2024-07-01T17:45:24-06:00', 'OK', NULL, 233.32, 
-    NULL, NULL, NULL, 
-    2, 5, 4.54, 5.66, 6.56, 
+    (1, '2024-07-01T17:45:24-06:00', 'WARN', '[ "Received less packets than expected." ]', 233.32, 
+    NULL, NULL, NULL,
+    4, 5, 4.54, 5.66, 6.56,
     NULL, NULL, NULL),
     (2, '2024-07-01T17:45:24-06:00', 'OK', NULL, 300.22, 
     200, 'Connection: Keep-Alive\nContent-Encoding: gzip', 'abc', 
@@ -181,7 +181,7 @@ VALUES
     200, 'X-Backend-Server: developer2.webapp.scl3.mozilla.com\nX-Cache-Info: not cacheable; meta data too large', 'ghi', 
     NULL, NULL, NULL, NULL, NULL, 
     NULL, NULL, NULL),
-    (2, '2024-07-01T17:45:24-06:00', 'OK', NULL, 388.83, 
+    (2, '2024-07-01T17:45:24-06:00', 'DEAD', '[ "The response status code is out of range." ]', 388.83, 
     500, 'Connection: close', 'Server Error', 
     NULL, NULL, NULL, NULL, NULL, 
     NULL, NULL, NULL),
@@ -189,10 +189,10 @@ VALUES
     NULL, NULL, NULL, 
     NULL, NULL, NULL, NULL, NULL, 
     0, 'shell  0.01s user 0.02s system 0% cpu 9.033 total\nchildren  0.01s user 0.02s system 0% cpu 9.033 total', NULL),
-    (3, '2024-07-01T17:45:24-06:00', 'OK', NULL, 119.03, 
+    (3, '2024-07-01T17:45:24-06:00', 'DEAD', '[ "Plugin returned a dead exit code." ]', 119.03, 
     NULL, NULL, NULL, 
     NULL, NULL, NULL, NULL, NULL, 
-    1, '', 'ls: cannot open directory ''/root'': Permission denied');
+    2, '', 'received malformed data');
 
 INSERT INTO certificate
     (measurement_id, version, serial_number, public_key_algorithm, issuer_common_name, subject_common_name, 
