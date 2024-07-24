@@ -139,7 +139,7 @@ export default function EditorComponent(props: EditorProps) {
                         label={<span className={hasValidInterval ? "" : "zenin__h_error"}>Interval</span>}
                         name="zenin__detail_monitor_interval"
                         value={editor.draft.interval}
-                        subtext="The time between each measurement when the monitor is active."
+                        subtext="The seconds between each measurement when the monitor is active."
                         onChange={interval =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, interval } }))}
                     />
@@ -154,7 +154,7 @@ export default function EditorComponent(props: EditorProps) {
                         label={<span className={hasValidTimeout ? "" : "zenin__h_error"}>Timeout</span>}
                         name="zenin__detail_monitor_timeout"
                         value={editor.draft.timeout}
-                        subtext="The time to wait before declaring the measurement dead."
+                        subtext="The seconds to wait before declaring the measurement dead."
                         onChange={timeout =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, timeout } }))}
                     />
