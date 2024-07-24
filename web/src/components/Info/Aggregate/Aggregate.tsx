@@ -18,7 +18,7 @@ export default function AggregateComponent(props: AggregateProps) {
         ? `${Math.floor((measurements.filter(n => n.state == OK_API).length / measurements.length) * 100)}%`
         : "N/A";
     const avgDur = measurements.length > 0
-        ? formatMilliseconds(measurements.reduce((acc, value) => acc + value.duration, 0))
+        ? formatMilliseconds(measurements.reduce((acc, value) => acc + value.duration, 0) / measurements.length)
         : "N/A";
 
     const pairs = new Map()
