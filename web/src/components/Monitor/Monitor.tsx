@@ -14,7 +14,6 @@ import InfoIcon from '../Icon/InfoIcon/InfoIcon';
 import EditIcon from '../Icon/EditIcon/EditIcon';
 import ActiveWidget from './Widget/ActiveWidget';
 import IDWidget from './Widget/IDWidget';
-import StateWidget from './Widget/StateWidget';
 import DatabaseIcon from '../Icon/DatabaseIcon/DatabaseIcon';
 
 import './Monitor.css';
@@ -46,8 +45,14 @@ export default function MonitorComponent(props: MonitorProps) {
         },
         {
             items: [
-                { text: "Edit", onClick: () => handleEdit(), icon: <EditIcon /> },
-                { text: "Delete", onClick: () => handleDelete(), icon: <TrashIcon />, destructive: true },
+                {
+                    text: "Edit",
+                    onClick: () => monitor.context.dispatch({ type: 'edit', monitor: monitor.data }), icon: <EditIcon />
+                },
+                {
+                    text: "Delete",
+                    onClick: () => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] }), icon: <TrashIcon />, destructive: true
+                },
             ]
         }
     ];
@@ -61,16 +66,11 @@ export default function MonitorComponent(props: MonitorProps) {
         monitor.context.dispatch({ type: 'select', monitor: monitor.data })
     }
 
-    const handleEdit = () => {
-        monitor.context.dispatch({ type: 'edit', monitor: monitor.data })
-    }
-
     const handleView = () => {
-        monitor.context.dispatch({ type: 'view', monitor: monitor.data })
-    }
-
-    const handleDelete = () => {
-        monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] })
+        monitor.context.dispatch({
+            type: 'view',
+            target: { monitor: monitor.data, measurement: null }
+        })
     }
 
     const handleToggle = async () => {
@@ -85,9 +85,9 @@ export default function MonitorComponent(props: MonitorProps) {
     return (
         <div
             className={
-                ['zenin__monitor', monitor.context.state.selected.includes(monitor.data)
-                    ? 'selected'
-                    : ''].join(' ')
+                ['zenin__monitor',
+                    monitor.context.state.bulk.includes(monitor.data) ? 'selected' : ''
+                ].join(' ')
             } >
             <div className="zenin__monitor_top" onClick={handleSelect}>
                 <div className="zenin__monitor_top_upper">
@@ -121,12 +121,9 @@ export default function MonitorComponent(props: MonitorProps) {
                     <span onClick={event => event.stopPropagation()}>
                         <IDWidget id={monitor.data.id!} />
                     </span>
-                    <span onClick={event => event.stopPropagation()}>
-                        <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
-                    </span>
-                    {monitor.data.measurements && monitor.data.measurements.length > 0 ?
+                    {!monitor.data.active ?
                         <span onClick={event => event.stopPropagation()}>
-                            <StateWidget state={monitor.data.measurements![monitor.data.measurements.length - 1].state} />
+                            <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
                         </span>
                         : null}
                 </div>
@@ -134,7 +131,13 @@ export default function MonitorComponent(props: MonitorProps) {
             <div className="zenin__monitor_middle" onClick={handleSelect}>
             </div>
             <div className='zenin__monitor_bottom'>
-                <SeriesComponent measurements={monitor.data.measurements?.toReversed() || []} />
+                <SeriesComponent
+                    measurements={monitor.data.measurements?.toReversed() || []}
+                    onSlotClick={measurement => monitor.context.dispatch({
+                        type: 'view',
+                        target: { monitor: monitor.data, measurement, disableToggle: true }
+                    })}
+                />
             </div>
         </div >
     )

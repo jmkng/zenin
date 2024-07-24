@@ -10,6 +10,7 @@ export const useFlaggedDispatch = () => {
     const log = useLogContext();
     const monitor = useMonitorContext();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const action = (data: any) => {
         let line: Line
         if (typeof data == 'string') {
@@ -25,10 +26,15 @@ export const useFlaggedDispatch = () => {
     return action;
 }
 
-const measurement = (measurement: Measurement, monitor: MonitorDispatch) => {
+const measurement = (measurement: Measurement, dispatch: MonitorDispatch) => {
     const notify = measurement.state == DEAD_API ? true : false
-    const line = new ObjectLine({ object: measurement, message: "measurement", notify, remote: true })
-    monitor({ type: 'poll', measurement })
+    const object = {
+        id: measurement.id,
+        state: measurement.state,
+        duration: measurement.duration,
+    };
+    const line = new ObjectLine({ object, message: "measurement", notify, remote: true })
+    dispatch({ type: 'poll', measurement })
     return line;
 }
 

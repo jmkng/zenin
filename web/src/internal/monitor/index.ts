@@ -19,7 +19,7 @@ export const
 export type FilterKind = "All" | typeof ACTIVE_UI | typeof INACTIVE_UI
 
 export interface Monitor {
-    id: number | null,
+    id: number,
     name: string,
     kind: string,
     active: boolean,
@@ -89,12 +89,12 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
 }
 
 export interface Measurement {
-    id: number | null,
-    monitorId: number | null,
+    id: number,
+    monitorId: number,
     recordedAt: string,
     duration: number,
     state: string
-    stateHint: string | null,
+    stateHint: string[] | null,
     httpStatusCode: number | null,
     httpResponseHeaders: string | null,
     httpResponseBody: string | null,
@@ -213,7 +213,7 @@ export function isValidJSONArray(body: string | null): boolean {
     } catch {
         return false;
     }
-};
+}
 
 export function isValidPluginName(name: string | null): boolean {
     return name != null && name.trim() != "";

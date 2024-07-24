@@ -5,13 +5,18 @@ import './Series.css';
 
 interface SeriesProps {
     measurements: Measurement[]
+
+    onSlotClick: (measurement: Measurement) => void;
 }
 
 const slotWidth = 20;
 const slotGap = 2;
 
 export default function SeriesComponent(props: SeriesProps) {
-    const { measurements } = props;
+    const {
+        measurements,
+        onSlotClick
+    } = props;
 
     const [slots, setSlots] = useState<number>(0);
     const containerRef = useRef(null);
@@ -34,11 +39,16 @@ export default function SeriesComponent(props: SeriesProps) {
 
     function renderSlots() {
         const cache = [];
-        for (const [i, m] of measurements.entries()) {
+        for (const [index, measurement] of measurements.entries()) {
             if (cache.length == slots) break;
             cache.push(
-                <div className="zenin__series_slot_container" style={{ width: slotWidth }} key={i}>
-                    <div className={["zenin__series_slot", m.state].join(' ')}></div>
+                <div
+                    key={index}
+                    onClick={() => onSlotClick(measurement)}
+                    className="zenin__series_slot_container"
+                    style={{ width: slotWidth }}
+                >
+                    <div className={["zenin__series_slot", measurement.state].join(' ')}></div>
                 </div>
             );
         }

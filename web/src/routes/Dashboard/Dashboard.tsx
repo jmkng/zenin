@@ -1,11 +1,10 @@
-import { isMonitor, Monitor, useMonitorContext } from '../../internal/monitor'
-import { useMemo } from 'react';
+import { ACTIVE_UI, INACTIVE_UI, isMonitor, Monitor, useMonitorContext } from '../../internal/monitor'
 import { useDefaultMonitorService } from '../../internal/monitor/service';
 import { useAccountContext } from '../../internal/account';
 import { DataPacket } from '../../server';
 
 import MonitorComponent from '../../components/Monitor/Monitor';
-import DetailComponent from '../../components/Detail/Detail';
+import EditorComponent from '../../components/Editor/Editor';
 import InfoComponent from '../../components/Info/Info';
 
 import './Dashboard.css'
@@ -16,12 +15,8 @@ export default function Dashboard() {
         service: useDefaultMonitorService()
     }
     const account = useAccountContext();
-    const sorted = monitor.context.state.visible.sort((a, b) => a.name > b.name ? 1 : -1);
-    const split: boolean = useMemo(() =>
-        monitor.context.state.editing != null
-        || monitor.context.state.drafting
-        || monitor.context.state.viewing != null,
-        [monitor.context.state.editing, monitor.context.state.drafting, monitor.context.state.viewing]);
+    const sorted = getVisible(monitor.context.state.monitors, monitor.context.state.filter).sort((a, b) => a.name > b.name ? 1 : -1);
+    const split = monitor.context.state.split.isEditing() || monitor.context.state.split.isViewing();
 
     const handleAdd = async (value: Monitor) => {
         const token = account.state.authenticated!.token.raw;
@@ -31,14 +26,6 @@ export default function Dashboard() {
         const measurements = null;
         const full: Monitor = { ...value, id: body.data.id, measurements: measurements }
         monitor.context.dispatch({ type: 'overwrite', monitor: full })
-    }
-
-    const handleClose = () => {
-        monitor.context.dispatch({ type: 'edit', monitor: null })
-    }
-
-    const handleDelete = (value: Monitor) => {
-        monitor.context.dispatch({ type: 'delete', monitors: [value] })
     }
 
     const handleUpdate = async (value: Monitor) => {
@@ -51,27 +38,36 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
 
-    const editor = <DetailComponent
-        monitor={monitor.context.state.editing}
-        onClose={handleClose}
-        onChange={value => isMonitor(value) ? handleUpdate(value) : handleAdd(value)}
-        onDelete={handleDelete}
-    />
-
-    const info = <InfoComponent monitor={monitor.context.state.viewing!} />
-
     return (
         <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
             <div className="zenin__dashboard_monitors">
-                {sorted.map((n, i) => <MonitorComponent key={i} monitor={n} service={monitor.service} />)}
+                {sorted.map((n, i) =>
+                    <MonitorComponent key={i} monitor={n} service={monitor.service} />)}
             </div>
 
             {split ?
                 <div className={"zenin__dashboard_activity"}>
-                    {monitor.context.state.editing || monitor.context.state.drafting ? editor : null}
-                    {monitor.context.state.viewing ? info : null}
+                    {monitor.context.state.split.isEditing() ?
+                        <EditorComponent
+                            state={monitor.context.state.split.pane}
+                            onClose={() => monitor.context.dispatch({ type: 'edit', monitor: null })}
+                            onChange={value => isMonitor(value) ? handleUpdate(value) : handleAdd(value)}
+                            onDelete={value => monitor.context.dispatch({ type: 'delete', monitors: [value] })} />
+                        : null}
+
+                    {monitor.context.state.split.isViewing() ?
+                        <InfoComponent
+                            state={monitor.context.state.split.pane} />
+                        : null}
                 </div>
                 : null}
         </div>
     )
+}
+
+const getVisible = (monitors: Map<number, Monitor>, filter: string): Monitor[] => {
+    let filtered = [...monitors.values()];
+    if (filter == ACTIVE_UI) filtered = filtered.filter(n => n.active)
+    else if (filter == INACTIVE_UI) filtered = filtered.filter(n => !n.active)
+    return filtered;
 }

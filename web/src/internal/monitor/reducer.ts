@@ -1,41 +1,137 @@
-import { ACTIVE_UI, FilterKind, INACTIVE_UI, Measurement, Monitor } from ".";
+import {FilterKind,Measurement, Monitor } from ".";
+
+export class ViewState {
+    constructor(
+        /** The monitor being viewed. */
+        public target: Monitor,
+        /** A measurement within that monitor that has been selected. */
+        public subTarget: Measurement | null
+    ) {}
+}
+
+export class EditorState {
+    constructor(
+        /** The monitor being modified. Null represents `drafting` a new monitor. */
+        public target: Monitor | null
+    ) {}
+}
+
+export class SplitState {
+    constructor(
+        /** We can either be viewing a monitor in detail, 
+         * editing a monitor, 
+         * or neither. */
+        public pane: ViewState | EditorState | null
+    ) {}
+
+    isViewing(): this is { pane: ViewState } {
+        return this.pane instanceof ViewState;
+    }
+
+    isEditing(): this is { pane: EditorState } {
+        return this.pane instanceof EditorState;
+    }
+
+    /** Return true if any of the provided IDs match the id of the monitor in this state. */
+    overlaps(id: number[]): boolean {
+        if (this.isViewing()) {
+            return id.includes(this.pane.target.id!);
+        } else if (this.isEditing()) {
+            return this.pane.target !== null && id.includes(this.pane.target.id);
+        }
+        return false;
+    }
+
+    /** Return true if the provided monitor is equal to the monitor in this state. */
+    equals(monitor: Monitor): boolean {
+        if (this.isViewing()) {
+            return monitor == this.pane.target
+        } else if (this.isEditing()) {
+            return this.pane.target !== null && monitor == this.pane.target
+        }
+        return false;
+    }
+}
 
 export interface MonitorState {
     monitors: Map<number, Monitor>,
     filter: FilterKind,
-    visible: Monitor[],
-    selected: Monitor[],
+    bulk: Monitor[],
+    split: SplitState,
     deleting: Monitor[],
-    viewing: Monitor | null,
-    editing: Monitor | null,
-    drafting: boolean,
 }
 
 export const monitorDefault: MonitorState = {
     monitors: new Map(),
     filter: "All",
-    visible: [],
-    selected: [],
+    bulk: [],
+    split: new SplitState(null),
     deleting: [],
-    viewing: null,
-    editing: null,
-    drafting: false,
 }
 
 const inventoryMaxMeasurements = 40;
 const inventoryChunkSize = 5;
 
-type RemoveAction = { type: 'remove', monitors: number[] };
-type ToggleAction = { type: 'toggle', monitors: number[], active: boolean };
-type DraftAction = { type: 'draft' };
-type FilterAction = { type: 'filter', filter: string };
-type DeleteAction = { type: 'delete', monitors: Monitor[] };
-type EditAction = { type: 'edit', monitor: Monitor | null };
-type SelectAction = { type: 'select', monitor: Monitor };
-type OverwriteAction = { type: 'overwrite', monitor: Monitor };
-type PollAction = { type: 'poll', measurement: Measurement };
-type ResetAction = { type: 'reset', monitors: Monitor[] };
-type ViewAction = { type: 'view', monitor: Monitor | null };
+type RemoveAction = { 
+    type: 'remove', 
+    monitors: number[] 
+};
+
+type ToggleAction = { 
+    type: 'toggle', 
+    monitors: number[], 
+    active: boolean 
+};
+
+type DraftAction = { 
+    type: 'draft' 
+};
+
+type FilterAction = { 
+    type: 'filter', 
+    filter: string 
+};
+
+type DeleteAction = { 
+    type: 'delete', 
+    monitors: Monitor[] 
+};
+
+type EditAction = { 
+    type: 'edit', 
+    monitor: Monitor | null 
+};
+
+type SelectAction = { 
+    type: 'select', 
+    monitor: Monitor 
+};
+
+type OverwriteAction = { 
+    type: 'overwrite', 
+    monitor: Monitor 
+};
+
+type PollAction = { 
+    type: 'poll', 
+    measurement: Measurement 
+};
+
+type ResetAction = { 
+    type: 'reset', 
+    monitors: Monitor[] 
+};
+
+type ViewAction = { 
+    type: 'view', 
+    target: { 
+        monitor: Monitor, 
+        measurement: Measurement | null,
+        disableToggle?: boolean
+    } | null
+};
+
+type DetailAction = { type: 'detail', measurement: Measurement | null };
 
 export type MonitorDispatch = (action: MonitorAction) => void;
 
@@ -51,17 +147,18 @@ export type MonitorAction =
     | PollAction
     | ResetAction
     | ViewAction
+    | DetailAction
 
 const removeAction = (state: MonitorState, action: RemoveAction) => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) monitors.delete(n);
-    const visible = getVisible(monitors, state.filter);
-    const editing = state.editing?.id && action.monitors.includes(state.editing.id) ? null : state.editing;
-    const viewing = state.viewing?.id && action.monitors.includes(state.viewing.id) ? null : state.viewing;
-    const drafting = state.drafting;
-    const selected: Monitor[] = [];
+    
+    const bulk: Monitor[] = [];
     const deleting: Monitor[] = [];
-    return { ...state, monitors, visible, viewing, editing, drafting, selected, deleting }
+    const split = state.split.overlaps(action.monitors) 
+        ? null 
+        : state.split;
+    return { ...state, monitors, bulk, deleting, split } as MonitorState
 }
 
 const toggleAction = (state: MonitorState, action: ToggleAction) => {
@@ -74,23 +171,20 @@ const toggleAction = (state: MonitorState, action: ToggleAction) => {
         }
         found.active = action.active;
     }
-    const visible = getVisible(monitors, state.filter);
-    const selected: Monitor[] = [];
+    const bulk: Monitor[] = [];
     const deleting: Monitor[] = [];
-    return { ...state, monitors, visible, selected, deleting };
+    return { ...state, monitors, bulk, deleting };
 }
 
 const draftAction = (state: MonitorState) => {
-    const drafting = true;
-    const focused = null;
-    const viewing = null;
-    return { ...state, drafting, viewing, focused }
+    const editor = new EditorState(null);
+    const split = new SplitState(editor);
+    return { ...state, split }
 }
 
 const filterAction = (state: MonitorState, action: FilterAction) => {
     const filter = action.filter as FilterKind;
-    const visible = getVisible(state.monitors, action.filter);
-    return { ...state, filter, visible }
+    return { ...state, filter }
 }
 
 const deleteAction = (state: MonitorState, action: DeleteAction) => {
@@ -99,40 +193,31 @@ const deleteAction = (state: MonitorState, action: DeleteAction) => {
 }
 
 const editAction = (state: MonitorState, action: EditAction) => {
-    const drafting = false;
-    const viewing = null;
-    const editing = state.editing == action.monitor ? null : action.monitor;
-    return { ...state, drafting, viewing, editing }
+    let split: SplitState;
+    if (!action.monitor || state.split.isEditing() && state.split.pane.target == action.monitor) 
+            split = new SplitState(null)
+    else split = new SplitState(new EditorState(action.monitor))
+    return { ...state, split }
 }
 
 const selectAction = (state: MonitorState, action: SelectAction) => {
-    const selected = state.selected.includes(action.monitor)
-        ? state.selected.filter(n => n != action.monitor)
-        : [...state.selected, action.monitor];
-    return { ...state, selected }
+    const bulk = state.bulk.includes(action.monitor)
+        ? state.bulk.filter(n => n != action.monitor)
+        : [...state.bulk, action.monitor];
+    return { ...state, bulk }
 }
 
 const overwriteAction = (state: MonitorState, action: OverwriteAction) => {
-    const monitor = action.monitor;
-    if (!monitor.id) {
-        throw new Error("monitor is missing id in overwrite action");
-    }
     const monitors = new Map(state.monitors);
-    const target = monitors.get(monitor.id);
-    if (target) monitor.measurements = target.measurements; // Recycle the measurement information.
-    monitors.set(monitor.id, monitor);
-    const editing = monitor;
-    const viewing = null;
-    const drafting = false;
-    const visible = getVisible(monitors, state.filter);
-    return { ...state, monitors, editing, viewing, drafting, visible }
+    const target = monitors.get(action.monitor.id);
+    if (target) action.monitor.measurements = target.measurements; // Recycle the measurement information.
+    monitors.set(action.monitor.id, action.monitor);
+    const split = new SplitState(new EditorState(action.monitor))
+    return { ...state, monitors, split }
 }
 
 const pollAction = (state: MonitorState, action: PollAction) => {
     const monitors = new Map(state.monitors);
-    if (!action.measurement.monitorId) {
-        throw new Error("measurement is missing monitor id in poll action");
-    }
     const monitor = monitors.get(action.measurement.monitorId);
     if (!monitor) {
         console.error(`failed to add measurement to monitor, monitor not in inventory: id=${action.measurement.monitorId}`);
@@ -148,17 +233,37 @@ const pollAction = (state: MonitorState, action: PollAction) => {
     return { ...state, monitors }
 }
 
+
 const resetAction = (state: MonitorState, action: ResetAction) => {
-    const monitors = getMapped(action.monitors);
-    const visible = [...monitors.values()];
-    return { ...state, monitors, visible }
+    const monitors = new Map<number, Monitor>();
+    for (const monitor of action.monitors) {
+        const duplicate: Monitor = { ...monitor };
+        // By default, measurement information has the newest at the front.
+        // Reverse array here so new measurements can be pushed to the back, since that is most common operation.
+        if (monitor.measurements) duplicate.measurements = [...monitor.measurements].reverse();
+        monitors.set(duplicate.id, duplicate);
+    }
+    
+    return { ...state, monitors }
 }
 
 const viewAction = (state: MonitorState, action: ViewAction) => {
-    const drafting = false;
-    const viewing = state.viewing == action.monitor ? null : action.monitor;
-    const editing = null;
-    return { ...state, drafting, viewing, editing }
+    if (
+        !action.target 
+        || (state.split.equals(action.target.monitor) && !action.target.disableToggle)
+    ) return { ...state, split: new SplitState(null) };
+
+    const view = new ViewState(action.target.monitor, action.target.measurement);
+    const split = new SplitState(view)
+    return { ...state, split }
+}
+
+const detailAction = (state: MonitorState, action: DetailAction) => {
+    if (state.split.isViewing()) {
+        const view = new ViewState(state.split.pane.target, action.measurement)
+        return {...state, split: new SplitState(view) }
+    }
+    return state;
 }
 
 const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorState => {
@@ -174,29 +279,8 @@ const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorStat
         case "edit": return editAction(state, action);
         case "select": return selectAction(state, action);
         case "view": return viewAction(state, action);
+        case "detail": return detailAction(state, action);
     }
-}
-
-const getVisible = (monitors: Map<number, Monitor>, filter: string): Monitor[] => {
-    let filtered = [...monitors.values()];
-    if (filter == ACTIVE_UI) filtered = filtered.filter(n => n.active)
-    else if (filter == INACTIVE_UI) filtered = filtered.filter(n => !n.active)
-    return filtered;
-}
-
-const getMapped = (monitors: Monitor[]): Map<number, Monitor> => {
-    const map = new Map<number, Monitor>();
-    for (const monitor of monitors) {
-        const duplicate: Monitor = { ...monitor };
-        if (!duplicate.id) {
-            throw new Error(`monitor is missing id in \`getMapped\``);
-        }
-        // By default, measurement information has the newest at the front.
-        // Reverse array here so new measurements can be pushed to the back, since that is most common operation.
-        if (monitor.measurements) duplicate.measurements = [...monitor.measurements].reverse();
-        map.set(duplicate.id, duplicate);
-    }
-    return map;
 }
 
 export { monitorReducer };

@@ -9,7 +9,6 @@ interface SummaryProps {
     measurements: Measurement[]
 }
 
-
 export default function SummaryComponent(props: SummaryProps) {
     const { measurements } = props;
 
@@ -23,11 +22,7 @@ export default function SummaryComponent(props: SummaryProps) {
 
     return (
         <div className="zenin__summary_component">
-            <ListComponent
-                title="Summary"
-                help="Monitor information that is not aggregated from the measurements created by the monitor."
-                data={listData}
-            />
+            <ListComponent title="Summary" data={listData} />
         </div>
     )
 }

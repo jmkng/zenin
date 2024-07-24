@@ -25,6 +25,7 @@
 
 .zenin__table_head, .zenin__table_component .zenin__row_component {
     height: var(--px-h);
+    width: 100%;
 }
 
 .zenin__table_component table {
@@ -64,31 +65,24 @@
 
 .zenin__table_component .zenin__row_component {
     border-top: 1px solid var(--off-b);
-    border-bottom: 1px solid var(--off-b);
-}
-
-.zenin__table_component .zenin__row_component:hover {
-    background: var(--off-a);
 }
 
 .zenin__table_recent_container {
     margin-left: var(--px-b);
-}
-
-.zenin__table_collapse_container {
     margin-left: auto;
 }
 
 .zenin__table_footer {
     display: flex;
+    justify-content: flex-end;
 }
 
-.zenin__table_footer > *:not(:first-child) {
+.zenin__table_footer_right {
+    display: flex;
+}
+
+.zenin__table_footer_right > *:not(:first-child) {
     margin-left: var(--px-b);
-}
-
-.zenin__table_footer > *:first-child {
-    margin-left: auto;
 }
 
 .zenin__table_container th:last-child, .zenin__table_container td:last-child {

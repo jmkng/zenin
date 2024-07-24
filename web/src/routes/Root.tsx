@@ -77,8 +77,11 @@ export default function RootComponent() {
             <div className='zenin__root_left'>
                 {visible ? <NavComponent /> : null}
             </div>
+
             <div className='zenin__root_right'>
-                {visible ? <MenuComponent /> : null}
+                {visible ?
+                    <MenuComponent />
+                    : null}
                 <div className='zenin__main'>
                     <Router />
                 </div>

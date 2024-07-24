@@ -1,0 +1,12 @@
+.zenin__row_component {
+    user-select: none;
+    width: 100%;
+}
+
+.zenin__row_component:not(.highlight) {
+    cursor: pointer;
+}
+
+.zenin__row_component:hover, .zenin__row_component.highlight {
+    background: var(--off-a);
+}

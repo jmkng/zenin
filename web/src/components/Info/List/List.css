@@ -20,15 +20,6 @@
     background: var(--off-a);
 }
 
-.zenin__list_intro_help {
-    display: flex;
-    align-items: center;
-    border-radius: var(--rounded);
-    background: var(--background);
-    padding: var(--px-b) var(--px-d);
-}
-
-
 .zenin__list_body_pair {
     height: var(--px-h);
     display: flex;

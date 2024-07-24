@@ -30,7 +30,7 @@ export default function DashboardMenuComponent() {
     }
 
     const handleToggle = async (active: boolean) => {
-        const monitors = [...monitor.context.state.selected.map(n => n.id!)];
+        const monitors = [...monitor.context.state.bulk.map(n => n.id!)];
         const token = account.state.authenticated!.token.raw;
         const extract = await monitor.service.toggle(token, monitors, active);
         if (!extract.ok()) return;
@@ -38,7 +38,7 @@ export default function DashboardMenuComponent() {
     }
 
     const handleDelete = () => {
-        const monitors = monitor.context.state.selected;
+        const monitors = monitor.context.state.bulk;
         monitor.context.dispatch({ type: 'delete', monitors });
     }
 
@@ -63,12 +63,12 @@ export default function DashboardMenuComponent() {
                 />
             </div>
             {
-                monitor.context.state.selected.length > 0
+                monitor.context.state.bulk.length > 0
                     ?
                     <div className="zenin__menu_monitor_bulk_container">
                         <div className="zenin__menu_margin">
                             <Button
-                                disabled={!monitor.context.state.selected.some(n => !n.active)}
+                                disabled={!monitor.context.state.bulk.some(n => !n.active)}
                                 tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}
                             >
                                 <PlayIcon />
@@ -76,7 +76,7 @@ export default function DashboardMenuComponent() {
                         </div>
                         <div className="zenin__menu_margin">
                             <Button
-                                disabled={!monitor.context.state.selected.some(n => n.active)}
+                                disabled={!monitor.context.state.bulk.some(n => n.active)}
                                 tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}
                             >
                                 <PauseIcon />

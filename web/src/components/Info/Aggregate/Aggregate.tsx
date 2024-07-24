@@ -8,7 +8,6 @@ interface AggregateProps {
     measurements: Measurement[]
 }
 
-
 export default function AggregateComponent(props: AggregateProps) {
     const { measurements } = props;
 
@@ -17,17 +16,17 @@ export default function AggregateComponent(props: AggregateProps) {
     const uptime = measurements.length > 0
         ? `${Math.floor((measurements.filter(n => n.state == OK_API).length / measurements.length) * 100)}%`
         : "N/A";
-    const listData = new Map()
-    listData.set("Uptime", `${uptime}`);
-    if (dead > 0) listData.set("Incidents", dead);
-    if (warn > 0) listData.set("Warnings", warn);
+
+    const pairs = new Map()
+    pairs.set("Uptime", `${uptime}`);
+    if (dead > 0) pairs.set("Incidents", dead);
+    if (warn > 0) pairs.set("Warnings", warn);
 
     return (
         <div className="zenin__aggregate_component">
             <ListComponent
                 title="Aggregate"
-                help="Statistics aggregated from the measurements displayed in the measurement table."
-                data={listData}
+                data={pairs}
             />
         </div>
     )
