@@ -9,14 +9,15 @@
 }
 
 .zenin__state[data-state="OK"] {
+    background: var(--off-b);
     color: var(--ok);
 }
-  
+
 .zenin__state[data-state="WARN"] {
     background: var(--off-b);
     color: var(--warn)
 }
-  
+
 .zenin__state[data-state="DEAD"] {
     background: var(--off-b);
     color: var(--dead-a)
