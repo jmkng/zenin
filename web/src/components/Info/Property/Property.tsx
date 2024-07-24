@@ -22,6 +22,8 @@ export default function PropertyComponent(props: PropertyProps) {
     if (m.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(m.icmpMaxRtt))
     if (m.pluginExitCode != null) pairs.set("Exit Code", m.pluginExitCode.toString())
 
+    // if (m.httpResponseHeaders != null) pairs.set("Response Headers", m.httpResponseHeaders)
+
     ////////////////// TODO: Limit field width, display in modal when clicked  
     // if (m.httpResponseHeaders) pairs.set("Response Headers", m.httpResponseHeaders.toString())
     // if (m.httpResponseBody) pairs.set("Response Body", m.httpResponseBody.toString())
@@ -33,13 +35,11 @@ export default function PropertyComponent(props: PropertyProps) {
         <div className="zenin__property_component">
             <ListComponent
                 title={`Properties #${measurement.id}`}
-                data={pairs} />
+                data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
 
             {measurement.stateHint ?
                 <div className="zenin__property_hints">
-                    <ListComponent
-                        title="Hints"
-                        data={measurement.stateHint} />
+                    <ListComponent title="Hints" data={measurement.stateHint} />
                 </div>
                 : null}
         </div>

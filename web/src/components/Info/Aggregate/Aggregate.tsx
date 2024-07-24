@@ -21,17 +21,17 @@ export default function AggregateComponent(props: AggregateProps) {
         ? formatMilliseconds(measurements.reduce((acc, value) => acc + value.duration, 0) / measurements.length)
         : "N/A";
 
-    const pairs = new Map()
+    const pairs: Map<string, string> = new Map()
     pairs.set("Uptime", `${uptime}`);
     pairs.set("Average Duration", avgDur)
-    if (dead > 0) pairs.set("Dead", dead);
-    if (warn > 0) pairs.set("Warn", warn);
+    if (dead > 0) pairs.set("Dead", dead.toString());
+    if (warn > 0) pairs.set("Warn", warn.toString());
 
     return (
         <div className="zenin__aggregate_component">
             <ListComponent
                 title="Aggregate"
-                data={pairs}
+                data={Array.from(pairs, ([key, value]) => ({ key, value: value }))}
             />
         </div>
     )

@@ -92,7 +92,10 @@ export default function TableComponent(props: TableProps) {
                 <thead className='zenin__table_head'>
                     <tr>
                         <th>
-                            <CheckboxInput checked={allChecked} name={`zenin__table_master`} onChange={handleMasterCheck} />
+                            <CheckboxInput
+                                checked={allChecked}
+                                name={`zenin__table_master`}
+                                onChange={handleMasterCheck} />
                         </th>
                         <th>ID</th>
                         <th>Time</th>
@@ -137,13 +140,11 @@ export default function TableComponent(props: TableProps) {
             <AggregateComponent measurements={measurements} />
         </div>
 
-        {
-            selected ?
-                <div className="zenin__info_property_container" ref={propertyContainerRef}>
-                    <PropertyComponent measurement={selected} />
-                </div>
-                : null
-        }
+        {selected ?
+            <div className="zenin__info_property_container" ref={propertyContainerRef}>
+                <PropertyComponent measurement={selected} />
+            </div>
+            : null}
     </div >
 }
 
