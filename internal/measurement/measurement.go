@@ -60,7 +60,7 @@ func (h *Hint) Scan(value any) error {
 type Span struct {
 	State        ProbeState    `json:"state" db:"state"`
 	StateHint    Hint          `json:"stateHint,omitempty" db:"state_hint"`
-	Certificates []Certificate `json:"certificates,omitempty"`
+	Certificates []Certificate `json:"-"`
 
 	HTTPFields
 	ICMPFields
