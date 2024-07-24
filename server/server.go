@@ -57,6 +57,7 @@ func (s *Server) Serve() error {
 		v1.Use(middleware.AllowContentType("application/json"))
 		v1.Mount("/meta", NewMetaHandler(s.bundle.Meta))
 		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
+		v1.Mount("/feed", NewFeedHandler(s.bundle.Monitor))
 
 		//// private /////
 		v1.Group(func(private chi.Router) {
@@ -64,8 +65,6 @@ func (s *Server) Serve() error {
 			private.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
 		})
 		//////////////////
-
-		v1.Mount("/feed", NewFeedHandler(s.bundle.Monitor))
 	})
 
 	err = http.ListenAndServe(s.config.Address.String(), mux)
