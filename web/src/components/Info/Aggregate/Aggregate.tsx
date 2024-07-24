@@ -1,3 +1,4 @@
+import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/monitor"
 import { DEAD_API, OK_API, WARN_API } from "../../../server";
 import ListComponent from "../List/List";
@@ -16,11 +17,15 @@ export default function AggregateComponent(props: AggregateProps) {
     const uptime = measurements.length > 0
         ? `${Math.floor((measurements.filter(n => n.state == OK_API).length / measurements.length) * 100)}%`
         : "N/A";
+    const avgDur = measurements.length > 0
+        ? formatMilliseconds(measurements.reduce((acc, value) => acc + value.duration, 0))
+        : "N/A";
 
     const pairs = new Map()
     pairs.set("Uptime", `${uptime}`);
-    if (dead > 0) pairs.set("Incidents", dead);
-    if (warn > 0) pairs.set("Warnings", warn);
+    pairs.set("Average Duration", avgDur)
+    if (dead > 0) pairs.set("Dead", dead);
+    if (warn > 0) pairs.set("Warn", warn);
 
     return (
         <div className="zenin__aggregate_component">
