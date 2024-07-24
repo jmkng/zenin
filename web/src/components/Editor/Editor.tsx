@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import * as sapi from "../../server";
 import * as im from "../../internal/monitor";
+import { EditorState } from "../../internal/monitor/reducer";
 import TextInput from "../Input/TextInput/TextInput";
 import Button from "../Button/Button";
 import NumberInput from "../Icon/NumberInput/NumberInput";
@@ -10,19 +11,14 @@ import TrashIcon from "../Icon/TrashIcon/TrashIcon";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import { useMetaContext } from "../../internal/meta";
 
-import "./Detail.css";
+import "./Editor.css";
 
-interface DetailProps {
-    monitor: im.Monitor | null
+interface EditorProps {
+    state: EditorState
 
     onChange: (target: im.Monitor) => void;
     onClose: () => void;
     onDelete: (monitor: im.Monitor) => void;
-}
-
-interface DetailState {
-    draft: im.Draft,
-    original: im.Draft
 }
 
 const defaultDraft: im.Draft = {
@@ -44,9 +40,9 @@ const defaultDraft: im.Draft = {
     icmpSize: 56
 }
 
-export default function DetailComponent(props: DetailProps) {
+export default function EditorComponent(props: EditorProps) {
     const {
-        monitor: subject,
+        state,
         onChange,
         onClose,
         onDelete
@@ -54,8 +50,11 @@ export default function DetailComponent(props: DetailProps) {
     const meta = {
         context: useMetaContext()
     };
-    const [id, reset] = useMemo(() => subject ? resetToDraft(subject) : [null, defaultDraft], [subject])
-    const [editor, setEditor] = useState<DetailState>({ draft: reset, original: reset })
+    const [id, reset] = useMemo(() => state.target ? resetToDraft(state.target) : [null, defaultDraft], [state.target])
+    const [editor, setEditor] = useState<{
+        draft: im.Draft,
+        original: im.Draft
+    }>({ draft: reset, original: reset })
 
     const canSubmit = useMemo(() =>
         !im.monitorEquals(editor.draft as im.Monitor, editor.original as im.Monitor)
@@ -76,10 +75,10 @@ export default function DetailComponent(props: DetailProps) {
     }, [reset])
 
     useEffect(() => {
-        if (!subject) return;
-        const active = subject.active;
+        if (!state.target) return;
+        const active = state.target.active;
         setEditor(prev => ({ ...prev, draft: { ...prev.draft, active }, original: { ...prev.original, active } }))
-    }, [subject, subject?.active])
+    }, [state.target])
 
     const handleSubmit = () => {
         const monitor = sanitizeToMonitor(editor.draft);
@@ -366,11 +365,11 @@ export default function DetailComponent(props: DetailProps) {
                     <span>Cancel</span>
                 </Button>
 
-                {subject ?
+                {state.target ?
                     <div onClick={(event) => event.stopPropagation()} className="zenin__detail_delete_button">
                         <Button
                             kind="destructive"
-                            onClick={() => onDelete(subject)}
+                            onClick={() => onDelete(state.target!)}
                         >
                             <TrashIcon />
                         </Button>
