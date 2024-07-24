@@ -53,3 +53,7 @@ export function formatDate(value: string) {
     });
     return formatter.format(date);
 }
+
+export function formatMilliseconds(value: number): string {
+    return `${value.toFixed(2)} (ms)`
+}
