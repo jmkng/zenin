@@ -1,3 +1,4 @@
+import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/monitor";
 import ListComponent from "../List/List";
 
@@ -12,13 +13,13 @@ export default function PropertyComponent(props: PropertyProps) {
 
     const m = measurement;
     const pairs: Map<string, string> = new Map()
-    pairs.set("Duration", `${m.duration.toFixed(2)} (ms)`)
+    pairs.set("Duration", formatMilliseconds(m.duration))
     if (m.httpStatusCode != null) pairs.set("Status Code", m.httpStatusCode.toString())
     if (m.icmpPacketsOut != null) pairs.set("Packets Out", m.icmpPacketsOut.toString())
     if (m.icmpPacketsIn != null) pairs.set("Packets In", m.icmpPacketsIn.toString())
-    if (m.icmpMinRtt != null) pairs.set("Min RTT", `${m.icmpMinRtt.toFixed(2)} (ms)`)
-    if (m.icmpAvgRtt != null) pairs.set("Average RTT", `${m.icmpAvgRtt.toFixed(2)} (ms)`)
-    if (m.icmpMaxRtt != null) pairs.set("Max RTT", `${m.icmpMaxRtt.toFixed(2)} (ms)`)
+    if (m.icmpMinRtt != null) pairs.set("Min Round Trip", formatMilliseconds(m.icmpMinRtt))
+    if (m.icmpAvgRtt != null) pairs.set("Average Round Trip", formatMilliseconds(m.icmpAvgRtt))
+    if (m.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(m.icmpMaxRtt))
     if (m.pluginExitCode != null) pairs.set("Exit Code", m.pluginExitCode.toString())
 
     ////////////////// TODO: Limit field width, display in modal when clicked  
