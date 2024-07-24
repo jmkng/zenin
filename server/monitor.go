@@ -165,7 +165,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 		&monitor.SelectParams{Id: &[]int{parsed}},
 		0)
 	if err != nil {
-		responder.Status(http.StatusInternalServerError)
+		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 	if len(found) == 0 {
@@ -210,7 +210,7 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 		&monitor.SelectParams{Id: &[]int{parsed}},
 		0)
 	if err != nil {
-		responder.Status(http.StatusInternalServerError)
+		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 	if len(found) == 0 {
