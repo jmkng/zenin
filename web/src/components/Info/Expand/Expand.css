@@ -1,0 +1,75 @@
+.zenin__expand_component {
+    border-radius: var(--rounded);
+    border: 1px solid var(--off-b);
+    transition: border var(--fast) ease-in-out;
+}
+
+.zenin__expand_controls, .zenin__expand_popout {
+    display: flex;
+    padding: var(--px-b) var(--px-d);
+    align-items: center;
+}
+
+.zenin__expand_component.expanded .zenin__expand_controls {
+    border-bottom: 1px solid var(--off-b);
+}
+
+.zenin__expand_component.expanded .zenin__expand_text {
+    color: var(--mid);
+}
+
+.zenin__expand_component.expanded .zenin__expand_toggle {
+    transform: rotate(270deg);
+}
+
+.zenin__expand_popout_controls {
+    border-bottom: 1px solid var(--off-b);
+    display: flex;
+    justify-content: space-between;
+    padding: var(--px-b);
+}
+
+.zenin__expand_popout_controls_left {
+    display: flex;
+}
+
+.zenin__expand_popout_controls_left > * {
+    margin-right: var(--px-b);
+}
+
+.zenin__expand_popout {
+    overflow: scroll;
+    border-radius: var(--rounded);
+}
+
+.zenin__expand_popout::-webkit-scrollbar {
+    display: none;
+}
+
+.zenin__expand_popout span {
+    max-height: 400px;
+}
+
+.zenin__expand_title {
+    cursor: pointer;
+    color: var(--mid);
+    flex: 0 0 auto;
+    margin-right: var(--px-f);
+}
+
+.zenin__expand_text {
+    transition: color var(--fast) ease-in-out;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.zenin__expand_toggle {
+    transition: transform var(--fast) ease-in-out;
+    margin-left: 10px;
+    flex: 0 0 auto;
+    transform: rotate(90deg);
+    cursor: pointer;
+    padding: 4px;
+}

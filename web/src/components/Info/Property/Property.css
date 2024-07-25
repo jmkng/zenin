@@ -1,4 +1,8 @@
 .zenin__property_component,
+.zenin__property_response_headers,
+.zenin__property_response_body,
+.zenin__property_stdout,
+.zenin__property_stderr,
 .zenin__property_hints {
     margin-top: var(--px-e);
 }

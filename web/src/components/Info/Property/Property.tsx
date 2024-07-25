@@ -1,5 +1,6 @@
 import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/monitor";
+import ExpandComponent from "../Expand/Expand";
 import ListComponent from "../List/List";
 
 import "./Property.css";
@@ -22,20 +23,35 @@ export default function PropertyComponent(props: PropertyProps) {
     if (m.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(m.icmpMaxRtt))
     if (m.pluginExitCode != null) pairs.set("Exit Code", m.pluginExitCode.toString())
 
-    // if (m.httpResponseHeaders != null) pairs.set("Response Headers", m.httpResponseHeaders)
-
-    ////////////////// TODO: Limit field width, display in modal when clicked  
-    // if (m.httpResponseHeaders) pairs.set("Response Headers", m.httpResponseHeaders.toString())
-    // if (m.httpResponseBody) pairs.set("Response Body", m.httpResponseBody.toString())
-    // if (m.pluginStdout) pairs.set("Status Code", m.pluginStdout.toString())
-    // if (m.pluginStderr) pairs.set("Status Code", m.pluginStderr.toString())
-    //////////////////      
-
     return (
         <div className="zenin__property_component">
             <ListComponent
                 title={`Properties #${measurement.id}`}
                 data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
+
+            {measurement.httpResponseHeaders ?
+                <div className="zenin__property_response_headers">
+                    <ExpandComponent title={"Response Headers"} text={measurement.httpResponseHeaders} />
+                </div>
+                : null}
+
+            {measurement.httpResponseBody ?
+                <div className="zenin__property_response_body">
+                    <ExpandComponent title={"Response Body"} text={measurement.httpResponseBody} />
+                </div>
+                : null}
+
+            {measurement.pluginStdout ?
+                <div className="zenin__property_stdout">
+                    <ExpandComponent title={"Standard Output"} text={measurement.pluginStdout} />
+                </div>
+                : null}
+
+            {measurement.pluginStderr ?
+                <div className="zenin__property_stderr">
+                    <ExpandComponent title={"Standard Output"} text={measurement.pluginStderr} />
+                </div>
+                : null}
 
             {measurement.stateHint ?
                 <div className="zenin__property_hints">

@@ -1,5 +1,7 @@
-import "./List.css";
+import { useRef } from "react";
 import InfoIcon from "../../Icon/InfoIcon/InfoIcon";
+
+import "./List.css";
 
 type ListItem = KeyValueItem | StringItem;
 
@@ -14,9 +16,10 @@ interface ListProps {
 
 export default function ListComponent(props: ListProps) {
     const { title, data } = props;
+    const listRef = useRef<HTMLDivElement>(null);
 
     return (
-        <div className="zenin__list_component">
+        <div className="zenin__list_component" ref={listRef}>
             <div className="zenin__list_intro">
                 <span className="zenin__list_intro_title">{title}</span>
 
@@ -24,6 +27,7 @@ export default function ListComponent(props: ListProps) {
                     <InfoIcon />
                 </div>
             </div>
+
 
             <div className="zenin__list_body">
                 {data.map((value, index) =>
