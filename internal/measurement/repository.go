@@ -8,4 +8,5 @@ import (
 // database table.
 type MeasurementRepository interface {
 	InsertMeasurement(ctx context.Context, m Measurement) (int, error)
+	GetCertificates(ctx context.Context, id int) ([]Certificate, error)
 }

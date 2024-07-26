@@ -63,6 +63,7 @@ func (s *Server) Serve() error {
 		v1.Group(func(private chi.Router) {
 			private.Use(Authenticator)
 			private.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
+			private.Mount("/measurement", NewMeasurementHandler(s.bundle.Measurement))
 		})
 		//////////////////
 	})

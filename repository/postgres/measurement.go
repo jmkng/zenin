@@ -76,3 +76,19 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 
 	return id, err
 }
+
+func (p PostgresRepository) GetCertificates(ctx context.Context, id int) ([]measurement.Certificate, error) {
+	query := `SELECT 
+        id "certificate_id", measurement_id "certificate_measurement_id",  version, serial_number, 
+        public_key_algorithm, issuer_common_name, subject_common_name, not_before, not_after
+    FROM certificate
+    WHERE measurement_id = $1`
+
+	var result []measurement.Certificate
+	err := p.db.SelectContext(ctx, &result, query, id)
+	if err != nil {
+		return []measurement.Certificate{}, nil
+	}
+
+	return result, nil
+}
