@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Measurement, useMonitorContext } from '../../../internal/monitor';
+import { useMonitorContext } from '../../../internal/monitor';
 
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
 import AggregateComponent from '../Aggregate/Aggregate';
@@ -11,6 +11,7 @@ import NextIcon from '../../Icon/NextIcon/NextIcon';
 import LastIcon from '../../Icon/LastIcon/LastIcon';
 import FirstIcon from '../../Icon/FirstIcon/FirstIcon';
 import Row from './Row/Row';
+import { Measurement } from '../../../internal/measurement';
 
 import './Table.css';
 
@@ -37,6 +38,7 @@ export default function TableComponent(props: TableProps) {
 
     useEffect(() => {
         setAllChecked(false);
+        // TODO: Review these effects
     }, [measurements, page]);
 
     useEffect(() => {
@@ -58,8 +60,8 @@ export default function TableComponent(props: TableProps) {
     };
 
     const handleRowClick = (id: number) => {
-        const found = measurements.find(n => n.id === id);
-        monitor.context.dispatch({ type: 'detail', measurement: found || null })
+        const measurement = measurements.find(n => n.id === id) || null;
+        monitor.context.dispatch({ type: 'detail', measurement })
     };
 
     const handleMasterCheck = () => {
@@ -136,7 +138,7 @@ export default function TableComponent(props: TableProps) {
             </div>
         </div>
 
-        <div className="zenin__info_aggregate_container">
+        <div className="zenin__info_aggregate_container zenin__h_space_top">
             <AggregateComponent measurements={measurements} />
         </div>
 

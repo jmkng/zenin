@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmkng/zenin/internal"
+	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
 )
 
@@ -232,7 +233,7 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 func SelectParamsFromQuery(values url.Values) monitor.SelectParams {
 	var id *[]int
 	var active *bool
-	var kind *monitor.ProbeKind
+	var kind *measurement.ProbeKind
 
 	if vid := values.Get("id"); vid != "" {
 		pid := []int{}
@@ -249,7 +250,7 @@ func SelectParamsFromQuery(values url.Values) monitor.SelectParams {
 	if vactive, err := strconv.ParseBool(values.Get("active")); err == nil {
 		active = &vactive
 	}
-	if vkind, err := monitor.ProbeKindFromString(values.Get("kind")); err == nil {
+	if vkind, err := measurement.ProbeKindFromString(values.Get("kind")); err == nil {
 		kind = &vkind
 	}
 

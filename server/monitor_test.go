@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/jmkng/zenin/internal/debug"
-	"github.com/jmkng/zenin/internal/monitor"
+	"github.com/jmkng/zenin/internal/measurement"
 )
 
 func TestSelectParamsFromQuery(t *testing.T) {
@@ -18,7 +18,7 @@ func TestSelectParamsFromQuery(t *testing.T) {
 	for i, v := range *params.Id {
 		debug.AssertEqual(t, v, id[i])
 	}
-	http := monitor.HTTP
+	http := measurement.HTTP
 	debug.AssertEqual(t, *params.Kind, http)
 	active := true
 	debug.AssertEqual(t, *params.Active, active)

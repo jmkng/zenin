@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/pkg/sql"
 )
 
@@ -33,7 +34,7 @@ type SelectParams struct {
 	// Group 2 -----
 
 	Active *bool
-	Kind   *ProbeKind
+	Kind   *measurement.ProbeKind
 }
 
 // Inject implements `Injectable.Inject` for `SelectParams`.

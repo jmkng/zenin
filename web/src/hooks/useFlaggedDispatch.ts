@@ -2,7 +2,8 @@ import { Line } from "../components/LineReader/Line";
 import ObjectLine from "../components/LineReader/ObjectLine";
 import StringLine from "../components/LineReader/StringLine";
 import { useLogContext } from "../internal/log";
-import { Measurement, isMeasurement, useMonitorContext } from "../internal/monitor";
+import { isMeasurement, Measurement } from "../internal/measurement";
+import { useMonitorContext } from "../internal/monitor";
 import { MonitorDispatch } from "../internal/monitor/reducer";
 import { DEAD_API } from "../server";
 

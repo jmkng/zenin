@@ -347,7 +347,7 @@ export default function EditorComponent(props: EditorProps) {
                             <TextAreaInput
                                 label={<span className={hasValidPluginArguments ? "" : "zenin__h_error"}>Arguments</span>}
                                 name="zenin__detail_monitor_http_headers"
-                                placeholder={"[ \"-c\", \"100\" ]"}
+                                placeholder={"[\"-c\", \"100\"]"}
                                 value={editor.draft.pluginArgs}
                                 subtext="Arguments passed to the plugin."
                                 onChange={pluginArgs =>

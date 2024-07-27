@@ -1,4 +1,4 @@
-import { Measurement } from '../../internal/monitor';
+import { Measurement } from '../../internal/measurement';
 import { useEffect, useRef, useState } from 'react';
 
 import './Series.css';

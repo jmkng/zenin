@@ -40,7 +40,7 @@ export function adjustPosition(element: HTMLElement) {
     if (isOffScreenLeft(rect)) element.classList.add('zenin__h_limit_left');
 }
 
-export function formatDate(value: string) {
+export function formatDate(value: string): string {
     const date = new Date(value);
     const options = { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone };
     const formatter = new Intl.DateTimeFormat(undefined, {

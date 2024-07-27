@@ -1,6 +1,7 @@
-import { useContext } from "react";
 import * as sapi from "../../server"
+import { useContext } from "react";
 import { MonitorContext, MonitorDispatchContext } from "./context";
+import { Measurement } from "../measurement";
 
 export const
     HTTP_UI = 'HTTP',
@@ -92,34 +93,6 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.httpCaptureHeaders == b.httpCaptureHeaders
         && a.httpCaptureBody == b.httpCaptureBody
         && a.icmpSize == b.icmpSize
-}
-
-export interface Measurement {
-    id: number,
-    monitorId: number,
-    recordedAt: string,
-    duration: number,
-    state: string
-    stateHint: string[] | null,
-    httpStatusCode: number | null,
-    httpResponseHeaders: string | null,
-    httpResponseBody: string | null,
-    icmpPacketsIn: number | null,
-    icmpPacketsOut: number | null,
-    icmpMinRtt: number | null,
-    icmpAvgRtt: number | null,
-    icmpMaxRtt: number | null,
-    pluginExitCode: string | null,
-    pluginStdout: string | null,
-    pluginStderr: string | null,
-}
-
-// eslint-disable-next-line
-export function isMeasurement(obj: any): obj is Measurement {
-    return typeof obj == 'object' &&
-        Object.hasOwn(obj, 'recordedAt') && typeof obj.recordedAt == 'string' &&
-        Object.hasOwn(obj, 'duration') && typeof obj.duration == 'number' &&
-        Object.hasOwn(obj, 'state') && typeof obj.state === 'string'
 }
 
 export function isValidMonitor(draft: Draft): boolean {

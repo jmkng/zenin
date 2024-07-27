@@ -1,9 +1,10 @@
 import { formatMilliseconds } from "../../../internal/layout/graphics";
-import { Measurement } from "../../../internal/monitor";
+import { Measurement } from "../../../internal/measurement";
+import { HTTP_API } from "../../../server";
+
 import ExpandComponent from "../Expand/Expand";
 import ListComponent from "../List/List";
-
-import "./Property.css";
+import ChainComponent from "./Chain";
 
 export interface PropertyProps {
     measurement: Measurement
@@ -12,50 +13,53 @@ export interface PropertyProps {
 export default function PropertyComponent(props: PropertyProps) {
     const { measurement } = props;
 
-    const m = measurement;
     const pairs: Map<string, string> = new Map()
-    pairs.set("Duration", formatMilliseconds(m.duration))
-    if (m.httpStatusCode != null) pairs.set("Status Code", m.httpStatusCode.toString())
-    if (m.icmpPacketsOut != null) pairs.set("Packets Out", m.icmpPacketsOut.toString())
-    if (m.icmpPacketsIn != null) pairs.set("Packets In", m.icmpPacketsIn.toString())
-    if (m.icmpMinRtt != null) pairs.set("Min Round Trip", formatMilliseconds(m.icmpMinRtt))
-    if (m.icmpAvgRtt != null) pairs.set("Average Round Trip", formatMilliseconds(m.icmpAvgRtt))
-    if (m.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(m.icmpMaxRtt))
-    if (m.pluginExitCode != null) pairs.set("Exit Code", m.pluginExitCode.toString())
+    pairs.set("Duration", formatMilliseconds(measurement.duration))
+    if (measurement.httpStatusCode != null) pairs.set("Status Code", measurement.httpStatusCode.toString())
+    if (measurement.icmpPacketsOut != null) pairs.set("Packets Out", measurement.icmpPacketsOut.toString())
+    if (measurement.icmpPacketsIn != null) pairs.set("Packets In", measurement.icmpPacketsIn.toString())
+    if (measurement.icmpMinRtt != null) pairs.set("Min Round Trip", formatMilliseconds(measurement.icmpMinRtt))
+    if (measurement.icmpAvgRtt != null) pairs.set("Average Round Trip", formatMilliseconds(measurement.icmpAvgRtt))
+    if (measurement.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(measurement.icmpMaxRtt))
+    if (measurement.pluginExitCode != null) pairs.set("Exit Code", measurement.pluginExitCode.toString())
 
     return (
-        <div className="zenin__property_component">
+        <div className="zenin__property_component zenin__h_space_top">
             <ListComponent
                 title={`Properties #${measurement.id}`}
                 data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
 
             {measurement.httpResponseHeaders ?
-                <div className="zenin__property_response_headers">
+                <div className="zenin__property_response_headers zenin__h_space_top">
                     <ExpandComponent title={"Response Headers"} text={measurement.httpResponseHeaders} />
                 </div>
                 : null}
-
             {measurement.httpResponseBody ?
-                <div className="zenin__property_response_body">
+                <div className="zenin__property_response_body zenin__h_space_top">
                     <ExpandComponent title={"Response Body"} text={measurement.httpResponseBody} />
                 </div>
                 : null}
-
             {measurement.pluginStdout ?
-                <div className="zenin__property_stdout">
+                <div className="zenin__property_stdout zenin__h_space_top">
                     <ExpandComponent title={"Standard Output"} text={measurement.pluginStdout} />
                 </div>
                 : null}
-
             {measurement.pluginStderr ?
-                <div className="zenin__property_stderr">
+                <div className="zenin__property_stderr zenin__h_space_top">
                     <ExpandComponent title={"Standard Output"} text={measurement.pluginStderr} />
                 </div>
                 : null}
-
             {measurement.stateHint ?
-                <div className="zenin__property_hints">
+                <div className="zenin__property_hints zenin__h_space_top">
                     <ListComponent title="Hints" data={measurement.stateHint} />
+                </div>
+                : null}
+
+            {/****** lazy load ******/}
+
+            {measurement.kind == HTTP_API ?
+                <div className="zenin__property_http_addon zenin__h_space_top">
+                    <ChainComponent measurement={measurement} />
                 </div>
                 : null}
         </div>

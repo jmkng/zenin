@@ -11,12 +11,12 @@ import (
 func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement.Measurement) (int, error) {
 	var id int
 	query := `INSERT INTO measurement 
-		(monitor_id, recorded_at, state, duration, 
+		(monitor_id, recorded_at, state, state_hint, kind, duration, 
         http_status_code, http_response_headers, http_response_body,
         icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt,
         plugin_exit_code, plugin_stdout, plugin_stderr)
     VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
     RETURNING id`
 	tx, err := p.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -28,6 +28,8 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 		m.MonitorId,
 		m.RecordedAt,
 		m.State,
+		m.StateHint,
+		m.Kind,
 		m.Duration,
 		m.HTTPStatusCode,
 		m.HTTPResponseHeaders,

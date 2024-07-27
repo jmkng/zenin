@@ -1,4 +1,5 @@
-import {FilterKind,Measurement, Monitor } from ".";
+import {FilterKind, Monitor } from ".";
+import { Measurement } from "../measurement";
 
 export class ViewState {
     constructor(

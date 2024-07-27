@@ -2,6 +2,7 @@
 package debug
 
 import (
+	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
 )
 
@@ -12,7 +13,7 @@ func GetHttpMonitor() monitor.Monitor {
 	monitor := monitor.Monitor{
 		Id:                 &id,
 		Name:               "HTTP Debug Monitor",
-		Kind:               monitor.HTTP,
+		Kind:               measurement.HTTP,
 		Active:             true,
 		Interval:           100,
 		Timeout:            5,

@@ -1,7 +1,10 @@
 package measurement
 
 import (
+	"database/sql/driver"
 	"encoding/json"
+	"errors"
+	"strings"
 	"time"
 )
 
@@ -39,6 +42,11 @@ func NewSpan(state ProbeState) Span {
 // Hint is a series of user-friendly messages that may indicate how a Probe was created.
 type Hint []string
 
+// Value implements `driver.Valuer` for `Hint`.
+func (h Hint) Value() (driver.Value, error) {
+	return json.Marshal(h)
+}
+
 // Scan implements `sql.Scanner` for `Hint`.
 // This allows storing and fetching the `Hint` as a JSON array.
 func (h *Hint) Scan(value any) error {
@@ -60,6 +68,7 @@ func (h *Hint) Scan(value any) error {
 type Span struct {
 	State        ProbeState    `json:"state" db:"state"`
 	StateHint    Hint          `json:"stateHint,omitempty" db:"state_hint"`
+	Kind         ProbeKind     `json:"kind" db:"measurement_kind"`
 	Certificates []Certificate `json:"-"`
 
 	HTTPFields
@@ -85,6 +94,33 @@ func (s *Span) Downgrade(state ProbeState, hint ...string) {
 // Hint will add hints to the `Span`.
 func (s *Span) Hint(hint ...string) {
 	s.StateHint = append(s.StateHint, hint...)
+}
+
+type ProbeKind string
+
+const (
+	HTTP   ProbeKind = "HTTP"
+	TCP    ProbeKind = "TCP"
+	ICMP   ProbeKind = "ICMP"
+	Ping   ProbeKind = "PING"
+	Plugin ProbeKind = "PLUGIN"
+)
+
+func ProbeKindFromString(value string) (ProbeKind, error) {
+	switch strings.ToLower(value) {
+	case "http":
+		return HTTP, nil
+	case "tcp":
+		return TCP, nil
+	case "icmp":
+		return ICMP, nil
+	case "ping":
+		return Ping, nil
+	case "plugin":
+		return Plugin, nil
+	default:
+		return "", errors.New("invalid monitor kind")
+	}
 }
 
 type HTTPFields struct {

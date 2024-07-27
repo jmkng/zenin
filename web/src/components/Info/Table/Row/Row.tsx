@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { formatDate } from '../../../../internal/layout/graphics';
-import { Measurement } from '../../../../internal/monitor';
 
+import { Measurement } from '../../../../internal/measurement';
 import CheckboxInput from '../../../Input/CheckboxInput/CheckboxInput';
 
 import './Row.css'

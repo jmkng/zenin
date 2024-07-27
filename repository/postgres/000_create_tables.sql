@@ -38,6 +38,7 @@ CREATE TABLE measurement (
     recorded_at           TIMESTAMPTZ NOT NULL,
     state                 TEXT NOT NULL CHECK (state IN ('OK', 'WARN', 'DEAD')),
     state_hint            TEXT,
+    kind                  TEXT NOT NULL CHECK (kind IN ('HTTP', 'TCP', 'ICMP', 'PING', 'PLUGIN')),
     duration              NUMERIC, -- Milliseconds
     http_status_code      INTEGER,
     http_response_headers TEXT,

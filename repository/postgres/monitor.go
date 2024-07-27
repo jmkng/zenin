@@ -12,7 +12,7 @@ import (
 func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.Monitor) (int, error) {
 	var id int
 	query := `INSERT INTO monitor 
-		(name, kind, active, interval, timeout, description, remote_address, remote_port,
+		(name, kind "monitor_kind", active, interval, timeout, description, remote_address, remote_port,
         plugin_name, plugin_args,
         http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
 		http_capture_headers, http_capture_body
@@ -66,7 +66,7 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 	builder.Push(`SELECT
             mo.id "monitor_id",
             mo.name,
-            mo.kind,
+            mo.kind "monitor_kind",
             mo.active,
             mo.interval,
             mo.timeout,
@@ -94,7 +94,7 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *monitor.SelectParams, measurements int) ([]monitor.Monitor, error) {
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT 
-		id "monitor_id", name, kind, active, interval, timeout, description, 
+		id "monitor_id", name, kind "monitor_kind", active, interval, timeout, description, 
 		remote_address, remote_port, 
 		plugin_name, plugin_args, 
 		http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod, 
@@ -122,13 +122,13 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	builder.Push(`WITH raw AS (SELECT
 		m.*,
 		ROW_NUMBER() OVER (PARTITION BY m.monitor_id ORDER BY m.recorded_at DESC) AS rank
-	FROM measurement m
+	FROM measurement m   
 	WHERE m.monitor_id IN (`)
 	builder.SpreadInt(distinct...)
 	builder.Push(`) ORDER BY m.id DESC)
 	SELECT 
 		id "measurement_id", monitor_id "measurement_monitor_id",
-		recorded_at, state, state_hint, duration, http_status_code, http_response_headers, http_response_body,
+		recorded_at, state, state_hint, kind "measurement_kind", duration, http_status_code, http_response_headers, http_response_body,
 		icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt,
 		plugin_exit_code, plugin_stdout, plugin_stderr
 	FROM raw WHERE rank <=`)

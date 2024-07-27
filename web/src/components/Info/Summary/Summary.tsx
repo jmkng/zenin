@@ -1,5 +1,5 @@
 import { formatDate } from "../../../internal/layout/graphics";
-import { Measurement } from "../../../internal/monitor"
+import { Measurement } from "../../../internal/measurement";
 import { DEAD_API } from "../../../server";
 import ListComponent from "../List/List";
 

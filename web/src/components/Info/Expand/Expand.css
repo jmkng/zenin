@@ -1,7 +1,6 @@
 .zenin__expand_component {
     border-radius: var(--rounded);
     border: 1px solid var(--off-b);
-    transition: border var(--fast) ease-in-out;
 }
 
 .zenin__expand_controls, .zenin__expand_popout {
@@ -10,12 +9,16 @@
     align-items: center;
 }
 
-.zenin__expand_component.expanded .zenin__expand_controls {
-    border-bottom: 1px solid var(--off-b);
-}
-
 .zenin__expand_component.expanded .zenin__expand_text {
     color: var(--mid);
+}
+
+.zenin__expand_toggle {
+    transition: transform var(--fast) ease-in-out;
+    flex: 0 0 auto;
+    transform: rotate(90deg);
+    cursor: pointer;
+    padding: 4px;
 }
 
 .zenin__expand_component.expanded .zenin__expand_toggle {
@@ -63,13 +66,5 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     margin-left: auto;
-}
-
-.zenin__expand_toggle {
-    transition: transform var(--fast) ease-in-out;
-    margin-left: 10px;
-    flex: 0 0 auto;
-    transform: rotate(90deg);
-    cursor: pointer;
-    padding: 4px;
+    margin-right: var(--px-e);
 }

@@ -1,42 +1,13 @@
 package monitor
 
 import (
-	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/measurement"
 )
-
-type ProbeKind string
-
-const (
-	HTTP   ProbeKind = "HTTP"
-	TCP    ProbeKind = "TCP"
-	ICMP   ProbeKind = "ICMP"
-	Ping   ProbeKind = "PING"
-	Plugin ProbeKind = "PLUGIN"
-)
-
-func ProbeKindFromString(value string) (ProbeKind, error) {
-	switch strings.ToLower(value) {
-	case "http":
-		return HTTP, nil
-	case "tcp":
-		return TCP, nil
-	case "icmp":
-		return ICMP, nil
-	case "ping":
-		return Ping, nil
-	case "plugin":
-		return Plugin, nil
-	default:
-		return "", errors.New("invalid monitor kind")
-	}
-}
 
 type HTTPRange = string
 
@@ -79,7 +50,7 @@ type Probe interface {
 type Monitor struct {
 	Id                 *int                      `json:"id" db:"monitor_id"`
 	Name               string                    `json:"name" db:"name"`
-	Kind               ProbeKind                 `json:"kind" db:"kind"`
+	Kind               measurement.ProbeKind     `json:"kind" db:"monitor_kind"`
 	Active             bool                      `json:"active" db:"active"`
 	Interval           int                       `json:"interval" db:"interval"`
 	Timeout            int                       `json:"timeout" db:"timeout"`
@@ -102,18 +73,18 @@ type Monitor struct {
 func (m Monitor) Fields() []any {
 	fields := []any{}
 	fields = append(fields, "name", m.Name, "kind", m.Kind, "timeout", m.Timeout)
-	if m.Kind != Plugin {
+	if m.Kind != measurement.Plugin {
 		fields = append(fields, "address", *m.RemoteAddress)
 		if m.RemotePort != nil {
 			fields = append(fields, "port", *m.RemotePort)
 		}
 	}
 	switch m.Kind {
-	case HTTP:
+	case measurement.HTTP:
 		fields = append(fields, "range", *m.HTTPRange, "method", *m.HTTPMethod)
-	case ICMP:
+	case measurement.ICMP:
 		fields = append(fields, "packet(bytes)", *m.ICMPSize)
-	case Plugin:
+	case measurement.Plugin:
 		fields = append(fields, "name", *m.PluginName)
 		if m.PluginArgs != nil {
 			fields = append(fields, "args", *m.PluginArgs)
@@ -136,15 +107,15 @@ func (m Monitor) Poll() measurement.Measurement {
 
 	var probe Probe
 	switch m.Kind {
-	case ICMP:
+	case measurement.ICMP:
 		probe = NewICMPProbe(false)
-	case HTTP:
+	case measurement.HTTP:
 		probe = NewHTTPProbe()
-	case TCP:
+	case measurement.TCP:
 		probe = NewTCPProbe()
-	case Plugin:
+	case measurement.Plugin:
 		probe = NewPluginProbe()
-	case Ping:
+	case measurement.Ping:
 		probe = NewICMPProbe(true)
 	default:
 		panic("unrecognized probe")
@@ -152,10 +123,15 @@ func (m Monitor) Poll() measurement.Measurement {
 
 	start := time.Now()
 	span := probe.Poll(m)
+	span.Kind = m.Kind
 	duration := float64(time.Since(start)) / float64(time.Millisecond)
+	result.Span = span
 	result.RecordedAt = start
 	result.Duration = duration
-	result.Span = span
+
+	if result.Kind == "" {
+		panic("empty kind on measurement")
+	}
 
 	log.Debug("poll stopping",
 		"monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
@@ -180,23 +156,23 @@ func (m Monitor) Validate() error {
 	if m.Name == "" {
 		push("name")
 	}
-	kind, err := ProbeKindFromString(string(m.Kind))
+	kind, err := measurement.ProbeKindFromString(string(m.Kind))
 	if err != nil {
 		push("kind")
 	}
 	switch kind {
-	case HTTP:
+	case measurement.HTTP:
 		if m.RemoteAddress == nil {
 			push("remoteAddress")
 		}
 		if m.HTTPRange == nil {
 			push("httpRange")
 		}
-	case TCP, ICMP, Ping:
+	case measurement.TCP, measurement.ICMP, measurement.Ping:
 		if m.RemoteAddress == nil {
 			push("remoteAddress")
 		}
-	case Plugin:
+	case measurement.Plugin:
 		if m.PluginName == nil {
 			push("pluginName")
 		}

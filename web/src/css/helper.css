@@ -93,7 +93,7 @@
 
 .zenin__h_error {
   color: var(--dead-a);
-}
+} 
 
 .zenin__h_monospace {
   font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace, "Geist Mono";
@@ -101,4 +101,8 @@
 
 .zenin__h_sans {
   font-family: system-ui, sans-serif, "Geist Sans";
+}
+
+.zenin__h_space_top {
+  margin-top: var(--px-e);
 }
