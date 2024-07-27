@@ -40,6 +40,7 @@ export default function ChainComponent(props: ChainProps) {
     }
 
     const handleExpand = () => {
+        if (pending) return;
         if (expanded) {
             setExpanded(false);
         } else {
