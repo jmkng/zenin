@@ -26,8 +26,8 @@ type Measurement struct {
 	Span
 }
 
-// NewSpan returns a new `Span`.
-// The default `State` is `Dead`. `Certificates` is an empty slice. All other fields are nil.
+// NewSpan returns a new `Span` with the provided default state.
+// `Certificates` is an empty slice. All other fields are nil.
 func NewSpan(state ProbeState) Span {
 	return Span{
 		State:        state,

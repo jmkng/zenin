@@ -24,13 +24,13 @@ func NewDistributor(service measurement.MeasurementService) Distributor {
 
 // Distributor handles polling actions, and distributes `Measurement` information.
 type Distributor struct {
-	// A `MeasurementService` used to handle measurements.
-	measurement measurement.MeasurementService
-
 	// A list of active feed subscriber connections.
 	subscribers map[int]*websocket.Conn
 	// A list of polling monitors, and a channel to contact them.
 	polling map[int]chan<- any
+
+	// A `MeasurementService` used to handle measurements.
+	measurement measurement.MeasurementService
 }
 
 // Listen will block and listen for incoming messages.
