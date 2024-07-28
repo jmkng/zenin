@@ -129,10 +129,6 @@ func (m Monitor) Poll() measurement.Measurement {
 	result.RecordedAt = start
 	result.Duration = duration
 
-	if result.Kind == "" {
-		panic("empty kind on measurement")
-	}
-
 	log.Debug("poll stopping",
 		"monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
 		"state", result.State, "hint", result.StateHint)

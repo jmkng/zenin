@@ -10,7 +10,7 @@ func TestAccountValidate(t *testing.T) {
 	debug.Assert(t, Application{
 		Username:          "helloworld",
 		PasswordPlainText: "password1",
-	}.Validate() == nil, "password should be rejected")
+	}.Validate() != nil, "password should be rejected")
 	debug.Assert(t, Application{
 		Username:          "helloworld",
 		PasswordPlainText: "Passw0rd1",
