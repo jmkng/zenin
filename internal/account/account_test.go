@@ -2,18 +2,17 @@ package account
 
 import (
 	"testing"
+
+	"github.com/jmkng/zenin/internal/debug"
 )
 
 func TestAccountValidate(t *testing.T) {
-	application := Application{
+	debug.Assert(t, Application{
 		Username:          "helloworld",
 		PasswordPlainText: "password1",
-	}
-	if application.Validate() == nil {
-		t.Errorf("password must not pass validation: %v", application.PasswordPlainText)
-	}
-	application.PasswordPlainText = "Passw0rd1"
-	if application.Validate() != nil {
-		t.Errorf("password must pass validation: %v", application.PasswordPlainText)
-	}
+	}.Validate() == nil, "password should be rejected")
+	debug.Assert(t, Application{
+		Username:          "helloworld",
+		PasswordPlainText: "Passw0rd1",
+	}.Validate() == nil, "password should be accepted")
 }

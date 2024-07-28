@@ -2,13 +2,16 @@ package debug
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func AssertNil(t *testing.T, value any) {
-	t.Helper()
-	if value != nil {
-		t.Errorf("value is not nil: %v", value)
+func Assert(t *testing.T, cond bool, message ...string) {
+	if len(message) == 0 {
+		message = append(message, "condition is false")
+	}
+	if !cond {
+		t.Errorf(strings.Join(message, " "))
 	}
 }
 
