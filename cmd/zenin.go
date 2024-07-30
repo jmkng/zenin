@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/jmkng/zenin/internal/bundle"
 	"github.com/jmkng/zenin/internal/env"
@@ -29,6 +31,12 @@ func main() {
 	dd(err)
 
 	bundle := bundle.NewBundle(repository)
+
+	// List plugins.
+	plugins, err := bundle.Meta.GetPlugins()
+	dd(err)
+	files := fmt.Sprintf("[%v]", strings.Join(plugins, ","))
+	log.Info("plugins", "path", env.Runtime.PluginDir, "count", len(plugins), "files", files)
 
 	// Resume polling active monitors.
 	active, err := bundle.Monitor.GetActive(context.Background())
