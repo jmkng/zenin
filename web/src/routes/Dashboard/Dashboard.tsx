@@ -20,7 +20,7 @@ export default function Dashboard() {
 
     const handleAdd = async (value: Monitor) => {
         const token = account.state.authenticated!.token.raw;
-        const extract = await monitor.service.add(token, value);
+        const extract = await monitor.service.addMonitor(token, value);
         if (!extract.ok()) return;
         const body: DataPacket<{ id: number }> = await extract.json();
         const measurements = null;
@@ -33,7 +33,7 @@ export default function Dashboard() {
             throw new Error("monitor is missing id in dashboard update");
         }
         const token = account.state.authenticated!.token.raw;
-        const extract = await monitor.service.update(token, value.id, value);
+        const extract = await monitor.service.updateMonitor(token, value.id, value);
         if (!extract.ok()) return;
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }

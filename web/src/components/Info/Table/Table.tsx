@@ -77,7 +77,7 @@ export default function TableComponent(props: TableProps) {
         }
 
         // Detach from HEAD, make duplicate monitor with fixed measurement set, freeze state.
-        const measurements = await monitor.service.measurements(account.state.authenticated!.token.raw,
+        const measurements = await monitor.service.getMeasurements(account.state.authenticated!.token.raw,
             state.monitor.id, value);
         if (!measurements.ok()) return;
 

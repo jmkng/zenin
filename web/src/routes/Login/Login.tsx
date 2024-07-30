@@ -36,7 +36,7 @@ export default function LoginView() {
 
 
     const handleInitialize = async () => {
-        const extract = await meta.summary();
+        const extract = await meta.getSummary();
         if (!extract.ok()) return;
         const packet: DataPacket<Meta> = await extract.json();
         setSummary(packet.data);

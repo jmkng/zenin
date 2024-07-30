@@ -8,14 +8,14 @@ import { Detached } from "./reducer";
 class MonitorService extends Service {
     constructor() { super(); }
 
-    async get(token: string, measurement?: number) {
+    async getMonitor(token: string, measurement?: number) {
         let address = `/monitor`
         if (measurement) address += `?measurements=${measurement}`;
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }
 
-    async delete(token: string, id: number[]) {
+    async deleteMonitor(token: string, id: number[]) {
         const joined = id.join(',');
         const address = `/monitor?id=${joined}`;
         const request = new AuthenticatedRequest(token, address)
@@ -23,14 +23,14 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async poll(token: string, id: number) {
+    async pollMonitor(token: string, id: number) {
         const address = `/monitor/${id}/poll`;
         const request = new AuthenticatedRequest(token, address)
             .method(GET_API)
         return await this.extract(request);
     }
 
-    async toggle(token: string, id: number[], active: boolean) {
+    async toggleMonitor(token: string, id: number[], active: boolean) {
         const joined = id.join(',');
         const address = `/monitor?id=${joined}&active=${active}`;
         const request = new AuthenticatedRequest(token, address)
@@ -38,7 +38,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async update(token: string, id: number, monitor: Monitor) {
+    async updateMonitor(token: string, id: number, monitor: Monitor) {
         monitor.measurements = null;
         const body = JSON.stringify(monitor);
         const address = `/monitor/${id}`;
@@ -48,7 +48,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async add(token: string, value: Monitor) {
+    async addMonitor(token: string, value: Monitor) {
         const body = JSON.stringify(value)
         const address = `/monitor`;
         const request = new AuthenticatedRequest(token, address)
@@ -57,7 +57,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async measurements(token: string, id: number, after?: Detached) {
+    async getMeasurements(token: string, id: number, after?: Detached) {
         let address = `/monitor/${id}/measurement`
         if (after) address += `?after=${after.toAfterDate()}`
         const request = new AuthenticatedRequest(token, address)

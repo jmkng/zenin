@@ -32,7 +32,7 @@ export default function DashboardMenuComponent() {
     const handleToggle = async (active: boolean) => {
         const monitors = [...monitor.context.state.bulk.map(n => n.id!)];
         const token = account.state.authenticated!.token.raw;
-        const extract = await monitor.service.toggle(token, monitors, active);
+        const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
         monitor.context.dispatch({ type: 'toggle', monitors, active });
     }

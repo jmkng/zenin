@@ -12,7 +12,7 @@ export default function Bundle() {
     const handleRemove = async (monitors: Monitor[]) => {
         const id = monitors.map(n => n.id!);
         const token = account.state.authenticated!.token.raw;
-        const extract = await service.delete(token, id);
+        const extract = await service.deleteMonitor(token, id);
         if (!extract.ok()) return;
         monitor.dispatch({ type: 'remove', monitors: id });
     }

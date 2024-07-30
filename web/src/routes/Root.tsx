@@ -56,12 +56,12 @@ export default function RootComponent() {
     }, [account.state.authenticated, log.state.connected])
 
     const handleInitialize = async (token: string) => {
-        const plugins = await meta.service.plugins(token);
+        const plugins = await meta.service.getPlugins(token);
         if (plugins.ok()) {
             const packet: DataPacket<string[]> = await plugins.json();
             if (packet) meta.context.dispatch({ type: 'reset', plugins: packet.data })
         }
-        const monitors = await monitor.service.get(token, 35);
+        const monitors = await monitor.service.getMonitor(token, 35);
         if (monitors.ok()) {
             const packet: DataPacket<Monitor[]> = await monitors.json();
             if (packet) monitor.context.dispatch({ type: 'reset', monitors: packet.data });

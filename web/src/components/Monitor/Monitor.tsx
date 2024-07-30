@@ -59,7 +59,7 @@ export default function MonitorComponent(props: MonitorProps) {
 
     const handlePoll = async () => {
         const token = account.state.authenticated!.token.raw;
-        await monitor.service.poll(token, monitor.data.id!);
+        await monitor.service.pollMonitor(token, monitor.data.id!);
     }
 
     const handleSelect = () => {
@@ -77,7 +77,7 @@ export default function MonitorComponent(props: MonitorProps) {
         const active = !monitor.data.active;
         const monitors = [monitor.data.id!];
         const token = account.state.authenticated!.token.raw;
-        const extract = await monitor.service.toggle(token, monitors, active);
+        const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
         monitor.context.dispatch({ type: 'toggle', monitors, active });
     }

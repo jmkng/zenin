@@ -6,13 +6,13 @@ import { AuthenticatedRequest, Request } from "../../server/request";
 class MetaService extends Service {
     constructor() { super(); }
 
-    async summary() {
+    async getSummary() {
         const address = '/meta';
         const request = new Request(address);
         return await this.extract(request);
     }
 
-    async plugins(token: string) {
+    async getPlugins(token: string) {
         const address = '/meta/plugins';
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
