@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react";
+import { useAccountContext } from "../../../internal/account";
 import { formatDate } from "../../../internal/layout/graphics";
 import { Certificate, Measurement } from "../../../internal/measurement";
-import { useAccountContext } from "../../../internal/account";
 import { useDefaultMeasurementService } from "../../../internal/measurement/service";
 import { DataPacket } from "../../../server";
 
 import ChevronIcon from "../../Icon/ChevronIcon/ChevronIcon";
 
-import "./Chain.css"
+import "./Chain.css";
 
 interface ChainProps {
     measurement: Measurement
@@ -19,52 +19,43 @@ export default function ChainComponent(props: ChainProps) {
         service: useDefaultMeasurementService(),
         data: props.measurement,
     }
-    const [expanded, setExpanded] = useState<boolean>(false);
+    const [state, setState] = useState<ChainState>("WAITING")
 
-    const [pending, setPending] = useState(false);
-    const [certificates, setCertificates] = useState<Certificate[] | null>(null);
-
-    useEffect(() => {
-        setPending(false);
-        setCertificates(null);
-        setExpanded(false);
+    useLayoutEffect(() => {
+        setState("WAITING");
     }, [measurement.data])
 
-    const handleLoad = async () => {
-        const token = account.state.authenticated!.token.raw;
-        const certificates = await measurement.service.getCertificates(token, measurement.data.id);
-        if (!certificates.ok()) return;
-        const packet: DataPacket<Certificate[]> = await certificates.json();
-        setCertificates(packet.data);
-        setPending(false);
-    }
-
-    const handleExpand = () => {
-        if (pending) return;
-        if (expanded) {
-            setExpanded(false);
-        } else {
-            setExpanded(true);
-            if (certificates == null) {
-                setPending(true);
-                handleLoad();
-            }
+    const handleExpand = async () => {
+        if (state == "PENDING" || isReadyState(state) && state.certificates.length == 0) return;
+        if (state == "WAITING") {
+            setState("PENDING");
+            const token = account.state.authenticated!.token.raw;
+            const certificates = await measurement.service.getCertificates(token, measurement.data.id);
+            if (!certificates.ok()) return;
+            const packet: DataPacket<Certificate[]> = await certificates.json();
+            if (packet.data == null) packet.data = [];
+            setState({ certificates: packet.data, expanded: true });
+            return;
         }
+        setState({ ...state, expanded: !state.expanded })
     }
 
     return <div
         className={
-            [
-                "zenin__chain_component",
-                pending ? "pending" : "",
-                expanded && certificates != null ? "expanded" : "",
+            ["zenin__chain_component",
+                state == "PENDING" ? "pending" : "",
+                isReadyState(state) && state.expanded
+                    ? state.certificates.length > 0
+                        ? "expanded"
+                        : "disabled"
+                    : "",
             ].join(" ")}>
         <div className="zenin__chain_controls">
             <div
                 className="zenin__chain_title"
                 onClick={handleExpand}
             >
-                Certificates
+                {isReadyState(state) && state.certificates.length == 0 ? "None" : "Certificates"}
             </div>
 
             <div
@@ -75,9 +66,9 @@ export default function ChainComponent(props: ChainProps) {
             </div>
         </div>
 
-        {expanded && certificates != null ?
-            <div className="zenin__chain_popout">
-                {certificates.map((certificate, index) =>
+        {isReadyState(state) && state.expanded ?
+            <div className={"zenin__chain_popout"}>
+                {state.certificates.map((certificate, index) =>
                     <div className="zenin__chain_popout_certificate" key={index}>
                         <div className="zenin__chain_popout_not_before zenin__chain_popout_row">
                             <span className="zenin__chain_popout_label">Not Before</span>
@@ -112,4 +103,16 @@ export default function ChainComponent(props: ChainProps) {
             </div>
             : null}
     </div>
+}
+
+type ChainState = WaitingState | PendingState | ReadyState;
+
+type PendingState = "PENDING";
+
+type WaitingState = "WAITING";
+
+type ReadyState = { certificates: Certificate[], expanded: boolean };
+
+function isReadyState(state: ChainState): state is ReadyState {
+    return typeof state === 'object' && state !== null && 'certificates' in state && 'expanded' in state;
 }

@@ -27,6 +27,15 @@
     padding: 4px;
 }
 
+.zenin__chain_component.disabled {
+    background: var(--off-b);
+}
+
+.zenin__chain_component.disabled,
+.zenin__chain_component.disabled * {
+    cursor: not-allowed;
+}
+
 .zenin__chain_component.expanded .zenin__chain_toggle {
     transform: rotate(270deg);
 }
