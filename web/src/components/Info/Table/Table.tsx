@@ -1,34 +1,42 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useAccountContext } from '../../../internal/account';
+import { Measurement } from '../../../internal/measurement';
 import { useMonitorContext } from '../../../internal/monitor';
+import { ViewState } from '../../../internal/monitor/reducer';
+import { useDefaultMonitorService } from '../../../internal/monitor/service';
+import { DataPacket } from '../../../server';
 
-import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
-import AggregateComponent from '../Aggregate/Aggregate';
-import PropertyComponent from '../Property/Property';
 import Button from '../../Button/Button';
 import ClockIcon from '../../Icon/ClockIcon/ClockIcon';
-import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
-import NextIcon from '../../Icon/NextIcon/NextIcon';
-import LastIcon from '../../Icon/LastIcon/LastIcon';
 import FirstIcon from '../../Icon/FirstIcon/FirstIcon';
+import LastIcon from '../../Icon/LastIcon/LastIcon';
+import NextIcon from '../../Icon/NextIcon/NextIcon';
+import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
+import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
+import ModalComponent from '../../Modal/Modal';
+import AggregateComponent from '../Aggregate/Aggregate';
+import PropertyComponent from '../Property/Property';
 import Row from './Row/Row';
-import { Measurement } from '../../../internal/measurement';
 
 import './Table.css';
 
 interface TableProps {
-    measurements: Measurement[]
-    selected: Measurement | null
+    state: ViewState
 }
 
 export default function TableComponent(props: TableProps) {
-    const { measurements, selected } = props;
+    const { state } = props;
     const monitor = {
-        context: useMonitorContext()
+        context: useMonitorContext(),
+        service: useDefaultMonitorService()
     }
+    const account = useAccountContext();
+    const measurements = (state.monitor.measurements || []).toReversed();
     const pages = Math.ceil(measurements.length / PAGESIZE);
     const [page, setPage] = useState(1);
-    const [checkedRowIDs, setCheckedRowIDs] = useState<number[]>([]);
+    const [checked, setChecked] = useState<number[]>([]);
     const [allChecked, setAllChecked] = useState(false);
+    const [dateModalIsVisible, setDateModalIsVisible] = useState(false);
 
     const propertyContainerRef = useRef<HTMLDivElement>(null);
     const visible = measurements.slice((page - 1) * PAGESIZE, page * PAGESIZE);
@@ -36,28 +44,51 @@ export default function TableComponent(props: TableProps) {
     const backDisabled = page === 1;
     const forwardDisabled = page === pages;
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        setChecked([]);
         setAllChecked(false);
-        // TODO: Review these effects
-    }, [measurements, page]);
+        setPage(1);
+    }, [state.monitor])
 
     useEffect(() => {
-        setCheckedRowIDs([]);
-    }, [page])
-
-    useEffect(() => {
-        if (selected && propertyContainerRef.current) {
+        if (state.selected && propertyContainerRef.current) {
             propertyContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    }, [selected])
+    }, [state.selected])
 
     const handleRowCheck = (id: number) => {
-        if (checkedRowIDs.includes(id)) {
-            setCheckedRowIDs(checkedRowIDs.filter(n => n !== id));
+        if (checked.includes(id)) {
+            setChecked(checked.filter(n => n !== id));
         } else {
-            setCheckedRowIDs([...checkedRowIDs, id]);
+            setChecked([...checked, id]);
         }
     };
+
+    const handleDateChange = async (value: MeasurementDate) => {
+        if (value.isRecent()) {
+            // Attach to monitor HEAD.
+            const head = monitor.context.state.monitors.get(state.monitor.id);
+            if (!head) return;
+            monitor.context.dispatch({
+                type: 'view',
+                target: { monitor: head, measurement: null, disableToggle: true }
+            });
+            return;
+        }
+
+        // Detach from HEAD, make duplicate monitor with fixed measurement set, freeze state.
+        const measurements = await monitor.service.measurements(account.state.authenticated!.token.raw,
+            state.monitor.id, value);
+        if (!measurements.ok()) return;
+
+        const packet: DataPacket<Measurement[]> = await measurements.json();
+
+        const mon = { ...state.monitor, measurements: [...packet.data || []].toReversed() };
+        monitor.context.dispatch({
+            type: 'view',
+            target: { monitor: mon, measurement: null, disableToggle: true }
+        })
+    }
 
     const handleRowClick = (id: number) => {
         const measurement = measurements.find(n => n.id === id) || null;
@@ -66,10 +97,10 @@ export default function TableComponent(props: TableProps) {
 
     const handleMasterCheck = () => {
         if (allChecked) {
-            setCheckedRowIDs([]);
+            setChecked([]);
             setAllChecked(false);
         } else {
-            setCheckedRowIDs(id);
+            setChecked(id);
             setAllChecked(true);
         }
     };
@@ -78,8 +109,27 @@ export default function TableComponent(props: TableProps) {
         <div className="zenin__table_header">
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
             <div className="zenin__table_recent_container">
-                <Button border={true} icon={<ClockIcon />}>
-                    <span className='zenin__table_recent_button_text'>Recent</span>
+                <Button
+                    style={dateModalIsVisible ? { background: "var(--off-b)" } : {}} // Maintain background when modal is open.
+                    border={true}
+                    icon={<ClockIcon />}
+                    onClick={event => { event.stopPropagation(); setDateModalIsVisible(!dateModalIsVisible) }}
+                >
+                    <span className='zenin__table_recent_button_text'>Date</span>
+                    <ModalComponent
+                        visible={dateModalIsVisible}
+                        onCancel={() => setDateModalIsVisible(false)}
+                        kind={{
+                            flag: 'attached',
+                            content: [
+                                { text: "Recent", onClick: () => handleDateChange(new MeasurementDate("RECENT")) },
+                                { text: "Past Day", onClick: () => handleDateChange(new MeasurementDate("DAY")) },
+                                { text: "Past Week", onClick: () => handleDateChange(new MeasurementDate("WEEK")) },
+                                { text: "Past Month", onClick: () => handleDateChange(new MeasurementDate("MONTH")) },
+                                { text: "Past Year", onClick: () => handleDateChange(new MeasurementDate("YEAR")) },
+                            ]
+                        }}
+                    />
                 </Button>
             </div>
         </div>
@@ -109,8 +159,8 @@ export default function TableComponent(props: TableProps) {
                         <Row
                             key={index}
                             measurement={n}
-                            highlight={selected != null && n.id === selected.id}
-                            checked={checkedRowIDs}
+                            highlight={state.selected != null && n.id === state.selected.id}
+                            checked={checked}
                             onCheck={handleRowCheck}
                             onClick={handleRowClick}
                         />
@@ -142,12 +192,60 @@ export default function TableComponent(props: TableProps) {
             <AggregateComponent measurements={measurements} />
         </div>
 
-        {selected ?
+        {state.selected ?
             <div className="zenin__info_property_container" ref={propertyContainerRef}>
-                <PropertyComponent measurement={selected} />
+                <PropertyComponent measurement={state.selected} />
             </div>
             : null}
     </div >
 }
 
 const PAGESIZE = 10;
+
+export class MeasurementDate {
+    constructor(
+        public date: "RECENT" | "DAY" | "WEEK" | "MONTH" | "YEAR"
+    ) { }
+
+    toString() {
+        switch (this.date) {
+            case "RECENT": return "Recent";
+            case "DAY": return "Past Day";
+            case "WEEK": return "Past Week";
+            case "MONTH": return "Past Month";
+            case "YEAR": return "Past Year"
+        }
+    }
+
+    toAfterDate() {
+        const today = new Date();
+        const target = new Date(today);
+
+        switch (this.date) {
+            case "DAY":
+                target.setDate(today.getDate() - 1);
+                break;
+            case "WEEK":
+                target.setDate(today.getDate() - 7);
+                break;
+            case "MONTH":
+                target.setMonth(today.getMonth() - 1);
+                break;
+            case "YEAR":
+                target.setFullYear(today.getFullYear() - 1);
+                break;
+            default:
+                throw new Error("invalid measurement date value");
+        }
+
+        const month = target.getMonth() + 1;
+        const day = target.getDate();
+        const year = target.getFullYear();
+
+        return `${month}/${day}/${year}`;
+    }
+
+    isRecent(): this is { date: "RECENT" } {
+        return this.date == "RECENT";
+    }
+}

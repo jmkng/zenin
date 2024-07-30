@@ -1,12 +1,12 @@
-import { useMonitorContext } from "../../internal/monitor"
+import { useMonitorContext } from "../../internal/monitor";
 import { ViewState } from "../../internal/monitor/reducer";
 
 import Button from "../Button/Button";
-import TableComponent from "./Table/Table";
 import ExpandComponent from "./Expand/Expand";
 import SummaryComponent from "./Summary/Summary";
+import TableComponent from "./Table/Table";
 
-import "./Info.css"
+import "./Info.css";
 
 interface InfoProps {
     state: ViewState
@@ -14,10 +14,7 @@ interface InfoProps {
 
 export default function InfoComponent(props: InfoProps) {
     const { state } = props;
-    const monitor = {
-        context: useMonitorContext()
-    }
-    const reversed = (state.monitor.measurements || []).toReversed();
+    const monitor = { context: useMonitorContext() }
 
     return (
         <div className="zenin__info_component">
@@ -28,10 +25,10 @@ export default function InfoComponent(props: InfoProps) {
                     : null}
 
                 <div className="zenin__info_summary_container zenin__h_space_top">
-                    <SummaryComponent measurements={reversed} />
+                    <SummaryComponent state={state} />
                 </div>
                 <div className="zenin__info_table_container zenin__h_space_top">
-                    <TableComponent measurements={reversed} selected={state.selected} />
+                    <TableComponent state={state} />
                 </div>
             </div>
 

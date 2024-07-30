@@ -59,7 +59,7 @@ class MonitorService extends Service {
 
     async measurements(token: string, id: number, after?: MeasurementDate) {
         let address = `/monitor/${id}/measurement`
-        if (after) address += `?after=${after.toString()}`
+        if (after) address += `?after=${after.toAfterDate()}`
         const request = new AuthenticatedRequest(token, address)
             .method(GET_API)
         return await this.extract(request);
