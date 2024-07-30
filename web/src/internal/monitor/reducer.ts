@@ -1,12 +1,60 @@
-import {FilterKind, Monitor } from ".";
+import { FilterKind, Monitor } from ".";
 import { Measurement } from "../measurement";
+
+export type Origin = Head | Detached;
+
+export type Head = "HEAD";
+
+export class Detached {
+    constructor(
+        public date: "DAY" | "WEEK" | "MONTH" | "YEAR"
+    ) { }
+
+    toString() {
+        switch (this.date) {
+            case "DAY": return "Past Day";
+            case "WEEK": return "Past Week";
+            case "MONTH": return "Past Month";
+            case "YEAR": return "Past Year"
+        }
+    }
+
+    toAfterDate() {
+        const today = new Date();
+        const target = new Date(today);
+        switch (this.date) {
+            case "DAY":
+                target.setDate(today.getDate() - 1);
+                break;
+            case "WEEK":
+                target.setDate(today.getDate() - 7);
+                break;
+            case "MONTH":
+                target.setMonth(today.getMonth() - 1);
+                break;
+            case "YEAR":
+                target.setFullYear(today.getFullYear() - 1);
+                break;
+            default:
+                throw new Error("invalid measurement date value");
+        }
+        const month = target.getMonth() + 1;
+        const day = target.getDate();
+        const year = target.getFullYear();
+        return `${month}/${day}/${year}`;
+    }
+}
 
 export class ViewState {
     constructor(
         /** The monitor being viewed. */
         public monitor: Monitor,
         /** A measurement within that monitor that has been selected. */
-        public selected: Measurement | null
+        public selected: Measurement | null,
+        /** Tracks the query that resulted in this state.
+         * `Head` means we are tracking the most recent data for a monitor,
+         * `Detached` means we are looking at historical data. */
+        public origin: Origin = "HEAD"
     ) {}
 }
 
@@ -128,6 +176,7 @@ type ViewAction = {
     target: { 
         monitor: Monitor, 
         measurement: Measurement | null,
+        origin?: Origin,
         disableToggle?: boolean
     } | null
 };
@@ -254,7 +303,7 @@ const viewAction = (state: MonitorState, action: ViewAction) => {
         || (state.split.equals(action.target.monitor) && !action.target.disableToggle)
     ) return { ...state, split: new SplitState(null) };
 
-    const view = new ViewState(action.target.monitor, action.target.measurement);
+    const view = new ViewState(action.target.monitor, action.target.measurement, action.target.origin);
     const split = new SplitState(view)
     return { ...state, split }
 }

@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAccountContext } from '../../../internal/account';
 import { Measurement } from '../../../internal/measurement';
 import { useMonitorContext } from '../../../internal/monitor';
-import { ViewState } from '../../../internal/monitor/reducer';
+import { Detached, Origin, ViewState } from '../../../internal/monitor/reducer';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
 import { DataPacket } from '../../../server';
 
@@ -64,14 +64,14 @@ export default function TableComponent(props: TableProps) {
         }
     };
 
-    const handleDateChange = async (value: MeasurementDate) => {
-        if (value.isRecent()) {
+    const handleDateChange = async (value: Origin) => {
+        if (value == "HEAD") {
             // Attach to monitor HEAD.
             const head = monitor.context.state.monitors.get(state.monitor.id);
             if (!head) return;
             monitor.context.dispatch({
                 type: 'view',
-                target: { monitor: head, measurement: null, disableToggle: true }
+                target: { monitor: head, measurement: null, disableToggle: true, origin: "HEAD" },
             });
             return;
         }
@@ -86,7 +86,7 @@ export default function TableComponent(props: TableProps) {
         const mon = { ...state.monitor, measurements: [...packet.data || []].toReversed() };
         monitor.context.dispatch({
             type: 'view',
-            target: { monitor: mon, measurement: null, disableToggle: true }
+            target: { monitor: mon, measurement: null, disableToggle: true, origin: value }
         })
     }
 
@@ -115,18 +115,18 @@ export default function TableComponent(props: TableProps) {
                     icon={<ClockIcon />}
                     onClick={event => { event.stopPropagation(); setDateModalIsVisible(!dateModalIsVisible) }}
                 >
-                    <span className='zenin__table_recent_button_text'>Date</span>
+                    <span className='zenin__table_recent_button_text'>{state.origin == "HEAD" ? "Recent" : state.origin.toString()}</span>
                     <ModalComponent
                         visible={dateModalIsVisible}
                         onCancel={() => setDateModalIsVisible(false)}
                         kind={{
                             flag: 'attached',
                             content: [
-                                { text: "Recent", onClick: () => handleDateChange(new MeasurementDate("RECENT")) },
-                                { text: "Past Day", onClick: () => handleDateChange(new MeasurementDate("DAY")) },
-                                { text: "Past Week", onClick: () => handleDateChange(new MeasurementDate("WEEK")) },
-                                { text: "Past Month", onClick: () => handleDateChange(new MeasurementDate("MONTH")) },
-                                { text: "Past Year", onClick: () => handleDateChange(new MeasurementDate("YEAR")) },
+                                { text: "Recent", onClick: () => handleDateChange("HEAD") },
+                                { text: "Past Day", onClick: () => handleDateChange(new Detached("DAY")) },
+                                { text: "Past Week", onClick: () => handleDateChange(new Detached("WEEK")) },
+                                { text: "Past Month", onClick: () => handleDateChange(new Detached("MONTH")) },
+                                { text: "Past Year", onClick: () => handleDateChange(new Detached("YEAR")) },
                             ]
                         }}
                     />
@@ -201,51 +201,3 @@ export default function TableComponent(props: TableProps) {
 }
 
 const PAGESIZE = 10;
-
-export class MeasurementDate {
-    constructor(
-        public date: "RECENT" | "DAY" | "WEEK" | "MONTH" | "YEAR"
-    ) { }
-
-    toString() {
-        switch (this.date) {
-            case "RECENT": return "Recent";
-            case "DAY": return "Past Day";
-            case "WEEK": return "Past Week";
-            case "MONTH": return "Past Month";
-            case "YEAR": return "Past Year"
-        }
-    }
-
-    toAfterDate() {
-        const today = new Date();
-        const target = new Date(today);
-
-        switch (this.date) {
-            case "DAY":
-                target.setDate(today.getDate() - 1);
-                break;
-            case "WEEK":
-                target.setDate(today.getDate() - 7);
-                break;
-            case "MONTH":
-                target.setMonth(today.getMonth() - 1);
-                break;
-            case "YEAR":
-                target.setFullYear(today.getFullYear() - 1);
-                break;
-            default:
-                throw new Error("invalid measurement date value");
-        }
-
-        const month = target.getMonth() + 1;
-        const day = target.getDate();
-        const year = target.getFullYear();
-
-        return `${month}/${day}/${year}`;
-    }
-
-    isRecent(): this is { date: "RECENT" } {
-        return this.date == "RECENT";
-    }
-}
