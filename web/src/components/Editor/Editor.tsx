@@ -1,31 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
-
-import * as sapi from "../../server";
-import * as im from "../../internal/monitor";
+import { useMetaContext } from "../../internal/meta";
+import {
+    ACTIVE_UI, HTTP_UI, ICMP_UI, INACTIVE_UI,
+    Monitor, monitorEquals,
+    PING_UI, PLUGIN_UI, TCP_UI,
+} from "../../internal/monitor";
 import { EditorState } from "../../internal/monitor/reducer";
-import TextInput from "../Input/TextInput/TextInput";
+import {
+    CLIENTERROR_API, DELETE_API, GET_API, HEAD_API, HTTP_API, ICMP_API,
+    INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PING_API, PLUGIN_API,
+    POST_API, PUT_API, REDIRECTION_API, SERVERERROR_API, SUCCESSFUL_API, TCP_API
+} from "../../server";
+
 import Button from "../Button/Button";
 import NumberInput from "../Icon/NumberInput/NumberInput";
-import SelectInput from "../Input/SelectInput/SelectInput";
 import TrashIcon from "../Icon/TrashIcon/TrashIcon";
+import SelectInput from "../Input/SelectInput/SelectInput";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
+import TextInput from "../Input/TextInput/TextInput";
 import ToggleInput from "../Input/ToggleInput/ToggleInput";
-import { useMetaContext } from "../../internal/meta";
 
 import "./Editor.css";
-
 
 interface EditorProps {
     state: EditorState
 
-    onChange: (target: im.Monitor) => void;
+    onChange: (target: Monitor) => void;
     onClose: () => void;
-    onDelete: (monitor: im.Monitor) => void;
+    onDelete: (monitor: Monitor) => void;
 }
 
-const defaultDraft: im.Draft = {
+const defaultDraft: Draft = {
     name: null,
-    kind: sapi.HTTP_API,
+    kind: HTTP_API,
     active: false,
     interval: 300,
     timeout: 10,
@@ -34,11 +41,11 @@ const defaultDraft: im.Draft = {
     remotePort: null,
     pluginName: null,
     pluginArgs: null,
-    httpRange: sapi.SUCCESSFUL_API,
-    httpMethod: sapi.GET_API,
+    httpRange: SUCCESSFUL_API,
+    httpMethod: GET_API,
     httpRequestHeaders: null,
     httpRequestBody: null,
-    httpExpiredCertMod: sapi.OFF_API,
+    httpExpiredCertMod: OFF_API,
     httpCaptureHeaders: false,
     httpCaptureBody: false,
     icmpSize: 56
@@ -56,23 +63,23 @@ export default function EditorComponent(props: EditorProps) {
     };
     const [id, reset] = useMemo(() => state.monitor ? resetToDraft(state.monitor) : [null, defaultDraft], [state.monitor])
     const [editor, setEditor] = useState<{
-        draft: im.Draft,
-        original: im.Draft
+        draft: Draft,
+        original: Draft
     }>({ draft: reset, original: reset })
 
     const canSubmit = useMemo(() =>
-        !im.monitorEquals(editor.draft as im.Monitor, editor.original as im.Monitor)
-        && im.isValidMonitor(editor.draft), [editor])
+        !monitorEquals(editor.draft as Monitor, editor.original as Monitor)
+        && isValidMonitor(editor.draft), [editor])
 
-    const hasValidName = useMemo(() => im.isValidName(editor.draft.name), [editor.draft.name])
-    const hasValidInterval = useMemo(() => im.isValidInterval(editor.draft.interval), [editor.draft.interval])
-    const hasValidTimeout = useMemo(() => im.isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
-    const hasValidRemoteAddress = useMemo(() => im.isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
-    const hasValidRemotePort = useMemo(() => im.isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
-    const hasValidHttpBody = useMemo(() => im.isValidJSON(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
-    const hasValidHttpHeaders = useMemo(() => im.isValidJSON(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
-    const hasValidPluginArguments = useMemo(() => im.isValidJSONArray(editor.draft.pluginArgs), [editor.draft.pluginArgs]);
-    const hasValidIcmpSize = useMemo(() => im.isValidIcmpSize(editor.draft.icmpSize), [editor.draft.icmpSize]);
+    const hasValidName = useMemo(() => isValidName(editor.draft.name), [editor.draft.name])
+    const hasValidInterval = useMemo(() => isValidInterval(editor.draft.interval), [editor.draft.interval])
+    const hasValidTimeout = useMemo(() => isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
+    const hasValidRemoteAddress = useMemo(() => isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
+    const hasValidRemotePort = useMemo(() => isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
+    const hasValidHttpBody = useMemo(() => isValidJSON(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
+    const hasValidHttpHeaders = useMemo(() => isValidJSON(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
+    const hasValidPluginArguments = useMemo(() => isValidJSONArray(editor.draft.pluginArgs), [editor.draft.pluginArgs]);
+    const hasValidIcmpSize = useMemo(() => isValidIcmpSize(editor.draft.icmpSize), [editor.draft.icmpSize]);
 
     useEffect(() => {
         setEditor(prev => ({ ...prev, draft: reset, original: reset }))
@@ -125,8 +132,8 @@ export default function EditorComponent(props: EditorProps) {
                         value={editor.draft.active.toString()}
                         subtext="Controls the polling state of the monitor."
                         options={[
-                            { value: "true", text: im.ACTIVE_UI },
-                            { value: "false", text: im.INACTIVE_UI }
+                            { value: "true", text: ACTIVE_UI },
+                            { value: "false", text: INACTIVE_UI }
                         ]}
                         onChange={value =>
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === 'true' } }))
@@ -170,11 +177,11 @@ export default function EditorComponent(props: EditorProps) {
                         name="zenin__detail_monitor_kind"
                         value={editor.draft.kind}
                         options={[
-                            { value: sapi.HTTP_API, text: im.HTTP_UI },
-                            { value: sapi.TCP_API, text: im.TCP_UI },
-                            { value: sapi.ICMP_API, text: im.ICMP_UI },
-                            { value: sapi.PING_API, text: im.PING_UI },
-                            { value: sapi.PLUGIN_API, text: im.PLUGIN_UI }
+                            { value: HTTP_API, text: HTTP_UI },
+                            { value: TCP_API, text: TCP_UI },
+                            { value: ICMP_API, text: ICMP_UI },
+                            { value: PING_API, text: PING_UI },
+                            { value: PLUGIN_API, text: PLUGIN_UI }
                         ]}
                         subtext={<span>Specify the <a href="#">probe</a> type.</span>} /* TODO: Add documentation link. */
                         onChange={value =>
@@ -182,7 +189,7 @@ export default function EditorComponent(props: EditorProps) {
                     />
                 </div>
 
-                {editor.draft.kind == sapi.HTTP_API || editor.draft.kind == sapi.ICMP_API || editor.draft.kind == sapi.TCP_API || editor.draft.kind == sapi.PING_API ?
+                {editor.draft.kind == HTTP_API || editor.draft.kind == ICMP_API || editor.draft.kind == TCP_API || editor.draft.kind == PING_API ?
                     <div className="zenin__detail_spaced zenin__detail_remote_address_container">
                         <TextInput
                             label={<span className={hasValidRemoteAddress ? "" : "zenin__h_error"}>Remote Address</span>}
@@ -200,7 +207,7 @@ export default function EditorComponent(props: EditorProps) {
                     :
                     null}
 
-                {editor.draft.kind == sapi.TCP_API ?
+                {editor.draft.kind == TCP_API ?
                     <div className="zenin__detail_spaced zenin__detail_remote_port_container">
                         <NumberInput
                             label={<span className={hasValidRemotePort ? "" : "zenin__h_error"}>Remote Port</span>}
@@ -217,7 +224,7 @@ export default function EditorComponent(props: EditorProps) {
                     </div>
                     : null}
 
-                {editor.draft.kind == sapi.HTTP_API ?
+                {editor.draft.kind == HTTP_API ?
                     <div>
                         <div className="zenin__detail_spaced">
                             <TextAreaInput
@@ -254,13 +261,13 @@ export default function EditorComponent(props: EditorProps) {
                                 label="Method"
                                 name="zenin__detail_monitor_method"
                                 options={[
-                                    { text: sapi.GET_API },
-                                    { text: sapi.HEAD_API },
-                                    { text: sapi.POST_API },
-                                    { text: sapi.PUT_API },
-                                    { text: sapi.PATCH_API },
-                                    { text: sapi.DELETE_API },
-                                    { text: sapi.OPTIONS_API },
+                                    { text: GET_API },
+                                    { text: HEAD_API },
+                                    { text: POST_API },
+                                    { text: PUT_API },
+                                    { text: PATCH_API },
+                                    { text: DELETE_API },
+                                    { text: OPTIONS_API },
                                 ]}
                                 subtext={<span>Set the HTTP <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">method</a> used to make the request.</span>}
                                 value={editor.draft.httpMethod!}
@@ -274,11 +281,11 @@ export default function EditorComponent(props: EditorProps) {
                                 label="Header Range"
                                 name="zenin__detail_monitor_range"
                                 options={[
-                                    { text: sapi.INFORMATIONAL_API },
-                                    { text: sapi.SUCCESSFUL_API },
-                                    { text: sapi.REDIRECTION_API },
-                                    { text: sapi.CLIENTERROR_API },
-                                    { text: sapi.SERVERERROR_API },
+                                    { text: INFORMATIONAL_API },
+                                    { text: SUCCESSFUL_API },
+                                    { text: REDIRECTION_API },
+                                    { text: CLIENTERROR_API },
+                                    { text: SERVERERROR_API },
                                 ]}
                                 subtext={<span>Specify the range of <a href="https://datatracker.ietf.org/doc/html/rfc2616#section-10">status codes</a> that will indicate a successful probe.</span>}
                                 value={editor.draft.httpRange}
@@ -309,7 +316,7 @@ export default function EditorComponent(props: EditorProps) {
                     :
                     null}
 
-                {editor.draft.kind == sapi.ICMP_API || editor.draft.kind == sapi.PING_API ?
+                {editor.draft.kind == ICMP_API || editor.draft.kind == PING_API ?
                     <div className="zenin__detail_spaced zenin__detail_icmp_container">
                         <NumberInput
                             label={<span className={hasValidIcmpSize ? "" : "zenin__h_error"}>Packet Size</span>}
@@ -325,7 +332,7 @@ export default function EditorComponent(props: EditorProps) {
                     </div>
                     : null}
 
-                {editor.draft.kind == sapi.PLUGIN_API ?
+                {editor.draft.kind == PLUGIN_API ?
                     <div className="zenin__detail_plugin_container">
                         <div className="zenin__detail_spaced">
 
@@ -387,31 +394,31 @@ export default function EditorComponent(props: EditorProps) {
     )
 }
 
-function sanitizeToMonitor(draft: im.Draft): im.Monitor {
-    const monitor = { ...draft } as im.Monitor;
+function sanitizeToMonitor(draft: Draft): Monitor {
+    const monitor = { ...draft } as Monitor;
     switch (monitor.kind) {
-        case sapi.HTTP_API:
+        case HTTP_API:
             sanitizeHTTP(monitor);
             break;
-        case sapi.TCP_API:
+        case TCP_API:
             sanitizeTCP(monitor);
             break;
-        case sapi.PING_API, sapi.ICMP_API:
+        case ICMP_API:
             sanitizeICMP(monitor);
             break;
-        case sapi.PLUGIN_API:
+        case PLUGIN_API:
             sanitizePlugin(monitor);
             break;
     }
     return monitor;
 }
 
-function sanitizeHTTP(monitor: im.Monitor) {
+function sanitizeHTTP(monitor: Monitor) {
     monitor.icmpSize = null;
     monitor.pluginName = null;
 }
 
-function sanitizeTCP(strategy: im.Monitor) {
+function sanitizeTCP(strategy: Monitor) {
     strategy.httpRequestHeaders = null;
     strategy.httpRequestBody = null;
     strategy.httpExpiredCertMod = null;
@@ -423,7 +430,7 @@ function sanitizeTCP(strategy: im.Monitor) {
     strategy.pluginName = null;
 }
 
-function sanitizeICMP(strategy: im.Monitor) {
+function sanitizeICMP(strategy: Monitor) {
     strategy.remotePort = null;
     strategy.httpRequestHeaders = null;
     strategy.httpRequestBody = null;
@@ -435,7 +442,7 @@ function sanitizeICMP(strategy: im.Monitor) {
     strategy.pluginName = null;
 }
 
-function sanitizePlugin(strategy: im.Monitor) {
+function sanitizePlugin(strategy: Monitor) {
     strategy.remoteAddress = null;
     strategy.remotePort = null;
     strategy.httpRequestHeaders = null;
@@ -449,7 +456,132 @@ function sanitizePlugin(strategy: im.Monitor) {
 }
 
 /** Reset a `Monitor` to `Draft`, setting useful defaults to make editing easier. */
-function resetToDraft(value: im.Monitor): [number | null, im.Draft] {
-    const draft: im.Draft = { ...defaultDraft, ...(value as im.Draft) };
+function resetToDraft(value: Monitor): [number | null, Draft] {
+    const draft: Draft = { ...defaultDraft, ...(value as Draft) };
     return [value.id, draft];
+}
+
+/** Similar to `Monitor`, but some fields may be null because they aren't filled in yet. */
+interface Draft {
+    name: string | null,
+    kind: string,
+    active: boolean,
+    interval: number | null,
+    timeout: number | null,
+    description: string | null,
+    remoteAddress: string | null,
+    remotePort: number | null,
+    pluginName: string | null,
+    pluginArgs: string | null,
+    httpRange: string,
+    httpMethod: string | null,
+    httpRequestHeaders: string | null,
+    httpRequestBody: string | null
+    httpExpiredCertMod: string | null,
+    httpCaptureHeaders: boolean,
+    httpCaptureBody: boolean,
+    icmpSize: number | null
+}
+
+function isValidMonitor(draft: Draft): boolean {
+    if (!isValidName(draft.name)
+        || !isValidState(draft.active)
+        || !isValidInterval(draft.interval)
+        || !isValidTimeout(draft.timeout)
+        || !isValidKind(draft.kind)) return false;
+
+    switch (draft.kind) {
+        case HTTP_API: return isValidHTTP(draft)
+        case ICMP_API: return isValidICMP(draft)
+        case TCP_API: return isValidTCP(draft)
+        case PLUGIN_API: return isValidPlugin(draft)
+        default: throw new Error("unrecognized probe")
+    }
+}
+
+function isValidHTTP(draft: Draft): boolean {
+    return isValidRemoteAddress(draft.remoteAddress) && isValidHeaderRange(draft.httpRange)
+        && isValidJSON(draft.httpRequestHeaders) && isValidJSON(draft.httpRequestBody);
+}
+
+function isValidICMP(draft: Draft): boolean {
+    return isValidRemoteAddress(draft.remoteAddress) && isValidIcmpSize(draft.icmpSize);
+}
+
+function isValidTCP(draft: Draft): boolean {
+    return isValidRemoteAddress(draft.remoteAddress) && isValidRemotePort(draft.remotePort)
+}
+
+function isValidPlugin(draft: Draft): boolean {
+    if (!draft.pluginName) return false;
+    return true;
+}
+
+function isValidHeaderRange(range: string | null): boolean {
+    const set = [
+        INFORMATIONAL_API,
+        SUCCESSFUL_API,
+        REDIRECTION_API,
+        CLIENTERROR_API,
+        SERVERERROR_API
+    ];
+    if (!range || !set.includes(range)) return false;
+    return true;
+}
+
+/** Return true if the provided string is valid JSON. **/
+function isValidJSON(body: string | null): boolean {
+    if (body == null) return true;
+    try {
+        JSON.parse(body);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** Return true if the provided string is a valid JSON array.
+    Any other type is considered invalid. **/
+function isValidJSONArray(body: string | null): boolean {
+    if (body == null) return true;
+    try {
+        const result = JSON.parse(body);
+        if (Array.isArray(result)) return true;
+        return false;
+    } catch {
+        return false;
+    }
+}
+
+function isValidIcmpSize(size: number | null): boolean {
+    return size != null && size > 0;
+}
+
+function isValidName(name: string | null): boolean {
+    return name != null && name.trim() != "";
+}
+
+function isValidKind(kind: string | null): boolean {
+    return kind != null && [HTTP_API, ICMP_API, TCP_API, PING_API, PLUGIN_API].includes(kind)
+}
+
+function isValidState(state: boolean): boolean {
+    return typeof state === 'boolean';
+}
+
+function isValidInterval(interval: number | null): boolean {
+    return interval != null && interval >= 0;
+}
+
+function isValidTimeout(timeout: number | null): boolean {
+    return timeout != null && timeout >= 0
+}
+
+function isValidRemoteAddress(remote: string | null): boolean {
+    if (!remote || remote.trim() == "") return false;
+    return true;
+}
+
+function isValidRemotePort(port: number | null): boolean {
+    return port != null && port >= 0 && port <= 65535;
 }
