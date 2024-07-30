@@ -54,7 +54,7 @@ export default function EditorComponent(props: EditorProps) {
     const meta = {
         context: useMetaContext()
     };
-    const [id, reset] = useMemo(() => state.target ? resetToDraft(state.target) : [null, defaultDraft], [state.target])
+    const [id, reset] = useMemo(() => state.monitor ? resetToDraft(state.monitor) : [null, defaultDraft], [state.monitor])
     const [editor, setEditor] = useState<{
         draft: im.Draft,
         original: im.Draft
@@ -79,10 +79,10 @@ export default function EditorComponent(props: EditorProps) {
     }, [reset])
 
     useEffect(() => {
-        if (!state.target) return;
-        const active = state.target.active;
+        if (!state.monitor) return;
+        const active = state.monitor.active;
         setEditor(prev => ({ ...prev, draft: { ...prev.draft, active }, original: { ...prev.original, active } }))
-    }, [state.target])
+    }, [state.monitor])
 
     const handleSubmit = () => {
         const monitor = sanitizeToMonitor(editor.draft);
@@ -372,11 +372,11 @@ export default function EditorComponent(props: EditorProps) {
                     <span>Cancel</span>
                 </Button>
 
-                {state.target ?
+                {state.monitor ?
                     <div onClick={(event) => event.stopPropagation()} className="zenin__detail_delete_button">
                         <Button
                             kind="destructive"
-                            onClick={() => onDelete(state.target!)}
+                            onClick={() => onDelete(state.monitor!)}
                         >
                             <TrashIcon />
                         </Button>

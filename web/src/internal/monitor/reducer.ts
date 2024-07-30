@@ -4,16 +4,16 @@ import { Measurement } from "../measurement";
 export class ViewState {
     constructor(
         /** The monitor being viewed. */
-        public target: Monitor,
+        public monitor: Monitor,
         /** A measurement within that monitor that has been selected. */
-        public subTarget: Measurement | null
+        public selected: Measurement | null
     ) {}
 }
 
 export class EditorState {
     constructor(
         /** The monitor being modified. Null represents `drafting` a new monitor. */
-        public target: Monitor | null
+        public monitor: Monitor | null
     ) {}
 }
 
@@ -36,9 +36,9 @@ export class SplitState {
     /** Return true if any of the provided IDs match the id of the monitor in this state. */
     overlaps(id: number[]): boolean {
         if (this.isViewing()) {
-            return id.includes(this.pane.target.id!);
+            return id.includes(this.pane.monitor.id!);
         } else if (this.isEditing()) {
-            return this.pane.target !== null && id.includes(this.pane.target.id);
+            return this.pane.monitor !== null && id.includes(this.pane.monitor.id);
         }
         return false;
     }
@@ -46,9 +46,9 @@ export class SplitState {
     /** Return true if the provided monitor is equal to the monitor in this state. */
     equals(monitor: Monitor): boolean {
         if (this.isViewing()) {
-            return monitor == this.pane.target
+            return monitor == this.pane.monitor
         } else if (this.isEditing()) {
-            return this.pane.target !== null && monitor == this.pane.target
+            return this.pane.monitor !== null && monitor == this.pane.monitor
         }
         return false;
     }
@@ -195,7 +195,7 @@ const deleteAction = (state: MonitorState, action: DeleteAction) => {
 
 const editAction = (state: MonitorState, action: EditAction) => {
     let split: SplitState;
-    if (!action.monitor || state.split.isEditing() && state.split.pane.target == action.monitor) 
+    if (!action.monitor || state.split.isEditing() && state.split.pane.monitor == action.monitor) 
             split = new SplitState(null)
     else split = new SplitState(new EditorState(action.monitor))
     return { ...state, split }
@@ -224,7 +224,7 @@ const pollAction = (state: MonitorState, action: PollAction) => {
         console.error(`failed to add measurement to monitor, monitor not in inventory: id=${action.measurement.monitorId}`);
         return state;
     }
-    if (monitor.measurements == null) monitor.measurements = [];
+    monitor.measurements = [...(monitor.measurements || [])]
     if (monitor.measurements.length >= inventoryMaxMeasurements) {
         const before = monitor.measurements.length;
         monitor.measurements = monitor.measurements.slice(inventoryChunkSize);
@@ -261,7 +261,7 @@ const viewAction = (state: MonitorState, action: ViewAction) => {
 
 const detailAction = (state: MonitorState, action: DetailAction) => {
     if (state.split.isViewing()) {
-        const view = new ViewState(state.split.pane.target, action.measurement)
+        const view = new ViewState(state.split.pane.monitor, action.measurement)
         return {...state, split: new SplitState(view) }
     }
     return state;
