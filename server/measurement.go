@@ -41,6 +41,7 @@ func (m MeasurementProvider) Mux() http.Handler {
 	router.Get("/{id}/certificates", m.HandleGetCertificates)
 	return router
 }
+
 func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 	param := chi.URLParam(r, "id")
@@ -51,7 +52,7 @@ func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *htt
 		return
 	}
 
-	certificates, err := m.Service.Repository.GetCertificates(r.Context(), parsed)
+	certificates, err := m.Service.Repository.SelectCertificate(r.Context(), parsed)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return

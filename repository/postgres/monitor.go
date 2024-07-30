@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
@@ -49,8 +50,8 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 // SelectMonitor implements `MonitorRepository.SelectMonitor` for `PostgresRepository`.
 func (p PostgresRepository) SelectMonitor(
 	ctx context.Context,
-	params *monitor.SelectParams,
 	measurements int,
+	params *monitor.SelectMonitorParams,
 ) ([]monitor.Monitor, error) {
 	if measurements > 0 {
 		return p.selectMonitorRelated(ctx, params, measurements)
@@ -58,7 +59,7 @@ func (p PostgresRepository) SelectMonitor(
 	return p.selectMonitor(ctx, params)
 }
 
-func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectParams) ([]monitor.Monitor, error) {
+func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectMonitorParams) ([]monitor.Monitor, error) {
 	var monitors []monitor.Monitor
 	var err error
 
@@ -91,7 +92,7 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 	return monitors, err
 }
 
-func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *monitor.SelectParams, measurements int) ([]monitor.Monitor, error) {
+func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *monitor.SelectMonitorParams, measurements int) ([]monitor.Monitor, error) {
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT 
 		id "monitor_id", name, kind "monitor_kind", active, interval, timeout, description, 
@@ -151,6 +152,47 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	return result, nil
 }
 
+// SelectMeasurement implements `MonitorRepository.SelectMeasurement` for `PostgresRepository`.
+func (p PostgresRepository) SelectMeasurement(ctx context.Context, id int, params *monitor.SelectMeasurementParams) ([]measurement.Measurement, error) {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push(`SELECT
+		id AS "measurement_id",
+		monitor_id AS "measurement_monitor_id",
+		recorded_at,
+		duration,
+		state,
+		state_hint,
+		kind AS "measurement_kind",
+		http_status_code,
+		http_response_headers,
+		http_response_body,
+		icmp_packets_in,
+		icmp_packets_out,
+		icmp_min_rtt,
+		icmp_avg_rtt,
+		icmp_max_rtt,
+		plugin_exit_code,
+		plugin_stdout,
+		plugin_stderr
+	FROM measurement`)
+	builder.Push(fmt.Sprintf("%v monitor_id = ", builder.Where()))
+	builder.BindInt(id)
+	if params != nil {
+		builder.Inject(params)
+	}
+	builder.Push("ORDER BY id DESC")
+
+	var measurements []measurement.Measurement
+
+	err := p.db.SelectContext(ctx, &measurements, builder.String(), builder.Args()...)
+	if err != nil {
+		return measurements, err
+	}
+
+	return measurements, nil
+}
+
+// UpdateMonitor implements `MonitorRepository.UpdateMonitor` for `PostgresRepository`.
 func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.Monitor) error {
 	const query string = `UPDATE monitor SET 
         name = $1,
@@ -195,6 +237,7 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 	return err
 }
 
+// DeleteMonitor implements `MonitorRepository.DeleteMonitor` for `PostgresRepository`.
 func (p PostgresRepository) DeleteMonitor(ctx context.Context, id []int) error {
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push("DELETE FROM monitor WHERE id in (")
@@ -205,6 +248,7 @@ func (p PostgresRepository) DeleteMonitor(ctx context.Context, id []int) error {
 	return err
 }
 
+// ToggleMonitor implements `MonitorRepository.ToggleMonitor` for `PostgresRepository`.
 func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active bool) error {
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push("UPDATE monitor SET active = ")

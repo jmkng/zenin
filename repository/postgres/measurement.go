@@ -8,7 +8,8 @@ import (
 	"golang.org/x/net/context"
 )
 
-func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement.Measurement) (int, error) {
+// InsertMeasurement implements `MeasurementRepository.InsertMeasurement` for `PostgresRepository`.
+func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement measurement.Measurement) (int, error) {
 	var id int
 	query := `INSERT INTO measurement 
 		(monitor_id, recorded_at, state, state_hint, kind, duration, 
@@ -25,23 +26,23 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 	row := tx.QueryRowContext(
 		ctx,
 		query,
-		m.MonitorId,
-		m.RecordedAt,
-		m.State,
-		m.StateHint,
-		m.Kind,
-		m.Duration,
-		m.HTTPStatusCode,
-		m.HTTPResponseHeaders,
-		m.HTTPResponseBody,
-		m.ICMPPacketsIn,
-		m.ICMPPacketsOut,
-		m.ICMPMinRTT,
-		m.ICMPAvgRTT,
-		m.ICMPMaxRTT,
-		m.PluginExitCode,
-		m.PluginStdout,
-		m.PluginStderr,
+		measurement.MonitorId,
+		measurement.RecordedAt,
+		measurement.State,
+		measurement.StateHint,
+		measurement.Kind,
+		measurement.Duration,
+		measurement.HTTPStatusCode,
+		measurement.HTTPResponseHeaders,
+		measurement.HTTPResponseBody,
+		measurement.ICMPPacketsIn,
+		measurement.ICMPPacketsOut,
+		measurement.ICMPMinRTT,
+		measurement.ICMPAvgRTT,
+		measurement.ICMPMaxRTT,
+		measurement.PluginExitCode,
+		measurement.PluginStdout,
+		measurement.PluginStderr,
 	)
 	err = row.Scan(&id)
 	if err != nil {
@@ -49,17 +50,17 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 		return id, errors.Join(err, rberr)
 	}
 
-	if len(m.Certificates) > 0 {
+	if len(measurement.Certificates) > 0 {
 		builder := zsql.NewBuilder(zsql.Numbered)
 		builder.Push(`INSERT INTO certificate
 	        (measurement_id, version, serial_number, public_key_algorithm,
 	        issuer_common_name, subject_common_name, not_before, not_after) VALUES`)
-		for i, v := range m.Certificates {
+		for i, v := range measurement.Certificates {
 			builder.Push("(")
 			builder.SpreadOpaque(id, v.Version, v.SerialNumber, v.PublicKeyAlgorithm, v.IssuerCommonName,
 				v.SubjectCommonName, v.NotBefore, v.NotAfter)
 			builder.Push(")")
-			if i < len(m.Certificates)-1 {
+			if i < len(measurement.Certificates)-1 {
 				builder.Push(", ")
 			}
 		}
@@ -79,7 +80,8 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, m measurement
 	return id, err
 }
 
-func (p PostgresRepository) GetCertificates(ctx context.Context, id int) ([]measurement.Certificate, error) {
+// SelectCertificate implements `MeasurementRepository.GetCertificate` for `PostgresRepository`.
+func (p PostgresRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
 	query := `SELECT 
         id "certificate_id", measurement_id "certificate_measurement_id",  version, serial_number, 
         public_key_algorithm, issuer_common_name, subject_common_name, not_before, not_after

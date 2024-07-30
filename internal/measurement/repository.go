@@ -7,6 +7,6 @@ import (
 // MeasurementRepository is a type used to interact with the measurement domain
 // database table.
 type MeasurementRepository interface {
-	InsertMeasurement(ctx context.Context, m Measurement) (int, error)
-	GetCertificates(ctx context.Context, id int) ([]Certificate, error)
+	InsertMeasurement(ctx context.Context, measurement Measurement) (int, error)
+	SelectCertificate(ctx context.Context, id int) ([]Certificate, error)
 }

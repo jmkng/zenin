@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmkng/zenin/internal"
@@ -47,21 +48,23 @@ func (m MonitorProvider) Mux() http.Handler {
 	router.Delete("/", m.HandleDeleteMonitor)
 	router.Patch("/", m.HandleToggleMonitor)
 	router.Put("/{id}", m.HandleUpdateMonitor)
+	router.Get("/{id}/measurement", m.HandleGetMeasurements)
 	router.Get("/{id}/poll", m.HandlePollMonitor)
 	return router
 }
 
 func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	query := r.URL.Query()
-	params := SelectParamsFromQuery(query)
+	params := NewSelectMonitorParamsFromQuery(query)
 
 	measurements := 0
 	if m, err := strconv.Atoi(query.Get("measurements")); err == nil {
 		measurements = m
 	}
 	monitors, err :=
-		m.Service.Repository.SelectMonitor(r.Context(), &params, measurements)
+		m.Service.Repository.SelectMonitor(r.Context(), measurements, &params)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -71,6 +74,7 @@ func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Reques
 
 func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	var incoming monitor.Monitor
 	err := StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
@@ -93,7 +97,8 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
-	params := SelectParamsFromQuery(r.URL.Query())
+
+	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
 	if len(*params.Id) == 0 {
 		responder.Error(internal.NewValidation("Expected `id` query parameter."),
 			http.StatusBadRequest)
@@ -115,7 +120,8 @@ func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Requ
 
 func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
-	params := SelectParamsFromQuery(r.URL.Query())
+
+	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
 
 	validation := internal.NewValidation()
 	if params.Id == nil || len(*params.Id) == 0 {
@@ -135,7 +141,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active)
 
 	if *params.Active {
-		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), &params, 0)
+		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), 0, &params)
 		if err != nil {
 			responder.Error(err, http.StatusInternalServerError)
 			return
@@ -154,6 +160,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 
 func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	param := chi.URLParam(r, "id")
 	parsed, err := strconv.Atoi(param)
 	if err != nil {
@@ -163,8 +170,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	}
 
 	found, err := m.Service.Repository.SelectMonitor(r.Context(),
-		&monitor.SelectParams{Id: &[]int{parsed}},
-		0)
+		0, &monitor.SelectMonitorParams{Id: &[]int{parsed}})
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -197,10 +203,35 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	responder.Status(http.StatusOK)
 }
 
+func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	rid := chi.URLParam(r, "id")
+	pid, err := strconv.Atoi(rid)
+	if err != nil {
+		responder.Error(internal.NewValidation("Expected integer url parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	params := NewSelectMeasurementParamsFromQuery(r.URL.Query())
+
+	measurements, err := m.
+		Service.
+		Repository.
+		SelectMeasurement(r.Context(), pid, &params)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+	}
+
+	responder.Data(measurements, http.StatusOK)
+}
+
 func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
-	param := chi.URLParam(r, "id")
-	parsed, err := strconv.Atoi(param)
+
+	rid := chi.URLParam(r, "id")
+	pid, err := strconv.Atoi(rid)
 	if err != nil {
 		responder.Error(internal.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
@@ -208,14 +239,13 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	}
 
 	found, err := m.Service.Repository.SelectMonitor(r.Context(),
-		&monitor.SelectParams{Id: &[]int{parsed}},
-		0)
+		0, &monitor.SelectMonitorParams{Id: &[]int{pid}})
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 	if len(found) == 0 {
-		message := fmt.Sprintf("monitor with id `%v` does not exist", param)
+		message := fmt.Sprintf("monitor with id `%v` does not exist", pid)
 		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
 		return
 	}
@@ -224,13 +254,9 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	responder.Status(http.StatusAccepted)
 }
 
-// SelectParamsFromQuery returns a `SelectParams` by parsing the values from
-// a query string.
-//
-// This function reads only the first set of each group, ignoring any others:
-//
-// ...?id=1,2,3&id=4,5 = [1, 2, 3]
-func SelectParamsFromQuery(values url.Values) monitor.SelectParams {
+// NewSelectMonitorParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
+// a `net/http` query string.
+func NewSelectMonitorParamsFromQuery(values url.Values) monitor.SelectMonitorParams {
 	var id *[]int
 	var active *bool
 	var kind *measurement.ProbeKind
@@ -254,9 +280,31 @@ func SelectParamsFromQuery(values url.Values) monitor.SelectParams {
 		kind = &vkind
 	}
 
-	return monitor.SelectParams{
+	return monitor.SelectMonitorParams{
 		Id:     id,
 		Active: active,
 		Kind:   kind,
 	}
+}
+
+const format string = "1/2/2006"
+
+// NewSelectMeasurementParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
+// a `net/http` query string.
+func NewSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasurementParams {
+	params := monitor.SelectMeasurementParams{
+		After:  nil,
+		Before: nil,
+	}
+	if braw := values.Get("before"); braw != "" {
+		if bparsed, err := time.Parse(format, braw); err == nil {
+			params.Before = &bparsed
+		}
+	}
+	if araw := values.Get("after"); araw != "" {
+		if aparsed, err := time.Parse(format, araw); err == nil {
+			params.After = &aparsed
+		}
+	}
+	return params
 }

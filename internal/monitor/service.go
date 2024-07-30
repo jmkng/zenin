@@ -20,13 +20,13 @@ type MonitorService struct {
 
 func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 	active := true
-	params := SelectParams{
+	params := SelectMonitorParams{
 		Id:     nil,
 		Active: &active,
 		Kind:   nil,
 	}
 
-	resume, err := s.Repository.SelectMonitor(ctx, &params, 0)
+	resume, err := s.Repository.SelectMonitor(ctx, 0, &params)
 	return resume, err
 }
 

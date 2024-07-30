@@ -3,6 +3,7 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/pkg/sql"
@@ -12,13 +13,14 @@ import (
 // database table.
 type MonitorRepository interface {
 	InsertMonitor(ctx context.Context, monitor Monitor) (int, error)
-	SelectMonitor(ctx context.Context, params *SelectParams, measurements int) ([]Monitor, error)
+	SelectMonitor(ctx context.Context, measurements int, params *SelectMonitorParams) ([]Monitor, error)
+	SelectMeasurement(ctx context.Context, id int, params *SelectMeasurementParams) ([]measurement.Measurement, error)
 	UpdateMonitor(ctx context.Context, monitor Monitor) error
 	DeleteMonitor(ctx context.Context, id []int) error
 	ToggleMonitor(ctx context.Context, id []int, active bool) error
 }
 
-// SelectParams is a set of parameters used to narrow the scope of the `SelectMonitor`
+// SelectMonitorParams is a set of parameters used to narrow the scope of the `SelectMonitor`
 // repository method.
 //
 // If the `Id` property is not nil, it will take priority over all other parameters.
@@ -26,7 +28,7 @@ type MonitorRepository interface {
 //
 // Implements `Injectable.Inject`, so it can automatically apply suitable SQL to
 // a `sql.Builder`.
-type SelectParams struct {
+type SelectMonitorParams struct {
 	// Group 1 -----
 
 	Id *[]int
@@ -37,10 +39,10 @@ type SelectParams struct {
 	Kind   *measurement.ProbeKind
 }
 
-// Inject implements `Injectable.Inject` for `SelectParams`.
-func (s SelectParams) Inject(builder *sql.Builder) {
+// Inject implements `Injectable.Inject` for `SelectMonitorParams`.
+func (s SelectMonitorParams) Inject(builder *sql.Builder) {
 	if s.Id != nil && len(*s.Id) > 0 {
-		builder.Push("WHERE id IN (")
+		builder.Push(fmt.Sprintf("%v id IN (", builder.Where()))
 		builder.SpreadInt(*s.Id...)
 		builder.Push(")")
 		return
@@ -56,5 +58,28 @@ func (s SelectParams) Inject(builder *sql.Builder) {
 		kind := string(*s.Kind)
 		builder.Push(x)
 		builder.BindString(kind)
+	}
+}
+
+// SelectMeasurementParams is a set of parameters used to narrow the scope of the `SelectMeasurement`
+// repository method.
+//
+// Implements `Injectable.Inject`, so it can automatically apply suitable SQL to
+// a `sql.Builder`.
+type SelectMeasurementParams struct {
+	After  *time.Time
+	Before *time.Time
+}
+
+// Inject implements `Injectable.Inject` for `SelectMeasurementParams`.
+func (s SelectMeasurementParams) Inject(builder *sql.Builder) {
+	where := builder.Where()
+	if s.After != nil {
+		builder.Push(fmt.Sprintf("%v recorded_at > ", where))
+		builder.BindString(s.After.Format(time.RFC3339))
+	}
+	if s.Before != nil {
+		builder.Push(fmt.Sprintf("%v recorded_at < ", where))
+		builder.BindString(s.Before.Format(time.RFC3339))
 	}
 }

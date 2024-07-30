@@ -19,6 +19,13 @@ const (
 	And   Separator = "AND"
 )
 
+// NewWhereBuilder returns a new `WhereBuilder`.
+func NewWhereBuilder() *WhereBuilder {
+	return &WhereBuilder{
+		state: Where,
+	}
+}
+
 // WhereBuilder is used to place a "WHERE" or "AND" in an SQL query.
 // See the `String` method for details.
 //
@@ -41,11 +48,15 @@ func (w *WhereBuilder) String() string {
 }
 
 // NewBuilder returns a new `Builder`.
+//
+// `Builder` has an instance of `WhereBuilder` inside of it, which can be accessed
+// via the `Where` method.
 func NewBuilder(marker BindMarker) *Builder {
 	return &Builder{
 		query:  strings.Builder{},
 		args:   []any{},
 		marker: NewMarkerBuilder(marker),
+		where:  NewWhereBuilder(),
 	}
 }
 
@@ -55,6 +66,7 @@ type Builder struct {
 	query  strings.Builder
 	args   []any
 	marker *MarkerBuilder
+	where  *WhereBuilder
 }
 
 // Reset will reset the `Builder` to the state returned by `NewBuilder`.
@@ -62,11 +74,6 @@ func (b *Builder) Reset() {
 	b.query.Reset()
 	b.args = nil
 	b.marker.Reset()
-}
-
-// Inject will apply an `Injectable` to the `Builder`.
-func (b *Builder) Inject(i Injectable) {
-	i.Inject(b)
 }
 
 // String implements `Stringer` for `Builder`.
@@ -161,9 +168,7 @@ func (b *Builder) pushArg(arg ...any) {
 
 // Where returns a new `WhereBuilder`.
 func (b *Builder) Where() *WhereBuilder {
-	return &WhereBuilder{
-		state: Where,
-	}
+	return b.where
 }
 
 // BindMarker allows a `MarkerBuilder` to understand which bind parameter
@@ -211,4 +216,9 @@ func (m *MarkerBuilder) String() string {
 		panic("unsupported marker")
 	}
 	return stamp
+}
+
+// Inject will apply an `Injectable` to the `Builder`.
+func (b *Builder) Inject(i Injectable) {
+	i.Inject(b)
 }

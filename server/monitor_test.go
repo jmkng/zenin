@@ -13,7 +13,7 @@ func TestSelectParamsFromQuery(t *testing.T) {
 	values["kind"] = []string{"http"}
 	values["active"] = []string{"true"}
 	id := []int{1, 2, 3}
-	params := SelectParamsFromQuery(values)
+	params := NewSelectMonitorParamsFromQuery(values)
 	debug.AssertEqual(t, len(*params.Id), len(id))
 	for i, v := range *params.Id {
 		debug.AssertEqual(t, v, id[i])
