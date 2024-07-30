@@ -17,28 +17,28 @@ export default function InfoComponent(props: InfoProps) {
     const monitor = {
         context: useMonitorContext()
     }
-    const reversed = (state.target.measurements || []).toReversed();
+    const reversed = (state.monitor.measurements || []).toReversed();
 
     return (
         <div className="zenin__info_component">
             <div className="zenin__info_component_body">
-                <h1 className="zenin__info_name">{state.target.name}</h1>
-                {state.target.description ?
-                    <ExpandComponent title={"Description"} text={state.target.description} />
+                <h1 className="zenin__info_name">{state.monitor.name}</h1>
+                {state.monitor.description ?
+                    <ExpandComponent title={"Description"} text={state.monitor.description} />
                     : null}
 
                 <div className="zenin__info_summary_container zenin__h_space_top">
                     <SummaryComponent measurements={reversed} />
                 </div>
                 <div className="zenin__info_table_container zenin__h_space_top">
-                    <TableComponent measurements={reversed} selected={state.subTarget} />
+                    <TableComponent measurements={reversed} selected={state.selected} />
                 </div>
             </div>
 
             <div className="zenin__detail_controls">
                 <Button
                     kind="primary"
-                    onClick={() => monitor.context.dispatch({ type: 'edit', monitor: state.target })}>
+                    onClick={() => monitor.context.dispatch({ type: 'edit', monitor: state.monitor })}>
                     <span>Edit</span>
                 </Button>
                 <Button
