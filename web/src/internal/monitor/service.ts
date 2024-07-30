@@ -3,6 +3,7 @@ import { Monitor } from ".";
 import { AuthenticatedRequest } from "../../server/request";
 import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../../server";
 import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
+import { MeasurementDate } from "../../components/Info/Table/Table";
 
 class MonitorService extends Service {
     constructor() { super(); }
@@ -53,6 +54,14 @@ class MonitorService extends Service {
         const request = new AuthenticatedRequest(token, address)
             .method(POST_API)
             .body(body)
+        return await this.extract(request);
+    }
+
+    async measurements(token: string, id: number, after?: MeasurementDate) {
+        let address = `/monitor/${id}/measurement`
+        if (after) address += `?after=${after.toString()}`
+        const request = new AuthenticatedRequest(token, address)
+            .method(GET_API)
         return await this.extract(request);
     }
 }
