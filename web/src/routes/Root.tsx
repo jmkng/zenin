@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAccountContext } from '../internal/account';
 import { hideLoadingScreen, showLoadingScreen } from '../internal/layout/graphics';
-import { useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { useLogContext } from '../internal/log';
 import { Monitor, useMonitorContext } from '../internal/monitor';
 import { useDefaultMonitorService } from '../internal/monitor/service';
@@ -12,7 +12,11 @@ import { DataPacket } from '../server';
 import { FEED, handleConnect, handleDisconnect } from '../server/feed';
 import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
 
-import Router from './Router/Router'
+import Hidden from '../components/Hidden/Hidden';
+import LoginView from './Login/Login';
+import Dashboard from './Dashboard/Dashboard';
+import LogView from './Log/Log';
+import Guard from '../components/Guard/Guard';
 import Bundle from '../components/Modal/Bundle/Bundle';
 import MenuComponent from '../components/Menu/Menu';
 import NavComponent from '../components/Nav/Nav';
@@ -83,7 +87,15 @@ export default function RootComponent() {
                     <MenuComponent />
                     : null}
                 <div className='zenin__main'>
-                    <Router />
+                    <Routes>
+                        <Route element={<Hidden />}>
+                            <Route path="/login" element={<LoginView />} />
+                        </Route>
+                        <Route element={<Guard />}>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/log" element={<LogView />} />
+                        </Route>
+                    </Routes>
                 </div>
             </div>
 
