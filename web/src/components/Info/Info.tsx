@@ -1,5 +1,5 @@
 import { useMonitorContext } from "../../internal/monitor";
-import { ViewState } from "../../internal/monitor/reducer";
+import { ViewState } from "../../internal/monitor/split";
 
 import Button from "../Button/Button";
 import ExpandComponent from "./Expand/Expand";

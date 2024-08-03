@@ -3,7 +3,7 @@ import { Monitor } from ".";
 import { AuthenticatedRequest } from "../../server/request";
 import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../../server";
 import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
-import { Detached } from "./reducer";
+import { DetachedState } from "./origin";
 
 class MonitorService extends Service {
     constructor() { super(); }
@@ -57,7 +57,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async getMeasurements(token: string, id: number, after?: Detached) {
+    async getMeasurements(token: string, id: number, after?: DetachedState) {
         let address = `/monitor/${id}/measurement`
         if (after) address += `?after=${after.toAfterDate()}`
         const request = new AuthenticatedRequest(token, address)

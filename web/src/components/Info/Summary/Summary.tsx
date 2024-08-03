@@ -1,5 +1,5 @@
 import { formatDate } from "../../../internal/layout/graphics";
-import { ViewState } from "../../../internal/monitor/reducer";
+import { ViewState } from "../../../internal/monitor/split";
 import { DEAD_API } from "../../../server";
 
 import ListComponent from "../List/List";

@@ -5,7 +5,7 @@ import {
     Monitor, monitorEquals,
     PING_UI, PLUGIN_UI, TCP_UI,
 } from "../../internal/monitor";
-import { EditorState } from "../../internal/monitor/reducer";
+import { EditorState } from "../../internal/monitor/split";
 import {
     CLIENTERROR_API, DELETE_API, GET_API, HEAD_API, HTTP_API, ICMP_API,
     INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PING_API, PLUGIN_API,
