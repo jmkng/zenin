@@ -86,7 +86,7 @@ export default function MonitorComponent(props: MonitorProps) {
         <div
             className={
                 ['zenin__monitor',
-                    monitor.context.state.bulk.includes(monitor.data) ? 'selected' : ''
+                    monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''
                 ].join(' ')
             } >
             <div className="zenin__monitor_top" onClick={handleSelect}>

@@ -2,8 +2,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAccountContext } from '../../../internal/account';
 import { Measurement } from '../../../internal/measurement';
 import { useMonitorContext } from '../../../internal/monitor';
-import { Detached, Origin, ViewState } from '../../../internal/monitor/reducer';
+import { DetachedState, OriginState } from '../../../internal/monitor/origin';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
+import { ViewState } from '../../../internal/monitor/split';
 import { DataPacket } from '../../../server';
 
 import Button from '../../Button/Button';
@@ -56,6 +57,16 @@ export default function TableComponent(props: TableProps) {
         }
     }, [state.selected])
 
+    const handleMasterCheck = () => {
+        if (allChecked) {
+            setChecked([]);
+            setAllChecked(false);
+        } else {
+            setChecked(id);
+            setAllChecked(true);
+        }
+    };
+
     const handleRowCheck = (id: number) => {
         if (checked.includes(id)) {
             setChecked(checked.filter(n => n !== id));
@@ -64,7 +75,7 @@ export default function TableComponent(props: TableProps) {
         }
     };
 
-    const handleDateChange = async (value: Origin) => {
+    const handleDateChange = async (value: OriginState) => {
         if (value == "HEAD") {
             // Attach to monitor HEAD.
             const head = monitor.context.state.monitors.get(state.monitor.id);
@@ -95,16 +106,6 @@ export default function TableComponent(props: TableProps) {
         monitor.context.dispatch({ type: 'detail', measurement })
     };
 
-    const handleMasterCheck = () => {
-        if (allChecked) {
-            setChecked([]);
-            setAllChecked(false);
-        } else {
-            setChecked(id);
-            setAllChecked(true);
-        }
-    };
-
     return <div className="zenin__table_component">
         <div className="zenin__table_header">
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
@@ -123,10 +124,10 @@ export default function TableComponent(props: TableProps) {
                             flag: 'attached',
                             content: [
                                 { text: "Recent", onClick: () => handleDateChange("HEAD") },
-                                { text: "Past Day", onClick: () => handleDateChange(new Detached("DAY")) },
-                                { text: "Past Week", onClick: () => handleDateChange(new Detached("WEEK")) },
-                                { text: "Past Month", onClick: () => handleDateChange(new Detached("MONTH")) },
-                                { text: "Past Year", onClick: () => handleDateChange(new Detached("YEAR")) },
+                                { text: "Past Day", onClick: () => handleDateChange(new DetachedState("DAY")) },
+                                { text: "Past Week", onClick: () => handleDateChange(new DetachedState("WEEK")) },
+                                { text: "Past Month", onClick: () => handleDateChange(new DetachedState("MONTH")) },
+                                { text: "Past Year", onClick: () => handleDateChange(new DetachedState("YEAR")) },
                             ]
                         }}
                     />

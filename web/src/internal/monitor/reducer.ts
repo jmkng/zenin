@@ -1,111 +1,12 @@
 import { FilterKind, Monitor } from ".";
 import { Measurement } from "../measurement";
-
-export type Origin = Head | Detached;
-
-export type Head = "HEAD";
-
-export class Detached {
-    constructor(
-        public date: "DAY" | "WEEK" | "MONTH" | "YEAR"
-    ) { }
-
-    toString() {
-        switch (this.date) {
-            case "DAY": return "Past Day";
-            case "WEEK": return "Past Week";
-            case "MONTH": return "Past Month";
-            case "YEAR": return "Past Year"
-        }
-    }
-
-    toAfterDate() {
-        const today = new Date();
-        const target = new Date(today);
-        switch (this.date) {
-            case "DAY":
-                target.setDate(today.getDate() - 1);
-                break;
-            case "WEEK":
-                target.setDate(today.getDate() - 7);
-                break;
-            case "MONTH":
-                target.setMonth(today.getMonth() - 1);
-                break;
-            case "YEAR":
-                target.setFullYear(today.getFullYear() - 1);
-                break;
-            default:
-                throw new Error("invalid measurement date value");
-        }
-        const month = target.getMonth() + 1;
-        const day = target.getDate();
-        const year = target.getFullYear();
-        return `${month}/${day}/${year}`;
-    }
-}
-
-export class ViewState {
-    constructor(
-        /** The monitor being viewed. */
-        public monitor: Monitor,
-        /** A measurement within that monitor that has been selected. */
-        public selected: Measurement | null,
-        /** Tracks the query that resulted in this state.
-         * `Head` means we are tracking the most recent data for a monitor,
-         * `Detached` means we are looking at historical data. */
-        public origin: Origin = "HEAD"
-    ) {}
-}
-
-export class EditorState {
-    constructor(
-        /** The monitor being modified. Null represents `drafting` a new monitor. */
-        public monitor: Monitor | null
-    ) {}
-}
-
-export class SplitState {
-    constructor(
-        /** We can either be viewing a monitor in detail, 
-         * editing a monitor, 
-         * or neither. */
-        public pane: ViewState | EditorState | null
-    ) {}
-
-    isViewing(): this is { pane: ViewState } {
-        return this.pane instanceof ViewState;
-    }
-
-    isEditing(): this is { pane: EditorState } {
-        return this.pane instanceof EditorState;
-    }
-
-    /** Return true if any of the provided IDs match the id of the monitor in this state. */
-    overlaps(id: number[]): boolean {
-        if (this.isViewing()) {
-            return id.includes(this.pane.monitor.id!);
-        } else if (this.isEditing()) {
-            return this.pane.monitor !== null && id.includes(this.pane.monitor.id);
-        }
-        return false;
-    }
-
-    /** Return true if the provided monitor is equal to the monitor in this state. */
-    equals(monitor: Monitor): boolean {
-        if (this.isViewing()) {
-            return monitor == this.pane.monitor
-        } else if (this.isEditing()) {
-            return this.pane.monitor !== null && monitor == this.pane.monitor
-        }
-        return false;
-    }
-}
+import { OriginState } from "./origin";
+import { EditorState, SplitState, ViewState } from "./split";
 
 export interface MonitorState {
     monitors: Map<number, Monitor>,
     filter: FilterKind,
-    bulk: Monitor[],
+    selected: Monitor[],
     split: SplitState,
     deleting: Monitor[],
 }
@@ -113,7 +14,7 @@ export interface MonitorState {
 export const monitorDefault: MonitorState = {
     monitors: new Map(),
     filter: "All",
-    bulk: [],
+    selected: [],
     split: new SplitState(null),
     deleting: [],
 }
@@ -176,7 +77,7 @@ type ViewAction = {
     target: { 
         monitor: Monitor, 
         measurement: Measurement | null,
-        origin?: Origin,
+        origin?: OriginState,
         disableToggle?: boolean
     } | null
 };
@@ -208,7 +109,7 @@ const removeAction = (state: MonitorState, action: RemoveAction) => {
     const split = state.split.overlaps(action.monitors) 
         ? null 
         : state.split;
-    return { ...state, monitors, bulk, deleting, split } as MonitorState
+    return { ...state, monitors, selected: bulk, deleting, split } as MonitorState
 }
 
 const toggleAction = (state: MonitorState, action: ToggleAction) => {
@@ -251,9 +152,9 @@ const editAction = (state: MonitorState, action: EditAction) => {
 }
 
 const selectAction = (state: MonitorState, action: SelectAction) => {
-    const bulk = state.bulk.includes(action.monitor)
-        ? state.bulk.filter(n => n != action.monitor)
-        : [...state.bulk, action.monitor];
+    const bulk = state.selected.includes(action.monitor)
+        ? state.selected.filter(n => n != action.monitor)
+        : [...state.selected, action.monitor];
     return { ...state, bulk }
 }
 
@@ -316,7 +217,7 @@ const detailAction = (state: MonitorState, action: DetailAction) => {
     return state;
 }
 
-const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorState => {
+export const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorState => {
     switch (action.type) {
         case "remove": return removeAction(state, action);
         case "toggle": return toggleAction(state, action);
@@ -332,5 +233,3 @@ const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorStat
         case "detail": return detailAction(state, action);
     }
 }
-
-export { monitorReducer };
