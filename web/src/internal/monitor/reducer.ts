@@ -104,12 +104,12 @@ const removeAction = (state: MonitorState, action: RemoveAction) => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) monitors.delete(n);
     
-    const bulk: Monitor[] = [];
+    const selected: Monitor[] = [];
     const deleting: Monitor[] = [];
     const split = state.split.overlaps(action.monitors) 
         ? null 
         : state.split;
-    return { ...state, monitors, selected: bulk, deleting, split } as MonitorState
+    return { ...state, monitors, selected, deleting, split } as MonitorState
 }
 
 const toggleAction = (state: MonitorState, action: ToggleAction) => {
@@ -122,9 +122,7 @@ const toggleAction = (state: MonitorState, action: ToggleAction) => {
         }
         found.active = action.active;
     }
-    const bulk: Monitor[] = [];
-    const deleting: Monitor[] = [];
-    return { ...state, monitors, bulk, deleting };
+    return { ...state, monitors, selected: [], deleting: [] };
 }
 
 const draftAction = (state: MonitorState) => {
@@ -152,10 +150,10 @@ const editAction = (state: MonitorState, action: EditAction) => {
 }
 
 const selectAction = (state: MonitorState, action: SelectAction) => {
-    const bulk = state.selected.includes(action.monitor)
+    const selected = state.selected.includes(action.monitor)
         ? state.selected.filter(n => n != action.monitor)
         : [...state.selected, action.monitor];
-    return { ...state, bulk }
+    return { ...state, selected }
 }
 
 const overwriteAction = (state: MonitorState, action: OverwriteAction) => {
