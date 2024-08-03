@@ -10,6 +10,7 @@ import "./Modal.css";
 interface ModalProps {
     visible: boolean;
     kind: ModalAttached | ModalFloating,
+
     onCancel: () => void;
 }
 

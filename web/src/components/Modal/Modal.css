@@ -9,22 +9,12 @@
   border-radius: var(--rounded);
 }
 
-.zenin__modal_icon_container {
-  display: flex;
-  justify-content: flex-start;
-  padding: 0 var(--px-c) 0 0;
-}
-
 .zenin__modal.attached {
   position: absolute;
   right: calc(var(--px-b) + 100%);
   top: -1px;
   height: auto;
   width: 200px;
-}
-
-.zenin__modal_padded {
-  padding: var(--px-b);
 }
 
 .zenin__modal.floating {
@@ -36,44 +26,14 @@
   transform: translate(-50%, -50%);
 }
 
-@keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.95)
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1)
-  }
+.zenin__modal_icon_container {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 var(--px-c) 0 0;
 }
 
-@keyframes modal-exit {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1)
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.95)
-  }
-}
-
-@keyframes backdrop-enter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: var(--darken);
-  }
-}
-
-@keyframes backdrop-exit {
-  from {
-    opacity: var(--darken);
-  }
-  to {
-    opacity: 0;
-  }
+.zenin__modal_padded {
+  padding: var(--px-b);
 }
 
 .zenin__modal.primary {
@@ -146,4 +106,44 @@
 .zenin__modal_group_border {
   height: 1px;
   background: var(--off-b);
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95)
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1)
+  }
+}
+
+@keyframes modal-exit {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1)
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95)
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--darken);
+  }
+}
+
+@keyframes backdrop-exit {
+  from {
+    opacity: var(--darken);
+  }
+  to {
+    opacity: 0;
+  }
 }

@@ -101,7 +101,7 @@ export default function MonitorComponent(props: MonitorProps) {
                         {monitor.data.name}
                     </span>
                     <Button
-                        style={menuModalIsOpen ? { background: "var(--off-b)" } : {}} // Maintain background when modal is open.
+                        style={menuModalIsOpen ? { background: "var(--off-b)" } : {}}
                         onClick={event => { event.stopPropagation(); setMenuModalIsOpen(!menuModalIsOpen) }}
                     >
                         <VMenuIcon />

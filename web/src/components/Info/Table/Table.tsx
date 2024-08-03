@@ -111,12 +111,14 @@ export default function TableComponent(props: TableProps) {
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
             <div className="zenin__table_recent_container">
                 <Button
-                    style={dateModalIsVisible ? { background: "var(--off-b)" } : {}} // Maintain background when modal is open.
+                    style={dateModalIsVisible ? { background: "var(--off-b)" } : {}}
                     border={true}
                     icon={<ClockIcon />}
                     onClick={event => { event.stopPropagation(); setDateModalIsVisible(!dateModalIsVisible) }}
                 >
-                    <span className='zenin__table_recent_button_text'>{state.origin == "HEAD" ? "Recent" : state.origin.toString()}</span>
+                    <span className='zenin__table_recent_button_text'>
+                        {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
+                    </span>
                     <ModalComponent
                         visible={dateModalIsVisible}
                         onCancel={() => setDateModalIsVisible(false)}

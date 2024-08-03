@@ -1,12 +1,12 @@
 import Button from "../Button/Button";
 
-import "./ConfirmModal.css";
+import "./DeleteMonitor.css";
 
-interface ConfirmModalProps {
+interface DeleteMonitorProps {
     onDelete: () => void;
 }
 
-export default function ConfirmModal(props: ConfirmModalProps) {
+export default function DeleteMonitor(props: DeleteMonitorProps) {
     const { onDelete } = props;
 
     return (

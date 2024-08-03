@@ -1,25 +1,25 @@
 import { useEffect } from 'react';
-import { useAccountContext } from '../internal/account';
-import { hideLoadingScreen, showLoadingScreen } from '../internal/layout/graphics';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
+import { useAccountContext } from '../internal/account';
+import { useLayoutContext } from '../internal/layout';
+import { hideLoadingScreen, showLoadingScreen } from '../internal/layout/graphics';
 import { useLogContext } from '../internal/log';
+import { useMetaContext } from '../internal/meta';
+import { useDefaultMetaService } from '../internal/meta/service';
 import { Monitor, useMonitorContext } from '../internal/monitor';
 import { useDefaultMonitorService } from '../internal/monitor/service';
-import { useLayoutContext } from '../internal/layout';
-import { useDefaultMetaService } from '../internal/meta/service';
-import { useMetaContext } from '../internal/meta';
 import { DataPacket } from '../server';
 import { FEED, handleConnect, handleDisconnect } from '../server/feed';
-import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
 
-import Hidden from '../components/Hidden/Hidden';
-import LoginView from './Login/Login';
-import Dashboard from './Dashboard/Dashboard';
-import LogView from './Log/Log';
 import Guard from '../components/Guard/Guard';
-import Bundle from '../components/Modal/Bundle/Bundle';
+import Hidden from '../components/Hidden/Hidden';
 import MenuComponent from '../components/Menu/Menu';
 import NavComponent from '../components/Nav/Nav';
+import Bundle from './Bundle';
+import Dashboard from './Dashboard/Dashboard';
+import LogView from './Log/Log';
+import LoginView from './Login/Login';
 
 import './Root.css';
 
@@ -81,11 +81,8 @@ export default function RootComponent() {
             <div className='zenin__root_left'>
                 {visible ? <NavComponent /> : null}
             </div>
-
             <div className='zenin__root_right'>
-                {visible ?
-                    <MenuComponent />
-                    : null}
+                {visible ? <MenuComponent /> : null}
                 <div className='zenin__main'>
                     <Routes>
                         <Route element={<Hidden />}>
@@ -99,9 +96,7 @@ export default function RootComponent() {
                 </div>
             </div>
 
-            <div className='zenin__modal_container'>
-                <Bundle />
-            </div>
+            <Bundle />
         </div>
     )
 }

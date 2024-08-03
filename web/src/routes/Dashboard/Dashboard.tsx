@@ -1,13 +1,13 @@
-import { ACTIVE_UI, INACTIVE_UI, isMonitor, Monitor, useMonitorContext } from '../../internal/monitor'
-import { useDefaultMonitorService } from '../../internal/monitor/service';
 import { useAccountContext } from '../../internal/account';
+import { ACTIVE_UI, INACTIVE_UI, isMonitor, Monitor, useMonitorContext } from '../../internal/monitor';
+import { useDefaultMonitorService } from '../../internal/monitor/service';
 import { DataPacket } from '../../server';
 
-import MonitorComponent from '../../components/Monitor/Monitor';
 import EditorComponent from '../../components/Editor/Editor';
 import InfoComponent from '../../components/Info/Info';
+import MonitorComponent from '../../components/Monitor/Monitor';
 
-import './Dashboard.css'
+import './Dashboard.css';
 
 export default function Dashboard() {
     const monitor = {
