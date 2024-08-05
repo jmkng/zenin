@@ -1,14 +1,15 @@
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAccountContext } from '../../internal/account/index.ts';
 import { useDefaultAccountService } from '../../internal/account/service.ts';
 import { useLayoutContext } from '../../internal/layout/index.ts';
 import { useLogContext } from '../../internal/log';
 
 import Button from '../Button/Button.tsx';
-import MessageIcon from '../Icon/MessageIcon/MessageIcon.tsx';
 import MenuIcon from '../Icon/MenuIcon/MenuIcon.tsx';
+import MessageIcon from '../Icon/MessageIcon/MessageIcon.tsx';
 import MonitorIcon from '../Icon/MonitorIcon/MonitorIcon.tsx';
+import SettingsIcon from '../Icon/SettingsIcon/SettingsIcon.tsx';
 
 import './Nav.css';
 
@@ -119,9 +120,7 @@ export default function NavComponent() {
                 <div className='zenin__nav_links_container'
                     onClick={() => window.matchMedia('(max-width: 700px)').matches ? layout.dispatch({ type: 'navigate', navigating: false }) : {}}>
                     <Button onClick={() => navigate('/')} background={location.pathname == '/'}>
-                        <span className="zenin__h_center">
-                            <MonitorIcon />
-                        </span>
+                        <span className="zenin__h_center"><MonitorIcon /></span>
                         <span>Dashboard</span>
                     </Button>
                     <Button onClick={() => navigate('/log')} background={location.pathname == "/log"}>
@@ -130,6 +129,10 @@ export default function NavComponent() {
                         <span className="zenin__h_center zenin__h_right">
                             {log.state.urgent.length > 0 ? <span className="zenin__nav_urgent" /> : null}
                         </span>
+                    </Button>
+                    <Button onClick={() => navigate('/settings')} background={location.pathname == "/settings"}>
+                        <span className="zenin__h_center"><SettingsIcon /></span>
+                        <span>Settings</span>
                     </Button>
                 </div>
             </div>
