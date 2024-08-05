@@ -4,7 +4,7 @@ export interface LayoutState {
 }
 
 export const layoutDefault: LayoutState = {
-    navigating: false,
+    navigating: document.body.clientWidth > 700,
     loading: true
 }
 
