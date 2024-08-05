@@ -18,7 +18,7 @@
   padding: var(--px-c);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
     .zenin__main {
       min-width: 100vw;
     }

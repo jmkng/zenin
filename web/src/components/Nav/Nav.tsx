@@ -27,7 +27,7 @@ export default function NavComponent() {
     const [resizing, setResizing] = useState<boolean>(false);
     const [size, setSize] = useState<number>(MIN_NAV_SIZE);
     const [render, setRender] = useState<boolean>(layout.state.navigating);
-    const [narrow, setNarrow] = useState<boolean>(window.matchMedia("(max-width: 600px)").matches);
+    const [narrow, setNarrow] = useState<boolean>(window.matchMedia("(max-width: 700px)").matches);
     const navRef = useRef<HTMLDivElement>(null);
     const initial = useRef(true);
     const options = { duration: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slow')) * 1000, easing: "ease-in-out" };
@@ -64,13 +64,13 @@ export default function NavComponent() {
 
     useEffect(() => {
         initial.current = false;
-        const media600 = window.matchMedia("(max-width: 600px)");
-        const mediaReset = () => setNarrow(media600.matches);
+        const media = window.matchMedia("(max-width: 700px)");
+        const mediaReset = () => setNarrow(media.matches);
 
-        media600.addEventListener('change', mediaReset);
+        media.addEventListener('change', mediaReset);
         return () => {
             initial.current = true;
-            media600.removeEventListener('change', mediaReset);
+            media.removeEventListener('change', mediaReset);
         }
     }, [])
 
