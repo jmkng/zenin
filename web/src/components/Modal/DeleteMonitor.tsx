@@ -16,7 +16,7 @@ export default function DeleteMonitor(props: DeleteMonitorProps) {
                 <div>This action cannot be undone.</div>
             </div>
             <div className="zenin__confirm_modal_bottom zenin__h_right">
-                <Button onClick={() => onDelete()} kind="primary" style={{ width: "auto" }}>
+                <Button onClick={() => onDelete()} kind="primary">
                     <span>Delete</span>
                 </Button>
             </div>
