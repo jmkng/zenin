@@ -44,19 +44,18 @@
 }
 
 .zenin__button:not(.disabled).destructive {
-  background: var(--dead-a);
-  color: var(--white);
+  color: var(--dead-a);
 }
 
 .zenin__button:not(.disabled).destructive:hover {
-  background: var(--dead-b);
+  color: var(--dead-b);
 }
 
 .zenin__button:not(.disabled).primary:hover {
   background: var(--primary-hl);  
 }
 
-.zenin__button:not(.disabled).default:hover {
+.zenin__button:not(.disabled):hover {
   background: var(--off-b);  
 }
 
