@@ -17,3 +17,9 @@
 .zenin__main > * {
   padding: var(--px-c);
 }
+
+@media (max-width: 600px) {
+    .zenin__main {
+      min-width: 100vw;
+    }
+}

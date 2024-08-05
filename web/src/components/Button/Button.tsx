@@ -76,7 +76,7 @@ export default function Button(props: ButtonProps) {
             adjustPosition(tooltipElement);
         };
         const handleMouseEnter = () => {
-            timeoutRef.current = setTimeout(() => handleShowTooltip(), 750)
+            if (!window.matchMedia("(max-width: 600px)").matches) timeoutRef.current = setTimeout(() => handleShowTooltip(), 750);
         }
         const handleMouseLeave = () => {
             const id = timeoutRef.current;
