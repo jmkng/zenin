@@ -116,7 +116,8 @@ export default function NavComponent() {
                         {account.context.state.authenticated?.token.payload.sub || "Zenin"}
                     </Button>
                 </div>
-                <div className='zenin__nav_links_container'>
+                <div className='zenin__nav_links_container'
+                    onClick={() => window.matchMedia('(max-width: 700px)').matches ? layout.dispatch({ type: 'navigate', navigating: false }) : {}}>
                     <Button onClick={() => navigate('/')} background={location.pathname == '/'}>
                         <span className="zenin__h_center">
                             <MonitorIcon />
