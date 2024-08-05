@@ -13,6 +13,7 @@ import FirstIcon from '../../Icon/FirstIcon/FirstIcon';
 import LastIcon from '../../Icon/LastIcon/LastIcon';
 import NextIcon from '../../Icon/NextIcon/NextIcon';
 import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
+import TrashIcon from '../../Icon/TrashIcon/TrashIcon';
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
 import AggregateComponent from '../Aggregate/Aggregate';
 import PropertyComponent from '../Property/Property';
@@ -107,8 +108,9 @@ export default function TableComponent(props: TableProps) {
     return <div className="zenin__table_component">
         <div className="zenin__table_header">
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
-
-            <div className="zenin__table_recent_container">
+            <div className="zenin__table_controls_container">
+                {/* <Button disabled={checked.length == 0} border={true} kind="destructive" icon={<ExportIcon />} /> */}
+                <Button disabled={checked.length == 0} border={true} kind="destructive" icon={<TrashIcon />} />
                 <Button border={true} icon={<ClockIcon />}
                     dialog={[
                         { text: "Recent", onClick: () => handleDateChange("HEAD") },
@@ -132,10 +134,7 @@ export default function TableComponent(props: TableProps) {
                 <thead className='zenin__table_head'>
                     <tr>
                         <th>
-                            <CheckboxInput
-                                checked={allChecked}
-                                name={`zenin__table_master`}
-                                onChange={handleMasterCheck} />
+                            <CheckboxInput checked={allChecked} name={`zenin__table_master`} onChange={handleMasterCheck} />
                         </th>
                         <th>ID</th>
                         <th>Time</th>

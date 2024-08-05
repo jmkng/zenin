@@ -67,10 +67,13 @@
     border-top: 1px solid var(--off-b);
 }
 
-.zenin__table_recent_container {
-    position: relative;
-    margin-left: var(--px-b);
+.zenin__table_controls_container {
+    display: flex;
     margin-left: auto;
+}
+
+.zenin__table_controls_container > *:not(:last-of-type) {
+    margin-right: var(--px-b);
 }
 
 .zenin__table_footer {
