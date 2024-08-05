@@ -6,13 +6,15 @@
 }
 
 .zenin__dashboard_activity {
+  overflow-y: auto;
+  overflow-x: hidden;
   margin-left: var(--px-c);
   flex: 1;
-  overflow-y: auto;
 }
 
 .zenin__dashboard_monitors {
   overflow-y: auto;
+  overflow-x: hidden;
   display: grid;
   flex: 1;
   gap: var(--px-c);
