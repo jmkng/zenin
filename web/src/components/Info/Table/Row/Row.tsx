@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { formatDate } from '../../../../internal/layout/graphics';
-
 import { Measurement } from '../../../../internal/measurement';
+
 import CheckboxInput from '../../../Input/CheckboxInput/CheckboxInput';
 
-import './Row.css'
+import './Row.css';
 
 interface RowProps {
     measurement: Measurement,
@@ -21,29 +21,16 @@ export default function Row(props: RowProps) {
         return false;
     }, [checked, measurement])
 
-    const handleCheck = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.stopPropagation();
-        onCheck(measurement.id!);
-    }
-
-    return (
-        <tr
-            onClick={() => onClick(measurement.id!)}
-            className={['zenin__row_component', highlight ? 'highlight' : ''].join(' ')}
-        >
-            <td>
-                <CheckboxInput onChange={e => handleCheck(e)} checked={isChecked} name={`zenin__row_${measurement.id}`} />
-            </td>
-            <td>
-                <span className="zenin__id">{measurement.id}</span>
-            </td>
-            <td>
-                {formatDate(measurement.recordedAt)}
-            </td>
-            <td>
-                <span className="zenin__state" data-state={measurement.state}>{measurement.state}</span>
-            </td>
-        </tr >
-    )
-
+    return <tr onClick={() => onClick(measurement.id!)}
+        className={['zenin__row_component', highlight ? 'highlight' : ''].join(' ')}>
+        <td onClick={event => event.stopPropagation()}>
+            <CheckboxInput onChange={() => onCheck(measurement.id)}
+                checked={isChecked} name={`zenin__row_${measurement.id}`} />
+        </td>
+        <td><span className="zenin__id">{measurement.id}</span></td>
+        <td>{formatDate(measurement.recordedAt)}</td>
+        <td>
+            <span className="zenin__state" data-state={measurement.state}>{measurement.state}</span>
+        </td>
+    </tr >
 }

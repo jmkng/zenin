@@ -68,6 +68,7 @@
 }
 
 .zenin__table_recent_container {
+    position: relative;
     margin-left: var(--px-b);
     margin-left: auto;
 }

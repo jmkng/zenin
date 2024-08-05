@@ -14,7 +14,6 @@ import LastIcon from '../../Icon/LastIcon/LastIcon';
 import NextIcon from '../../Icon/NextIcon/NextIcon';
 import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
-import ModalComponent from '../../Modal/Modal';
 import AggregateComponent from '../Aggregate/Aggregate';
 import PropertyComponent from '../Property/Property';
 import Row from './Row/Row';
@@ -37,7 +36,6 @@ export default function TableComponent(props: TableProps) {
     const [page, setPage] = useState(1);
     const [checked, setChecked] = useState<number[]>([]);
     const [allChecked, setAllChecked] = useState(false);
-    const [dateModalIsVisible, setDateModalIsVisible] = useState(false);
 
     const propertyContainerRef = useRef<HTMLDivElement>(null);
     const visible = measurements.slice((page - 1) * PAGESIZE, page * PAGESIZE);
@@ -109,30 +107,17 @@ export default function TableComponent(props: TableProps) {
     return <div className="zenin__table_component">
         <div className="zenin__table_header">
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
+
             <div className="zenin__table_recent_container">
-                <Button
-                    style={dateModalIsVisible ? { background: "var(--off-b)" } : {}}
-                    border={true}
-                    icon={<ClockIcon />}
-                    onClick={event => { event.stopPropagation(); setDateModalIsVisible(!dateModalIsVisible) }}
-                >
-                    <span className='zenin__table_recent_button_text'>
-                        {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
-                    </span>
-                    <ModalComponent
-                        visible={dateModalIsVisible}
-                        onCancel={() => setDateModalIsVisible(false)}
-                        kind={{
-                            flag: 'attached',
-                            content: [
-                                { text: "Recent", onClick: () => handleDateChange("HEAD") },
-                                { text: "Past Day", onClick: () => handleDateChange(new DetachedState("DAY")) },
-                                { text: "Past Week", onClick: () => handleDateChange(new DetachedState("WEEK")) },
-                                { text: "Past Month", onClick: () => handleDateChange(new DetachedState("MONTH")) },
-                                { text: "Past Year", onClick: () => handleDateChange(new DetachedState("YEAR")) },
-                            ]
-                        }}
-                    />
+                <Button border={true} icon={<ClockIcon />}
+                    dialog={[
+                        { text: "Recent", onClick: () => handleDateChange("HEAD") },
+                        { text: "Past Day", onClick: () => handleDateChange(new DetachedState("DAY")) },
+                        { text: "Past Week", onClick: () => handleDateChange(new DetachedState("WEEK")) },
+                        { text: "Past Month", onClick: () => handleDateChange(new DetachedState("MONTH")) },
+                        { text: "Past Year", onClick: () => handleDateChange(new DetachedState("YEAR")) },
+                    ]}>
+                    {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
                 </Button>
             </div>
         </div>

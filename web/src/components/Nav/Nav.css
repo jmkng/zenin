@@ -39,6 +39,11 @@
   margin-right: var(--px-c);
 }
 
+.zenin__nav_links_container .zenin__button {
+  justify-content: flex-start;
+  width: "100%";
+}
+
 .zenin__nav_account_container {
   display: flex;
   justify-content: flex-start;

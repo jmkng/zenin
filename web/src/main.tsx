@@ -19,6 +19,7 @@ import './css/input.css';
 import './css/icon.css';
 import './css/widget.css';
 import './css/state.css';
+import './css/dialog.css';
 
 const providers = [
     MonitorProvider,

@@ -28,7 +28,6 @@ export default function NavComponent() {
     const navRef = useRef<HTMLDivElement>(null);
     const initial = useRef(true);
     const navStyle = { width: `${width}px` };
-    const buttonStyle = { justifyContent: "flex-start", width: "100%" };
     const cssvalue = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slow'));
     const options = { duration: cssvalue * 1000, easing: "ease-in-out" }
 
@@ -114,13 +113,13 @@ export default function NavComponent() {
                     </Button>
                 </span>
                 <div className='zenin__nav_links_container'>
-                    <Button style={buttonStyle} onClick={() => navigate('/')} background={location.pathname == '/'}>
+                    <Button onClick={() => navigate('/')} background={location.pathname == '/'}>
                         <span className="zenin__h_center">
                             <MonitorIcon />
                         </span>
                         <span>Dashboard</span>
                     </Button>
-                    <Button style={buttonStyle} onClick={() => navigate('/log')} background={location.pathname == "/log"}>
+                    <Button onClick={() => navigate('/log')} background={location.pathname == "/log"}>
                         <span className="zenin__h_center"><MessageIcon /></span>
                         <span>Log</span>
                         <span className="zenin__h_center zenin__h_right">

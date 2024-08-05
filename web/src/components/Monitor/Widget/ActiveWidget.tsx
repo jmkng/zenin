@@ -12,7 +12,6 @@ interface ActiveWidgetProps {
 
 export default function ActiveWidget(props: ActiveWidgetProps) {
     const { active, onClick } = props;
-
     const attr = active ? ACTIVE_UI : INACTIVE_UI;
 
     return (

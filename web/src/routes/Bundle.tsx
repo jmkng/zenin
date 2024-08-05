@@ -1,8 +1,9 @@
 import { useAccountContext } from "../internal/account";
 import { Monitor, useMonitorContext } from "../internal/monitor";
 import { useDefaultMonitorService } from "../internal/monitor/service";
+
+import DialogModalComponent from "../components/Modal/DialogModal";
 import DeleteMonitor from "../components/Modal/DeleteMonitor";
-import ModalComponent from "../components/Modal/Modal";
 
 export default function Bundle() {
     const account = useAccountContext();
@@ -18,14 +19,10 @@ export default function Bundle() {
     }
 
     return <>
-        <ModalComponent
+        <DialogModalComponent
+            title="Confirm"
             visible={monitor.state.deleting.length > 0}
-            kind={{
-                flag: "floating",
-                title: "Confirm",
-                content: <DeleteMonitor onDelete={() => handleRemove(monitor.state.deleting)} />
-            }}
             onCancel={() => monitor.dispatch({ type: 'delete', monitors: [] })}
-        />
+            content={<DeleteMonitor onDelete={() => handleRemove(monitor.state.deleting)} />} />
     </>
 }

@@ -17,6 +17,9 @@
 
 .zenin__button_icon {
   display: flex;
+}
+
+.zenin__button_icon.pair {
   margin-right: var(--px-b);
 }
 

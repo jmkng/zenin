@@ -1,22 +1,24 @@
 import { adjustPosition } from '../../internal/layout/graphics';
+import DialogMenuComponent, { DialogGroup, DialogItem } from '../Modal/DialogMenu';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+
 import './Button.css'
-import { CSSProperties, ReactNode, useCallback, useEffect, useRef } from 'react';
 
 interface ButtonProps {
-    children: ReactNode
+    children?: ReactNode
     kind?: "default" | "primary" | "destructive"
     border?: boolean;
     hover?: boolean;
     icon?: ReactNode;
     background?: boolean;
     disabled?: boolean;
-    tooltip?: ButtonTooltipOptions | null
-    style?: CSSProperties
+    tooltip?: ButtonTooltipOptions
 
+    dialog?: DialogGroup[] | DialogItem[]
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-export interface ButtonTooltipOptions {
+interface ButtonTooltipOptions {
     text: string
 }
 
@@ -30,20 +32,31 @@ export default function Button(props: ButtonProps) {
         background = false,
         disabled = false,
         tooltip = null,
-        style,
+        dialog,
         onClick
     } = props;
-    const tooltipStyle = {}
-    const timeout = useRef<number | null>(null);
-    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [dialogVisible, setDialogVisible] = useState(false);
     const tooltipRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const timeoutRef = useRef<number | null>(null);
 
     const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if (onClick) {
-            onClick(event);
-            handleHideTooltip();
-        }
-    }, [onClick])
+        if (dialog) setDialogVisible(prev => !prev);
+        if (onClick) onClick(event);
+        handleHideTooltip();
+    }, [dialog, onClick])
+
+    useEffect(() => {
+        if (!dialogVisible) return;
+        const handleClick = (event: MouseEvent) => {
+            if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) setDialogVisible(false)
+        };
+        document.addEventListener('click', handleClick, true);
+        return () => {
+            document.removeEventListener('click', handleClick, true);
+        };
+    }, [dialogVisible])
 
     const handleHideTooltip = () => {
         const tooltipElement = tooltipRef.current;
@@ -63,13 +76,13 @@ export default function Button(props: ButtonProps) {
             adjustPosition(tooltipElement);
         };
         const handleMouseEnter = () => {
-            timeout.current = setTimeout(() => handleShowTooltip(), 750)
+            timeoutRef.current = setTimeout(() => handleShowTooltip(), 750)
         }
         const handleMouseLeave = () => {
-            const id = timeout.current;
+            const id = timeoutRef.current;
             if (!id) return;
             clearTimeout(id);
-            timeout.current = null;
+            timeoutRef.current = null;
             handleHideTooltip();
         }
 
@@ -84,34 +97,35 @@ export default function Button(props: ButtonProps) {
         }
     }, [tooltip])
 
-    return (
-        <button
-            className={[
-                'zenin__button',
-                'zenin__input',
-                kind,
-                border ? 'border' : '',
-                hover ? 'hover' : '',
-                background ? 'background' : '',
-                disabled ? 'disabled' : '',
-            ].join(' ')}
-            ref={buttonRef}
-            style={style}
-            onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { if (!disabled) { handleClick(event) } }}
-        >
-            {icon ? <span className="zenin__button_icon">{icon}</span> : null}
-            {children}
-            {tooltip ?
-                <div
-                    className="zenin__tooltip"
-                    style={tooltipStyle}
-                    ref={tooltipRef}
-                >
-                    {tooltip.text}
-                </div>
-                : null
-            }
-        </button >
-    );
+    return <button
+        ref={buttonRef}
+        onClick={event => { if (!disabled) handleClick(event) }}
+        className={[
+            'zenin__button',
+            'zenin__input',
+            kind,
+            border ? 'border' : '',
+            hover ? 'hover' : '',
+            (background || dialogVisible) ? 'background' : '',
+            disabled ? 'disabled' : '',
+        ].join(' ')}
+    >
+        {icon
+            ? <span className={["zenin__button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
+            : null}
+        {children}
+        {tooltip
+            ? <div className="zenin__tooltip" ref={tooltipRef}>{tooltip.text}</div>
+            : null}
+        {dialog && dialogVisible
+            ? <div
+                role="dialog"
+                ref={dialogRef}
+                onClick={event => event.stopPropagation()}
+            >
+                <DialogMenuComponent content={dialog} onItemClick={() => setDialogVisible(false)} />
+            </div>
+            : null}
+    </button >
 }
 

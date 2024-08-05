@@ -380,11 +380,8 @@ export default function EditorComponent(props: EditorProps) {
                 </Button>
 
                 {state.monitor ?
-                    <div onClick={(event) => event.stopPropagation()} className="zenin__detail_delete_button">
-                        <Button
-                            kind="destructive"
-                            onClick={() => onDelete(state.monitor!)}
-                        >
+                    <div className="zenin__detail_delete_button" onClick={event => event.stopPropagation()}>
+                        <Button kind="destructive" onClick={() => onDelete(state.monitor!)}>
                             <TrashIcon />
                         </Button>
                     </div>

@@ -1,0 +1,43 @@
+.zenin__dialog_menu {
+    position: absolute;
+    right: calc(var(--px-b) + 100%);
+    top: -1px;
+    height: auto;
+    width: 175px;
+}
+
+.zenin__dialog_menu_list {
+    list-style: none;
+    padding: var(--px-b);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.zenin__dialog_menu_item {
+    border-radius: var(--rounded);
+    padding: var(--px-d);
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.zenin__dialog_menu_item.destructive {
+    color: var(--dead-a);
+  }
+  
+.zenin__dialog_menu_group_border {
+    height: 1px;
+    background: var(--off-b);
+    margin-top: var(--px-b);
+    margin-bottom: var(--px-b);
+}
+
+.zenin__dialog_menu_icon_container {
+    margin-right: var(--px-d);
+}
+
+.zenin__dialog_menu_item:hover {
+    background: var(--off-b);
+}

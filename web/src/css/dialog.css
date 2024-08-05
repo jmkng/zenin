@@ -1,0 +1,10 @@
+.zenin__dialog {
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--off-b);
+    background: var(--background);
+    color: var(--foreground);
+    z-index: 101;
+    border-radius: var(--rounded);
+  }
