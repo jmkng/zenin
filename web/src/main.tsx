@@ -12,6 +12,7 @@ import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
+import './css/cover.css';
 import './css/dialog.css';
 import './css/helper.css';
 import './css/icon.css';
