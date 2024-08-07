@@ -14,16 +14,16 @@ import { FEED, handleConnect, handleDisconnect } from '../server/feed';
 
 import Guard from '../components/Guard/Guard';
 import Hidden from '../components/Hidden/Hidden';
-import MenuComponent from '../components/Menu/Menu';
-import NavComponent from '../components/Nav/Nav';
+import Menu from '../components/Menu/Menu';
+import Nav from '../components/Nav/Nav';
 import Bundle from './Bundle';
 import Dashboard from './Dashboard/Dashboard';
-import LogView from './Log/Log';
-import LoginView from './Login/Login';
+import Log from './Log/Log';
+import Login from './Login/Login';
 
 import './Root.css';
 
-export default function RootComponent() {
+export default function Root() {
     const account = useAccountContext();
     const layout = useLayoutContext();
     const monitor = {
@@ -79,18 +79,18 @@ export default function RootComponent() {
     return (
         <div className='zenin__root_component'>
             <div className='zenin__root_left'>
-                {visible ? <NavComponent /> : null}
+                {visible ? <Nav /> : null}
             </div>
             <div className='zenin__root_right'>
-                {visible ? <MenuComponent /> : null}
+                {visible ? <Menu /> : null}
                 <div className='zenin__main'>
                     <Routes>
                         <Route element={<Hidden />}>
-                            <Route path="/login" element={<LoginView />} />
+                            <Route path="/login" element={<Login />} />
                         </Route>
                         <Route element={<Guard />}>
                             <Route path="/" element={<Dashboard />} />
-                            <Route path="/log" element={<LogView />} />
+                            <Route path="/log" element={<Log />} />
                         </Route>
                     </Routes>
                 </div>
