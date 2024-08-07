@@ -86,17 +86,13 @@ export default function Nav() {
         }
         const handleStopResize = () => {
             if (resizing) setResizing(false);
-            const body = document.querySelector('body');
-            if (!body) return;
-            body.style.cursor = "default";
-            body.style.userSelect = "auto";
-            body.classList.remove('layout-adjust');
+            const root = document.documentElement;
+            root.classList.remove('layout-adjust');
         }
 
         if (resizing) {
-            const body = document.querySelector('body');
-            if (!body) return;
-            body.classList.add('layout-adjust');
+            const root = document.documentElement;
+            root.classList.add('layout-adjust');
             window.addEventListener('mousemove', handleResize)
             window.addEventListener('mouseup', handleStopResize)
         }

@@ -60,9 +60,7 @@ export default function Dashboard() {
                         : null}
 
                     {monitor.context.state.split.isViewing() ?
-                        <Info
-                            state={monitor.context.state.split.pane} />
-                        : null}
+                        <Info state={monitor.context.state.split.pane} /> : null}
                 </div>
                 : null}
         </div>
