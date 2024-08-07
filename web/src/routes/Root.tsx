@@ -20,6 +20,7 @@ import Bundle from './Bundle';
 import Dashboard from './Dashboard/Dashboard';
 import Log from './Log/Log';
 import Login from './Login/Login';
+import Settings from './Settings/Settings';
 
 import './Root.css';
 
@@ -91,6 +92,7 @@ export default function Root() {
                         <Route element={<Guard />}>
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/log" element={<Log />} />
+                            <Route path="/settings" element={<Settings />} />
                         </Route>
                     </Routes>
                 </div>
