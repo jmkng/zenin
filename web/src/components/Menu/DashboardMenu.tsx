@@ -11,7 +11,7 @@ import AddIcon from "../Icon/AddIcon/AddIcon";
 
 import "./DashboardMenu.css";
 
-export default function DashboardMenuComponent() {
+export default function DashboardMenu() {
     const monitor = {
         context: useMonitorContext(),
         service: useDefaultMonitorService()

@@ -1,4 +1,4 @@
-import './RadioInput.css'
+import './RadioInput.css';
 
 interface RadioProps {
     name: string;

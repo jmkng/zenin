@@ -13,7 +13,7 @@ interface ChainProps {
     measurement: Measurement
 }
 
-export default function ChainComponent(props: ChainProps) {
+export default function Chain(props: ChainProps) {
     const account = useAccountContext();
     const measurement = {
         service: useDefaultMeasurementService(),

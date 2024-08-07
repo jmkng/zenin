@@ -18,11 +18,9 @@ export default function Initialize(props: InitializeProps) {
         const token = account.service.read();
         if (token) account.context.dispatch({ type: 'login', token });
         else account.context.dispatch({ type: 'logout' });
-    }, [account])
+    }, [account.context, account.service])
 
-    return (
-        <>
-            {account.context.state.initialized ? children : null}
-        </>
-    )
+    return <>
+        {account.context.state.initialized ? children : null}
+    </>
 }

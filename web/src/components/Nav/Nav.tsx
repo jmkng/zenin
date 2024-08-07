@@ -15,7 +15,7 @@ import './Nav.css';
 
 const MIN_NAV_SIZE = 250;
 
-export default function NavComponent() {
+export default function Nav() {
     const layout = useLayoutContext();
     const account = {
         context: useAccountContext(),

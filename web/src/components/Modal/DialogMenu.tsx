@@ -17,7 +17,7 @@ interface DialogMenuProps {
     onItemClick?: () => void;
 }
 
-export default function DialogMenuComponent(props: DialogMenuProps) {
+export default function DialogMenu(props: DialogMenuProps) {
     const { content, onItemClick } = props;
 
     return <div className="zenin__dialog_menu zenin__dialog">

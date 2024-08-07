@@ -11,7 +11,7 @@ interface LineReaderProps {
     urgent: Line[];
 }
 
-export default function LineReaderComponent(props: LineReaderProps) {
+export default function LineReader(props: LineReaderProps) {
     const { lines, urgent } = props;
 
     const [isSticky, setIsSticky] = useState<boolean>(true);

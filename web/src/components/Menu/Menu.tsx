@@ -3,12 +3,12 @@ import { useLayoutContext } from '../../internal/layout';
 
 import Button from '../Button/Button';
 import MenuIcon from '../Icon/MenuIcon/MenuIcon';
-import DashboardMenuComponent from './DashboardMenu';
-import LogMenuComponent from './LogMenu';
+import DashboardMenu from './DashboardMenu';
+import LogMenu from './LogMenu';
 
 import './Menu.css';
 
-export default function MenuComponent() {
+export default function Menu() {
     const layout = useLayoutContext();
     const location = useLocation();
 
@@ -25,8 +25,8 @@ export default function MenuComponent() {
 
                 <div className="zenin__menu_spacer first"></div>
                 <div className="zenin__menu_left_contextual">
-                    {location.pathname == "/" ? <DashboardMenuComponent /> : null}
-                    {location.pathname == "/log" ? <LogMenuComponent /> : null}
+                    {location.pathname == "/" ? <DashboardMenu /> : null}
+                    {location.pathname == "/log" ? <LogMenu /> : null}
                 </div>
             </div>
 

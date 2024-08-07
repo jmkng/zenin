@@ -12,7 +12,7 @@ interface SeriesProps {
 const slotWidth = 20;
 const slotGap = 2;
 
-export default function SeriesComponent(props: SeriesProps) {
+export default function Series(props: SeriesProps) {
     const {
         measurements,
         onSlotClick

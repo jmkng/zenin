@@ -1,5 +1,6 @@
 import { useAccountContext } from '../../internal/account';
-import { Monitor, useMonitorContext } from "../../internal/monitor";
+import * as monitor from "../../internal/monitor";
+import { useMonitorContext } from "../../internal/monitor";
 import { MonitorService } from '../../internal/monitor/service';
 
 import Button from '../Button/Button';
@@ -10,18 +11,18 @@ import PauseIcon from '../Icon/PauseIcon/PauseIcon';
 import PlayIcon from '../Icon/PlayIcon/PlayIcon';
 import TrashIcon from '../Icon/TrashIcon/TrashIcon';
 import VMenuIcon from '../Icon/VMenuIcon/VMenuIcon';
-import SeriesComponent from './Series';
+import Series from './Series';
 import ActiveWidget from './Widget/ActiveWidget';
 import IDWidget from './Widget/IDWidget';
 
 import './Monitor.css';
 
 interface MonitorProps {
-    monitor: Monitor;
+    monitor: monitor.Monitor;
     service: MonitorService;
 }
 
-export default function MonitorComponent(props: MonitorProps) {
+export default function Monitor(props: MonitorProps) {
     const monitor = {
         data: props.monitor,
         context: useMonitorContext(),
@@ -112,7 +113,7 @@ export default function MonitorComponent(props: MonitorProps) {
             <div className="zenin__monitor_middle" onClick={handleSelect}>
             </div>
             <div className='zenin__monitor_bottom'>
-                <SeriesComponent
+                <Series
                     measurements={monitor.data.measurements?.toReversed() || []}
                     onSlotClick={measurement => monitor.context.dispatch({
                         type: 'view',

@@ -51,7 +51,7 @@ const defaultDraft: Draft = {
     icmpSize: 56
 }
 
-export default function EditorComponent(props: EditorProps) {
+export default function Editor(props: EditorProps) {
     const {
         state,
         onChange,

@@ -1,18 +1,19 @@
-import { useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react";
 import ChevronIcon from "../../Icon/ChevronIcon/ChevronIcon";
 
-import "./Expand.css"
 import Button from "../../Button/Button";
 import CopyIcon from "../../Icon/CopyIcon/CopyIcon";
-import LastIcon from "../../Icon/LastIcon/LastIcon";
 import FirstIcon from "../../Icon/FirstIcon/FirstIcon";
+import LastIcon from "../../Icon/LastIcon/LastIcon";
+
+import "./Expand.css";
 
 interface ExpandProps {
     title: string,
     text: string
 }
 
-export default function ExpandComponent(props: ExpandProps) {
+export default function Expand(props: ExpandProps) {
     const { title, text } = props;
     const [expanded, setExpanded] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);

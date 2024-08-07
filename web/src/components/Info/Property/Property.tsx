@@ -2,15 +2,15 @@ import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/measurement";
 import { HTTP_API } from "../../../server";
 
-import ExpandComponent from "../Expand/Expand";
-import ListComponent from "../List/List";
-import ChainComponent from "./Chain";
+import Expand from "../Expand/Expand";
+import List from "../List/List";
+import Chain from "./Chain";
 
 export interface PropertyProps {
     measurement: Measurement
 }
 
-export default function PropertyComponent(props: PropertyProps) {
+export default function Property(props: PropertyProps) {
     const { measurement } = props;
 
     const pairs: Map<string, string> = new Map()
@@ -25,33 +25,33 @@ export default function PropertyComponent(props: PropertyProps) {
 
     return (
         <div className="zenin__property_component zenin__h_space_top">
-            <ListComponent
+            <List
                 title={`Properties #${measurement.id}`}
                 data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
 
             {measurement.httpResponseHeaders ?
                 <div className="zenin__property_response_headers zenin__h_space_top">
-                    <ExpandComponent title={"Response Headers"} text={measurement.httpResponseHeaders} />
+                    <Expand title={"Response Headers"} text={measurement.httpResponseHeaders} />
                 </div>
                 : null}
             {measurement.httpResponseBody ?
                 <div className="zenin__property_response_body zenin__h_space_top">
-                    <ExpandComponent title={"Response Body"} text={measurement.httpResponseBody} />
+                    <Expand title={"Response Body"} text={measurement.httpResponseBody} />
                 </div>
                 : null}
             {measurement.pluginStdout ?
                 <div className="zenin__property_stdout zenin__h_space_top">
-                    <ExpandComponent title={"Standard Output"} text={measurement.pluginStdout} />
+                    <Expand title={"Standard Output"} text={measurement.pluginStdout} />
                 </div>
                 : null}
             {measurement.pluginStderr ?
                 <div className="zenin__property_stderr zenin__h_space_top">
-                    <ExpandComponent title={"Standard Output"} text={measurement.pluginStderr} />
+                    <Expand title={"Standard Output"} text={measurement.pluginStderr} />
                 </div>
                 : null}
             {measurement.stateHint ?
                 <div className="zenin__property_hints zenin__h_space_top">
-                    <ListComponent title="Hints" data={measurement.stateHint} />
+                    <List title="Hints" data={measurement.stateHint} />
                 </div>
                 : null}
 
@@ -59,7 +59,7 @@ export default function PropertyComponent(props: PropertyProps) {
 
             {measurement.kind == HTTP_API ?
                 <div className="zenin__property_http_addon zenin__h_space_top">
-                    <ChainComponent measurement={measurement} />
+                    <Chain measurement={measurement} />
                 </div>
                 : null}
         </div>

@@ -14,7 +14,7 @@ interface ListProps {
     data: ListItem[]
 }
 
-export default function ListComponent(props: ListProps) {
+export default function List(props: ListProps) {
     const { title, data } = props;
     const listRef = useRef<HTMLDivElement>(null);
 

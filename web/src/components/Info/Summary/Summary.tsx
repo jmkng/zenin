@@ -2,7 +2,7 @@ import { formatDate } from "../../../internal/layout/graphics";
 import { ViewState } from "../../../internal/monitor/split";
 import { DEAD_API } from "../../../server";
 
-import ListComponent from "../List/List";
+import List from "../List/List";
 
 import "./Summary.css";
 
@@ -10,7 +10,7 @@ interface SummaryProps {
     state: ViewState,
 }
 
-export default function SummaryComponent(props: SummaryProps) {
+export default function Summary(props: SummaryProps) {
     const { state } = props;
     const reversed = (state.monitor.measurements || []).toReversed();
 
@@ -24,7 +24,7 @@ export default function SummaryComponent(props: SummaryProps) {
 
     return (
         <div className="zenin__summary_component">
-            <ListComponent title="Summary" data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
+            <List title="Summary" data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
         </div>
     )
 }

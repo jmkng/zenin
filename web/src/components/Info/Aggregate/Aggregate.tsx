@@ -1,7 +1,7 @@
 import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/measurement";
 import { DEAD_API, OK_API, WARN_API } from "../../../server";
-import ListComponent from "../List/List";
+import List from "../List/List";
 
 import "./Aggregate.css";
 
@@ -9,7 +9,7 @@ interface AggregateProps {
     measurements: Measurement[]
 }
 
-export default function AggregateComponent(props: AggregateProps) {
+export default function Aggregate(props: AggregateProps) {
     const { measurements } = props;
 
     const dead = measurements.filter(n => n.state == DEAD_API).length;
@@ -29,7 +29,7 @@ export default function AggregateComponent(props: AggregateProps) {
 
     return (
         <div className="zenin__aggregate_component">
-            <ListComponent
+            <List
                 title="Aggregate"
                 data={Array.from(pairs, ([key, value]) => ({ key, value: value }))}
             />

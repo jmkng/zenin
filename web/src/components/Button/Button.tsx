@@ -1,8 +1,8 @@
-import { adjustPosition } from '../../internal/layout/graphics';
-import DialogMenuComponent, { DialogGroup, DialogItem } from '../Modal/DialogMenu';
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { adjustPosition } from '../../internal/layout/graphics';
+import DialogMenu, { DialogGroup, DialogItem } from '../Modal/DialogMenu';
 
-import './Button.css'
+import './Button.css';
 
 interface ButtonProps {
     children?: ReactNode
@@ -123,7 +123,7 @@ export default function Button(props: ButtonProps) {
                 ref={dialogRef}
                 onClick={event => event.stopPropagation()}
             >
-                <DialogMenuComponent content={dialog} onItemClick={() => setDialogVisible(false)} />
+                <DialogMenu content={dialog} onItemClick={() => setDialogVisible(false)} />
             </div>
             : null}
     </button >

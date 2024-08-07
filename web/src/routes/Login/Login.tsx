@@ -13,7 +13,7 @@ import LogoIcon from "../../components/Icon/LogoIcon/LogoIcon";
 
 import "./Login.css"
 
-export default function LoginView() {
+export default function Login() {
     const [form, setForm] = useState<LoginState>(defaultState);
     const [errors, setErrors] = useState<string[]>([]);
     const [summary, setSummary] = useState<Meta | null>(null);

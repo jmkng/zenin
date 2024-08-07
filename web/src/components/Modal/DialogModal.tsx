@@ -14,7 +14,7 @@ interface ModalProps {
     onCancel: () => void;
 }
 
-export default function DialogModalComponent(props: ModalProps) {
+export default function DialogModal(props: ModalProps) {
     const { title, content, visible, onCancel } = props;
     const [render, setRender] = useState<boolean>(visible);
 

@@ -2,7 +2,7 @@ import { useAccountContext } from "../internal/account";
 import { Monitor, useMonitorContext } from "../internal/monitor";
 import { useDefaultMonitorService } from "../internal/monitor/service";
 
-import DialogModalComponent from "../components/Modal/DialogModal";
+import DialogModal from "../components/Modal/DialogModal";
 import DeleteMonitor from "../components/Modal/DeleteMonitor";
 
 export default function Bundle() {
@@ -19,7 +19,7 @@ export default function Bundle() {
     }
 
     return <>
-        <DialogModalComponent
+        <DialogModal
             title="Confirm"
             visible={monitor.state.deleting.length > 0}
             onCancel={() => monitor.dispatch({ type: 'delete', monitors: [] })}

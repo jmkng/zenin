@@ -15,8 +15,8 @@ import NextIcon from '../../Icon/NextIcon/NextIcon';
 import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
 import TrashIcon from '../../Icon/TrashIcon/TrashIcon';
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
-import AggregateComponent from '../Aggregate/Aggregate';
-import PropertyComponent from '../Property/Property';
+import Aggregate from '../Aggregate/Aggregate';
+import Property from '../Property/Property';
 import Row from './Row/Row';
 
 import './Table.css';
@@ -25,7 +25,7 @@ interface TableProps {
     state: ViewState
 }
 
-export default function TableComponent(props: TableProps) {
+export default function Table(props: TableProps) {
     const { state } = props;
     const monitor = {
         context: useMonitorContext(),
@@ -176,12 +176,12 @@ export default function TableComponent(props: TableProps) {
         </div>
 
         <div className="zenin__info_aggregate_container zenin__h_space_top">
-            <AggregateComponent measurements={measurements} />
+            <Aggregate measurements={measurements} />
         </div>
 
         {state.selected ?
             <div className="zenin__info_property_container" ref={propertyContainerRef}>
-                <PropertyComponent measurement={state.selected} />
+                <Property measurement={state.selected} />
             </div>
             : null}
     </div >

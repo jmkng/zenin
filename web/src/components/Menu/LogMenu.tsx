@@ -7,7 +7,7 @@ import UnplugIcon from "../Icon/UnplugIcon/UnplugIcon";
 
 import "./LogMenu.css";
 
-export default function LogMenuComponent() {
+export default function LogMenu() {
     const log = useLogContext();
 
     const handleFeedToggle = (connected: boolean) => {
