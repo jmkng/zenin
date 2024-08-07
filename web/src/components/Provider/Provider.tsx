@@ -3,7 +3,7 @@ interface Props {
     children?: React.ReactNode
 }
 
-export default function Compose(props: Props) {
+export default function Provider(props: Props) {
     const { providers = [], children } = props
 
     return (
