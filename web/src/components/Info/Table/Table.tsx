@@ -175,7 +175,7 @@ export default function Table(props: TableProps) {
             </div>
         </div>
 
-        <div className="zenin__info_aggregate_container zenin__h_space_top">
+        <div className="zenin__info_aggregate_container zenin__h_margin_top">
             <Aggregate measurements={measurements} />
         </div>
 

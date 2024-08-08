@@ -21,10 +21,10 @@ export default function Info(props: InfoProps) {
             <div className="zenin__info_component_body">
                 <h1 className="zenin__info_name">{state.monitor.name}</h1>
                 {state.monitor.description ? <Expand title={"Description"} text={state.monitor.description} /> : null}
-                <div className="zenin__info_summary_container zenin__h_space_top">
+                <div className="zenin__info_summary_container zenin__h_margin_top">
                     <Summary state={state} />
                 </div>
-                <div className="zenin__info_table_container zenin__h_space_top">
+                <div className="zenin__info_table_container zenin__h_margin_top">
                     <Table state={state} />
                 </div>
             </div>
