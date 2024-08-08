@@ -7,6 +7,13 @@
   transform: translate(-50%, -50%);
 }
 
+@media (max-width: 700px) {
+  .zenin__dialog_modal {
+    max-width: none;
+    width: 90vw;
+  }
+}
+
 .zenin__dialog_modal_upper {
   display: flex;
   margin-bottom: var(--px-c);

@@ -103,6 +103,10 @@
   font-family: system-ui, sans-serif, "Geist Sans";
 }
 
-.zenin__h_space_top {
+.zenin__h_margin_top {
   margin-top: var(--px-e);
+}
+
+.zenin__h_padding_top {
+  padding-top: var(--px-e);
 }

@@ -13,11 +13,7 @@ const slotWidth = 20;
 const slotGap = 2;
 
 export default function Series(props: SeriesProps) {
-    const {
-        measurements,
-        onSlotClick
-    } = props;
-
+    const { measurements, onSlotClick } = props;
     const [slots, setSlots] = useState<number>(0);
     const containerRef = useRef(null);
 
