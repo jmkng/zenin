@@ -53,5 +53,5 @@ input:checked + .zenin__toggle_input_slider {
 }
 
 input:checked + .zenin__toggle_input_slider::before {
-    transform: translateX(14px);
+    transform: translateX(10px);
 }
