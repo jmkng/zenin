@@ -37,7 +37,10 @@ export interface Monitor {
     httpExpiredCertMod: string | null,
     httpCaptureHeaders: boolean | null,
     httpCaptureBody: boolean | null,
-    icmpSize: number | null
+    icmpSize: number | null,
+    icmpWait: number | null,
+    icmpCount: number | null,
+    icmpTtl: number | null,
     measurements: Measurement[] | null
 }
 
@@ -50,8 +53,6 @@ export function isMonitor(obj: any): obj is Monitor {
         Object.hasOwn(obj, 'interval') && typeof obj.interval === 'number' &&
         Object.hasOwn(obj, 'timeout') && typeof obj.timeout === 'number'
 }
-
-
 
 export function monitorEquals(a: Monitor, b: Monitor): boolean {
     return a.name == b.name
@@ -72,6 +73,9 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.httpCaptureHeaders == b.httpCaptureHeaders
         && a.httpCaptureBody == b.httpCaptureBody
         && a.icmpSize == b.icmpSize
+        && a.icmpWait == b.icmpWait
+        && a.icmpCount == b.icmpCount
+        && a.icmpTtl == b.icmpTtl
 }
 
 export function kindAPItoUI(value: string) {

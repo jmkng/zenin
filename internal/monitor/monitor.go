@@ -54,20 +54,23 @@ type Monitor struct {
 	Active             bool                      `json:"active" db:"active"`
 	Interval           int                       `json:"interval" db:"interval"`
 	Timeout            int                       `json:"timeout" db:"timeout"`
-	Description        *string                   `json:"description,omitempty" db:"description"`
-	RemoteAddress      *string                   `json:"remoteAddress,omitempty" db:"remote_address"`
-	RemotePort         *int16                    `json:"remotePort,omitempty" db:"remote_port"`
-	PluginName         *string                   `json:"pluginName,omitempty" db:"plugin_name"`
-	PluginArgs         *string                   `json:"pluginArgs,omitempty" db:"plugin_args"`
-	HTTPRange          *HTTPRange                `json:"httpRange,omitempty" db:"http_range"`
-	HTTPMethod         *string                   `json:"httpMethod,omitempty" db:"http_method"`
-	HTTPRequestHeaders *string                   `json:"httpRequestHeaders,omitempty" db:"http_request_headers"`
-	HTTPRequestBody    *string                   `json:"httpRequestBody,omitempty" db:"http_request_body"`
-	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod,omitempty" db:"http_expired_cert_mod"`
-	HTTPCaptureHeaders *bool                     `json:"httpCaptureHeaders,omitempty" db:"http_capture_headers"`
-	HTTPCaptureBody    *bool                     `json:"httpCaptureBody,omitempty" db:"http_capture_body"`
-	ICMPSize           *int                      `json:"icmpSize,omitempty" db:"icmp_size"`
-	Measurements       []measurement.Measurement `json:"measurements,omitempty"`
+	Description        *string                   `json:"description" db:"description"`
+	RemoteAddress      *string                   `json:"remoteAddress" db:"remote_address"`
+	RemotePort         *int16                    `json:"remotePort" db:"remote_port"`
+	PluginName         *string                   `json:"pluginName" db:"plugin_name"`
+	PluginArgs         *string                   `json:"pluginArgs" db:"plugin_args"`
+	HTTPRange          *HTTPRange                `json:"httpRange" db:"http_range"`
+	HTTPMethod         *string                   `json:"httpMethod" db:"http_method"`
+	HTTPRequestHeaders *string                   `json:"httpRequestHeaders" db:"http_request_headers"`
+	HTTPRequestBody    *string                   `json:"httpRequestBody" db:"http_request_body"`
+	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
+	HTTPCaptureHeaders *bool                     `json:"httpCaptureHeaders" db:"http_capture_headers"`
+	HTTPCaptureBody    *bool                     `json:"httpCaptureBody" db:"http_capture_body"`
+	ICMPSize           *int                      `json:"icmpSize" db:"icmp_size"`
+	ICMPWait           *int                      `json:"icmpWait" db:"icmp_wait"`
+	ICMPCount          *int                      `json:"icmpCount" db:"icmp_count"`
+	ICMPTTL            *int                      `json:"icmpTtl" db:"icmp_ttl"`
+	Measurements       []measurement.Measurement `json:"measurements"`
 }
 
 func (m Monitor) Fields() []any {

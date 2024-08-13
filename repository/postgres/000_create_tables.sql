@@ -27,7 +27,10 @@ CREATE TABLE monitor (
     http_expired_cert_mod TEXT CHECK (http_expired_cert_mod IN ('WARN', 'DEAD')),
     http_capture_headers  BOOLEAN,
     http_capture_body     BOOLEAN,
-    icmp_size             INTEGER CHECK (icmp_size > 0)
+    icmp_size             INTEGER CHECK (icmp_size > 0),
+    icmp_wait             INTEGER CHECK (icmp_wait > 0),
+    icmp_count            INTEGER CHECK (icmp_count > 0),
+    icmp_ttl              INTEGER CHECK (icmp_ttl > 0)
 );
 
 CREATE TABLE measurement (

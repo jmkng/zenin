@@ -32,7 +32,7 @@ interface EditorProps {
 
 const defaultDraft: Draft = {
     name: null,
-    kind: HTTP_API,
+    kind: PLUGIN_API,
     active: false,
     interval: 300,
     timeout: 10,
@@ -48,7 +48,10 @@ const defaultDraft: Draft = {
     httpExpiredCertMod: OFF_API,
     httpCaptureHeaders: false,
     httpCaptureBody: false,
-    icmpSize: 56
+    icmpSize: 56,
+    icmpWait: 1000,
+    icmpCount: 3,
+    icmpTtl: 64
 }
 
 export default function Editor(props: EditorProps) {
@@ -74,12 +77,19 @@ export default function Editor(props: EditorProps) {
     const hasValidName = useMemo(() => isValidName(editor.draft.name), [editor.draft.name])
     const hasValidInterval = useMemo(() => isValidInterval(editor.draft.interval), [editor.draft.interval])
     const hasValidTimeout = useMemo(() => isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
+
     const hasValidRemoteAddress = useMemo(() => isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
     const hasValidRemotePort = useMemo(() => isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
+
     const hasValidHttpBody = useMemo(() => isValidJSON(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
     const hasValidHttpHeaders = useMemo(() => isValidJSON(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
+
     const hasValidPluginArguments = useMemo(() => isValidJSONArray(editor.draft.pluginArgs), [editor.draft.pluginArgs]);
-    const hasValidIcmpSize = useMemo(() => isValidIcmpSize(editor.draft.icmpSize), [editor.draft.icmpSize]);
+
+    const hasValidIcmpSize = useMemo(() => isValidNonZeroNumber(editor.draft.icmpSize), [editor.draft.icmpSize]);
+    const hasValidIcmpWait = useMemo(() => isValidNonZeroNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
+    const hasValidIcmpCount = useMemo(() => isValidNonZeroNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
+    const hasValidIcmpTtl = useMemo(() => isValidNonZeroNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
 
     useEffect(() => {
         setEditor(prev => ({ ...prev, draft: reset, original: reset }))
@@ -181,12 +191,14 @@ export default function Editor(props: EditorProps) {
                             { value: HTTP_API, text: HTTP_UI },
                             { value: TCP_API, text: TCP_UI },
                             { value: ICMP_API, text: ICMP_UI },
-                            { value: PING_API, text: PING_UI },
-                            { value: PLUGIN_API, text: PLUGIN_UI }
                         ]}
-                        subtext={<span>Specify the <a href="#">probe</a> type.</span>} /* TODO: Add documentation link. */
-                        onChange={value =>
-                            setEditor(prev => ({ ...prev, draft: { ...prev.draft, kind: value } }))}
+                        subtext={<span>Set the <a href="#">probe</a> type.</span>} /* TODO: Add documentation link. */
+                        onChange={kind => setEditor(prev => ({
+                            ...prev, draft: {
+                                ...prev.draft, kind,
+                                pluginName: kind == PLUGIN_API ? prev.draft.pluginName || meta.context.state.plugins[0] : null
+                            }
+                        }))}
                     />
                 </div>
 
@@ -288,7 +300,7 @@ export default function Editor(props: EditorProps) {
                                     { text: CLIENTERROR_API },
                                     { text: SERVERERROR_API },
                                 ]}
-                                subtext={<span>Specify the range of <a href="https://datatracker.ietf.org/doc/html/rfc2616#section-10">status codes</a> that will indicate a successful probe.</span>}
+                                subtext={<span>Set the range of <a href="https://datatracker.ietf.org/doc/html/rfc2616#section-10">status codes</a> that will indicate a successful probe.</span>}
                                 value={editor.draft.httpRange}
                                 onChange={httpRange =>
                                     setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRange } }))}
@@ -318,39 +330,82 @@ export default function Editor(props: EditorProps) {
                     null}
 
                 {editor.draft.kind == ICMP_API ?
-                    <div className="zenin__detail_spaced zenin__detail_icmp_container">
-                        <NumberInput
-                            label={<span className={hasValidIcmpSize ? "" : "zenin__h_error"}>Packet Size</span>}
-                            name="zenin__detail_monitor_icmp_size"
-                            value={editor.draft.icmpSize}
-                            subtext="The packet size in bytes."
-                            onChange={icmpSize => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpSize } }))}
-                        />
-                        {!hasValidIcmpSize ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet size must be greater than 0</span>
-                            :
-                            null}
-                    </div>
+                    <>
+                        <div className="zenin__detail_spaced">
+                            <NumberInput
+                                label={<span className={hasValidIcmpSize ? "" : "zenin__h_error"}>Packet Size</span>}
+                                name="zenin__detail_monitor_icmp_size"
+                                value={editor.draft.icmpSize}
+                                subtext="The packet size in bytes."
+                                onChange={icmpSize => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpSize } }))}
+                            />
+                            {!hasValidIcmpSize ?
+                                <span className="zenin__detail_validation zenin__h_error">Packet size must be greater than 0</span>
+                                :
+                                null}
+                        </div>
+
+                        <div className="zenin__detail_spaced">
+                            <NumberInput
+                                label={<span className={hasValidIcmpWait ? "" : "zenin__h_error"}>Packet Wait</span>}
+                                name="zenin__detail_monitor_icmp_wait"
+                                value={editor.draft.icmpWait}
+                                subtext="The time to wait between each outgoing packet in milliseconds."
+                                onChange={icmpWait => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpWait } }))}
+                            />
+                            {!hasValidIcmpWait ?
+                                <span className="zenin__detail_validation zenin__h_error">Packet wait must be greater than 0</span>
+                                :
+                                null}
+                        </div>
+
+
+                        <div className="zenin__detail_spaced">
+                            <NumberInput
+                                label={<span className={hasValidIcmpCount ? "" : "zenin__h_error"}>Packet Count</span>}
+                                name="zenin__detail_monitor_icmp_count"
+                                value={editor.draft.icmpCount}
+                                subtext="The total packets to send."
+                                onChange={icmpCount => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpCount } }))}
+                            />
+                            {!hasValidIcmpCount ?
+                                <span className="zenin__detail_validation zenin__h_error">Packet count must be greater than 0</span>
+                                :
+                                null}
+                        </div>
+
+
+                        <div className="zenin__detail_spaced">
+                            <NumberInput
+                                label={<span className={hasValidIcmpTtl ? "" : "zenin__h_error"}>Packet TTL</span>}
+                                name="zenin__detail_monitor_icmp_ttl"
+                                value={editor.draft.icmpTtl}
+                                subtext="The TTL for each outgoing packet."
+                                onChange={icmpTtl => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpTtl } }))}
+                            />
+                            {!hasValidIcmpTtl ?
+                                <span className="zenin__detail_validation zenin__h_error">Packet TTL must be greater than 0</span>
+                                :
+                                null}
+                        </div>
+
+                    </>
                     : null}
 
                 {editor.draft.kind == PLUGIN_API ?
                     <div className="zenin__detail_plugin_container">
                         <div className="zenin__detail_spaced">
-
-                        </div>
-                        <div className="zenin__detail_spaced">
                             <SelectInput
                                 label="Name"
                                 name="zenin__detail_monitor_method"
                                 subtext={<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>}
-                                value={editor.draft.pluginName!}
+                                value={editor.draft.pluginName || meta.context.state.plugins[0]}
                                 onChange={pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))}
-                                options={Array.from(
-                                    new Set([...meta.context.state.plugins, editor.draft.pluginName!]))
-                                    .map(n => ({ text: n }))
-                                }
+                                options={Array.from(new Set([...meta.context.state.plugins, editor.draft.pluginName || ""]))
+                                    .map(n => ({ text: n })).filter(n => n.text.trim() != "")}
                             />
                         </div>
+
                         <div className="zenin__detail_spaced">
                             <TextAreaInput
                                 label={<span className={hasValidPluginArguments ? "" : "zenin__h_error"}>Arguments</span>}
@@ -369,7 +424,25 @@ export default function Editor(props: EditorProps) {
                     </div>
                     :
                     null}
+
+                {/* TODO */}
+                {/* <div className="zenin__detail_chain_plugin zenin__detail_spaced">
+                    <SelectInput
+                        label="Chain Plugin"
+                        name="zenin__detail_chain_plugidn"
+                        value={editor.draft.active.toString()}
+                        subtext={<span>Set a <a href="#">plugin</a> to <a href="#">chain</a> with this monitor.</span>}
+                        options={[
+                            { value: "true", text: ACTIVE_UI },
+                            { value: "false", text: INACTIVE_UI }
+                        ]}
+                        onChange={value =>
+                            setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === 'true' } }))
+                        }
+                    />
+                </div> */}
             </div>
+
 
             <div className="zenin__detail_controls">
                 <Button kind="primary" disabled={!canSubmit} onClick={() => { handleSubmit() }}>
@@ -478,7 +551,10 @@ interface Draft {
     httpExpiredCertMod: string | null,
     httpCaptureHeaders: boolean,
     httpCaptureBody: boolean,
-    icmpSize: number | null
+    icmpSize: number | null,
+    icmpWait: number | null,
+    icmpCount: number | null,
+    icmpTtl: number | null
 }
 
 function isValidMonitor(draft: Draft): boolean {
@@ -503,7 +579,8 @@ function isValidHTTP(draft: Draft): boolean {
 }
 
 function isValidICMP(draft: Draft): boolean {
-    return isValidRemoteAddress(draft.remoteAddress) && isValidIcmpSize(draft.icmpSize);
+    return isValidRemoteAddress(draft.remoteAddress) && isValidNonZeroNumber(draft.icmpSize)
+        && isValidNonZeroNumber(draft.icmpWait) && isValidNonZeroNumber(draft.icmpCount) && isValidNonZeroNumber(draft.icmpTtl);
 }
 
 function isValidTCP(draft: Draft): boolean {
@@ -551,8 +628,8 @@ function isValidJSONArray(body: string | null): boolean {
     }
 }
 
-function isValidIcmpSize(size: number | null): boolean {
-    return size != null && size > 0;
+function isValidNonZeroNumber(value: number | null): boolean {
+    return value != null && value > 0;
 }
 
 function isValidName(name: string | null): boolean {
@@ -560,7 +637,7 @@ function isValidName(name: string | null): boolean {
 }
 
 function isValidKind(kind: string | null): boolean {
-    return kind != null && [HTTP_API, ICMP_API, TCP_API, PING_API, PLUGIN_API].includes(kind)
+    return kind != null && [HTTP_API, ICMP_API, TCP_API, PLUGIN_API].includes(kind)
 }
 
 function isValidState(state: boolean): boolean {
