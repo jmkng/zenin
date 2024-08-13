@@ -7,7 +7,6 @@ export const
     HTTP_UI = 'HTTP',
     ICMP_UI = 'ICMP',
     TCP_UI = 'TCP',
-    PING_UI = 'Ping',
     PLUGIN_UI = 'Plugin',
     ACTIVE_UI = 'Active',
     INACTIVE_UI = 'Inactive',
@@ -80,7 +79,6 @@ export function kindAPItoUI(value: string) {
         case sapi.HTTP_API: return HTTP_UI
         case sapi.ICMP_API: return ICMP_UI
         case sapi.TCP_API: return TCP_UI
-        case sapi.PING_API: return PING_UI
         case sapi.PLUGIN_API: return PLUGIN_UI
         default: return ""
     }

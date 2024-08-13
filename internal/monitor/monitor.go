@@ -108,15 +108,13 @@ func (m Monitor) Poll() measurement.Measurement {
 	var probe Probe
 	switch m.Kind {
 	case measurement.ICMP:
-		probe = NewICMPProbe(false)
+		probe = NewICMPProbe()
 	case measurement.HTTP:
 		probe = NewHTTPProbe()
 	case measurement.TCP:
 		probe = NewTCPProbe()
 	case measurement.Plugin:
 		probe = NewPluginProbe()
-	case measurement.Ping:
-		probe = NewICMPProbe(true)
 	default:
 		panic("unrecognized probe")
 	}
@@ -164,7 +162,7 @@ func (m Monitor) Validate() error {
 		if m.HTTPRange == nil {
 			push("httpRange")
 		}
-	case measurement.TCP, measurement.ICMP, measurement.Ping:
+	case measurement.TCP, measurement.ICMP:
 		if m.RemoteAddress == nil {
 			push("remoteAddress")
 		}

@@ -102,7 +102,6 @@ const (
 	HTTP   ProbeKind = "HTTP"
 	TCP    ProbeKind = "TCP"
 	ICMP   ProbeKind = "ICMP"
-	Ping   ProbeKind = "PING"
 	Plugin ProbeKind = "PLUGIN"
 )
 
@@ -114,8 +113,6 @@ func ProbeKindFromString(value string) (ProbeKind, error) {
 		return TCP, nil
 	case "icmp":
 		return ICMP, nil
-	case "ping":
-		return Ping, nil
 	case "plugin":
 		return Plugin, nil
 	default:

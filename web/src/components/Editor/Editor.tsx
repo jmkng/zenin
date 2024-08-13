@@ -3,12 +3,12 @@ import { useMetaContext } from "../../internal/meta";
 import {
     ACTIVE_UI, HTTP_UI, ICMP_UI, INACTIVE_UI,
     Monitor, monitorEquals,
-    PING_UI, PLUGIN_UI, TCP_UI,
+    PLUGIN_UI, TCP_UI,
 } from "../../internal/monitor";
 import { EditorState } from "../../internal/monitor/split";
 import {
     CLIENTERROR_API, DELETE_API, GET_API, HEAD_API, HTTP_API, ICMP_API,
-    INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PING_API, PLUGIN_API,
+    INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PLUGIN_API,
     POST_API, PUT_API, REDIRECTION_API, SERVERERROR_API, SUCCESSFUL_API, TCP_API
 } from "../../server";
 
@@ -177,6 +177,7 @@ export default function Editor(props: EditorProps) {
                         name="zenin__detail_monitor_kind"
                         value={editor.draft.kind}
                         options={[
+                            { value: PLUGIN_API, text: PLUGIN_UI },
                             { value: HTTP_API, text: HTTP_UI },
                             { value: TCP_API, text: TCP_UI },
                             { value: ICMP_API, text: ICMP_UI },
@@ -189,7 +190,7 @@ export default function Editor(props: EditorProps) {
                     />
                 </div>
 
-                {editor.draft.kind == HTTP_API || editor.draft.kind == ICMP_API || editor.draft.kind == TCP_API || editor.draft.kind == PING_API ?
+                {editor.draft.kind == HTTP_API || editor.draft.kind == ICMP_API || editor.draft.kind == TCP_API ?
                     <div className="zenin__detail_spaced zenin__detail_remote_address_container">
                         <TextInput
                             label={<span className={hasValidRemoteAddress ? "" : "zenin__h_error"}>Remote Address</span>}
@@ -316,7 +317,7 @@ export default function Editor(props: EditorProps) {
                     :
                     null}
 
-                {editor.draft.kind == ICMP_API || editor.draft.kind == PING_API ?
+                {editor.draft.kind == ICMP_API ?
                     <div className="zenin__detail_spaced zenin__detail_icmp_container">
                         <NumberInput
                             label={<span className={hasValidIcmpSize ? "" : "zenin__h_error"}>Packet Size</span>}

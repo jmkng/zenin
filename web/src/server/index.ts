@@ -4,7 +4,6 @@ export const
     HTTP_API = 'HTTP',
     ICMP_API = 'ICMP',
     TCP_API = 'TCP',
-    PING_API = 'PING',
     PLUGIN_API = 'PLUGIN',
     GET_API = 'GET',
     HEAD_API = 'HEAD',
