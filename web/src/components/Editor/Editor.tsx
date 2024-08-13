@@ -417,7 +417,7 @@ export default function Editor(props: EditorProps) {
                                     setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))}
                             />
                             {!hasValidPluginArguments ?
-                                <span className="zenin__detail_validation zenin__h_error">Request headers must be a valid JSON array</span>
+                                <span className="zenin__detail_validation zenin__h_error">Plugin arguments must be a valid JSON array</span>
                                 :
                                 null}
                         </div>
@@ -528,8 +528,15 @@ function sanitizePlugin(strategy: Monitor) {
 
 /** Reset a `Monitor` to `Draft`, setting useful defaults to make editing easier. */
 function resetToDraft(value: Monitor): [number | null, Draft] {
-    const draft: Draft = { ...defaultDraft, ...(value as Draft) };
-    return [value.id, draft];
+    // Start with the default values, layer on the non-null keys from `value`.
+    const [id, draft] = [value.id, { ...value } as Draft];
+    for (const [key, value] of Object.entries(draft)) {
+        if (value === null) {
+            //@ts-expect-error Ignore type for assignment.
+            draft[key] = defaultDraft[key];
+        }
+    }
+    return [id, draft];
 }
 
 /** Similar to `Monitor`, but some fields may be null because they aren't filled in yet. */

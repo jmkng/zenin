@@ -35,7 +35,7 @@
   margin-left: auto;
 }
 
-.zenin__detail_spaced:not(:last-of-type) {
+.zenin__detail_spaced {
   margin-bottom: var(--px-e);
 }
 
@@ -43,3 +43,6 @@
   height: 150px;
 }
 
+.zenin__detail_chain_plugin {
+  margin-bottom: 0;
+}
