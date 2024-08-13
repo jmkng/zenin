@@ -109,7 +109,7 @@ export default function Nav() {
                     {narrow
                         ? <Button onClick={() => layout.dispatch({ type: 'navigate', navigating: false })} icon={<MenuIcon />} />
                         : null}
-                    <Button>
+                    <Button onClick={() => navigate("/account")}>
                         {account.context.state.authenticated?.token.payload.sub || "Zenin"}
                     </Button>
                 </div>

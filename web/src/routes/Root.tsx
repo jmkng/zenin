@@ -16,6 +16,7 @@ import Guard from '../components/Guard/Guard';
 import Hidden from '../components/Hidden/Hidden';
 import Menu from '../components/Menu/Menu';
 import Nav from '../components/Nav/Nav';
+import Account from './Account/Account';
 import Bundle from './Bundle';
 import Dashboard from './Dashboard/Dashboard';
 import Log from './Log/Log';
@@ -91,6 +92,7 @@ export default function Root() {
                         </Route>
                         <Route element={<Guard />}>
                             <Route path="/" element={<Dashboard />} />
+                            <Route path="/account" element={<Account />} />
                             <Route path="/log" element={<Log />} />
                             <Route path="/settings" element={<Settings />} />
                         </Route>
