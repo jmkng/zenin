@@ -3,14 +3,14 @@ import "./ToggleInput.css";
 
 interface ToggleProps {
     name: string;
-    label?: string | React.ReactNode;
     value: boolean;
+    label?: string | React.ReactNode;
 
     onChange: (checked: boolean) => void;
 }
 
 export default function ToggleInput(props: ToggleProps) {
-    const { name, label, value = false, onChange } = props;
+    const { name, label, value, onChange } = props;
 
     return (
         <div className="zenin__toggle_input">
