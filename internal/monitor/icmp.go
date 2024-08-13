@@ -1,6 +1,9 @@
 package monitor
 
-import "github.com/jmkng/zenin/internal/measurement"
+import (
+	"github.com/jmkng/zenin/internal/measurement"
+	_ "github.com/prometheus-community/pro-bing"
+)
 
 // NewICMPProbe returns a new `ICMPProbe`
 func NewICMPProbe() ICMPProbe {
