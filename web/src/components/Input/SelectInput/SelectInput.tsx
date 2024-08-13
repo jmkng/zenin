@@ -4,10 +4,11 @@ import './SelectInput.css';
 
 interface SelectProps {
     name: string
-    label?: string | React.ReactNode;
     value: string;
-    subtext?: string | React.ReactNode
     options: SelectGroup[] | SelectOption[]
+    label?: string | React.ReactNode;
+    subtext?: string | React.ReactNode
+    placeholder?: string
 
     onChange: (value: string) => void
 }
@@ -23,7 +24,8 @@ interface SelectOption {
 }
 
 export default function SelectInput(props: SelectProps) {
-    const { name, options, onChange, value, subtext, label } = props;
+    const { name, value, options, label, subtext, placeholder, onChange } = props;
+
     return (
         <div
             className={["zenin__select", "zenin__input_container", "zenin__h_stack_vertical"].join(' ')}
@@ -47,17 +49,18 @@ export default function SelectInput(props: SelectProps) {
                     className="zenin__input zenin__select_input_box"
                     name={name}
                     id={name}
+                    disabled={options.length == 0 ? true : false}
                     value={value || undefined}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
                 >
-                    {
-                        options.length == 0 ? null :
-                            options.every(isGroup) ? options.map((n, i) =>
+                    {options.length == 0
+                        ? <option value="" selected disabled>{placeholder || "Empty"}</option>
+                        : options.every(isGroup)
+                            ? options.map((n, i) =>
                                 <optgroup key={i} label={n.label}>
                                     {n.options.map((m, o) => <option key={o} value={m.value}>{m.text}</option>)}
                                 </optgroup>)
-                                :
-                                options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
+                            : options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
                     }
                 </select>
 
