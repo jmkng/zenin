@@ -185,7 +185,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
 		responder.Error(internal.
-			NewValidation("Received unexpected data, keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+			NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
 			http.StatusBadRequest)
 		return
 	}
