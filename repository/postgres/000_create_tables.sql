@@ -28,7 +28,7 @@ CREATE TABLE monitor (
     http_capture_headers  BOOLEAN,
     http_capture_body     BOOLEAN,
     icmp_size             INTEGER CHECK (icmp_size > 0),
-    icmp_wait             INTEGER CHECK (icmp_wait > 0),
+    icmp_wait             INTEGER CHECK (icmp_wait > 0), -- Milliseconds
     icmp_count            INTEGER CHECK (icmp_count > 0),
     icmp_ttl              INTEGER CHECK (icmp_ttl > 0)
 );

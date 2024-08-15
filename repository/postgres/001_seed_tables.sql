@@ -9,7 +9,7 @@ INSERT INTO monitor
     http_capture_headers, http_capture_body, icmp_size, icmp_wait, icmp_count, icmp_ttl)
 VALUES
     (
-        'Mercury', 'ICMP', false, 30, 10, 'Mercury Description', 'http://google.com', NULL,
+        'Mercury', 'ICMP', false, 30, 10, 'Mercury Description', 'google.com', NULL,
         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 56, 1000, 3, 64
     ),
     (
@@ -55,10 +55,6 @@ VALUES
     (1, '2024-07-01T17:45:24-06:00', 'OK', NULL, 'ICMP', 364.22, 
     NULL, NULL, NULL, 
     5, 5, 1.99, 2.22, 2.46, 
-    NULL, NULL, NULL),
-    (1, '2024-07-01T17:45:24-06:00', 'WARN', '[ "Received less packets than expected." ]', 'ICMP', 233.32, 
-    NULL, NULL, NULL,
-    4, 5, 4.54, 5.66, 6.56,
     NULL, NULL, NULL),
     (2, '2024-07-01T17:45:24-06:00', 'OK', NULL, 'HTTP', 300.22, 
     200, 'Connection: Keep-Alive\nContent-Encoding: gzip', 'abc', 
