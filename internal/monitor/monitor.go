@@ -9,6 +9,11 @@ import (
 	"github.com/jmkng/zenin/internal/measurement"
 )
 
+const (
+	RemoteAddressInvalidMessage string = "Remote address may be invalid."
+	TimeoutMessage              string = "The monitor timed out."
+)
+
 type HTTPRange = string
 
 const (
