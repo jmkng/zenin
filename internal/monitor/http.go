@@ -31,7 +31,7 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 
 	request, err := http.NewRequest(*monitor.HTTPMethod, *monitor.RemoteAddress, requestBody)
 	if err != nil {
-		span.Downgrade(measurement.Dead, "Field `remote address` may be invalid.")
+		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
 		return span
 	}
 
@@ -39,7 +39,7 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 		var requestHeaders map[string]string
 		err = json.Unmarshal([]byte(*monitor.HTTPRequestHeaders), &requestHeaders)
 		if err != nil {
-			span.Downgrade(measurement.Dead, "Field `request headers` may be invalid.")
+			span.Downgrade(measurement.Dead, "Request headers may be invalid.")
 			return span
 		}
 		for key, value := range requestHeaders {
@@ -54,7 +54,7 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 	if err != nil {
 		span.Downgrade(measurement.Dead)
 		if e, ok := err.(net.Error); ok && e.Timeout() {
-			span.Hint("The monitor timed out.")
+			span.Hint(TimeoutMessage)
 		}
 		return span
 	}
@@ -114,8 +114,6 @@ func newHTTPRangeFromInt(value int) HTTPRange {
 		return Redirection
 	} else if value >= 400 && value < 500 {
 		return ClientError
-	} else if value >= 500 && value < 600 {
-		return ServerError
 	}
-	panic("unrecognized status code")
+	return ServerError
 }
