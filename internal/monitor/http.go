@@ -2,11 +2,11 @@ package monitor
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"io"
-	"net"
 	"net/http"
-	"time"
 
 	"github.com/jmkng/zenin/internal/measurement"
 )
@@ -19,41 +19,43 @@ func NewHTTPProbe() HTTPProbe {
 type HTTPProbe struct{}
 
 // Poll implements `Probe.Poll` for `HTTPProbe`.
-func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
+func (h HTTPProbe) Poll(m Monitor) measurement.Span {
 	span := measurement.NewSpan(measurement.Ok)
 
-	var requestBody *bytes.Buffer
-	if monitor.HTTPRequestBody != nil {
-		requestBody = bytes.NewBuffer([]byte(*monitor.HTTPRequestBody))
-	} else {
-		requestBody = bytes.NewBuffer([]byte{})
+	requestBody := bytes.NewBuffer([]byte{})
+	if m.HTTPRequestBody != nil {
+		requestBody = bytes.NewBuffer([]byte(*m.HTTPRequestBody))
 	}
 
-	request, err := http.NewRequest(*monitor.HTTPMethod, *monitor.RemoteAddress, requestBody)
+	deadline, cancel := m.Deadline(context.Background())
+	defer cancel()
+
+	request, err := http.NewRequestWithContext(deadline,
+		*m.HTTPMethod,
+		*m.RemoteAddress,
+		requestBody)
 	if err != nil {
 		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
 		return span
 	}
 
-	if monitor.HTTPRequestHeaders != nil {
+	if m.HTTPRequestHeaders != nil {
 		var requestHeaders map[string]string
-		err = json.Unmarshal([]byte(*monitor.HTTPRequestHeaders), &requestHeaders)
+		err = json.Unmarshal([]byte(*m.HTTPRequestHeaders), &requestHeaders)
 		if err != nil {
 			span.Downgrade(measurement.Dead, "Request headers may be invalid.")
 			return span
 		}
+
 		for key, value := range requestHeaders {
 			request.Header.Add(key, value)
 		}
 	}
 
-	client := &http.Client{
-		Timeout: time.Duration(monitor.Timeout) * time.Second,
-	}
-	response, err := client.Do(request)
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		span.Downgrade(measurement.Dead)
-		if e, ok := err.(net.Error); ok && e.Timeout() {
+		if errors.Is(err, context.DeadlineExceeded) {
 			span.Hint(TimeoutMessage)
 		}
 		return span
@@ -62,11 +64,11 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 
 	span.HTTPStatusCode = &response.StatusCode
 	responseRange := newHTTPRangeFromInt(response.StatusCode)
-	if responseRange != *monitor.HTTPRange {
+	if responseRange != *m.HTTPRange {
 		span.Downgrade(measurement.Dead, "Response status code is out of range.")
 	}
 
-	if monitor.HTTPCaptureHeaders != nil && *monitor.HTTPCaptureHeaders {
+	if m.HTTPCaptureHeaders != nil && *m.HTTPCaptureHeaders {
 		responseHeaders, err := json.Marshal(response.Header)
 		if err != nil {
 			span.Downgrade(measurement.Warn, "Response headers could not be serialized.")
@@ -75,7 +77,7 @@ func (h HTTPProbe) Poll(monitor Monitor) measurement.Span {
 			span.HTTPResponseHeaders = &headersString
 		}
 	}
-	if monitor.HTTPCaptureBody != nil && *monitor.HTTPCaptureBody {
+	if m.HTTPCaptureBody != nil && *m.HTTPCaptureBody {
 		responseBody, err := io.ReadAll(response.Body)
 		if err != nil {
 			span.Downgrade(measurement.Warn, "Response body could not be read.")
