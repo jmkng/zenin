@@ -2,7 +2,9 @@ package monitor
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -22,9 +24,9 @@ func NewPluginProbe() PluginProbe {
 type PluginProbe struct{}
 
 // Poll implements `Probe.Poll` for `PluginProbe`.
-func (s PluginProbe) Poll(monitor Monitor) measurement.Span {
+func (s PluginProbe) Poll(m Monitor) measurement.Span {
 	span := measurement.NewSpan(measurement.Ok)
-	command := *monitor.PluginName
+	command := *m.PluginName
 
 	path := filepath.Join(env.Runtime.PluginDir, command)
 	_, err := os.Stat(path)
@@ -34,15 +36,18 @@ func (s PluginProbe) Poll(monitor Monitor) measurement.Span {
 	}
 
 	var args []string
-	if monitor.PluginArgs != nil {
-		err := json.Unmarshal([]byte(*monitor.PluginArgs), &args)
+	if m.PluginArgs != nil {
+		err := json.Unmarshal([]byte(*m.PluginArgs), &args)
 		if err != nil {
 			span.Downgrade(measurement.Dead, "Failed to parse plugin arguments.")
 			return span
 		}
 	}
 
-	cmd := exec.Command(path, args...)
+	deadline, cancel := m.Deadline(context.Background())
+	defer cancel()
+
+	cmd := exec.CommandContext(deadline, path, args...)
 	switch runtime.GOOS {
 	case "windows":
 		if strings.HasSuffix(command, ".ps1") {
@@ -72,6 +77,7 @@ func (s PluginProbe) Poll(monitor Monitor) measurement.Span {
 		span.Downgrade(measurement.Dead, "Failed to start plugin.")
 		return span
 	}
+
 	var stdout *bytes.Buffer
 	if stdoutPipeErr == nil {
 		b, err := io.ReadAll(stdoutPipe)
@@ -93,8 +99,12 @@ func (s PluginProbe) Poll(monitor Monitor) measurement.Span {
 
 	def := 0
 	span.PluginExitCode = &def
-	if err := cmd.Wait(); err != nil {
-		if exit, ok := err.(*exec.ExitError); ok {
+	err = cmd.Wait()
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			span.Downgrade(measurement.Dead, TimeoutMessage)
+			return span
+		} else if exit, ok := err.(*exec.ExitError); ok {
 			code := exit.ExitCode()
 			span.PluginExitCode = &code
 
