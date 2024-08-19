@@ -53,7 +53,7 @@ export default function Settings() {
                 Submit
             </Button>
         </div>
-        <div className="zenin__settings_about zenin__h_mid zenin__h_margin_top">
+        <div className="zenin__settings_about zenin__h_margin_top">
             <span className="zenin__settings_version">0.1.0</span>
             {/* TODO: links */}
             <a href="#" className="zenin__settings_link">

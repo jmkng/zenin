@@ -1,5 +1,6 @@
 .zenin__settings_about {
     display: flex;
+    color: var(--mid);
     align-items: center;
     justify-content: space-between;
 }
