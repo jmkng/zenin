@@ -65,7 +65,7 @@ func (h HTTPProbe) Poll(m Monitor) measurement.Span {
 	span.HTTPStatusCode = &response.StatusCode
 	responseRange := newHTTPRangeFromInt(response.StatusCode)
 	if responseRange != *m.HTTPRange {
-		span.Downgrade(measurement.Dead, "Response status code is out of range.")
+		span.Downgrade(measurement.Dead, "Response status code was out of range.")
 	}
 
 	if m.HTTPCaptureHeaders != nil && *m.HTTPCaptureHeaders {
