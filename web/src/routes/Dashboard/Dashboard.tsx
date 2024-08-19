@@ -20,7 +20,8 @@ export default function Dashboard() {
     if (monitor.context.state.filter == ACTIVE_UI) sorted = sorted.filter(n => n.active)
     else if (monitor.context.state.filter == INACTIVE_UI) sorted = sorted.filter(n => !n.active)
     sorted.sort((a, b) => a.name > b.name ? 1 : -1);
-    const split = monitor.context.state.split.isEditing() || monitor.context.state.split.isViewing();
+    const split = monitor.context.state.split &&
+        (monitor.context.state.split.isEditing() || monitor.context.state.split.isViewing());
 
     const handleAdd = async (value: monitor.Monitor) => {
         const token = account.state.authenticated!.token.raw;
