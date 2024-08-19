@@ -26,9 +26,12 @@ export default function Dashboard() {
         const token = account.state.authenticated!.token.raw;
         const extract = await monitor.service.addMonitor(token, value);
         if (!extract.ok()) return;
-        const body: DataPacket<{ id: number }> = await extract.json();
+        const body: DataPacket<number> = await extract.json();
+        if (!body.data || typeof body.data !== 'number') {
+            throw new Error("expected server to respond with id of new monitor")
+        }
         const measurements = null;
-        const full: monitor.Monitor = { ...value, id: body.data.id, measurements: measurements }
+        const full: monitor.Monitor = { ...value, id: body.data, measurements: measurements }
         monitor.context.dispatch({ type: 'overwrite', monitor: full })
     }
 
@@ -55,7 +58,7 @@ export default function Dashboard() {
                         <Editor
                             state={monitor.context.state.split.pane}
                             onClose={() => monitor.context.dispatch({ type: 'edit', monitor: null })}
-                            onChange={value => isMonitor(value) ? handleUpdate(value) : handleAdd(value)}
+                            onChange={value => (value.id != null && isMonitor(value)) ? handleUpdate(value) : handleAdd(value)}
                             onDelete={value => monitor.context.dispatch({ type: 'delete', monitors: [value] })} />
                         : null}
 

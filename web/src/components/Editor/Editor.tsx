@@ -66,7 +66,7 @@ export default function Editor(props: EditorProps) {
     const meta = {
         context: useMetaContext()
     };
-    const [id, reset] = useMemo(() => state.monitor ? resetToDraft(state.monitor) : [null, defaultDraft], [state.monitor])
+    const reset = useMemo(() => state.monitor ? resetToDraft(state.monitor) : defaultDraft, [state.monitor])
     const [editor, setEditor] = useState<{
         draft: Draft,
         original: Draft
@@ -105,8 +105,7 @@ export default function Editor(props: EditorProps) {
 
     const handleSubmit = () => {
         const monitor = sanitizeToMonitor(editor.draft);
-        if (id) onChange(monitor);
-        else onChange(monitor);
+        onChange(monitor);
     };
 
     return (
@@ -554,16 +553,16 @@ function sanitizePlugin(monitor: Monitor) {
 }
 
 /** Reset a `Monitor` to `Draft`, setting useful defaults to make editing easier. */
-function resetToDraft(value: Monitor): [number | null, Draft] {
+function resetToDraft(value: Monitor): Draft {
     // Start with the default values, layer on the non-null keys from `value`.
-    const [id, draft] = [value.id, { ...value } as Draft];
+    const draft = { ...value } as Draft;
     for (const [key, value] of Object.entries(draft)) {
         if (value === null) {
             //@ts-expect-error Ignore type for assignment.
             draft[key] = defaultDraft[key];
         }
     }
-    return [id, draft];
+    return draft;
 }
 
 /** Similar to `Monitor`, but some fields may be null because they aren't filled in yet. */
