@@ -14,7 +14,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	var id int
 	query := `INSERT INTO monitor 
 		(name,
-		kind "monitor_kind",
+		kind,
 		active,
 		interval,
 		timeout,
