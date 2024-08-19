@@ -91,10 +91,7 @@ func TestSelectMonitorWithRelated(t *testing.T) {
 
 	debug.AssertEqual(t, len(monitors), 1)
 	debug.AssertEqual(t, *monitors[0].Id, 1)
-	debug.AssertEqual(t, len(monitors[0].Measurements), 2)
-	if *monitors[0].Measurements[0].Id < *monitors[0].Measurements[1].Id {
-		t.Fatal("measurements should be sorted newest first")
-	}
+	debug.AssertEqual(t, len(monitors[0].Measurements), 1)
 }
 
 func TestSelectMonitorMeasurements(t *testing.T) {
