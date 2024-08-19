@@ -1,15 +1,20 @@
+.zenin__toggle_input {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.zenin__toggle_input_controls {
+    display: flex;
+    width: 100%;
+}
+
 .zenin__input_label.zenin__toggle_input_label {
     margin-bottom: 0;
 }
 
 .zenin__toggle_input_label {
     width: 100%;
-}
-
-.zenin__toggle_input {
-    position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .zenin__toggle_input_slider_wrapper {
@@ -32,7 +37,7 @@
     right: 0;
     bottom: 0;
     background-color: var(--off-d);
-    transition: var(--slow);
+    transition: var(--fast);
     border-radius: 34px;
 }
 
@@ -44,7 +49,7 @@
     left: 3px;
     bottom: 3px;
     background-color: var(--background);
-    transition: var(--slow);
+    transition: var(--fast);
     border-radius: 50%;
 }
 
@@ -53,5 +58,9 @@ input:checked + .zenin__toggle_input_slider {
 }
 
 input:checked + .zenin__toggle_input_slider::before {
-    transform: translateX(10px);
+    transform: translateX(12px);
+}
+
+.zenin__toggle_input_subtext {
+    color: var(--mid);
 }
