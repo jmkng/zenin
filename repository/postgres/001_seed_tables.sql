@@ -6,45 +6,45 @@ VALUES
 INSERT INTO monitor 
     (name, kind, active, interval, timeout, description, remote_address, remote_port, plugin_name, 
     plugin_args, http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
-    http_capture_headers, http_capture_body, icmp_size, icmp_wait, icmp_count, icmp_ttl)
+    http_capture_headers, http_capture_body, icmp_size, icmp_wait, icmp_count, icmp_ttl, icmp_protocol)
 VALUES
     (
         'Mercury', 'ICMP', false, 30, 10, 'Mercury Description', 'google.com', NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 56, 1000, 3, 64
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 56, 100, 3, 64, 'UDP'
     ),
     (
         'Venus', 'HTTP', true, 30, 10, NULL, 'https://wikipedia.org', NULL,
         NULL, NULL, '200-299', 'GET', '{"X-Debug-Info": "Value"}', NULL, 'WARN', NULL, NULL, NULL,
-        NULL, NULL, NULL
+        NULL, NULL, NULL, NULL
     ),
     (
         'Earth', 'PLUGIN', false, 137, 10, 'Earth Description', NULL, NULL, 
         'helloworld.sh', '["one", "two"]', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL
+        NULL, NULL, NULL, NULL
     ),
     (
         'Mars', 'HTTP', false, 112, 10, NULL, 'http://google.com', NULL,
-        NULL, NULL, '200-299', 'GET', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+        NULL, NULL, '200-299', 'GET', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
     ),
     (
         'Jupiter', 'HTTP', false, 133, 10, NULL, 'http://google.com', NULL,
         NULL, NULL, '200-299', 'POST', '{"X-Debug-Info": "Value"}', '{"KeyA": "ValueA", "KeyB": "ValueB"}', 
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
     ),
     (
         'Saturn', 'HTTP', false, 139, 10, NULL, 'http://google.com', NULL,
         NULL, NULL, '200-299', 'GET', NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL
+        NULL, NULL, NULL, NULL
     ),
     (
         'Uranus', 'HTTP', false, 110, 10, NULL, 'http://google.com', NULL,
         NULL, NULL, '200-299', 'GET', NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL
+        NULL, NULL, NULL, NULL
     ),
     (
         'Neptune', 'HTTP', false, 109, 10, NULL, 'http://google.com', NULL,
         NULL, NULL, '200-299', 'GET', NULL, NULL, NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL
+        NULL, NULL, NULL, NULL
     );
 
 INSERT INTO measurement 

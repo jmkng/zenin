@@ -1,6 +1,7 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -48,37 +49,66 @@ type Probe interface {
 	//
 	// In this situation, the `Span` can be distributed normally, triggering alerts and
 	// calling attention to the failure.
-	Poll(monitor Monitor) measurement.Span
+	Poll(m Monitor) measurement.Span
 }
+
+type ProtocolKind string
+
+const (
+	ICMP ProtocolKind = "ICMP"
+	UDP  ProtocolKind = "UDP"
+)
 
 // Monitor is the monitor domain type.
 type Monitor struct {
-	Id                 *int                      `json:"id" db:"monitor_id"`
-	Name               string                    `json:"name" db:"name"`
-	Kind               measurement.ProbeKind     `json:"kind" db:"monitor_kind"`
-	Active             bool                      `json:"active" db:"active"`
-	Interval           int                       `json:"interval" db:"interval"`
-	Timeout            int                       `json:"timeout" db:"timeout"`
-	Description        *string                   `json:"description" db:"description"`
-	RemoteAddress      *string                   `json:"remoteAddress" db:"remote_address"`
-	RemotePort         *int16                    `json:"remotePort" db:"remote_port"`
-	PluginName         *string                   `json:"pluginName" db:"plugin_name"`
-	PluginArgs         *string                   `json:"pluginArgs" db:"plugin_args"`
-	HTTPRange          *HTTPRange                `json:"httpRange" db:"http_range"`
-	HTTPMethod         *string                   `json:"httpMethod" db:"http_method"`
-	HTTPRequestHeaders *string                   `json:"httpRequestHeaders" db:"http_request_headers"`
-	HTTPRequestBody    *string                   `json:"httpRequestBody" db:"http_request_body"`
-	HTTPExpiredCertMod *string                   `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
-	HTTPCaptureHeaders *bool                     `json:"httpCaptureHeaders" db:"http_capture_headers"`
-	HTTPCaptureBody    *bool                     `json:"httpCaptureBody" db:"http_capture_body"`
-	ICMPSize           *int                      `json:"icmpSize" db:"icmp_size"`
-	ICMPWait           *int                      `json:"icmpWait" db:"icmp_wait"`
-	ICMPCount          *int                      `json:"icmpCount" db:"icmp_count"`
-	ICMPTTL            *int                      `json:"icmpTtl" db:"icmp_ttl"`
-	Measurements       []measurement.Measurement `json:"measurements"`
+	Id            *int                  `json:"id" db:"monitor_id"`
+	Name          string                `json:"name" db:"name"`
+	Kind          measurement.ProbeKind `json:"kind" db:"monitor_kind"`
+	Active        bool                  `json:"active" db:"active"`
+	Interval      int                   `json:"interval" db:"interval"`
+	Timeout       int                   `json:"timeout" db:"timeout"`
+	Description   *string               `json:"description" db:"description"`
+	RemoteAddress *string               `json:"remoteAddress" db:"remote_address"`
+	RemotePort    *int16                `json:"remotePort" db:"remote_port"`
+	PluginFields
+	HTTPFields
+	ICMPFields
+	Measurements []measurement.Measurement `json:"measurements"`
 }
 
-func (m Monitor) Fields() []any {
+type PluginFields struct {
+	PluginName *string `json:"pluginName" db:"plugin_name"`
+	PluginArgs *string `json:"pluginArgs" db:"plugin_args"`
+}
+
+type HTTPFields struct {
+	HTTPRange          *HTTPRange `json:"httpRange" db:"http_range"`
+	HTTPMethod         *string    `json:"httpMethod" db:"http_method"`
+	HTTPRequestHeaders *string    `json:"httpRequestHeaders" db:"http_request_headers"`
+	HTTPRequestBody    *string    `json:"httpRequestBody" db:"http_request_body"`
+	HTTPExpiredCertMod *string    `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
+	HTTPCaptureHeaders *bool      `json:"httpCaptureHeaders" db:"http_capture_headers"`
+	HTTPCaptureBody    *bool      `json:"httpCaptureBody" db:"http_capture_body"`
+}
+
+type ICMPFields struct {
+	ICMPSize     *int          `json:"icmpSize" db:"icmp_size"`
+	ICMPWait     *int          `json:"icmpWait" db:"icmp_wait"`
+	ICMPCount    *int          `json:"icmpCount" db:"icmp_count"`
+	ICMPTTL      *int          `json:"icmpTtl" db:"icmp_ttl"`
+	ICMPProtocol *ProtocolKind `json:"icmpProtocol" db:"icmp_protocol"`
+}
+
+// Deadline returns a copy of the parent context with a timeout set according to
+// the monitor `Timeout` field.
+func (m Monitor) Deadline(ctx context.Context) (context.Context, context.CancelFunc) {
+	deadline := time.Duration(m.Timeout) * time.Second
+	ctx, cancel := context.WithTimeout(ctx, deadline)
+	return ctx, cancel
+}
+
+// Describe returns a set of loggable fields describing the monitor.
+func (m Monitor) Describe() []any {
 	fields := []any{}
 	fields = append(fields, "name", m.Name, "kind", m.Kind, "timeout", m.Timeout)
 	if m.Kind != measurement.Plugin {
@@ -107,7 +137,7 @@ func (m Monitor) Fields() []any {
 // This function should only ever be called on a `Monitor` from the database,
 // it requires essential fields (including id) to be populated.
 func (m Monitor) Poll() measurement.Measurement {
-	fields := append([]any{"monitor(id)", *m.Id}, m.Fields()...)
+	fields := append([]any{"monitor(id)", *m.Id}, m.Describe()...)
 	log.Debug("poll starting", fields...)
 
 	var result measurement.Measurement

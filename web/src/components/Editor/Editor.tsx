@@ -9,7 +9,8 @@ import { EditorState } from "../../internal/monitor/split";
 import {
     CLIENTERROR_API, DELETE_API, GET_API, HEAD_API, HTTP_API, ICMP_API,
     INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PLUGIN_API,
-    POST_API, PUT_API, REDIRECTION_API, SERVERERROR_API, SUCCESSFUL_API, TCP_API
+    POST_API, PUT_API, REDIRECTION_API, SERVERERROR_API, SUCCESSFUL_API, TCP_API,
+    UDP_API
 } from "../../server";
 
 import Button from "../Button/Button";
@@ -49,9 +50,10 @@ const defaultDraft: Draft = {
     httpCaptureHeaders: false,
     httpCaptureBody: false,
     icmpSize: 56,
-    icmpWait: 1000,
+    icmpWait: 100,
     icmpCount: 3,
-    icmpTtl: 64
+    icmpTtl: 64,
+    icmpProtocol: ICMP_API
 }
 
 export default function Editor(props: EditorProps) {
@@ -332,6 +334,20 @@ export default function Editor(props: EditorProps) {
                 {editor.draft.kind == ICMP_API ?
                     <>
                         <div className="zenin__detail_spaced">
+                            <ToggleInput
+                                name={"zenin__detail_"}
+                                label="Use UDP Protocol"
+                                offSubtext={<span className="zenin__h_advice">This monitor will use ICMP protocol. Requires root.</span>}
+                                value={editor.draft.icmpProtocol == UDP_API}
+                                onChange={value =>
+                                    setEditor(prev => ({
+                                        ...prev,
+                                        draft: { ...prev.draft, icmpProtocol: value ? UDP_API : ICMP_API }
+                                    }))}
+                            />
+                        </div>
+
+                        <div className="zenin__detail_spaced">
                             <NumberInput
                                 label={<span className={hasValidIcmpSize ? "" : "zenin__h_error"}>Packet Size</span>}
                                 name="zenin__detail_monitor_icmp_size"
@@ -350,7 +366,7 @@ export default function Editor(props: EditorProps) {
                                 label={<span className={hasValidIcmpWait ? "" : "zenin__h_error"}>Packet Wait</span>}
                                 name="zenin__detail_monitor_icmp_wait"
                                 value={editor.draft.icmpWait}
-                                subtext="The time to wait between each outgoing packet in milliseconds."
+                                subtext="The milliseconds to wait between each outgoing packet."
                                 onChange={icmpWait => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpWait } }))}
                             />
                             {!hasValidIcmpWait ?
@@ -358,7 +374,6 @@ export default function Editor(props: EditorProps) {
                                 :
                                 null}
                         </div>
-
 
                         <div className="zenin__detail_spaced">
                             <NumberInput
@@ -374,7 +389,6 @@ export default function Editor(props: EditorProps) {
                                 null}
                         </div>
 
-
                         <div className="zenin__detail_spaced">
                             <NumberInput
                                 label={<span className={hasValidIcmpTtl ? "" : "zenin__h_error"}>Packet TTL</span>}
@@ -388,7 +402,6 @@ export default function Editor(props: EditorProps) {
                                 :
                                 null}
                         </div>
-
                     </>
                     : null}
 
@@ -486,44 +499,58 @@ function sanitizeToMonitor(draft: Draft): Monitor {
 
 function sanitizeHTTP(monitor: Monitor) {
     monitor.icmpSize = null;
+    monitor.icmpCount = null;
+    monitor.icmpProtocol = null;
+    monitor.icmpWait = null;
+    monitor.icmpTtl = null;
+    monitor.pluginName = null;
+    monitor.pluginArgs = null;
+}
+
+function sanitizeTCP(monitor: Monitor) {
+    monitor.httpRequestHeaders = null;
+    monitor.httpRequestBody = null;
+    monitor.httpExpiredCertMod = null;
+    monitor.httpCaptureHeaders = null;
+    monitor.httpCaptureBody = null;
+    monitor.httpMethod = null;
+    monitor.httpRange = null;
+    monitor.icmpSize = null;
+    monitor.icmpCount = null;
+    monitor.icmpProtocol = null;
+    monitor.icmpWait = null;
+    monitor.icmpTtl = null;
+    monitor.pluginName = null;
+    monitor.pluginArgs = null;
+}
+
+function sanitizeICMP(monitor: Monitor) {
+    monitor.remotePort = null;
+    monitor.httpRequestHeaders = null;
+    monitor.httpRequestBody = null;
+    monitor.httpExpiredCertMod = null;
+    monitor.httpCaptureHeaders = null;
+    monitor.httpCaptureBody = null;
+    monitor.httpMethod = null;
+    monitor.httpRange = null;
     monitor.pluginName = null;
 }
 
-function sanitizeTCP(strategy: Monitor) {
-    strategy.httpRequestHeaders = null;
-    strategy.httpRequestBody = null;
-    strategy.httpExpiredCertMod = null;
-    strategy.httpCaptureHeaders = null;
-    strategy.httpCaptureBody = null;
-    strategy.httpMethod = null;
-    strategy.httpRange = null;
-    strategy.icmpSize = null;
-    strategy.pluginName = null;
-}
-
-function sanitizeICMP(strategy: Monitor) {
-    strategy.remotePort = null;
-    strategy.httpRequestHeaders = null;
-    strategy.httpRequestBody = null;
-    strategy.httpExpiredCertMod = null;
-    strategy.httpCaptureHeaders = null;
-    strategy.httpCaptureBody = null;
-    strategy.httpMethod = null;
-    strategy.httpRange = null;
-    strategy.pluginName = null;
-}
-
-function sanitizePlugin(strategy: Monitor) {
-    strategy.remoteAddress = null;
-    strategy.remotePort = null;
-    strategy.httpRequestHeaders = null;
-    strategy.httpRequestBody = null;
-    strategy.httpExpiredCertMod = null;
-    strategy.httpCaptureHeaders = null;
-    strategy.httpCaptureBody = null;
-    strategy.httpMethod = null;
-    strategy.httpRange = null;
-    strategy.icmpSize = null;
+function sanitizePlugin(monitor: Monitor) {
+    monitor.remoteAddress = null;
+    monitor.remotePort = null;
+    monitor.httpRequestHeaders = null;
+    monitor.httpRequestBody = null;
+    monitor.httpExpiredCertMod = null;
+    monitor.httpCaptureHeaders = null;
+    monitor.httpCaptureBody = null;
+    monitor.httpMethod = null;
+    monitor.httpRange = null;
+    monitor.icmpSize = null;
+    monitor.icmpCount = null;
+    monitor.icmpProtocol = null;
+    monitor.icmpWait = null;
+    monitor.icmpTtl = null;
 }
 
 /** Reset a `Monitor` to `Draft`, setting useful defaults to make editing easier. */
@@ -561,7 +588,8 @@ interface Draft {
     icmpSize: number | null,
     icmpWait: number | null,
     icmpCount: number | null,
-    icmpTtl: number | null
+    icmpTtl: number | null,
+    icmpProtocol: string,
 }
 
 function isValidMonitor(draft: Draft): boolean {

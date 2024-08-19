@@ -13,20 +13,54 @@ import (
 func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.Monitor) (int, error) {
 	var id int
 	query := `INSERT INTO monitor 
-		(name, kind "monitor_kind", active, interval, timeout, description, remote_address, remote_port,
-        plugin_name, plugin_args, http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod,
-		http_capture_headers, http_capture_body, icmp_size, icmp_wait, icmp_count, icmp_ttl)
+		(name,
+		kind "monitor_kind",
+		active,
+		interval,
+		timeout,
+		description,
+		remote_address,		
+		remote_port,
+		plugin_name,
+		plugin_args,
+		http_range,
+		http_method,
+		http_request_headers,
+		http_request_body,
+		http_expired_cert_mod,
+		http_capture_headers,
+		http_capture_body,
+		icmp_size,
+		icmp_wait,
+		icmp_count,
+		icmp_ttl,
+		icmp_protocol)
     VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
     RETURNING id`
-	row := p.db.QueryRowContext(
-		ctx,
-		query, monitor.Name, monitor.Kind, monitor.Active, monitor.Interval, monitor.Timeout,
-		monitor.Description, monitor.RemoteAddress, monitor.RemotePort, monitor.PluginName,
-		monitor.PluginArgs, monitor.HTTPRange, monitor.HTTPMethod, monitor.HTTPRequestHeaders,
-		monitor.HTTPRequestBody, monitor.HTTPExpiredCertMod, monitor.HTTPCaptureHeaders,
-		monitor.HTTPCaptureBody, monitor.ICMPSize, monitor.ICMPWait, monitor.ICMPCount, monitor.ICMPTTL,
-	)
+	row := p.db.QueryRowContext(ctx, query,
+		monitor.Name,
+		monitor.Kind,
+		monitor.Active,
+		monitor.Interval,
+		monitor.Timeout,
+		monitor.Description,
+		monitor.RemoteAddress,
+		monitor.RemotePort,
+		monitor.PluginName,
+		monitor.PluginArgs,
+		monitor.HTTPRange,
+		monitor.HTTPMethod,
+		monitor.HTTPRequestHeaders,
+		monitor.HTTPRequestBody,
+		monitor.HTTPExpiredCertMod,
+		monitor.HTTPCaptureHeaders,
+		monitor.HTTPCaptureBody,
+		monitor.ICMPSize,
+		monitor.ICMPWait,
+		monitor.ICMPCount,
+		monitor.ICMPTTL,
+		monitor.ICMPProtocol)
 	err := row.Scan(&id)
 	return id, err
 }
@@ -70,7 +104,8 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
             mo.icmp_size,
 			mo.icmp_wait,
 			mo.icmp_count,
-			mo.icmp_ttl
+			mo.icmp_ttl,
+			mo.icmp_protocol
         FROM monitor mo`)
 	builder.Inject(params)
 	builder.Push("ORDER BY mo.id;")
@@ -82,12 +117,29 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *monitor.SelectMonitorParams, measurements int) ([]monitor.Monitor, error) {
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT 
-		id "monitor_id", name, kind "monitor_kind", active, interval, timeout, description, 
-		remote_address, remote_port, 
-		plugin_name, plugin_args, 
-		http_range, http_method, http_request_headers, http_request_body, http_expired_cert_mod, 
-		http_capture_headers, http_capture_body,
-		icmp_size, icmp_wait, icmp_count, icmp_ttl
+		id "monitor_id", 
+		name, 
+		kind "monitor_kind", 
+		active, 
+		interval, 
+		timeout, 
+		description, 
+		remote_address, 
+		remote_port, 
+		plugin_name, 
+		plugin_args, 
+		http_range, 
+		http_method, 
+		http_request_headers, 
+		http_request_body, 
+		http_expired_cert_mod, 
+		http_capture_headers, 
+		http_capture_body,
+		icmp_size, 
+		icmp_wait, 
+		icmp_count, 
+		icmp_ttl, 
+		icmp_protocol
 	FROM monitor`)
 	if params != nil {
 		builder.Inject(params)
@@ -115,10 +167,24 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	builder.SpreadInt(distinct...)
 	builder.Push(`) ORDER BY m.id DESC)
 	SELECT 
-		id "measurement_id", monitor_id "measurement_monitor_id",
-		recorded_at, state, state_hint, kind "measurement_kind", duration, http_status_code, http_response_headers, http_response_body,
-		icmp_packets_in, icmp_packets_out, icmp_min_rtt, icmp_avg_rtt, icmp_max_rtt,
-		plugin_exit_code, plugin_stdout, plugin_stderr
+		id "measurement_id", 
+		monitor_id "measurement_monitor_id",
+		recorded_at, 
+		state, 
+		state_hint, 
+		kind "measurement_kind", 
+		duration, 
+		http_status_code, 
+		http_response_headers, 
+		http_response_body,
+		icmp_packets_in, 
+		icmp_packets_out, 
+		icmp_min_rtt, 
+		icmp_avg_rtt, 
+		icmp_max_rtt,
+		plugin_exit_code, 
+		plugin_stdout, 
+		plugin_stderr
 	FROM raw WHERE rank <=`)
 	builder.BindInt(measurements)
 
@@ -182,17 +248,52 @@ func (p PostgresRepository) SelectMeasurement(ctx context.Context, id int, param
 // UpdateMonitor implements `MonitorRepository.UpdateMonitor` for `PostgresRepository`.
 func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.Monitor) error {
 	const query string = `UPDATE monitor SET 
-        name = $1, kind = $2, active = $3, interval = $4, timeout = $5, description = $6, remote_address = $7,
-		remote_port = $8, plugin_name = $9, plugin_args = $10, http_range = $11, http_method = $12,
-        http_request_headers = $13, http_request_body = $14, http_expired_cert_mod = $15, http_capture_headers = $16,
-		http_capture_body = $17, icmp_size = $18, icmp_wait = $19, icmp_count = $20, icmp_ttl = $21
-    WHERE id = $22`
+        name = $1, 
+		kind = $2, 
+		active = $3, 
+		interval = $4, 
+		timeout = $5, 
+		description = $6, 
+		remote_address = $7,
+		remote_port = $8, 
+		plugin_name = $9, 
+		plugin_args = $10, 
+		http_range = $11, 
+		http_method = $12,
+        http_request_headers = $13, 
+		http_request_body = $14, 
+		http_expired_cert_mod = $15, 
+		http_capture_headers = $16,
+		http_capture_body = $17, 
+		icmp_size = $18, 
+		icmp_wait = $19, 
+		icmp_count = $20, 
+		icmp_ttl = $21, 
+		icmp_protocol = $22
+    WHERE id = $23`
 	_, err := p.db.ExecContext(ctx, query,
-		monitor.Name, monitor.Kind, monitor.Active, monitor.Interval, monitor.Timeout,
-		monitor.Description, monitor.RemoteAddress, monitor.RemotePort, monitor.PluginName,
-		monitor.PluginArgs, monitor.HTTPRange, monitor.HTTPMethod, monitor.HTTPRequestHeaders,
-		monitor.HTTPRequestBody, monitor.HTTPExpiredCertMod, monitor.HTTPCaptureHeaders,
-		monitor.HTTPCaptureBody, monitor.ICMPSize, monitor.ICMPWait, monitor.ICMPCount, monitor.ICMPTTL,
+		monitor.Name,
+		monitor.Kind,
+		monitor.Active,
+		monitor.Interval,
+		monitor.Timeout,
+		monitor.Description,
+		monitor.RemoteAddress,
+		monitor.RemotePort,
+		monitor.PluginName,
+		monitor.PluginArgs,
+		monitor.HTTPRange,
+		monitor.HTTPMethod,
+		monitor.HTTPRequestHeaders,
+		monitor.HTTPRequestBody,
+		monitor.HTTPExpiredCertMod,
+		monitor.HTTPCaptureHeaders,
+		monitor.HTTPCaptureBody,
+		monitor.ICMPSize,
+		monitor.ICMPWait,
+		monitor.ICMPCount,
+		monitor.ICMPTTL,
+		monitor.ICMPProtocol,
 		monitor.Id)
 	return err
 }

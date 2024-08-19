@@ -1,6 +1,5 @@
 .zenin__radio_input {
     display: flex;
-    justify-content: center;
     background: var(--background);
     border-radius: var(--rounded);
 }

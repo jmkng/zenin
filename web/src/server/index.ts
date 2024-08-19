@@ -3,6 +3,7 @@ import { Request } from "./request";
 export const
     HTTP_API = 'HTTP',
     ICMP_API = 'ICMP',
+    UDP_API = 'UDP',
     TCP_API = 'TCP',
     PLUGIN_API = 'PLUGIN',
     GET_API = 'GET',

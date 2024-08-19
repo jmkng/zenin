@@ -41,6 +41,7 @@ export interface Monitor {
     icmpWait: number | null,
     icmpCount: number | null,
     icmpTtl: number | null,
+    icmpProtocol: string | null,
     measurements: Measurement[] | null
 }
 
@@ -76,6 +77,7 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.icmpWait == b.icmpWait
         && a.icmpCount == b.icmpCount
         && a.icmpTtl == b.icmpTtl
+        && a.icmpProtocol == b.icmpProtocol
 }
 
 export function kindAPItoUI(value: string) {
