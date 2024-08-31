@@ -14,6 +14,7 @@ import VMenuIcon from '../Icon/VMenuIcon/VMenuIcon';
 import Series from './Series';
 import ActiveWidget from './Widget/ActiveWidget';
 import IDWidget from './Widget/IDWidget';
+import KindWidget from './Widget/KindWidget';
 
 import './Monitor.css';
 
@@ -102,6 +103,7 @@ export default function Monitor(props: MonitorProps) {
                         <span onClick={event => event.stopPropagation()}>
                             <IDWidget id={monitor.data.id!} />
                         </span>
+                        <KindWidget kind={monitor.data.kind} />
                         {!monitor.data.active ?
                             <span onClick={event => event.stopPropagation()}>
                                 <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
