@@ -31,31 +31,6 @@ interface EditorProps {
     onDelete: (monitor: Monitor) => void;
 }
 
-const defaultDraft: Draft = {
-    name: null,
-    kind: PLUGIN_API,
-    active: false,
-    interval: 300,
-    timeout: 10,
-    description: null,
-    remoteAddress: null,
-    remotePort: null,
-    pluginName: null,
-    pluginArgs: null,
-    httpRange: SUCCESSFUL_API,
-    httpMethod: GET_API,
-    httpRequestHeaders: null,
-    httpRequestBody: null,
-    httpExpiredCertMod: OFF_API,
-    httpCaptureHeaders: false,
-    httpCaptureBody: false,
-    icmpSize: 56,
-    icmpWait: 100,
-    icmpCount: 3,
-    icmpTtl: 64,
-    icmpProtocol: ICMP_API
-}
-
 export default function Editor(props: EditorProps) {
     const {
         state,
@@ -66,7 +41,34 @@ export default function Editor(props: EditorProps) {
     const meta = {
         context: useMetaContext()
     };
-    const reset = useMemo(() => state.monitor ? resetToDraft(state.monitor) : defaultDraft, [state.monitor])
+    const defaultDraft = useMemo(() => ({
+        name: null,
+        kind: PLUGIN_API,
+        active: false,
+        interval: 1800,
+        timeout: 10,
+        description: null,
+        remoteAddress: null,
+        remotePort: null,
+        pluginName: meta.context.state.plugins[0] || null,
+        pluginArgs: null,
+        httpRange: SUCCESSFUL_API,
+        httpMethod: GET_API,
+        httpRequestHeaders: null,
+        httpRequestBody: null,
+        httpExpiredCertMod: OFF_API,
+        httpCaptureHeaders: false,
+        httpCaptureBody: false,
+        icmpSize: 56,
+        icmpWait: 100,
+        icmpCount: 3,
+        icmpTtl: 64,
+        icmpProtocol: ICMP_API
+    }), [meta.context.state.plugins])
+    const reset = useMemo(() => state.monitor
+        //@ts-expect-error Ignore type for assignment.
+        ? Object.fromEntries(Object.entries({ ...state.monitor } as Draft).map(([k, v]) => [k, v === null ? defaultDraft[k] : v])) as Draft
+        : defaultDraft, [defaultDraft, state.monitor])
     const [editor, setEditor] = useState<{
         draft: Draft,
         original: Draft
@@ -550,19 +552,6 @@ function sanitizePlugin(monitor: Monitor) {
     monitor.icmpProtocol = null;
     monitor.icmpWait = null;
     monitor.icmpTtl = null;
-}
-
-/** Reset a `Monitor` to `Draft`, setting useful defaults to make editing easier. */
-function resetToDraft(value: Monitor): Draft {
-    // Start with the default values, layer on the non-null keys from `value`.
-    const draft = { ...value } as Draft;
-    for (const [key, value] of Object.entries(draft)) {
-        if (value === null) {
-            //@ts-expect-error Ignore type for assignment.
-            draft[key] = defaultDraft[key];
-        }
-    }
-    return draft;
 }
 
 /** Similar to `Monitor`, but some fields may be null because they aren't filled in yet. */
