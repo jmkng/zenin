@@ -1,23 +1,23 @@
 export interface LayoutState {
-    navigating: boolean,
+    shortcut: boolean,
     loading: boolean,
 }
 
 export const layoutDefault: LayoutState = {
-    navigating: document.body.clientWidth > 700,
+    shortcut: document.body.clientWidth > 700,
     loading: true
 }
 
-type NavigateAction = { type: 'navigate', navigating: boolean };
+type ShortcutAction = { type: 'shortcut', shortcut: boolean };
 type LoadAction = { type: 'load', loading: boolean };
 
 export type LayoutAction =
-    | NavigateAction
+    | ShortcutAction
     | LoadAction
 
-const navigateAction = (state: LayoutState, action: NavigateAction): LayoutState => {
-    const navigating = action.navigating;
-    return { ...state, navigating };
+const shortcutAction = (state: LayoutState, action: ShortcutAction): LayoutState => {
+    const shortcut = action.shortcut;
+    return { ...state, shortcut };
 }
 
 const loadAction = (state: LayoutState, action: LoadAction): LayoutState => {
@@ -27,7 +27,7 @@ const loadAction = (state: LayoutState, action: LoadAction): LayoutState => {
 
 export const layoutReducer = (state: LayoutState, action: LayoutAction): LayoutState => {
     switch (action.type) {
-        case "navigate": return navigateAction(state, action);
+        case "shortcut": return shortcutAction(state, action);
         case "load": return loadAction(state, action);
     }
 }

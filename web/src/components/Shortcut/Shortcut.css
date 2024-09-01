@@ -1,18 +1,18 @@
-.zenin__nav {
+.zenin__shortcut {
   height: 100%;
   display: flex;
   position: relative;
   overflow: hidden;
 }
 
-.zenin__nav_content {
+.zenin__shortcut_content {
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.zenin__nav_border {
+.zenin__shortcut_border {
   right: 0;
   width: 8px;
   position: absolute;
@@ -21,57 +21,57 @@
   height: 100%;
 }
 
-.zenin__nav_border:hover {
+.zenin__shortcut_border:hover {
   border-width: 4px;
 }
 
-.zenin__nav_links_container {
+.zenin__shortcut_links_container {
   display: flex;
   margin-top: 18px;
   flex-direction: column;
 }
 
-.zenin__nav_links_container > * {
+.zenin__shortcut_links_container > * {
   margin: var(--px-a) 0;
 }
 
-.zenin__nav_links_container .zenin__icon {
+.zenin__shortcut_links_container .zenin__icon {
   margin-right: var(--px-c);
 }
 
-.zenin__nav_links_container .zenin__button {
+.zenin__shortcut_links_container .zenin__button {
   justify-content: flex-start;
 }
 
-.zenin__nav_account_container {
+.zenin__shortcut_account_container {
   display: flex;
   justify-content: flex-start;
   gap: var(--px-b);
 }
 
-.zenin__nav a {
+.zenin__shortcut a {
   color: var(--mid);
   text-decoration: none;
 }
 
-.zenin__nav a:hover {
+.zenin__shortcut a:hover {
   color: var(--foreground);
 }
 
-.zenin__nav .zenin__h_stack_vertical {
+.zenin__shortcut .zenin__h_stack_vertical {
   margin-left: auto;
 }
 
-#zenin__nav_active_count {
+#zenin__shortcut_active_count {
   margin-left: auto;
   margin-right: var(--px-b);
 }
 
-.zenin__nav_top, .zenin__nav_bottom {
+.zenin__shortcut_top, .zenin__shortcut_bottom {
   padding: var(--px-c);
 }
 
-.zenin__nav_urgent {
+.zenin__shortcut_urgent {
   margin-right: var(--px-c);
   display: inline-block;
   height: 5px;

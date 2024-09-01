@@ -90,6 +90,6 @@ export default function DashboardMenu() {
                     </div>
                     : null
             }
-        </div >
+        </div>
     )
 }
