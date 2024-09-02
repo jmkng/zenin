@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Route, Routes, Switch } from "react-router";
+import { Route, Routes } from "react-router";
 import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
 import { useAccountContext } from '../internal/account';
 import { useLayoutContext } from '../internal/layout';
@@ -13,10 +12,8 @@ import { useDefaultMonitorService } from '../internal/monitor/service';
 import { DataPacket } from '../server';
 import { FEED, handleConnect, handleDisconnect } from '../server/feed';
 
-import Guard from '../components/Guard/Guard';
+import Private from '../components/Guard/Guard';
 import Hidden from '../components/Hidden/Hidden';
-import Menu from '../components/Menu/Menu';
-import Shortcut from '../components/Shortcut/Shortcut';
 import Bundle from './Bundle';
 import Dashboard from './Dashboard/Dashboard';
 import Login from './Login/Login';
@@ -35,9 +32,7 @@ export default function Root() {
         service: useDefaultMetaService()
     };
     const log = useLogContext();
-    const location = useLocation();
     const dispatch = useFlaggedDispatch();
-    const visible = location.pathname != '/login' && location.pathname != '/register';
 
     useEffect(() => {
         if (!account.state.authenticated) return;
@@ -77,21 +72,15 @@ export default function Root() {
     }
 
     return <div className='zenin__root_component'>
-        <div className='zenin__root_left'>
-            {visible ? <Shortcut /> : null}
-        </div>
-        <div className='zenin__root_right'>
-            {visible ? <Menu /> : null}
-            <div className='zenin__main'>
-                <Routes>
-                    <Route element={<Hidden />}>
-                        <Route path="/login" element={<Login />} />
-                    </Route>
-                    <Route element={<Guard />}>
-                        <Route path="/" element={<Dashboard />} />
-                    </Route>
-                </Routes>
-            </div>
+        <div className='zenin__main'>
+            <Routes>
+                <Route element={<Hidden />}>
+                    <Route path="/login" element={<Login />} />
+                </Route>
+                <Route element={<Private />}>
+                    <Route path="/" element={<Dashboard />} />
+                </Route>
+            </Routes>
         </div>
         <Bundle />
     </div>

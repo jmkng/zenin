@@ -1,8 +1,20 @@
 .zenin__dashboard {
   height: 100%;
   display: flex;
+}
+
+.zenin__dashboard_main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   container-type: inline-size;
   container-name: dashboard-container;
+}
+
+.zenin__dashboard_main_bottom {
+  display: flex;
+  padding: var(--px-c);
+  height: calc(100% - var(--px-i));
 }
 
 .zenin__dashboard_activity {

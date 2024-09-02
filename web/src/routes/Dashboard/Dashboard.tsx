@@ -6,7 +6,9 @@ import { DataPacket } from '../../server';
 
 import Editor from '../../components/Editor/Editor';
 import Info from '../../components/Info/Info';
+import Menu from '../../components/Menu/Menu';
 import Monitor from '../../components/Monitor/Monitor';
+import Shortcut from '../../components/Shortcut/Shortcut';
 
 import './Dashboard.css';
 
@@ -46,27 +48,35 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
 
-    return (
-        <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
-            <div className="zenin__dashboard_monitors">
-                {sorted.map((n, i) =>
-                    <Monitor key={i} monitor={n} service={monitor.service} />)}
-            </div>
-
-            {split ?
-                <div className={"zenin__dashboard_activity"}>
-                    {monitor.context.state.split.isEditing() ?
-                        <Editor
-                            state={monitor.context.state.split.pane}
-                            onClose={() => monitor.context.dispatch({ type: 'edit', monitor: null })}
-                            onChange={value => (value.id != null && isMonitor(value)) ? handleUpdate(value) : handleAdd(value)}
-                            onDelete={value => monitor.context.dispatch({ type: 'delete', monitors: [value] })} />
-                        : null}
-
-                    {monitor.context.state.split.isViewing() ?
-                        <Info state={monitor.context.state.split.pane} /> : null}
-                </div>
+    const activity = split
+        ? <div className={"zenin__dashboard_activity"}>
+            {monitor.context.state.split.isEditing()
+                ? <Editor
+                    state={monitor.context.state.split.pane}
+                    onClose={() => monitor.context.dispatch({ type: 'edit', monitor: null })}
+                    onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
+                    onDelete={n => monitor.context.dispatch({ type: 'delete', monitors: [n] })} />
+                : null}
+            {monitor.context.state.split.isViewing()
+                ? <Info state={monitor.context.state.split.pane} />
                 : null}
         </div>
-    )
+        : null;
+
+    return <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
+        <div className="zenin__dashboard_side">
+            <Shortcut />
+        </div>
+        <div className="zenin__dashboard_main">
+            <div className="zenin__dashboard_main_top">
+                <Menu />
+            </div>
+            <div className="zenin__dashboard_main_bottom">
+                <div className="zenin__dashboard_monitors">
+                    {sorted.map((n, i) => <Monitor key={i} monitor={n} service={monitor.service} />)}
+                </div>
+                {activity}
+            </div>
+        </div>
+    </div>
 }

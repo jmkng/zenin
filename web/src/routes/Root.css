@@ -1,21 +1,5 @@
-.zenin__root_component {
-  display: flex;
-}
-
-.zenin__root_left, .zenin__root_right {
-  height: 100vh;
-}
-
-.zenin__root_right {
-  flex-grow: 1;
-}
-
 .zenin__main {
-  height: calc(100% - var(--px-i));
-}
-
-.zenin__main > * {
-  padding: var(--px-c);
+  height: 100vh;
 }
 
 @media (max-width: 700px) {
