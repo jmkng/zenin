@@ -187,4 +187,4 @@ export default function Table(props: TableProps) {
     </div >
 }
 
-const PAGESIZE = 10;
+const PAGESIZE = 7;
