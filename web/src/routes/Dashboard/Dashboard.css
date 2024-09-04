@@ -52,7 +52,7 @@
   margin-right: var(--px-c);
 }
 
-@container dashboard-container (max-width: 689px) {
+@container dashboard-container (max-width: 720px) {
   .zenin__dashboard.split .zenin__dashboard_monitors {
     display: none;
   }
