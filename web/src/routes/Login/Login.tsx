@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAccountContext } from "../../internal/account";
 import { useDefaultAccountService } from "../../internal/account/service";
-import { useNavigate } from "react-router-dom";
-import { DataPacket, Packet, isErrorPacket } from "../../server";
 import { useLayoutContext } from "../../internal/layout";
-import { useDefaultMetaService } from "../../internal/meta/service";
 import { Meta } from "../../internal/meta";
+import { useDefaultMetaService } from "../../internal/meta/service";
+import { DataPacket, Packet, isErrorPacket } from "../../server";
 
-import TextInput from "../../components/Input/TextInput/TextInput";
 import Button from "../../components/Button/Button";
 import LogoIcon from "../../components/Icon/LogoIcon/LogoIcon";
+import TextInput from "../../components/Input/TextInput/TextInput";
 
-import "./Login.css"
+import "./Login.css";
 
 export default function Login() {
     const [form, setForm] = useState<LoginState>(defaultState);
