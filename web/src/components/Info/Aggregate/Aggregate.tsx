@@ -27,12 +27,10 @@ export default function Aggregate(props: AggregateProps) {
     if (dead > 0) pairs.set("Dead", dead.toString());
     if (warn > 0) pairs.set("Warn", warn.toString());
 
-    return (
-        <div className="zenin__aggregate_component">
-            <List
-                title="Aggregate"
-                data={Array.from(pairs, ([key, value]) => ({ key, value: value }))}
-            />
-        </div>
-    )
+    return <div className="zenin__aggregate_component">
+        <List
+            title="Aggregate"
+            data={Array.from(pairs, ([key, value]) => ({ key, value: value }))}
+        />
+    </div>
 }

@@ -23,45 +23,43 @@ export default function Property(props: PropertyProps) {
     if (measurement.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(measurement.icmpMaxRtt))
     if (measurement.pluginExitCode != null) pairs.set("Exit Code", measurement.pluginExitCode.toString())
 
-    return (
-        <div className="zenin__property_component zenin__h_margin_top">
-            <List
-                title={`Properties #${measurement.id}`}
-                data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
+    return <div className="zenin__property_component zenin__h_margin_top">
+        <List
+            title={`Properties #${measurement.id}`}
+            data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
 
-            {measurement.httpResponseHeaders ?
-                <div className="zenin__property_response_headers zenin__h_margin_top">
-                    <Expand title={"Response Headers"} text={measurement.httpResponseHeaders} />
-                </div>
-                : null}
-            {measurement.httpResponseBody ?
-                <div className="zenin__property_response_body zenin__h_margin_top">
-                    <Expand title={"Response Body"} text={measurement.httpResponseBody} />
-                </div>
-                : null}
-            {measurement.pluginStdout ?
-                <div className="zenin__property_stdout zenin__h_margin_top">
-                    <Expand title={"Standard Output"} text={measurement.pluginStdout} />
-                </div>
-                : null}
-            {measurement.pluginStderr ?
-                <div className="zenin__property_stderr zenin__h_margin_top">
-                    <Expand title={"Standard Output"} text={measurement.pluginStderr} />
-                </div>
-                : null}
-            {measurement.stateHint ?
-                <div className="zenin__property_hints zenin__h_margin_top">
-                    <List title="Hints" data={measurement.stateHint} />
-                </div>
-                : null}
+        {measurement.httpResponseHeaders ?
+            <div className="zenin__property_response_headers zenin__h_margin_top">
+                <Expand title={"Response Headers"} text={measurement.httpResponseHeaders} />
+            </div>
+            : null}
+        {measurement.httpResponseBody ?
+            <div className="zenin__property_response_body zenin__h_margin_top">
+                <Expand title={"Response Body"} text={measurement.httpResponseBody} />
+            </div>
+            : null}
+        {measurement.pluginStdout ?
+            <div className="zenin__property_stdout zenin__h_margin_top">
+                <Expand title={"Standard Output"} text={measurement.pluginStdout} />
+            </div>
+            : null}
+        {measurement.pluginStderr ?
+            <div className="zenin__property_stderr zenin__h_margin_top">
+                <Expand title={"Standard Output"} text={measurement.pluginStderr} />
+            </div>
+            : null}
+        {measurement.stateHint ?
+            <div className="zenin__property_hints zenin__h_margin_top">
+                <List title="Hints" data={measurement.stateHint} />
+            </div>
+            : null}
 
-            {/****** lazy load ******/}
+        {/****** lazy load ******/}
 
-            {measurement.kind == HTTP_API ?
-                <div className="zenin__property_http_addon zenin__h_margin_top">
-                    <Chain measurement={measurement} />
-                </div>
-                : null}
-        </div>
-    )
+        {measurement.kind == HTTP_API ?
+            <div className="zenin__property_http_addon zenin__h_margin_top">
+                <Chain measurement={measurement} />
+            </div>
+            : null}
+    </div>
 }
