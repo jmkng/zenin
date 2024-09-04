@@ -1,9 +1,9 @@
 import { useRef } from "react";
 import { Monitor } from ".";
-import { AuthenticatedRequest } from "../../server/request";
-import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../../server";
 import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
-import { DetachedState } from "./origin";
+import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../../server";
+import { AuthenticatedRequest } from "../../server/request";
+import { DetachedState } from "./split";
 
 class MonitorService extends Service {
     constructor() { super(); }
@@ -76,4 +76,5 @@ export const useDefaultMonitorService = () => {
     return ref.current;
 }
 
-export { MonitorService }
+export { MonitorService };
+
