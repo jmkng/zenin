@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAccountContext } from '../../../internal/account';
 import { Measurement } from '../../../internal/measurement';
 import { useMonitorContext } from '../../../internal/monitor';
@@ -14,7 +14,6 @@ import NextIcon from '../../Icon/NextIcon/NextIcon';
 import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
 import TrashIcon from '../../Icon/TrashIcon/TrashIcon';
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
-import Aggregate from '../Aggregate/Aggregate';
 import Property from '../Property/Property';
 import Row from './Row/Row';
 
@@ -34,25 +33,28 @@ export default function Table(props: TableProps) {
     const measurements = (state.monitor.measurements || []).toReversed();
     const pages = Math.ceil(measurements.length / PAGESIZE);
     const [page, setPage] = useState(1);
+
     const [checked, setChecked] = useState<number[]>([]);
     const [allChecked, setAllChecked] = useState(false);
 
-    const propertyContainerRef = useRef<HTMLDivElement>(null);
     const visible = measurements.slice((page - 1) * PAGESIZE, page * PAGESIZE);
+    const propertyContainerRef = useRef<HTMLDivElement>(null);
     const id = measurements.map(n => n.id!);
     const backDisabled = page === 1;
     const forwardDisabled = page === pages;
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         setChecked([]);
         setAllChecked(false);
-        setPage(1);
     }, [state.monitor])
 
     useEffect(() => {
         if (state.selected && propertyContainerRef.current) {
             propertyContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+        setPage(state.selected
+            ? measurements.reduce((acc, _, i, a) => acc === -1 && i % 7 === 0 && a.slice(i, i + 7).includes(state.selected!) ? Math.floor(i / 7) + 1 : acc, -1)
+            : 1);
     }, [state.selected])
 
     const handleMasterCheck = () => {
@@ -173,11 +175,6 @@ export default function Table(props: TableProps) {
                 </Button>
             </div>
         </div>
-
-        <div className="zenin__info_aggregate_container zenin__h_margin_top">
-            <Aggregate measurements={measurements} />
-        </div>
-
         {state.selected ?
             <div className="zenin__info_property_container" ref={propertyContainerRef}>
                 <Property measurement={state.selected} />
