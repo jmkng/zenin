@@ -1,5 +1,5 @@
 import { useMonitorContext } from "../../internal/monitor";
-import { ViewState } from "../../internal/monitor/split";
+import { ViewPane } from "../../internal/monitor/split";
 
 import Button from "../Button/Button";
 import Expand from "./Expand/Expand";
@@ -9,7 +9,7 @@ import Table from "./Table/Table";
 import "./Info.css";
 
 interface InfoProps {
-    state: ViewState
+    state: ViewPane
 }
 
 export default function Info(props: InfoProps) {
@@ -32,12 +32,12 @@ export default function Info(props: InfoProps) {
             <div className="zenin__detail_controls">
                 <Button
                     kind="primary"
-                    onClick={() => monitor.context.dispatch({ type: 'edit', monitor: state.monitor })}>
+                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: state.monitor } })}>
                     <span>Edit</span>
                 </Button>
                 <Button
                     border={true}
-                    onClick={() => monitor.context.dispatch({ type: 'view', target: null })}>
+                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target: null } })}>
                     <span>Close</span>
                 </Button>
             </div>

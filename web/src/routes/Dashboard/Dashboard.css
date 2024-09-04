@@ -18,14 +18,13 @@
 }
 
 .zenin__dashboard_activity {
-  overflow-y: auto;
+  height: 100%;
   overflow-x: hidden;
   margin-left: var(--px-c);
   flex: 1;
 }
 
 .zenin__dashboard_monitors {
-  overflow-y: auto;
   overflow-x: hidden;
   display: grid;
   flex: 1;

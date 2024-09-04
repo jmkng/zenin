@@ -5,7 +5,7 @@ import {
     Monitor, monitorEquals,
     PLUGIN_UI, TCP_UI,
 } from "../../internal/monitor";
-import { EditorState } from "../../internal/monitor/split";
+import { EditorPane } from "../../internal/monitor/split";
 import {
     CLIENTERROR_API, DELETE_API, GET_API, HEAD_API, HTTP_API, ICMP_API,
     INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PLUGIN_API,
@@ -24,7 +24,7 @@ import ToggleInput from "../Input/ToggleInput/ToggleInput";
 import "./Editor.css";
 
 interface EditorProps {
-    state: EditorState
+    state: EditorPane
 
     onChange: (target: Monitor) => void;
     onClose: () => void;
@@ -438,23 +438,6 @@ export default function Editor(props: EditorProps) {
                     </div>
                     :
                     null}
-
-                {/* TODO */}
-                {/* <div className="zenin__detail_chain_plugin zenin__detail_spaced">
-                    <SelectInput
-                        label="Chain Plugin"
-                        name="zenin__detail_chain_plugidn"
-                        value={editor.draft.active.toString()}
-                        subtext={<span>Set a <a href="#">plugin</a> to <a href="#">chain</a> with this monitor.</span>}
-                        options={[
-                            { value: "true", text: ACTIVE_UI },
-                            { value: "false", text: INACTIVE_UI }
-                        ]}
-                        onChange={value =>
-                            setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === 'true' } }))
-                        }
-                    />
-                </div> */}
             </div>
 
 

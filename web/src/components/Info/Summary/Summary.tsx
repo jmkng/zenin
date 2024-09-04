@@ -1,5 +1,5 @@
 import { formatDate } from "../../../internal/layout/graphics";
-import { ViewState } from "../../../internal/monitor/split";
+import { ViewPane } from "../../../internal/monitor/split";
 import { DEAD_API } from "../../../server";
 
 import List from "../List/List";
@@ -7,7 +7,7 @@ import List from "../List/List";
 import "./Summary.css";
 
 interface SummaryProps {
-    state: ViewState,
+    state: ViewPane,
 }
 
 export default function Summary(props: SummaryProps) {

@@ -42,54 +42,46 @@ export default function DashboardMenu() {
         monitor.context.dispatch({ type: 'delete', monitors });
     }
 
-    return (
-        <div className="zenin__dashboard_menu">
-            <div className="zenin__menu_margin">
-                <Button
-                    onClick={handleAdd}
-                    tooltip={{ text: "Add Monitor" }}
-                >
-                    <span className="zenin__h_center zenin__menu_add">
-                        <AddIcon />
-                    </span>
-                </Button>
-            </div >
-            <div className="zenin__menu_margin zenin__menu_monitor_filter_container">
-                <SelectInput
-                    name={'zenin__menu_state_filter'}
-                    options={[{ text: 'All' }, { text: ACTIVE_UI }, { text: INACTIVE_UI }]}
-                    value={monitor.context.state.filter}
-                    onChange={(value: string) => handleFilterChange(value as FilterKind)}
-                />
-            </div>
-            {
-                monitor.context.state.selected.length > 0
-                    ?
-                    <div className="zenin__menu_monitor_bulk_container">
-                        <div className="zenin__menu_margin">
-                            <Button
-                                disabled={!monitor.context.state.selected.some(n => !n.active)}
-                                tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}
-                            >
-                                <PlayIcon />
-                            </Button>
-                        </div>
-                        <div className="zenin__menu_margin">
-                            <Button
-                                disabled={!monitor.context.state.selected.some(n => n.active)}
-                                tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}
-                            >
-                                <PauseIcon />
-                            </Button>
-                        </div>
-                        <div onClick={(event) => event.stopPropagation()}>
-                            <Button tooltip={{ text: "Delete Selected" }} onClick={() => handleDelete()}>
-                                <TrashIcon />
-                            </Button>
-                        </div>
-                    </div>
-                    : null
-            }
+    return <div className="zenin__dashboard_menu">
+        <div className="zenin__menu_margin">
+            <Button onClick={handleAdd} tooltip={{ text: "Add Monitor" }}>
+                <span className="zenin__h_center zenin__menu_add">
+                    <AddIcon />
+                </span>
+            </Button>
         </div>
-    )
+        <div className="zenin__menu_margin zenin__menu_monitor_filter_container">
+            <SelectInput
+                name={'zenin__menu_state_filter'}
+                options={[{ text: 'All' }, { text: ACTIVE_UI }, { text: INACTIVE_UI }]}
+                value={monitor.context.state.filter}
+                onChange={(value: string) => handleFilterChange(value as FilterKind)}
+            />
+        </div>
+        {monitor.context.state.selected.length > 0
+            ? <div className="zenin__menu_monitor_bulk_container">
+                <div className="zenin__menu_margin">
+                    <Button
+                        disabled={!monitor.context.state.selected.some(n => !n.active)}
+                        tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}
+                    >
+                        <PlayIcon />
+                    </Button>
+                </div>
+                <div className="zenin__menu_margin">
+                    <Button
+                        disabled={!monitor.context.state.selected.some(n => n.active)}
+                        tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}
+                    >
+                        <PauseIcon />
+                    </Button>
+                </div>
+                <div onClick={(event) => event.stopPropagation()}>
+                    <Button tooltip={{ text: "Delete Selected" }} onClick={() => handleDelete()}>
+                        <TrashIcon />
+                    </Button>
+                </div>
+            </div>
+            : null}
+    </div>
 }

@@ -1,7 +1,6 @@
 import { FilterKind, Monitor } from ".";
 import { Measurement } from "../measurement";
-import { OriginState } from "./origin";
-import { EditorState, SplitState, ViewState } from "./split";
+import { EditorPane, OriginState, SettingsPane, SplitState, ViewPane } from "./split";
 
 export interface MonitorState {
     monitors: Map<number, Monitor>,
@@ -47,11 +46,6 @@ type DeleteAction = {
     monitors: Monitor[] 
 };
 
-type EditAction = { 
-    type: 'edit', 
-    monitor: Monitor | null 
-};
-
 type SelectAction = { 
     type: 'select', 
     monitor: Monitor 
@@ -72,7 +66,12 @@ type ResetAction = {
     monitors: Monitor[] 
 };
 
-type ViewAction = { 
+type PaneAction = {
+    type: 'pane',
+    pane: ViewPaneAction | EditorPaneAction | SettingsPaneAction
+}
+
+type ViewPaneAction = {
     type: 'view', 
     target: { 
         monitor: Monitor, 
@@ -80,6 +79,15 @@ type ViewAction = {
         origin?: OriginState,
         disableToggle?: boolean
     } | null
+};
+
+type EditorPaneAction = { 
+    type: 'editor', 
+    monitor: Monitor | null 
+};
+
+type SettingsPaneAction = {
+    type: 'settings'
 };
 
 type DetailAction = { type: 'detail', measurement: Measurement | null };
@@ -92,12 +100,11 @@ export type MonitorAction =
     | DraftAction
     | FilterAction
     | DeleteAction
-    | EditAction
     | SelectAction
     | OverwriteAction
     | PollAction
     | ResetAction
-    | ViewAction
+    | PaneAction
     | DetailAction
 
 const removeAction = (state: MonitorState, action: RemoveAction) => {
@@ -126,7 +133,7 @@ const toggleAction = (state: MonitorState, action: ToggleAction) => {
 }
 
 const draftAction = (state: MonitorState) => {
-    const editor = new EditorState(null);
+    const editor = new EditorPane(null);
     const split = new SplitState(editor);
     return { ...state, split }
 }
@@ -141,14 +148,6 @@ const deleteAction = (state: MonitorState, action: DeleteAction) => {
     return { ...state, deleting }
 }
 
-const editAction = (state: MonitorState, action: EditAction) => {
-    let split: SplitState;
-    if (!action.monitor || state.split.isEditing() && state.split.pane.monitor == action.monitor) 
-            split = new SplitState(null)
-    else split = new SplitState(new EditorState(action.monitor))
-    return { ...state, split }
-}
-
 const selectAction = (state: MonitorState, action: SelectAction) => {
     const selected = state.selected.includes(action.monitor)
         ? state.selected.filter(n => n != action.monitor)
@@ -161,7 +160,7 @@ const overwriteAction = (state: MonitorState, action: OverwriteAction) => {
     const target = monitors.get(action.monitor.id);
     if (target) action.monitor.measurements = target.measurements; // Recycle the measurement information.
     monitors.set(action.monitor.id, action.monitor);
-    const split = new SplitState(new EditorState(action.monitor))
+    const split = new SplitState(new EditorPane(action.monitor))
     return { ...state, monitors, split }
 }
 
@@ -196,20 +195,44 @@ const resetAction = (state: MonitorState, action: ResetAction) => {
     return { ...state, monitors }
 }
 
-const viewAction = (state: MonitorState, action: ViewAction) => {
-    if (
-        !action.target 
-        || (state.split.equals(action.target.monitor) && !action.target.disableToggle)
-    ) return { ...state, split: new SplitState(null) };
+const paneAction = (state: MonitorState, action: PaneAction) => {
+    switch (action.pane.type) {
+        case "view":
+            return viewPaneAction(state, action.pane);
+        case "editor":
+            return editorPaneAction(state, action.pane);
+        case "settings":
+            return settingsPaneAction(state);
+    }
+}
 
-    const view = new ViewState(action.target.monitor, action.target.measurement, action.target.origin);
+const viewPaneAction = (state: MonitorState, action: ViewPaneAction) => {
+    if (!action.target || (state.split.equals(action.target.monitor) && !action.target.disableToggle)) 
+        return { ...state, split: new SplitState(null) };
+
+    const view = new ViewPane(action.target.monitor, action.target.measurement, action.target.origin);
     const split = new SplitState(view)
     return { ...state, split }
 }
 
+const editorPaneAction = (state: MonitorState, action: EditorPaneAction) => {
+    let split: SplitState;
+    if (!action.monitor || state.split.isEditorPane() && state.split.pane.monitor == action.monitor) 
+            split = new SplitState(null)
+    else split = new SplitState(new EditorPane(action.monitor))
+    return { ...state, split }
+}
+
+const settingsPaneAction = (state: MonitorState) => {
+    let split: SplitState;
+    if (state.split.pane != null && state.split.isSettingsPane()) split = new SplitState(null);
+    else split = new SplitState(new SettingsPane())
+    return { ...state, split }
+}
+
 const detailAction = (state: MonitorState, action: DetailAction) => {
-    if (state.split.isViewing()) {
-        const view = new ViewState(state.split.pane.monitor, action.measurement)
+    if (state.split.isViewPane()) {
+        const view = new ViewPane(state.split.pane.monitor, action.measurement)
         return {...state, split: new SplitState(view) }
     }
     return state;
@@ -225,9 +248,8 @@ export const monitorReducer = (state: MonitorState, action: MonitorAction): Moni
         case "draft": return draftAction(state);
         case "filter": return filterAction(state, action);
         case "delete": return deleteAction(state, action);
-        case "edit": return editAction(state, action);
         case "select": return selectAction(state, action);
-        case "view": return viewAction(state, action);
+        case "pane": return paneAction(state, action);
         case "detail": return detailAction(state, action);
     }
 }

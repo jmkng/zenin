@@ -2,9 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useAccountContext } from '../../../internal/account';
 import { Measurement } from '../../../internal/measurement';
 import { useMonitorContext } from '../../../internal/monitor';
-import { DetachedState, OriginState } from '../../../internal/monitor/origin';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
-import { ViewState } from '../../../internal/monitor/split';
+import { DetachedState, OriginState, ViewPane } from '../../../internal/monitor/split';
 import { DataPacket } from '../../../server';
 
 import Button from '../../Button/Button';
@@ -22,7 +21,7 @@ import Row from './Row/Row';
 import './Table.css';
 
 interface TableProps {
-    state: ViewState
+    state: ViewPane
 }
 
 export default function Table(props: TableProps) {
@@ -80,8 +79,8 @@ export default function Table(props: TableProps) {
             const head = monitor.context.state.monitors.get(state.monitor.id);
             if (!head) return;
             monitor.context.dispatch({
-                type: 'view',
-                target: { monitor: head, measurement: null, disableToggle: true, origin: "HEAD" },
+                type: 'pane',
+                pane: { type: 'view', target: { monitor: head, measurement: null, disableToggle: true, origin: "HEAD" } },
             });
             return;
         }
@@ -95,9 +94,9 @@ export default function Table(props: TableProps) {
 
         const mon = { ...state.monitor, measurements: [...packet.data || []].toReversed() };
         monitor.context.dispatch({
-            type: 'view',
-            target: { monitor: mon, measurement: null, disableToggle: true, origin: value }
-        })
+            type: 'pane',
+            pane: { type: 'view', target: { monitor: mon, measurement: null, disableToggle: true, origin: value } },
+        });
     }
 
     const handleRowClick = (id: number) => {

@@ -42,8 +42,8 @@ export default function Monitor(props: MonitorProps) {
 
     const handleView = () => {
         monitor.context.dispatch({
-            type: 'view',
-            target: { monitor: monitor.data, measurement: null }
+            type: 'pane',
+            pane: { type: 'view', target: { monitor: monitor.data, measurement: null } }
         })
     }
 
@@ -56,73 +56,64 @@ export default function Monitor(props: MonitorProps) {
         monitor.context.dispatch({ type: 'toggle', monitors, active });
     }
 
-    return (
-        <div
-            className={
-                ['zenin__monitor',
-                    monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''
-                ].join(' ')
-            } >
-            <div className="zenin__monitor_top" onClick={handleSelect}>
-                <div className="zenin__monitor_top_upper">
-                    <div onClick={event => event.stopPropagation()}>
-                        <span className="zenin__monitor_name zenin__h_left" onClick={() => handleView()}>
-                            {monitor.data.name}
-                        </span>
-                    </div>
-                    <Button
-                        icon={<VMenuIcon />}
-                        onClick={event => event.stopPropagation()}
-                        dialog={[
-                            {
-                                items: [
-                                    { text: "Info", onClick: () => handleView(), icon: <InfoIcon /> },
-                                    { text: "Poll", onClick: () => handlePoll(), icon: <DatabaseIcon /> },
-                                    { text: monitor.data.active ? "Pause" : "Resume", onClick: () => handleToggle(), icon: monitor.data.active ? <PauseIcon /> : <PlayIcon /> },
-                                ]
-                            },
-                            {
-                                items: [
-                                    {
-                                        text: "Edit",
-                                        onClick: () => monitor.context.dispatch({ type: 'edit', monitor: monitor.data }), icon: <EditIcon />
-                                    },
-                                    {
-                                        text: "Delete",
-                                        onClick: () => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] }), icon: <TrashIcon />, destructive: true
-                                    },
-                                ]
-                            }
-                        ]} />
-                </div>
+    return <div
+        className={['zenin__monitor', monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''].join(' ')}>
+        <div className="zenin__monitor_top" onClick={handleSelect}>
+            <div className="zenin__monitor_top_upper">
                 <div onClick={event => event.stopPropagation()}>
-                    <div
-                        className="zenin__monitor_top_lower"
-                        onClick={() => handleSelect()}
-                    >
+                    <span className="zenin__monitor_name zenin__h_left" onClick={() => handleView()}>
+                        {monitor.data.name}
+                    </span>
+                </div>
+                <Button
+                    icon={<VMenuIcon />}
+                    onClick={event => event.stopPropagation()}
+                    dialog={[
+                        {
+                            items: [
+                                { text: "Info", onClick: () => handleView(), icon: <InfoIcon /> },
+                                { text: "Poll", onClick: () => handlePoll(), icon: <DatabaseIcon /> },
+                                { text: monitor.data.active ? "Pause" : "Resume", onClick: () => handleToggle(), icon: monitor.data.active ? <PauseIcon /> : <PlayIcon /> },
+                            ]
+                        },
+                        {
+                            items: [
+                                {
+                                    text: "Edit",
+                                    onClick: () => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: monitor.data } }), icon: <EditIcon />
+                                },
+                                {
+                                    text: "Delete",
+                                    onClick: () => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] }), icon: <TrashIcon />, destructive: true
+                                },
+                            ]
+                        }
+                    ]} />
+            </div>
+            <div onClick={event => event.stopPropagation()}>
+                <div className="zenin__monitor_top_lower" onClick={() => handleSelect()}>
+                    <span onClick={event => event.stopPropagation()}>
+                        <IDWidget id={monitor.data.id!} />
+                    </span>
+                    <KindWidget kind={monitor.data.kind} />
+                    {!monitor.data.active ?
                         <span onClick={event => event.stopPropagation()}>
-                            <IDWidget id={monitor.data.id!} />
+                            <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
                         </span>
-                        <KindWidget kind={monitor.data.kind} />
-                        {!monitor.data.active ?
-                            <span onClick={event => event.stopPropagation()}>
-                                <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
-                            </span>
-                            : null}
-                    </div>
+                        : null}
                 </div>
             </div>
-            <div className="zenin__monitor_middle" onClick={handleSelect}>
-            </div>
-            <div className='zenin__monitor_bottom'>
-                <Series
-                    measurements={monitor.data.measurements?.toReversed() || []}
-                    onSlotClick={measurement => monitor.context.dispatch({
-                        type: 'view',
-                        target: { monitor: monitor.data, measurement, disableToggle: true }
-                    })}
-                />
-            </div>
-        </div >
-    )
+        </div>
+        <div className="zenin__monitor_middle" onClick={handleSelect}>
+        </div>
+        <div className='zenin__monitor_bottom'>
+            <Series
+                measurements={monitor.data.measurements?.toReversed() || []}
+                onSlotClick={measurement => monitor.context.dispatch({
+                    type: 'pane',
+                    pane: { type: 'view', target: { monitor: monitor.data, measurement, disableToggle: true } }
+                })}
+            />
+        </div>
+    </div>
 }

@@ -8,6 +8,7 @@ import Editor from '../../components/Editor/Editor';
 import Info from '../../components/Info/Info';
 import Menu from '../../components/Menu/Menu';
 import Monitor from '../../components/Monitor/Monitor';
+import Settings from '../../components/Settings/Settings';
 import Shortcut from '../../components/Shortcut/Shortcut';
 
 import './Dashboard.css';
@@ -18,12 +19,12 @@ export default function Dashboard() {
         service: useDefaultMonitorService()
     }
     const account = useAccountContext();
-    let sorted = [...monitor.context.state.monitors.values()];
-    if (monitor.context.state.filter == ACTIVE_UI) sorted = sorted.filter(n => n.active)
-    else if (monitor.context.state.filter == INACTIVE_UI) sorted = sorted.filter(n => !n.active)
-    sorted.sort((a, b) => a.name > b.name ? 1 : -1);
-    const split = monitor.context.state.split &&
-        (monitor.context.state.split.isEditing() || monitor.context.state.split.isViewing());
+    const sorted = [...monitor.context.state.monitors.values()].filter(n =>
+        monitor.context.state.filter === ACTIVE_UI
+            ? n.active
+            : monitor.context.state.filter === INACTIVE_UI ? !n.active : true
+    ).sort((a, b) => a.name > b.name ? 1 : -1);
+    const split = monitor.context.state.split.pane != null;
 
     const handleAdd = async (value: monitor.Monitor) => {
         const token = account.state.authenticated!.token.raw;
@@ -48,18 +49,18 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
 
+    // Determine what goes in the activity window.
     const activity = split
         ? <div className={"zenin__dashboard_activity"}>
-            {monitor.context.state.split.isEditing()
+            {monitor.context.state.split.isEditorPane()
                 ? <Editor
                     state={monitor.context.state.split.pane}
-                    onClose={() => monitor.context.dispatch({ type: 'edit', monitor: null })}
+                    onClose={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
                     onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
                     onDelete={n => monitor.context.dispatch({ type: 'delete', monitors: [n] })} />
                 : null}
-            {monitor.context.state.split.isViewing()
-                ? <Info state={monitor.context.state.split.pane} />
-                : null}
+            {monitor.context.state.split.isViewPane() ? <Info state={monitor.context.state.split.pane} /> : null}
+            {monitor.context.state.split.isSettingsPane() ? <Settings /> : null}
         </div>
         : null;
 

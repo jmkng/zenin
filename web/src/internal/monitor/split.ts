@@ -1,8 +1,46 @@
 import { Monitor } from ".";
 import { Measurement } from "../measurement";
-import { OriginState } from "./origin";
 
-export class ViewState {
+export class SplitState {
+    constructor(
+        /** The active pane. */
+        public pane: ViewPane | EditorPane | SettingsPane | null
+    ) {}
+
+    isViewPane(): this is { pane: ViewPane } {
+        return this.pane instanceof ViewPane;
+    }
+
+    isEditorPane(): this is { pane: EditorPane } {
+        return this.pane instanceof EditorPane;
+    }
+
+    isSettingsPane(): this is { pane : SettingsPane } {
+        return this.pane instanceof SettingsPane;
+    }
+
+    /** Return true if any of the provided IDs match the id of the monitor in this state. */
+    overlaps(id: number[]): boolean {
+        if (this.isViewPane()) {
+            return id.includes(this.pane.monitor.id!);
+        } else if (this.isEditorPane()) {
+            return this.pane.monitor !== null && id.includes(this.pane.monitor.id);
+        }
+        return false;
+    }
+
+    /** Return true if the provided monitor is equal to the monitor in this state. */
+    equals(monitor: Monitor): boolean {
+        if (this.isViewPane()) {
+            return monitor == this.pane.monitor
+        } else if (this.isEditorPane()) {
+            return this.pane.monitor !== null && monitor == this.pane.monitor
+        }
+        return false;
+    }
+}
+
+export class ViewPane {
     constructor(
         /** The monitor being viewed. */
         public monitor: Monitor,
@@ -15,46 +53,57 @@ export class ViewState {
     ) {}
 }
 
-export class EditorState {
+export class EditorPane {
     constructor(
         /** The monitor being modified. Null represents `drafting` a new monitor. */
         public monitor: Monitor | null
     ) {}
 }
 
-export class SplitState {
+export class SettingsPane {
+    constructor() {}
+}
+
+export type OriginState = HeadState | DetachedState;
+
+export type HeadState = "HEAD";
+
+export class DetachedState {
     constructor(
-        /** We can either be viewing a monitor in detail, 
-         * editing a monitor, 
-         * or neither. */
-        public pane: ViewState | EditorState | null
-    ) {}
+        public date: "DAY" | "WEEK" | "MONTH" | "YEAR"
+    ) { }
 
-    isViewing(): this is { pane: ViewState } {
-        return this.pane instanceof ViewState;
-    }
-
-    isEditing(): this is { pane: EditorState } {
-        return this.pane instanceof EditorState;
-    }
-
-    /** Return true if any of the provided IDs match the id of the monitor in this state. */
-    overlaps(id: number[]): boolean {
-        if (this.isViewing()) {
-            return id.includes(this.pane.monitor.id!);
-        } else if (this.isEditing()) {
-            return this.pane.monitor !== null && id.includes(this.pane.monitor.id);
+    toString() {
+        switch (this.date) {
+            case "DAY": return "Past Day";
+            case "WEEK": return "Past Week";
+            case "MONTH": return "Past Month";
+            case "YEAR": return "Past Year"
         }
-        return false;
     }
 
-    /** Return true if the provided monitor is equal to the monitor in this state. */
-    equals(monitor: Monitor): boolean {
-        if (this.isViewing()) {
-            return monitor == this.pane.monitor
-        } else if (this.isEditing()) {
-            return this.pane.monitor !== null && monitor == this.pane.monitor
+    toAfterDate() {
+        const today = new Date();
+        const target = new Date(today);
+        switch (this.date) {
+            case "DAY":
+                target.setDate(today.getDate() - 1);
+                break;
+            case "WEEK":
+                target.setDate(today.getDate() - 7);
+                break;
+            case "MONTH":
+                target.setMonth(today.getMonth() - 1);
+                break;
+            case "YEAR":
+                target.setFullYear(today.getFullYear() - 1);
+                break;
+            default:
+                throw new Error("invalid measurement date value");
         }
-        return false;
+        const month = target.getMonth() + 1;
+        const day = target.getDate();
+        const year = target.getFullYear();
+        return `${month}/${day}/${year}`;
     }
 }

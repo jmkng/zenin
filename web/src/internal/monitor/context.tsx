@@ -12,13 +12,11 @@ const MonitorProvider = (props: MonitorProviderProps) => {
     const { children } = props;
     const [state, dispatch] = useReducer(monitorReducer, monitorDefault);
 
-    return (
-        <MonitorContext.Provider value={state}>
-            <MonitorDispatchContext.Provider value={dispatch}>
-                {children}
-            </MonitorDispatchContext.Provider>
-        </MonitorContext.Provider>
-    )
+    return <MonitorContext.Provider value={state}>
+        <MonitorDispatchContext.Provider value={dispatch}>
+            {children}
+        </MonitorDispatchContext.Provider>
+    </MonitorContext.Provider>
 }
 
 export default MonitorProvider;

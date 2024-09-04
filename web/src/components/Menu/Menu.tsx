@@ -6,9 +6,12 @@ import MenuIcon from '../Icon/MenuIcon/MenuIcon';
 import DashboardMenu from './DashboardMenu';
 
 import './Menu.css';
+import SettingsIcon from '../Icon/SettingsIcon/SettingsIcon';
+import { useMonitorContext } from '../../internal/monitor';
 
 export default function Menu() {
     const layout = useLayoutContext();
+    const monitor = useMonitorContext();
     const location = useLocation();
 
     const handleMenuToggle = () => {
@@ -18,7 +21,9 @@ export default function Menu() {
     return <div className='zenin__menu'>
         <div className='zenin__menu_left'>
             <Button onClick={handleMenuToggle} tooltip={{ text: "Toggle Shortcuts" }}>
-                <span className="zenin__h_center zenin__menu_toggle"><MenuIcon /></span>
+                <span className="zenin__h_center zenin__menu_toggle">
+                    <MenuIcon />
+                </span>
             </Button>
 
             <div className="zenin__menu_spacer first"></div>
@@ -28,6 +33,11 @@ export default function Menu() {
         </div>
 
         <div className='zenin__menu_right'>
+            <Button onClick={() => monitor.dispatch({ type: 'pane', pane: { type: 'settings' } })} tooltip={{ text: "Toggle Settings" }}>
+                <span className="zenin__h_center zenin__menu_toggle">
+                    <SettingsIcon />
+                </span>
+            </Button>
         </div>
     </div>
 }
