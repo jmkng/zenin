@@ -18,6 +18,10 @@
     margin-top: var(--px-b);
 }
 
+.zenin__table_head {
+    user-select: none;
+}
+
 .zenin__table_head th {
     font-weight: 400;
     color: var(--mid);
@@ -55,7 +59,7 @@
     border-top-right-radius: 2px;
 }
 
-.zenin__table_head:hover, .zenin__row_component:hover {
+.zenin__row_component:hover {
     background: var(--off-a);
 }
 

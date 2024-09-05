@@ -21,10 +21,6 @@
     color: var(--mid);
 }
 
-.zenin__list_intro:hover, .zenin__list_item_container:hover {
-    background: var(--off-a);
-}
-
 .zenin__list_item_container {
     height: var(--px-h);
     display: flex;
