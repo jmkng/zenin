@@ -1,13 +1,13 @@
 import { useLocation } from 'react-router-dom';
 import { useLayoutContext } from '../../internal/layout';
+import { useMonitorContext } from '../../internal/monitor';
 
 import Button from '../Button/Button';
 import MenuIcon from '../Icon/MenuIcon/MenuIcon';
+import SettingsIcon from '../Icon/SettingsIcon/SettingsIcon';
 import DashboardMenu from './DashboardMenu';
 
 import './Menu.css';
-import SettingsIcon from '../Icon/SettingsIcon/SettingsIcon';
-import { useMonitorContext } from '../../internal/monitor';
 
 export default function Menu() {
     const layout = useLayoutContext();
