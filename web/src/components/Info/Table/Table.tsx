@@ -111,7 +111,7 @@ export default function Table(props: TableProps) {
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
             <div className="zenin__table_controls_container">
                 {/* <Button disabled={checked.length == 0} border={true} kind="destructive" icon={<ExportIcon />} /> */}
-                <Button disabled={checked.length == 0} border={true} kind="destructive" icon={<TrashIcon />} />
+                <Button disabled={checked.length == 0} border={true} icon={<TrashIcon />} />
                 <Button border={true} icon={<ClockIcon />}
                     dialog={[
                         { text: "Recent", onClick: () => handleDateChange("HEAD") },
