@@ -1,8 +1,0 @@
-.zenin__log_menu {
-  display: flex;
-}
-
-
-.zenin__log_menu *:not(:first-of-type) {
-  margin-left: var(--px-b);
-}

@@ -30,3 +30,28 @@
   border-radius: var(--rounded);
   margin: var(--px-d) 0 var(--px-d) 0;
 }
+
+.zenin__dashboard_menu {
+  display: flex;
+  align-items: center;
+}
+
+.zenin__menu_monitor_bulk_container {
+  display: flex;
+  align-items: center;
+}
+
+.zenin__menu_selected_count {
+margin: 0 var(--px-b);
+}
+
+.zenin__menu_margin {
+margin-right: var(--px-b);
+}
+
+
+@media (max-width: 700px) {
+  .zenin__menu {
+    width: 100vw;
+  }
+}
