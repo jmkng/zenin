@@ -18,11 +18,11 @@ const (
 
 // Measurement is the measurement domain type.
 type Measurement struct {
-	Id         *int      `json:"id" db:"measurement_id"`
-	MonitorId  *int      `json:"monitorId" db:"measurement_monitor_id"`
-	RecordedAt time.Time `json:"recordedAt" db:"recorded_at"`
-	Duration   float64   `json:"duration" db:"duration"`
-
+	Id        *int      `json:"id" db:"measurement_id"`
+	CreatedAt time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
+	MonitorId *int      `json:"monitorId" db:"measurement_monitor_id"`
+	Duration  float64   `json:"duration" db:"duration"`
 	Span
 }
 
@@ -143,6 +143,8 @@ type PluginFields struct {
 // Certificate is an x509 certificate recorded by an HTTP probe.
 type Certificate struct {
 	Id                 *int      `json:"id" db:"certificate_id"`
+	CreatedAt          time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt          time.Time `json:"updatedAt" db:"updated_at"`
 	MeasurementId      *int      `json:"measurementId" db:"certificate_measurement_id"`
 	Version            int       `json:"version" db:"version"`
 	SerialNumber       string    `json:"serialNumber" db:"serial_number"`

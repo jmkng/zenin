@@ -13,6 +13,8 @@ import (
 // Account is the account domain type.
 type Account struct {
 	Id                  *int                `db:"id"`
+	CreatedAt           time.Time           `json:"createdAt" db:"created_at"`
+	UpdatedAt           time.Time           `json:"updatedAt" db:"updated_at"`
 	Username            string              `db:"username"`
 	VersionedSaltedHash VersionedSaltedHash `db:"versioned_salted_hash"`
 }

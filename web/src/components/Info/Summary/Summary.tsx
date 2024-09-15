@@ -20,7 +20,7 @@ export default function Summary(props: SummaryProps) {
     const pairs: Map<string, string> = new Map()
         .set("State", <span className={cname} data-state={!empty ? stateVal : null}>{stateVal}</span>)
     const dead = reversed.find(n => n.state == DEAD_API);
-    if (dead) pairs.set("Last Incident", formatDate(dead.recordedAt!))
+    if (dead) pairs.set("Last Incident", formatDate(dead.createdAt!))
 
     return (
         <div className="zenin__summary_component">

@@ -184,19 +184,15 @@ func (d *Distributor) stop(id int) {
 func (d *Distributor) distributeMeasurement(loopback chan<- any, m measurement.Measurement) {
 	id, err := d.measurement.Repository.InsertMeasurement(context.Background(), m)
 	if err != nil {
-		log.Error("distributor failed to send measurement to repository (aborted distribution)",
-			"error", err)
+		log.Error("distributor failed to send measurement to repository (aborted distribution)", "error", err)
 		return
 	}
 	m.Id = &id
-	log.Info("distributing measurement",
-		"measurement(id)", id,
-		"subscribers(count)", len(d.subscribers))
+	log.Info("distributing measurement", "measurement(id)", id, "subscribers(count)", len(d.subscribers))
 
 	message, err := json.Marshal(m)
 	if err != nil {
-		log.Error("distributor failed to serialize measurement (aborted distribution)",
-			"measurement", m, "error", err)
+		log.Error("distributor failed to serialize measurement (aborted distribution)", "measurement", m, "error", err)
 		return
 	}
 	discard := []int{}
@@ -208,8 +204,7 @@ func (d *Distributor) distributeMeasurement(loopback chan<- any, m measurement.M
 		}
 	}
 	for _, v := range discard {
-		log.Error("distributor discarding broken feed subscriber connection",
-			"subscriber(id)", v)
+		log.Error("distributor discarding broken feed subscriber connection", "subscriber(id)", v)
 		loopback <- UnsubscribeMessage{Id: v}
 	}
 }

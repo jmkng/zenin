@@ -12,7 +12,7 @@ export interface MonitorState {
 
 export const monitorDefault: MonitorState = {
     monitors: new Map(),
-    filter: "All",
+    filter: "NAME_ASC",
     selected: [],
     split: new SplitState(null),
     deleting: [],
@@ -29,7 +29,8 @@ type RemoveAction = {
 type ToggleAction = { 
     type: 'toggle', 
     monitors: number[], 
-    active: boolean 
+    active: boolean,
+    time: string
 };
 
 type DraftAction = { 
@@ -38,7 +39,7 @@ type DraftAction = {
 
 type FilterAction = { 
     type: 'filter', 
-    filter: string 
+    filter: FilterKind 
 };
 
 type DeleteAction = { 
@@ -128,6 +129,7 @@ const toggleAction = (state: MonitorState, action: ToggleAction) => {
             continue;
         }
         found.active = action.active;
+        found.updatedAt = action.time;
     }
     return { ...state, monitors, selected: [], deleting: [] };
 }
@@ -139,7 +141,7 @@ const draftAction = (state: MonitorState) => {
 }
 
 const filterAction = (state: MonitorState, action: FilterAction) => {
-    const filter = action.filter as FilterKind;
+    const filter = action.filter;
     return { ...state, filter }
 }
 

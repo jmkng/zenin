@@ -17,7 +17,7 @@ type MonitorRepository interface {
 	SelectMeasurement(ctx context.Context, id int, params *SelectMeasurementParams) ([]measurement.Measurement, error)
 	UpdateMonitor(ctx context.Context, monitor Monitor) error
 	DeleteMonitor(ctx context.Context, id []int) error
-	ToggleMonitor(ctx context.Context, id []int, active bool) error
+	ToggleMonitor(ctx context.Context, id []int, active bool, time time.Time) error
 }
 
 // SelectMonitorParams is a set of parameters used to narrow the scope of the `SelectMonitor`
@@ -75,11 +75,11 @@ type SelectMeasurementParams struct {
 func (s SelectMeasurementParams) Inject(builder *sql.Builder) {
 	where := builder.Where()
 	if s.After != nil {
-		builder.Push(fmt.Sprintf("%v recorded_at > ", where))
+		builder.Push(fmt.Sprintf("%v created_at > ", where))
 		builder.BindString(s.After.Format(time.RFC3339))
 	}
 	if s.Before != nil {
-		builder.Push(fmt.Sprintf("%v recorded_at < ", where))
+		builder.Push(fmt.Sprintf("%v created_at < ", where))
 		builder.BindString(s.Before.Format(time.RFC3339))
 	}
 }

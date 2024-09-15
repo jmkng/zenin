@@ -13,8 +13,8 @@ const logMaxLines = 200;
 
 type PushAction = { type: "push", line: Line };
 type ClearAction = { type: "clear" };
-type ToggleAction = { type: 'toggle', connected: boolean };
-type SilenceAction = { type: 'silence' };
+type ToggleAction = { type: "toggle", connected: boolean };
+type SilenceAction = { type: "silence" };
 
 export type LogDispatch = (action: LogAction) => void;
 

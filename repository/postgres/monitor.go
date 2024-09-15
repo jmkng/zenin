@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
@@ -14,6 +15,8 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 	var id int
 	query := `INSERT INTO monitor 
 		(name,
+		created_at,
+		updated_at,
 		kind,
 		active,
 		interval,
@@ -36,10 +39,12 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		icmp_ttl,
 		icmp_protocol)
     VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
     RETURNING id`
 	row := p.db.QueryRowContext(ctx, query,
 		monitor.Name,
+		monitor.CreatedAt,
+		monitor.UpdatedAt,
 		monitor.Kind,
 		monitor.Active,
 		monitor.Interval,
@@ -66,11 +71,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 }
 
 // SelectMonitor implements `MonitorRepository.SelectMonitor` for `PostgresRepository`.
-func (p PostgresRepository) SelectMonitor(
-	ctx context.Context,
-	measurements int,
-	params *monitor.SelectMonitorParams,
-) ([]monitor.Monitor, error) {
+func (p PostgresRepository) SelectMonitor(ctx context.Context, measurements int, params *monitor.SelectMonitorParams) ([]monitor.Monitor, error) {
 	if measurements > 0 {
 		return p.selectMonitorRelated(ctx, params, measurements)
 	}
@@ -84,6 +85,8 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 	var builder = zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT
             mo.id "monitor_id",
+			mo.created_at,
+			mo.updated_at,
             mo.name,
             mo.kind "monitor_kind",
             mo.active,
@@ -117,8 +120,10 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *monitor.SelectMonitorParams, measurements int) ([]monitor.Monitor, error) {
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT 
-		id "monitor_id", 
-		name, 
+		id "monitor_id",
+		created_at,
+		updated_at,
+		name,
 		kind "monitor_kind", 
 		active, 
 		interval, 
@@ -161,15 +166,16 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	builder.Reset()
 	builder.Push(`WITH raw AS (SELECT
 		m.*,
-		ROW_NUMBER() OVER (PARTITION BY m.monitor_id ORDER BY m.recorded_at DESC) AS rank
+		ROW_NUMBER() OVER (PARTITION BY m.monitor_id ORDER BY m.created_at DESC) AS rank
 	FROM measurement m   
 	WHERE m.monitor_id IN (`)
 	builder.SpreadInt(distinct...)
 	builder.Push(`) ORDER BY m.id DESC)
 	SELECT 
-		id "measurement_id", 
+		id "measurement_id",
+		created_at,
+		updated_at,
 		monitor_id "measurement_monitor_id",
-		recorded_at, 
 		state, 
 		state_hint, 
 		kind "measurement_kind", 
@@ -210,8 +216,9 @@ func (p PostgresRepository) SelectMeasurement(ctx context.Context, id int, param
 	builder := zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT
 		id AS "measurement_id",
+		created_at,
+		updated_at,
 		monitor_id AS "measurement_monitor_id",
-		recorded_at,
 		duration,
 		state,
 		state_hint,
@@ -247,32 +254,34 @@ func (p PostgresRepository) SelectMeasurement(ctx context.Context, id int, param
 
 // UpdateMonitor implements `MonitorRepository.UpdateMonitor` for `PostgresRepository`.
 func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.Monitor) error {
-	const query string = `UPDATE monitor SET 
-        name = $1, 
-		kind = $2, 
-		active = $3, 
-		interval = $4, 
-		timeout = $5, 
-		description = $6, 
-		remote_address = $7,
-		remote_port = $8, 
-		plugin_name = $9, 
-		plugin_args = $10, 
-		http_range = $11, 
-		http_method = $12,
-        http_request_headers = $13, 
-		http_request_body = $14, 
-		http_expired_cert_mod = $15, 
-		http_capture_headers = $16,
-		http_capture_body = $17, 
-		icmp_size = $18, 
-		icmp_wait = $19, 
-		icmp_count = $20, 
-		icmp_ttl = $21, 
-		icmp_protocol = $22
-    WHERE id = $23`
+	const query string = `UPDATE monitor SET
+        name = $1,
+		updated_at = $2,
+		kind = $3,
+		active = $4,
+		interval = $5, 
+		timeout = $6, 
+		description = $7,
+		remote_address = $8,
+		remote_port = $9,
+		plugin_name = $10,
+		plugin_args = $11,
+		http_range = $12,
+		http_method = $13,
+        http_request_headers = $14,
+		http_request_body = $15,
+		http_expired_cert_mod = $16,
+		http_capture_headers = $17,
+		http_capture_body = $18,
+		icmp_size = $19,
+		icmp_wait = $20,
+		icmp_count = $21,
+		icmp_ttl = $22,
+		icmp_protocol = $23
+    WHERE id = $24`
 	_, err := p.db.ExecContext(ctx, query,
 		monitor.Name,
+		monitor.UpdatedAt,
 		monitor.Kind,
 		monitor.Active,
 		monitor.Interval,
@@ -310,10 +319,13 @@ func (p PostgresRepository) DeleteMonitor(ctx context.Context, id []int) error {
 }
 
 // ToggleMonitor implements `MonitorRepository.ToggleMonitor` for `PostgresRepository`.
-func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active bool) error {
+func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active bool, time time.Time) error {
 	builder := zsql.NewBuilder(zsql.Numbered)
+
 	builder.Push("UPDATE monitor SET active = ")
 	builder.BindBool(active)
+	builder.Push(", updated_at = ")
+	builder.BindTime(time)
 	builder.Push("WHERE id IN (")
 	builder.SpreadInt(id...)
 	builder.Push(")")

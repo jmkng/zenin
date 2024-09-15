@@ -1,3 +1,4 @@
+import CheckIcon from "../Icon/CheckIcon";
 import "./DialogMenu.css";
 
 export interface DialogGroup {
@@ -7,20 +8,24 @@ export interface DialogGroup {
 export interface DialogItem {
     text: string;
     icon?: React.ReactNode;
+    active?: boolean;
     disabled?: boolean;
     destructive?: boolean;
     onClick: (event: React.MouseEvent) => void;
 }
 
+export type DialogSideKind = "left" | "right" | "bottom";
+
 interface DialogMenuProps {
     content: DialogGroup[] | DialogItem[];
+    side: DialogSideKind;
     onItemClick?: () => void;
 }
 
 export default function DialogMenu(props: DialogMenuProps) {
-    const { content, onItemClick } = props;
+    const { content, side, onItemClick } = props;
 
-    return <div className="zenin__dialog_menu zenin__dialog">
+    return <div className="zenin__dialog_menu zenin__dialog" data-side={side}>
         <ul className="zenin__dialog_menu_list">
             {content.every(isDialogGroup)
                 ? content.map((group, index) => <div key={index} className="zenin__dialog_menu_group">
@@ -53,5 +58,6 @@ function renderItem(index: number, item: DialogItem, onItemClick?: () => void) {
     >
         {item.icon && <span className="zenin__dialog_menu_icon_container zenin__h_center">{item.icon}</span>}
         <span>{item.text}</span>
+        {item.active ? <div className="zenin__dialog_menu_item_active"><CheckIcon /></div> : null}
     </li>
 }

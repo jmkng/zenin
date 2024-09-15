@@ -28,7 +28,7 @@ export default function Row(props: RowProps) {
                 checked={isChecked} name={`zenin__row_${measurement.id}`} />
         </td>
         <td><span className="zenin__id">{measurement.id}</span></td>
-        <td>{formatDate(measurement.recordedAt)}</td>
+        <td>{formatDate(measurement.createdAt)}</td>
         <td>
             <span className="zenin__state" data-state={measurement.state}>{measurement.state}</span>
         </td>

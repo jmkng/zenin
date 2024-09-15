@@ -87,12 +87,21 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		responder.Error(err, http.StatusBadRequest)
 		return
 	}
+
+	now := time.Now()
+	incoming.CreatedAt = now
+	incoming.UpdatedAt = now
 	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
-	responder.Data(id, http.StatusCreated)
+
+	type Response struct {
+		ID   int       `json:"id"`
+		Time time.Time `json:"time"`
+	}
+	responder.Data(Response{ID: id, Time: now}, http.StatusCreated)
 }
 
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +131,6 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	responder := NewResponder(w)
 
 	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
-
 	validation := internal.NewValidation()
 	if params.Id == nil || len(*params.Id) == 0 {
 		validation.Push("Expected `id` query parameter.")
@@ -138,8 +146,8 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	// Make sure `Kind` doesn't interfere with below query.
 	params.Kind = nil
 
-	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active)
-
+	now := time.Now()
+	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active, now)
 	if *params.Active {
 		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), 0, &params)
 		if err != nil {
@@ -155,7 +163,10 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	responder.Status(http.StatusOK)
+	type Response struct {
+		Time time.Time `json:"time"`
+	}
+	responder.Data(Response{Time: now}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {
@@ -184,8 +195,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	var incoming monitor.Monitor
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(internal.
-			NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+		responder.Error(internal.NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
 			http.StatusBadRequest)
 		return
 	}
@@ -195,12 +205,19 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 		responder.Error(err, http.StatusBadRequest)
 		return
 	}
+
+	now := time.Now()
+	incoming.UpdatedAt = now
 	err = m.Service.UpdateMonitor(r.Context(), incoming)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
-	responder.Status(http.StatusOK)
+
+	type Response struct {
+		Time time.Time `json:"time"`
+	}
+	responder.Data(Response{Time: now}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Request) {
@@ -245,7 +262,7 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	if len(found) == 0 {
-		message := fmt.Sprintf("monitor with id `%v` does not exist", pid)
+		message := fmt.Sprintf("Monitor with id `%v` does not exist.", pid)
 		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
 		return
 	}
@@ -287,8 +304,6 @@ func NewSelectMonitorParamsFromQuery(values url.Values) monitor.SelectMonitorPar
 	}
 }
 
-const format string = "1/2/2006"
-
 // NewSelectMeasurementParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
 // a `net/http` query string.
 func NewSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasurementParams {
@@ -296,6 +311,8 @@ func NewSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasur
 		After:  nil,
 		Before: nil,
 	}
+
+	format := "1/2/2006"
 	if braw := values.Get("before"); braw != "" {
 		if bparsed, err := time.Parse(format, braw); err == nil {
 			params.Before = &bparsed

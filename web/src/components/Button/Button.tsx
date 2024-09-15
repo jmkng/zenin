@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { adjustPosition } from '../../internal/layout/graphics';
-import DialogMenu, { DialogGroup, DialogItem } from '../Modal/DialogMenu';
+import DialogMenu, { DialogGroup, DialogItem, DialogSideKind } from '../Modal/DialogMenu';
 
 import './Button.css';
 
@@ -12,9 +12,8 @@ interface ButtonProps {
     icon?: ReactNode;
     background?: boolean;
     disabled?: boolean;
-    tooltip?: ButtonTooltipOptions
-
-    dialog?: DialogGroup[] | DialogItem[]
+    tooltip?: ButtonTooltipOptions;
+    dialog?: { content: DialogGroup[] | DialogItem[], side: DialogSideKind }
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -76,7 +75,9 @@ export default function Button(props: ButtonProps) {
             adjustPosition(tooltipElement);
         };
         const handleMouseEnter = () => {
-            if (!window.matchMedia("(max-width: 700px)").matches) timeoutRef.current = setTimeout(() => handleShowTooltip(), 750);
+            if (!window.matchMedia("(max-width: 700px)").matches && !dialogVisible) {
+                timeoutRef.current = setTimeout(() => handleShowTooltip(), 1000);
+            }
         }
         const handleMouseLeave = () => {
             const id = timeoutRef.current;
@@ -95,7 +96,7 @@ export default function Button(props: ButtonProps) {
             buttonElement.removeEventListener('mouseenter', handleMouseEnter);
             buttonElement.removeEventListener('mouseleave', handleMouseLeave);
         }
-    }, [tooltip])
+    }, [dialogVisible, tooltip])
 
     return <button
         ref={buttonRef}
@@ -114,16 +115,12 @@ export default function Button(props: ButtonProps) {
             ? <span className={["zenin__button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
             : null}
         {children}
-        {tooltip
+        {tooltip && !dialogVisible
             ? <div className="zenin__tooltip" ref={tooltipRef}>{tooltip.text}</div>
             : null}
         {dialog && dialogVisible
-            ? <div
-                role="dialog"
-                ref={dialogRef}
-                onClick={event => event.stopPropagation()}
-            >
-                <DialogMenu content={dialog} onItemClick={() => setDialogVisible(false)} />
+            ? <div role="dialog" ref={dialogRef} onClick={event => event.stopPropagation()}>
+                <DialogMenu content={dialog.content} side={dialog.side} onItemClick={() => setDialogVisible(false)} />
             </div>
             : null}
     </button >

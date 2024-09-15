@@ -1,7 +1,8 @@
 export interface Measurement {
     id: number,
+    createdAt: string,
+    updatedAt: string,
     monitorId: number,
-    recordedAt: string,
     duration: number,
     state: string
     stateHint: string[] | null,
@@ -22,7 +23,6 @@ export interface Measurement {
 // eslint-disable-next-line
 export function isMeasurement(obj: any): obj is Measurement {
     return typeof obj == 'object' &&
-        Object.hasOwn(obj, 'recordedAt') && typeof obj.recordedAt == 'string' &&
         Object.hasOwn(obj, 'duration') && typeof obj.duration == 'number' &&
         Object.hasOwn(obj, 'state') && typeof obj.state === 'string'
 }

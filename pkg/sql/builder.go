@@ -4,6 +4,7 @@ package sql
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 // Injectable is a type that can interact with a `Builder`, typically to inject some SQL.
@@ -115,6 +116,13 @@ func (b *Builder) BindBool(arg bool) {
 // BindString will push a bind marker to the internal buffer,
 // and add the provided string to the argument stack.
 func (b *Builder) BindString(arg string) {
+	b.pushMarker()
+	b.pushArg(arg)
+}
+
+// BindTime will push a bind marker to the internal buffer,
+// and add the provided `time.Time` to the argument stack.
+func (b *Builder) BindTime(arg time.Time) {
 	b.pushMarker()
 	b.pushArg(arg)
 }

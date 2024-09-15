@@ -1,4 +1,3 @@
-import * as sapi from "../../server"
 import { useContext } from "react";
 import { MonitorContext, MonitorDispatchContext } from "./context";
 import { Measurement } from "../measurement";
@@ -8,18 +7,29 @@ export const
     ICMP_UI = 'ICMP',
     TCP_UI = 'TCP',
     PLUGIN_UI = 'Plugin',
-    ACTIVE_UI = 'Active',
-    INACTIVE_UI = 'Inactive',
     OK_UI = 'Ok',
     WARN_UI = 'Warn',
     DEAD_UI = 'Dead',
-    OFF_UI = 'Off'
-    ;
+    OFF_UI = 'Off',
+    ACTIVE_UI = 'Active',
+    INACTIVE_UI = 'Inactive',
+    NAME_ASC_UI = 'Name (A-Z)',
+    NAME_DESC_UI = 'Name (Z-A)',
+    UPDATED_NEW_UI = 'Updated (New)',
+    UPDATED_OLD_UI = 'Updated (Old)'
+;
 
-export type FilterKind = "All" | typeof ACTIVE_UI | typeof INACTIVE_UI
+export type FilterKind = 
+    | "NAME_ASC" 
+    | "NAME_DESC" 
+    | "UPDATED_OLD" 
+    | "UPDATED_NEW"
+;
 
 export interface Monitor {
     id: number,
+    createdAt: string,
+    updatedAt: string,
     name: string,
     kind: string,
     active: boolean,
@@ -78,16 +88,6 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.icmpCount == b.icmpCount
         && a.icmpTtl == b.icmpTtl
         && a.icmpProtocol == b.icmpProtocol
-}
-
-export function kindAPItoUI(value: string) {
-    switch (value) {
-        case sapi.HTTP_API: return HTTP_UI
-        case sapi.ICMP_API: return ICMP_UI
-        case sapi.TCP_API: return TCP_UI
-        case sapi.PLUGIN_API: return PLUGIN_UI
-        default: return ""
-    }
 }
 
 export const useMonitorContext = () => {

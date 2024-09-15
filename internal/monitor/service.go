@@ -1,8 +1,6 @@
 package monitor
 
-import (
-	"context"
-)
+import "context"
 
 // NewMonitorService returns a new `MonitorService`.
 func NewMonitorService(repository MonitorRepository, distributor chan<- any) MonitorService {

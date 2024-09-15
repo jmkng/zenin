@@ -13,7 +13,6 @@ type Repository interface {
 	// Validate will return true if the database schema is valid,
 	// and may return an error if the repository cannot be validated.
 	Validate() (bool, error)
-
 	// Migrate will attempt to migrate the database.
 	Migrate() error
 
