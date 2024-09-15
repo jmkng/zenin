@@ -1,12 +1,10 @@
 import { ACTIVE_UI, INACTIVE_UI } from "../../../internal/monitor";
-
-import EyeIcon from "../../Icon/EyeIcon/EyeIcon";
+import EyeIcon from "../../Icon/EyeIcon";
 
 import "./ActiveWidget.css";
 
 interface ActiveWidgetProps {
     active: boolean;
-
     onClick: () => void;
 }
 

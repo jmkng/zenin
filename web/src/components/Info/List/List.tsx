@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import InfoIcon from "../../Icon/InfoIcon/InfoIcon";
+import InfoIcon from "../../Icon/InfoIcon";
 
 import "./List.css";
 

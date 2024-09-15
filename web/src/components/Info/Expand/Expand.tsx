@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import ChevronIcon from "../../Icon/ChevronIcon/ChevronIcon";
+import ChevronIcon from "../../Icon/ChevronIcon";
 
 import Button from "../../Button/Button";
-import CopyIcon from "../../Icon/CopyIcon/CopyIcon";
-import FirstIcon from "../../Icon/FirstIcon/FirstIcon";
-import LastIcon from "../../Icon/LastIcon/LastIcon";
+import CopyIcon from "../../Icon/CopyIcon";
+import FirstIcon from "../../Icon/FirstIcon";
+import LastIcon from "../../Icon/LastIcon";
 
 import "./Expand.css";
 

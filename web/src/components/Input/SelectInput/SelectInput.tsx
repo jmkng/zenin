@@ -1,4 +1,4 @@
-import SelectIcon from '../../Icon/SelectIcon/SelectIcon';
+import SelectIcon from '../../Icon/SelectIcon';
 
 import './SelectInput.css';
 

@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 
 import Button from "../Button/Button";
-import BookIcon from "../Icon/BookIcon/BookIcon";
-import BugIcon from "../Icon/BugIcon/BugIcon";
+import BookIcon from "../Icon/BookIcon";
+import BugIcon from "../Icon/BugIcon";
 import SelectInput from "../Input/SelectInput/SelectInput";
 
 import "./Settings.css";

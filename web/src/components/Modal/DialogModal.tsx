@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { adjustPosition } from "../../internal/layout/graphics";
 
-import AddIcon from "../Icon/AddIcon/AddIcon";
+import AddIcon from "../Icon/AddIcon";
 import Button from "../Button/Button";
 
 import "./DialogModal.css";

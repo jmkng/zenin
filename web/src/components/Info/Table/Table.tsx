@@ -7,12 +7,12 @@ import { DetachedState, OriginState, ViewPane } from '../../../internal/monitor/
 import { DataPacket } from '../../../server';
 
 import Button from '../../Button/Button';
-import ClockIcon from '../../Icon/ClockIcon/ClockIcon';
-import FirstIcon from '../../Icon/FirstIcon/FirstIcon';
-import LastIcon from '../../Icon/LastIcon/LastIcon';
-import NextIcon from '../../Icon/NextIcon/NextIcon';
-import PreviousIcon from '../../Icon/PreviousIcon/PreviousIcon';
-import TrashIcon from '../../Icon/TrashIcon/TrashIcon';
+import ClockIcon from '../../Icon/ClockIcon';
+import FirstIcon from '../../Icon/FirstIcon';
+import LastIcon from '../../Icon/LastIcon';
+import NextIcon from '../../Icon/NextIcon';
+import PreviousIcon from '../../Icon/PreviousIcon';
+import TrashIcon from '../../Icon/TrashIcon';
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
 import Property from '../Property/Property';
 import Row from './Row/Row';
@@ -113,13 +113,15 @@ export default function Table(props: TableProps) {
                 {/* <Button disabled={checked.length == 0} border={true} kind="destructive" icon={<ExportIcon />} /> */}
                 <Button disabled={checked.length == 0} border={true} icon={<TrashIcon />} />
                 <Button border={true} icon={<ClockIcon />}
-                    dialog={[
-                        { text: "Recent", onClick: () => handleDateChange("HEAD") },
-                        { text: "Past Day", onClick: () => handleDateChange(new DetachedState("DAY")) },
-                        { text: "Past Week", onClick: () => handleDateChange(new DetachedState("WEEK")) },
-                        { text: "Past Month", onClick: () => handleDateChange(new DetachedState("MONTH")) },
-                        { text: "Past Year", onClick: () => handleDateChange(new DetachedState("YEAR")) },
-                    ]}>
+                    dialog={{
+                        content: [
+                            { text: "Recent", onClick: () => handleDateChange("HEAD") },
+                            { text: "Past Day", onClick: () => handleDateChange(new DetachedState("DAY")) },
+                            { text: "Past Week", onClick: () => handleDateChange(new DetachedState("WEEK")) },
+                            { text: "Past Month", onClick: () => handleDateChange(new DetachedState("MONTH")) },
+                            { text: "Past Year", onClick: () => handleDateChange(new DetachedState("YEAR")) },
+                        ], side: "left"
+                    }}>
                     {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
                 </Button>
             </div>

@@ -1,8 +1,8 @@
 import { DEAD_API, OK_API, WARN_API } from "../../../server";
 
-import YesIcon from "../../Icon/YesIcon/YesIcon";
-import WarnIcon from "../../Icon/WarnIcon/WarnIcon";
-import NoIcon from "../../Icon/NoIcon/NoIcon";
+import YesIcon from "../../Icon/YesIcon";
+import WarnIcon from "../../Icon/WarnIcon";
+import NoIcon from "../../Icon/NoIcon";
 
 import "./StateWidget.css";
 

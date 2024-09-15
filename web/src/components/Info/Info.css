@@ -1,10 +1,10 @@
-.zenin__info_name {
-    margin: 0 0 var(--px-e) 0;
-}
-
 .zenin__info_component {
     height: 100%;
     padding-right: var(--px-a);
+}
+
+.zenin__info_name {
+    margin: 0 0 var(--px-e) 0;
 }
 
 .zenin__info_component_body {

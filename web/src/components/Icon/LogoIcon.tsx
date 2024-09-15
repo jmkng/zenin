@@ -1,5 +1,3 @@
-import "./LogoIcon.css";
-
 export default function DefaultIcon() {
     return (
         <svg

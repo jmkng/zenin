@@ -5,7 +5,7 @@ import { Certificate, Measurement } from "../../../internal/measurement";
 import { useDefaultMeasurementService } from "../../../internal/measurement/service";
 import { DataPacket } from "../../../server";
 
-import ChevronIcon from "../../Icon/ChevronIcon/ChevronIcon";
+import ChevronIcon from "../../Icon/ChevronIcon";
 
 import "./Chain.css";
 

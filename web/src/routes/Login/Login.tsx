@@ -8,7 +8,7 @@ import { useDefaultMetaService } from "../../internal/meta/service";
 import { DataPacket, Packet, isErrorPacket } from "../../server";
 
 import Button from "../../components/Button/Button";
-import LogoIcon from "../../components/Icon/LogoIcon/LogoIcon";
+import LogoIcon from "../../components/Icon/LogoIcon";
 import TextInput from "../../components/Input/TextInput/TextInput";
 
 import "./Login.css";

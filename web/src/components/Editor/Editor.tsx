@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMetaContext } from "../../internal/meta";
 import {
-    ACTIVE_UI, HTTP_UI, ICMP_UI, INACTIVE_UI,
+    ACTIVE_UI,
+    HTTP_UI, ICMP_UI,
+    INACTIVE_UI,
     Monitor, monitorEquals,
     PLUGIN_UI, TCP_UI,
 } from "../../internal/monitor";
@@ -14,8 +16,8 @@ import {
 } from "../../server";
 
 import Button from "../Button/Button";
-import NumberInput from "../Icon/NumberInput/NumberInput";
-import TrashIcon from "../Icon/TrashIcon/TrashIcon";
+import NumberInput from "../Input/NumberInput/NumberInput";
+import TrashIcon from "../Icon/TrashIcon";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../Input/TextInput/TextInput";

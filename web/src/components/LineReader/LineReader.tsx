@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { isScrolledToBottom } from "../../internal/layout/graphics";
 import { Line } from "./Line";
 
-import ChevronIcon from "../Icon/ChevronIcon/ChevronIcon";
+import ChevronIcon from "../Icon/ChevronIcon";
 
 import "./LineReader.css";
 
