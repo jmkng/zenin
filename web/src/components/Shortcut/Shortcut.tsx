@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLayoutContext } from '../../internal/layout/index.ts';
 
 import Button from '../Button/Button.tsx';
-import MenuIcon from '../Icon/MenuIcon/MenuIcon.tsx';
+import MenuIcon from '../Icon/MenuIcon.tsx';
 
 import './Shortcut.css';
 
@@ -31,6 +31,18 @@ export default function Shortcut() {
     }
 
     useEffect(() => {
+        initial.current = false;
+        const media = window.matchMedia("(max-width: 700px)");
+        const mediaReset = () => setNarrow(media.matches);
+
+        media.addEventListener('change', mediaReset);
+        return () => {
+            initial.current = true;
+            media.removeEventListener('change', mediaReset);
+        }
+    }, [])
+
+    useEffect(() => {
         const close = () => {
             const shortcut = shortcutRef.current;
             if (!shortcut) return;
@@ -48,18 +60,6 @@ export default function Shortcut() {
             shortcut.animate([{ width: 0 }, { width }], options);
         }
     }, [render]);
-
-    useEffect(() => {
-        initial.current = false;
-        const media = window.matchMedia("(max-width: 700px)");
-        const mediaReset = () => setNarrow(media.matches);
-
-        media.addEventListener('change', mediaReset);
-        return () => {
-            initial.current = true;
-            media.removeEventListener('change', mediaReset);
-        }
-    }, [])
 
     useEffect(() => {
         const handleResize = (event: MouseEvent) => {
@@ -92,17 +92,11 @@ export default function Shortcut() {
         ? <div className='zenin__shortcut'>
             <div className="zenin__shortcut_content" ref={shortcutRef} style={{ width }}>
                 <div className='zenin__shortcut_top'>
-                    <div className='zenin__shortcut_account_container'>
-                        {narrow
-                            ? <Button onClick={() => layout.dispatch({ type: 'shortcut', shortcut: false })} icon={<MenuIcon />} />
-                            : null}
-                    </div>
-                    <div className='zenin__shortcut_links_container'
-                        onClick={() => window.matchMedia('(max-width: 700px)').matches ? layout.dispatch({ type: 'shortcut', shortcut: false }) : {}}>
-                    </div>
-                </div>
-                <div className="zenin__shortcut_bottom zenin__shortcut_links_container">
-
+                    {narrow
+                        ? <div className='zenin__shortcut_controls_container'>
+                            <Button onClick={() => layout.dispatch({ type: 'shortcut', shortcut: false })} icon={<MenuIcon />} />
+                        </div>
+                        : null}
                 </div>
             </div>
             <div className="zenin__shortcut_border" onMouseDown={() => setResizing(true)} onDoubleClick={handleReset} />

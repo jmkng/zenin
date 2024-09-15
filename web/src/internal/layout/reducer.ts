@@ -4,7 +4,8 @@ export interface LayoutState {
 }
 
 export const layoutDefault: LayoutState = {
-    shortcut: document.body.clientWidth > 700,
+    // shortcut: document.body.clientWidth > 700,
+    shortcut: false,
     loading: true
 }
 

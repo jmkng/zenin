@@ -2,6 +2,7 @@
   height: 100%;
   display: flex;
   position: relative;
+  background: var(--background);
   overflow: hidden;
 }
 
@@ -10,6 +11,12 @@
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.zenin__shortcut_placeholder {
+  height: 100%;
+  width: 100%;
+  background: var(--off-a);
 }
 
 .zenin__shortcut_border {
@@ -25,28 +32,28 @@
   border-width: 4px;
 }
 
-.zenin__shortcut_links_container {
+.zenin__shortcut_container {
   display: flex;
   margin-top: 18px;
   flex-direction: column;
 }
 
-.zenin__shortcut_links_container > * {
+.zenin__shortcut_container > * {
   margin: var(--px-a) 0;
 }
 
-.zenin__shortcut_links_container .zenin__icon {
+.zenin__shortcut_container .zenin__icon {
   margin-right: var(--px-c);
 }
 
-.zenin__shortcut_links_container .zenin__button {
+.zenin__shortcut_container .zenin__button {
   justify-content: flex-start;
 }
 
-.zenin__shortcut_account_container {
+.zenin__shortcut_controls_container {
   display: flex;
   justify-content: flex-start;
-  gap: var(--px-b);
+  margin-bottom: var(--px-c);
 }
 
 .zenin__shortcut a {
@@ -71,11 +78,16 @@
   padding: var(--px-c);
 }
 
-.zenin__shortcut_urgent {
-  margin-right: var(--px-c);
-  display: inline-block;
-  height: 5px;
-  width: 5px;
-  background: var(--warn);
-  border-radius: 100%;
+.zenin__shortcut_top > * {
+  margin-bottom: var(--px-c);
+}
+
+.zenin__shortcut_item {
+  border: 1px solid var(--off-b);
+  padding: var(--px-c);
+  width: 100%;
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  border-radius: var(--rounded);
 }
