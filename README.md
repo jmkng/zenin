@@ -2,7 +2,7 @@
 
 A simple infrastructure monitoring tool.
 
-![Zenin](../assets/01.png?raw=true)
+![Zenin](../assets/1.png?raw=true)
 
 > [!Tip]
 > Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. Feel free to provide feedback on the design.
