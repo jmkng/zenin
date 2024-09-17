@@ -47,9 +47,11 @@ type DeleteAction = {
     monitors: Monitor[] 
 };
 
+type SelectKind = Monitor | "ALL" | "NONE";
+
 type SelectAction = { 
     type: 'select', 
-    monitor: Monitor 
+    monitor: SelectKind
 };
 
 type OverwriteAction = { 
@@ -151,6 +153,12 @@ const deleteAction = (state: MonitorState, action: DeleteAction) => {
 }
 
 const selectAction = (state: MonitorState, action: SelectAction) => {
+    if (action.monitor == "ALL") {
+        return { ...state, selected: [...state.monitors.values()]}
+    }
+    if (action.monitor == "NONE") {
+        return { ...state, selected: [] }
+    }
     const selected = state.selected.includes(action.monitor)
         ? state.selected.filter(n => n != action.monitor)
         : [...state.selected, action.monitor];

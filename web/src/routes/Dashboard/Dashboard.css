@@ -3,6 +3,23 @@
   display: flex;
 }
 
+.zenin__dashboard_select_menu {
+  position: fixed;
+  top: -57px;
+  transition: all var(--slow) ease-in-out;
+  transition-property: opacity, top;
+  opacity: 0;
+  left: 0;
+  right: 0;
+  background: var(--background);
+  z-index: 1;
+}
+
+.zenin__dashboard_select_menu.selection {
+  top: 0;
+  opacity: 1
+}
+
 .zenin__dashboard_main {
   flex-grow: 1;
   display: flex;

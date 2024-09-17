@@ -17,6 +17,7 @@ import './css/dialog.css';
 import './css/helper.css';
 import './css/icon.css';
 import './css/input.css';
+import './css/menu.css';
 import './css/root.css';
 import './css/scrollbar.css';
 import './css/state.css';

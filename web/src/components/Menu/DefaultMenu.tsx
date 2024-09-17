@@ -41,7 +41,7 @@ export default function DefaultMenu() {
         monitor.context.dispatch({ type: 'draft' });
     }
 
-    return <div className='zenin__menu'>
+    return <div className='zenin__default_menu zenin__menu'>
         <div className='zenin__menu_left'>
             <div className="zenin__menu_toggle_container">
                 <Button onClick={handleMenuToggle}>
@@ -54,14 +54,14 @@ export default function DefaultMenu() {
 
             <div className="zenin__menu_left_contextual">
                 <div className="zenin__dashboard_menu">
-                    <div className="zenin__menu_margin">
+                    <div className="zenin__menu_margin_right">
                         <Button onClick={handleAdd} tooltip={{ text: "Add Monitor" }}>
                             <span className="zenin__h_center zenin__menu_add">
                                 <AddIcon />
                             </span>
                         </Button>
                     </div>
-                    <div className="zenin__menu_margin">
+                    <div className="zenin__menu_margin_right">
                         <Button
                             tooltip={{ text: "Sort Dashboard" }}
                             dialog={{

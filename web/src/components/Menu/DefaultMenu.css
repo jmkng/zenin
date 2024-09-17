@@ -1,24 +1,3 @@
-.zenin__menu {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--off-b);
-  justify-content: space-between;
-  padding: var(--px-c);
-}
-
-.zenin__menu .zenin__button {
-  justify-content: center;
-  align-items: center;
-}
-
-.zenin__menu_left, .zenin__menu_right {
-  display: flex;
-}
-
-.zenin__menu_right > * {
-  margin-left: var(--px-b);
-}
-
 .zenin__menu_spacer.first {
   margin-left: var(--px-b);
   margin-right: var(--px-b);
@@ -42,11 +21,7 @@
 }
 
 .zenin__menu_selected_count {
-margin: 0 var(--px-b);
-}
-
-.zenin__menu_margin {
-margin-right: var(--px-b);
+  margin: 0 var(--px-b);
 }
 
 .zenin__filter_indicator {
@@ -55,10 +30,6 @@ margin-right: var(--px-b);
 }
 
 @media (max-width: 700px) {
-  .zenin__menu {
-    width: 100vw;
-  }
-
   .zenin__filter_indicator {
     display: none;
   }

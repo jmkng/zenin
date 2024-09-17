@@ -82,7 +82,10 @@ export default function Dashboard() {
         </div>
         <div className="zenin__dashboard_main">
             <div className="zenin__dashboard_main_top">
-                {monitor.context.state.selected.length > 0 ? <SelectMenu /> : <DefaultMenu />}
+                <div className={["zenin__dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
+                    <SelectMenu />
+                </div>
+                <DefaultMenu />
             </div>
             <div className="zenin__dashboard_main_bottom">
                 <div className="zenin__dashboard_monitors">
