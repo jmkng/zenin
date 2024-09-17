@@ -1,10 +1,12 @@
-export default function DefaultIcon() {
+export default function LogoIcon() {
     return (
         <svg
             className="zenin__logo_icon"
             xmlns="http://www.w3.org/2000/svg"
             xmlSpace="preserve"
             style={{
+                height: "100%",
+                width: "100%",
                 fill: "currentcolor",
                 fillRule: "evenodd",
                 clipRule: "evenodd",
