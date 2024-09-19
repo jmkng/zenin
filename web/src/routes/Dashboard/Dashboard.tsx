@@ -61,15 +61,13 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
 
-    // Determine what goes in the activity window.
     const activity = split
         ? <div className={"zenin__dashboard_activity"}>
             {monitor.context.state.split.isEditorPane()
                 ? <Editor
                     state={monitor.context.state.split.pane}
-                    onClose={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
                     onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
-                    onDelete={n => monitor.context.dispatch({ type: 'delete', monitors: [n] })} />
+                />
                 : null}
             {monitor.context.state.split.isViewPane() ? <Info state={monitor.context.state.split.pane} /> : null}
             {monitor.context.state.split.isSettingsPane() ? <Settings /> : null}

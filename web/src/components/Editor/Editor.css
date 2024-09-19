@@ -6,15 +6,6 @@
   flex-direction: column;
 }
 
-.zenin__detail_editor_body {
-  overflow: auto;
-  padding: var(--px-c);
-  border: 1px solid var(--off-b);
-  border-bottom: none;
-  border-top-right-radius: var(--rounded);
-  border-top-left-radius: var(--rounded);
-}
-
 .zenin__detail_monitor_state {
   background: var(--off-b);
   flex: .10;

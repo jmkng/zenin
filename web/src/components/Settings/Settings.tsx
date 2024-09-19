@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useMonitorContext } from "../../internal/monitor";
 
 import Button from "../Button/Button";
 import BookIcon from "../Icon/BookIcon";
@@ -14,6 +15,9 @@ const KEY = "zenin__theme";
 
 export default function Settings() {
     const [theme, setTheme] = useState(localStorage.getItem(KEY) || AUTO);
+    const monitor = {
+        context: useMonitorContext(),
+    }
 
     const handleSubmit = useCallback(() => {
         handleThemeChange(theme);
@@ -33,37 +37,43 @@ export default function Settings() {
     }
 
     return <div className="zenin__settings">
-        <SelectInput
-            label="Theme"
-            name={"zenin__settings_theme"}
-            value={theme}
-            options={[
-                { text: "Auto", value: AUTO },
-                { text: "Light", value: LIGHT },
-                { text: "Dark", value: DARK }
-            ]}
-            onChange={value => setTheme(value)}
-        />
-        <div className="zenin__h_margin_top">
+        <div className="zenin__detail_body">
+            <SelectInput
+                label="Theme"
+                name={"zenin__settings_theme"}
+                value={theme}
+                options={[
+                    { text: "Auto", value: AUTO },
+                    { text: "Light", value: LIGHT },
+                    { text: "Dark", value: DARK }
+                ]}
+                onChange={value => setTheme(value)}
+            />
+            <div className="zenin__settings_about zenin__h_margin_top">
+                <span className="zenin__settings_version">0.1.0</span>
+                {/* TODO: links */}
+                <a href="#" className="zenin__settings_link">
+                    <BookIcon />
+                    User Guide
+                </a>
+                <a href="#" className="zenin__settings_link">
+                    <BugIcon />
+                    Report Issue
+                </a>
+            </div>
+        </div>
+
+        <div className="zenin__detail_controls">
+            <Button kind="primary" onClick={handleSubmit}>
+                <span>Save</span>
+            </Button>
+
             <Button
-                onClick={handleSubmit}
                 border={true}
-                kind="primary"
+                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
             >
-                Submit
+                <span>Close</span>
             </Button>
         </div>
-        <div className="zenin__settings_about zenin__h_margin_top">
-            <span className="zenin__settings_version">0.1.0</span>
-            {/* TODO: links */}
-            <a href="#" className="zenin__settings_link">
-                <BookIcon />
-                User Guide
-            </a>
-            <a href="#" className="zenin__settings_link">
-                <BugIcon />
-                Report Issue
-            </a>
-        </div>
-    </div>
+    </div >
 }

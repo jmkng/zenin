@@ -18,7 +18,7 @@ export default function Info(props: InfoProps) {
     const monitor = { context: useMonitorContext() }
 
     return <div className="zenin__info_component">
-        <div className="zenin__info_component_body">
+        <div className="zenin__detail_body">
             <h1 className="zenin__info_name">{state.monitor.name}</h1>
             {state.monitor.description ? <Expand title={"Description"} text={state.monitor.description} /> : null}
             <div className="zenin__info_summary_container zenin__h_margin_top">
