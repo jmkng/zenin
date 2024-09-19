@@ -72,7 +72,7 @@ Supported environment variables are documented below.
 | ZENIN_DB_PORT          | The port that the database is listening on.               | any u16              | export ZENIN_DB_PORT=5432                   | n/a
 | ZENIN_DB_NAME          | The name of the database.                                 | any string           | export ZENIN_DB_NAME=postgres               | n/a
 | ZENIN_DB_USERNAME      | The username used to sign in to the database.             | any string           | export ZENIN_DB_USERNAME=username           | n/a
-| ZENIN_DB_PASSWORD      | The password used to sign in the database.                | any string           | export ZENIN_DB_PASSWORD=password           | n/a
+| ZENIN_DB_PASSWORD      | The password used to sign in to the database.                | any string           | export ZENIN_DB_PASSWORD=password           | n/a
 | ZENIN_DB_MAX_CONN      | The maximum number of open database connections.          | any number           | export ZENIN_DB_MAX_CONN=5                  | n/a
 | ZENIN_RT_LEVEL         | The process run level. (optional)                         | prod, dev            | export ZENIN_RT_LEVEL=prod                  | prod
 | ZENIN_RT_PORT          | A port number for Zenin to run on. (optional)             | any u16              | export ZENIN_RT_PORT=4884                   | 50010
