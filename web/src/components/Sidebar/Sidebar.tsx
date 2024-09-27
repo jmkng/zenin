@@ -4,11 +4,11 @@ import { useLayoutContext } from '../../internal/layout/index.ts';
 import Button from '../Button/Button.tsx';
 import MenuIcon from '../Icon/MenuIcon.tsx';
 
-import './Shortcut.css';
+import './Sidebar.css';
 
 const MIN_SIZE = 250;
 
-export default function Shortcut() {
+export default function Sidebar() {
     const layout = useLayoutContext();
 
     const [resizing, setResizing] = useState<boolean>(false);

@@ -9,8 +9,8 @@ import Info from '../../components/Info/Info';
 import DefaultMenu from '../../components/Menu/DefaultMenu';
 import SelectMenu from '../../components/Menu/SelectMenu';
 import Monitor from '../../components/Monitor/Monitor';
+import Sidebar from '../../components/Sidebar/Sidebar';
 import Settings from '../../components/Settings/Settings';
-import Shortcut from '../../components/Shortcut/Shortcut';
 
 import './Dashboard.css';
 
@@ -76,7 +76,7 @@ export default function Dashboard() {
 
     return <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
         <div className="zenin__dashboard_side">
-            <Shortcut />
+            <Sidebar />
         </div>
         <div className="zenin__dashboard_main">
             <div className="zenin__dashboard_main_top">
