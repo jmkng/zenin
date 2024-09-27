@@ -58,7 +58,7 @@ export default function Root() {
         const plugins = await meta.service.getPlugins(token);
         if (plugins.ok()) {
             const packet: DataPacket<string[]> = await plugins.json();
-            if (packet) meta.context.dispatch({ type: 'reset', plugins: packet.data })
+            if (packet) meta.context.dispatch({ type: 'reset', plugins: packet.data ?? [] })
         }
         const monitors = await monitor.service.getMonitor(token, 35);
         if (monitors.ok()) {
