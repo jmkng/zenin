@@ -35,14 +35,25 @@ export default function Info(props: InfoProps) {
         <div className="zenin__detail_controls">
             <Button
                 kind="primary"
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: state.monitor } })}>
+                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: state.monitor } })}
+            >
                 <span>Edit</span>
             </Button>
             <Button
                 border={true}
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target: null } })}>
+                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target: null } })}
+            >
                 <span>Close</span>
             </Button>
+            <div className="zenin__detail_controls_delete">
+                <Button
+                    border={true}
+                    onClick={() => monitor.context.dispatch({ type: 'delete', monitors: [state.monitor!] })}
+                    kind="destructive"
+                >
+                    Delete
+                </Button>
+            </div>
         </div>
     </div>
 }

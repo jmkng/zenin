@@ -18,7 +18,6 @@ import {
 
 import Button from "../Button/Button";
 import NumberInput from "../Input/NumberInput/NumberInput";
-import TrashIcon from "../Icon/TrashIcon";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../Input/TextInput/TextInput";
@@ -445,19 +444,8 @@ export default function Editor(props: EditorProps) {
             >
                 <span>Close</span>
             </Button>
-
-            {state.monitor ?
-                <div className="zenin__detail_delete_button" onClick={event => event.stopPropagation()}>
-                    <Button
-                        border={true}
-                        onClick={() => monitor.context.dispatch({ type: 'delete', monitors: [state.monitor!] })}
-                    >
-                        <TrashIcon />
-                    </Button>
-                </div>
-                : null}
         </div>
-    </div >
+    </div>
 }
 
 function sanitizeToMonitor(draft: Draft): Monitor {

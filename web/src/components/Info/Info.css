@@ -6,3 +6,7 @@
 .zenin__info_name {
     margin: 0 0 var(--px-e) 0;
 }
+
+.zenin__detail_controls_delete {
+    margin-left: auto;
+}
