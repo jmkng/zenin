@@ -22,6 +22,7 @@ import TrashIcon from "../Icon/TrashIcon";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../Input/TextInput/TextInput";
+import PluginSpec from "./PluginSpec";
 import ToggleInput from "../Input/ToggleInput/ToggleInput";
 
 import "./Editor.css";
@@ -407,39 +408,31 @@ export default function Editor(props: EditorProps) {
                 </>
                 : null}
 
-            {editor.draft.kind == PLUGIN_API ?
-                <div className="zenin__detail_plugin_container">
-                    <div className="zenin__detail_spaced">
-                        <SelectInput
-                            label="Name"
-                            name="zenin__detail_monitor_method"
-                            subtext={<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>}
-                            value={editor.draft.pluginName || meta.context.state.plugins[0]}
-                            onChange={pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))}
-                            options={Array.from(new Set([...meta.context.state.plugins, editor.draft.pluginName || ""]))
-                                .map(n => ({ text: n })).filter(n => n.text.trim() != "")}
-                        />
-                    </div>
-
-                    <div className="zenin__detail_spaced">
-                        <TextAreaInput
-                            label={<span className={hasValidPluginArguments ? "" : "zenin__h_error"}>Arguments</span>}
-                            name="zenin__detail_monitor_http_headers"
-                            placeholder={"[\"-c\", \"100\"]"}
-                            value={editor.draft.pluginArgs}
-                            subtext="Arguments passed to the plugin."
-                            onChange={pluginArgs =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))}
-                        />
-                        {!hasValidPluginArguments ?
-                            <span className="zenin__detail_validation zenin__h_error">Plugin arguments must be a valid JSON array</span>
-                            :
-                            null}
-                    </div>
-                </div>
-                :
-                null}
-        </div>
+            {editor.draft.kind == PLUGIN_API
+                ? <>
+                    <PluginSpec
+                        plugin={{
+                            label: "Name",
+                            name: "zenin__detail_monitor_plugin",
+                            subtext: (<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>),
+                            value: editor.draft.pluginName,
+                            onChange: pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))
+                        }}
+                        args={{
+                            placeholder: "[\"-c\", \"100\"]",
+                            label: (<span className={hasValidPluginArguments ? "" : "zenin__h_error"}>Arguments</span>),
+                            name: "zenin__detail_monitor_plugin_arguments",
+                            subtext: "Arguments passed to the plugin.",
+                            value: editor.draft.pluginArgs,
+                            onChange: pluginArgs => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))
+                        }}
+                    />
+                    {!hasValidPluginArguments
+                        ? <span className="zenin__detail_validation zenin__h_error">Plugin arguments must be a valid JSON array</span>
+                        : null}
+                </>
+                : null}
+        </div >
 
         <div className="zenin__detail_controls">
             <Button kind="primary" disabled={!canSubmit} onClick={() => { handleSubmit() }}>
@@ -464,7 +457,7 @@ export default function Editor(props: EditorProps) {
                 </div>
                 : null}
         </div>
-    </div>
+    </div >
 }
 
 function sanitizeToMonitor(draft: Draft): Monitor {

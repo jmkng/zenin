@@ -26,50 +26,47 @@ interface SelectOption {
 export default function SelectInput(props: SelectProps) {
     const { name, value, options, label, subtext, placeholder, onChange } = props;
 
-    return (
-        <div
-            className={["zenin__select", "zenin__input_container", "zenin__h_stack_vertical"].join(' ')}
-        >
-            {label ?
-                <label
-                    className="zenin__text_input_label zenin__input_label"
-                    htmlFor={name}>
-                    {label}
-                </label>
-                : null}
+    const list = options.length == 0
+        ? <option value="" selected disabled>{placeholder || "Empty"}</option>
+        : options.every(isGroup)
+            ? options.map((n, i) =>
+                <optgroup key={i} label={n.label}>
+                    {n.options.map((m, o) => <option key={o} value={m.value}>{m.text}</option>)}
+                </optgroup>)
+            : options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
 
-            {subtext ?
-                <p className="zenin__select_input_subtext zenin__input_subtext">
-                    {subtext}
-                </p>
-                : null}
+    return <div className={["zenin__select", "zenin__input_container", "zenin__h_stack_vertical"].join(' ')}>
+        {label
+            ? <label
+                className="zenin__text_input_label zenin__input_label"
+                htmlFor={name}
+            >
+                {label}
+            </label>
+            : null}
 
-            <div className="zenin__select_input_controls_container">
-                <select
-                    className="zenin__input zenin__select_input_box"
-                    name={name}
-                    id={name}
-                    disabled={options.length == 0 ? true : false}
-                    value={value || undefined}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
-                >
-                    {options.length == 0
-                        ? <option value="" selected disabled>{placeholder || "Empty"}</option>
-                        : options.every(isGroup)
-                            ? options.map((n, i) =>
-                                <optgroup key={i} label={n.label}>
-                                    {n.options.map((m, o) => <option key={o} value={m.value}>{m.text}</option>)}
-                                </optgroup>)
-                            : options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
-                    }
-                </select>
+        {subtext
+            ? <p className="zenin__select_input_subtext zenin__input_subtext">
+                {subtext}
+            </p>
+            : null}
 
-                <div className="zenin__select_input_icon_container">
-                    <SelectIcon />
-                </div>
-            </div >
-        </div >
-    );
+        <div className="zenin__select_input_controls_container">
+            <select
+                className="zenin__input zenin__select_input_box"
+                name={name}
+                id={name}
+                disabled={options.length == 0 ? true : false}
+                value={value || undefined}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+            >
+                {list}
+            </select>
+            <div className="zenin__select_input_icon_container">
+                <SelectIcon />
+            </div>
+        </div>
+    </div>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
