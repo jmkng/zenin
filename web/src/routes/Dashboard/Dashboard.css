@@ -79,7 +79,7 @@
   box-shadow: 0px 15px 0px 0px var(--background);
 }
 
-@container dashboard-container (max-width: 700px) {
+@container dashboard-container (max-width: 800px) {
   .zenin__dashboard.split .zenin__dashboard_monitors {
     display: none;
   }
