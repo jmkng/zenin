@@ -26,7 +26,7 @@ export default function Button(props: ButtonProps) {
         children,
         kind = "default",
         border = false,
-        hover = false,
+        hover = true,
         icon,
         background = false,
         disabled = false,

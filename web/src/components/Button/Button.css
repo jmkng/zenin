@@ -51,11 +51,11 @@
   color: var(--dead-b);
 }
 
-.zenin__button:not(.disabled).primary:hover {
+.zenin__button:not(.disabled).hover.primary:hover {
   background: var(--primary-hl);  
 }
 
-.zenin__button:not(.disabled):hover {
+.zenin__button:not(.disabled).hover:hover {
   background: var(--off-b);  
 }
 
