@@ -79,8 +79,8 @@ type Monitor struct {
 }
 
 type PluginFields struct {
-	PluginName *string `json:"pluginName" db:"plugin_name"`
-	PluginArgs *string `json:"pluginArgs" db:"plugin_args"`
+	PluginName *string              `json:"pluginName" db:"plugin_name"`
+	PluginArgs *internal.ArrayValue `json:"pluginArgs" db:"plugin_args"`
 }
 
 type HTTPFields struct {
@@ -109,38 +109,12 @@ func (m Monitor) Deadline(ctx context.Context) (context.Context, context.CancelF
 	return ctx, cancel
 }
 
-// Describe returns a set of loggable fields describing the monitor.
-func (m Monitor) Describe() []any {
-	fields := []any{}
-	fields = append(fields, "name", m.Name, "kind", m.Kind, "timeout", m.Timeout)
-	if m.Kind != measurement.Plugin {
-		fields = append(fields, "address", *m.RemoteAddress)
-		if m.RemotePort != nil {
-			fields = append(fields, "port", *m.RemotePort)
-		}
-	}
-	switch m.Kind {
-	case measurement.HTTP:
-		fields = append(fields, "range", *m.HTTPRange, "method", *m.HTTPMethod)
-	case measurement.ICMP:
-		fields = append(fields, "packet(bytes)", *m.ICMPSize)
-	case measurement.Plugin:
-		fields = append(fields, "name", *m.PluginName)
-		if m.PluginArgs != nil {
-			fields = append(fields, "args", *m.PluginArgs)
-		}
-	}
-
-	return fields
-}
-
 // Poll will invoke a `Probe`, returning a `Measurement` describing the result.
 //
 // This function should only ever be called on a `Monitor` from the database,
 // it requires essential fields (including id) to be populated.
 func (m Monitor) Poll() measurement.Measurement {
-	fields := append([]any{"monitor(id)", *m.Id}, m.Describe()...)
-	log.Debug("poll starting", fields...)
+	log.Debug("poll starting", "monitor(id)", *m.Id)
 
 	var result measurement.Measurement
 	result.MonitorId = m.Id

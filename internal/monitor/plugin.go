@@ -3,7 +3,6 @@ package monitor
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -37,11 +36,7 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 
 	var args []string
 	if m.PluginArgs != nil {
-		err := json.Unmarshal([]byte(*m.PluginArgs), &args)
-		if err != nil {
-			span.Downgrade(measurement.Dead, "Failed to parse plugin arguments.")
-			return span
-		}
+		args = append(args, *m.PluginArgs...)
 	}
 
 	deadline, cancel := m.Deadline(context.Background())

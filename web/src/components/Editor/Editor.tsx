@@ -18,10 +18,10 @@ import {
 
 import Button from "../Button/Button";
 import NumberInput from "../Input/NumberInput/NumberInput";
+import PluginInput from "../Input/PluginInput/PluginInput";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../Input/TextInput/TextInput";
-import PluginSpec from "./PluginSpec";
 import ToggleInput from "../Input/ToggleInput/ToggleInput";
 
 import "./Editor.css";
@@ -83,15 +83,10 @@ export default function Editor(props: EditorProps) {
     const hasValidName = useMemo(() => isValidName(editor.draft.name), [editor.draft.name])
     const hasValidInterval = useMemo(() => isValidInterval(editor.draft.interval), [editor.draft.interval])
     const hasValidTimeout = useMemo(() => isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
-
     const hasValidRemoteAddress = useMemo(() => isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
     const hasValidRemotePort = useMemo(() => isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
-
     const hasValidHttpBody = useMemo(() => isValidJSON(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
     const hasValidHttpHeaders = useMemo(() => isValidJSON(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
-
-    const hasValidPluginArguments = useMemo(() => isValidJSONArray(editor.draft.pluginArgs), [editor.draft.pluginArgs]);
-
     const hasValidIcmpSize = useMemo(() => isValidNonZeroNumber(editor.draft.icmpSize), [editor.draft.icmpSize]);
     const hasValidIcmpWait = useMemo(() => isValidNonZeroNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
     const hasValidIcmpCount = useMemo(() => isValidNonZeroNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
@@ -408,28 +403,18 @@ export default function Editor(props: EditorProps) {
                 : null}
 
             {editor.draft.kind == PLUGIN_API
-                ? <>
-                    <PluginSpec
-                        plugin={{
-                            label: "Name",
-                            name: "zenin__detail_monitor_plugin",
-                            subtext: (<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>),
-                            value: editor.draft.pluginName,
-                            onChange: pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))
-                        }}
-                        args={{
-                            placeholder: "[\"-c\", \"100\"]",
-                            label: (<span className={hasValidPluginArguments ? "" : "zenin__h_error"}>Arguments</span>),
-                            name: "zenin__detail_monitor_plugin_arguments",
-                            subtext: "Arguments passed to the plugin.",
-                            value: editor.draft.pluginArgs,
-                            onChange: pluginArgs => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))
-                        }}
-                    />
-                    {!hasValidPluginArguments
-                        ? <span className="zenin__detail_validation zenin__h_error">Plugin arguments must be a valid JSON array</span>
-                        : null}
-                </>
+                ? <PluginInput
+                    plugin={{
+                        subtext: (<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>),
+                        value: editor.draft.pluginName,
+                        onChange: pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))
+                    }}
+                    args={{
+                        subtext: "Arguments passed to the plugin.",
+                        value: editor.draft.pluginArgs,
+                        onChange: pluginArgs => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))
+                    }}
+                />
                 : null}
         </div >
 
@@ -534,7 +519,7 @@ interface Draft {
     remoteAddress: string | null,
     remotePort: number | null,
     pluginName: string | null,
-    pluginArgs: string | null,
+    pluginArgs: string[] | null,
     httpRange: string,
     httpMethod: string | null,
     httpRequestHeaders: string | null,
@@ -602,19 +587,6 @@ function isValidJSON(body: string | null): boolean {
     try {
         JSON.parse(body);
         return true;
-    } catch {
-        return false;
-    }
-}
-
-/** Return true if the provided string is a valid JSON array.
-    Any other type is considered invalid. **/
-function isValidJSONArray(body: string | null): boolean {
-    if (body == null) return true;
-    try {
-        const result = JSON.parse(body);
-        if (Array.isArray(result)) return true;
-        return false;
     } catch {
         return false;
     }

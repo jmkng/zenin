@@ -39,17 +39,16 @@ func NewSpan(state ProbeState) Span {
 	}
 }
 
-// Hint is a series of user-friendly messages that may indicate how a Probe was created.
-type Hint []string
+type ArrayValue []string
 
-// Value implements `driver.Valuer` for `Hint`.
-func (h Hint) Value() (driver.Value, error) {
+// Value implements `driver.Valuer` for `ArrayValue`.
+func (h ArrayValue) Value() (driver.Value, error) {
 	return json.Marshal(h)
 }
 
-// Scan implements `sql.Scanner` for `Hint`.
-// This allows storing and fetching the `Hint` as a JSON array.
-func (h *Hint) Scan(value any) error {
+// Scan implements `sql.Scanner` for `ArrayValue`.
+// This allows storing and fetching the `ArrayValue` as a JSON array.
+func (h *ArrayValue) Scan(value any) error {
 	if value == nil {
 		*h = []string{}
 		return nil
@@ -66,8 +65,9 @@ func (h *Hint) Scan(value any) error {
 
 // Span is a common set of fields for all `Measurement`.
 type Span struct {
-	State        ProbeState    `json:"state" db:"state"`
-	StateHint    Hint          `json:"stateHint,omitempty" db:"state_hint"`
+	State ProbeState `json:"state" db:"state"`
+	// StateHint is a series of user-friendly messages which indicate why a Span was given a state.
+	StateHint    ArrayValue    `json:"stateHint,omitempty" db:"state_hint"`
 	Kind         ProbeKind     `json:"kind" db:"measurement_kind"`
 	Certificates []Certificate `json:"-"`
 
