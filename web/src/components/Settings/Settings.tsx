@@ -25,7 +25,7 @@ export default function Settings() {
 
     const handleThemeChange = (value: string) => {
         const root = document.documentElement;
-        root.classList.add("layout-static");
+        root.classList.add("static");
         root.classList.remove(DARK)
         root.classList.remove(LIGHT)
         root.classList.remove(AUTO)
@@ -33,7 +33,7 @@ export default function Settings() {
         setTheme(value)
         if (value == AUTO) localStorage.removeItem(KEY)
         else localStorage.setItem(KEY, value);
-        window.requestAnimationFrame(() => root.classList.remove("layout-static"));
+        window.requestAnimationFrame(() => root.classList.remove("static"));
     }
 
     return <div className="zenin__settings">

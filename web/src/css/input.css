@@ -6,6 +6,7 @@
 }
 
 .zenin__input_label {
+  display: block;
   margin: 0 0 var(--px-c) 0;
   font-weight: 500;
 }

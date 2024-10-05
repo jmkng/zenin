@@ -39,7 +39,7 @@ export interface Monitor {
     remoteAddress: string | null,
     remotePort: number | null,
     pluginName: string | null,
-    pluginArgs: string | null,
+    pluginArgs: string[] | null,
     httpRange: string | null,
     httpMethod: string | null,
     httpRequestHeaders: string | null,
@@ -66,6 +66,12 @@ export function isMonitor(obj: any): obj is Monitor {
 }
 
 export function monitorEquals(a: Monitor, b: Monitor): boolean {
+    const ae = (a1: string[] | null, a2: string[] | null): boolean => {
+        if (a1 == null && a2 == null) return true;
+        if (a1 != null && a2 != null && a1.length == a2.length && a1.every((n, i) => n == a2[i])) return true;
+        return false;
+    };
+    
     return a.name == b.name
         && a.kind == b.kind
         && a.active == b.active
@@ -75,7 +81,7 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.remoteAddress == b.remoteAddress
         && a.remotePort == b.remotePort
         && a.pluginName == b.pluginName
-        && a.pluginArgs == b.pluginArgs
+        && ae(a.pluginArgs, b.pluginArgs)
         && a.httpRange == b.httpRange
         && a.httpMethod == b.httpMethod
         && a.httpRequestHeaders == b.httpRequestHeaders

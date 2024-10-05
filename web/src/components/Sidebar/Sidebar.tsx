@@ -73,12 +73,12 @@ export default function Sidebar() {
         const handleStopResize = () => {
             if (resizing) setResizing(false);
             const root = document.documentElement;
-            root.classList.remove('layout-adjust');
+            root.classList.remove('ew-resize');
         }
 
         if (resizing) {
             const root = document.documentElement;
-            root.classList.add('layout-adjust');
+            root.classList.add('ew-resize');
             window.addEventListener('mousemove', handleResize)
             window.addEventListener('mouseup', handleStopResize)
         }

@@ -143,15 +143,15 @@
     line-height: 1.5;
 }
 
-:root.layout-adjust * {
-    cursor: col-resize !important;
+:root.ew-resize * {
+    cursor: ew-resize !important;
     user-select: none !important;
     -webkit-user-select: none !important; 
     -moz-user-select: none !important;
     -ms-user-select: none !important;
 }
 
-:root.layout-static * {
+:root.static * {
     transition: none !important;
     -webkit-transition: none !important;
     -moz-transition: none !important;
