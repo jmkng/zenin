@@ -1,18 +1,14 @@
 export default function VMenuIcon() {
-  return (
-    <svg
-      className="zenin__vmenu_icon zenin__icon"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentcolor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="12" cy="5" r="1" />
-      <circle cx="12" cy="19" r="1" />
-    </svg>
-  )
+  return <svg
+    className="zenin__vmenu_icon zenin__icon"
+    style={{
+      fillRule: "evenodd",
+      clipRule: "evenodd",
+      strokeLinejoin: "round",
+      strokeMiterlimit: 2,
+    }}
+    viewBox="0 0 24 24"
+  >
+    <path d="M12 18.327A1.837 1.837 0 1 1 11.999 22 1.837 1.837 0 0 1 12 18.327Zm0-8.164a1.837 1.837 0 1 1-.001 3.675A1.837 1.837 0 0 1 12 10.163Zm1.837-6.326a1.837 1.837 0 1 0-3.675.001 1.837 1.837 0 0 0 3.675-.001Z" />
+  </svg>
 }
