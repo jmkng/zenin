@@ -1,6 +1,5 @@
 import AccountProvider from './internal/account/context.tsx';
 import LayoutProvider from './internal/layout/context.tsx';
-import LogProvider from './internal/log/context.tsx';
 import MetaProvider from './internal/meta/context.tsx';
 import MonitorProvider from './internal/monitor/context.tsx';
 
@@ -27,7 +26,6 @@ const providers = [
     MonitorProvider,
     LayoutProvider,
     AccountProvider,
-    LogProvider,
     MetaProvider
 ];
 

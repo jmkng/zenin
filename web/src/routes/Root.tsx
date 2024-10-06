@@ -4,7 +4,6 @@ import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
 import { useAccountContext } from '../internal/account';
 import { useLayoutContext } from '../internal/layout';
 import { hideLoadingScreen, showLoadingScreen } from '../internal/layout/graphics';
-import { useLogContext } from '../internal/log';
 import { useMetaContext } from '../internal/meta';
 import { useDefaultMetaService } from '../internal/meta/service';
 import { Monitor, useMonitorContext } from '../internal/monitor';
@@ -31,7 +30,6 @@ export default function Root() {
         context: useMetaContext(),
         service: useDefaultMetaService()
     };
-    const log = useLogContext();
     const dispatch = useFlaggedDispatch();
 
     useEffect(() => {
@@ -47,12 +45,10 @@ export default function Root() {
 
     useEffect(() => {
         if (account.state.authenticated) {
-            if (log.state.connected && !FEED) handleConnect((event: MessageEvent) =>
-                dispatch(JSON.parse(event.data)));
-            else if (!log.state.connected && FEED) handleDisconnect()
+            if (!FEED) handleConnect((event: MessageEvent) => dispatch(JSON.parse(event.data)));
         }
         else handleDisconnect();
-    }, [account.state.authenticated, log.state.connected])
+    }, [account.state.authenticated])
 
     const handleInitialize = async (token: string) => {
         const plugins = await meta.service.getPlugins(token);
