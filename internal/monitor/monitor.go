@@ -84,13 +84,18 @@ type PluginFields struct {
 }
 
 type HTTPFields struct {
-	HTTPRange          *HTTPRange `json:"httpRange" db:"http_range"`
-	HTTPMethod         *string    `json:"httpMethod" db:"http_method"`
-	HTTPRequestHeaders *string    `json:"httpRequestHeaders" db:"http_request_headers"`
-	HTTPRequestBody    *string    `json:"httpRequestBody" db:"http_request_body"`
-	HTTPExpiredCertMod *string    `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
-	HTTPCaptureHeaders *bool      `json:"httpCaptureHeaders" db:"http_capture_headers"`
-	HTTPCaptureBody    *bool      `json:"httpCaptureBody" db:"http_capture_body"`
+	HTTPRange  *HTTPRange `json:"httpRange" db:"http_range"`
+	HTTPMethod *string    `json:"httpMethod" db:"http_method"`
+	// HTTPRequestHeaders is a list of key/value pairs representing headers to send with the request.
+	//
+	// At the time of request, values for duplicate keys are combined by net/http.
+	//
+	// https://pkg.go.dev/net/http#Header.Add
+	HTTPRequestHeaders *internal.PairListValue `json:"httpRequestHeaders" db:"http_request_headers"`
+	HTTPRequestBody    *string                 `json:"httpRequestBody" db:"http_request_body"`
+	HTTPExpiredCertMod *string                 `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
+	HTTPCaptureHeaders *bool                   `json:"httpCaptureHeaders" db:"http_capture_headers"`
+	HTTPCaptureBody    *bool                   `json:"httpCaptureBody" db:"http_capture_body"`
 }
 
 type ICMPFields struct {

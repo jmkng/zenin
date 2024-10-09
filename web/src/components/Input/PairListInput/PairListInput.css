@@ -1,0 +1,13 @@
+.zenin__pair_list_row {
+    display: flex;
+    margin-bottom: var(--px-b);
+}
+
+.zenin__pair_list_key_input, .zenin__pair_list_value_input {
+    flex: 1;
+    margin-right: var(--px-b);
+}
+
+.zenin__pair_list_input_delete_icon {
+    transform: rotate(45deg);
+}

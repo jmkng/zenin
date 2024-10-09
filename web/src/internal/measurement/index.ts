@@ -1,3 +1,5 @@
+import { PairListValue } from "../monitor"
+
 export interface Measurement {
     id: number,
     createdAt: string,
@@ -8,7 +10,7 @@ export interface Measurement {
     stateHint: string[] | null,
     kind: string,
     httpStatusCode: number | null,
-    httpResponseHeaders: string | null,
+    httpResponseHeaders: PairListValue | null,
     httpResponseBody: string | null,
     icmpPacketsIn: number | null,
     icmpPacketsOut: number | null,

@@ -6,8 +6,8 @@ import "./ArrayInput.css";
 
 interface ArrayInputProps {
     name: string
-    value: string[]
     label?: string | React.ReactNode;
+    value: string[]
     onChange: (value: string[]) => void
 }
 
@@ -21,8 +21,8 @@ export default function ArrayInput(props: ArrayInputProps) {
     };
 
     const handleDelete = (index: number) => {
-        const newValue = value.filter((_, i) => i !== index);
-        onChange(newValue);
+        const state = value.filter((_, i) => i !== index);
+        onChange(state);
     };
 
     return <div className="zenin__array_input zenin__input_container">
@@ -34,6 +34,7 @@ export default function ArrayInput(props: ArrayInputProps) {
                 {label}
             </label>
             : null}
+
         {value.map((value, index) => <div className="zenin__array_input_row" key={index}>
             <TextInput
                 name={name}
@@ -53,8 +54,9 @@ export default function ArrayInput(props: ArrayInputProps) {
             </div>
         </div>
         )}
+
         <Button
-            disabled={value[value.length - 1].trim() == ""}
+            disabled={false}
             border={true}
             onClick={() => onChange([...value, ''])}
         >

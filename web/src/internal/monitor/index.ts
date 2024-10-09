@@ -17,14 +17,18 @@ export const
     NAME_DESC_UI = 'Name (Z-A)',
     UPDATED_NEW_UI = 'Updated (New)',
     UPDATED_OLD_UI = 'Updated (Old)'
-;
+    ;
 
-export type FilterKind = 
-    | "NAME_ASC" 
-    | "NAME_DESC" 
-    | "UPDATED_OLD" 
+export type FilterKind =
+    | "NAME_ASC"
+    | "NAME_DESC"
+    | "UPDATED_OLD"
     | "UPDATED_NEW"
-;
+    ;
+
+export interface PairValue { key: string; value: string; }
+
+export type PairListValue = PairValue[];
 
 export interface Monitor {
     id: number,
@@ -42,7 +46,7 @@ export interface Monitor {
     pluginArgs: string[] | null,
     httpRange: string | null,
     httpMethod: string | null,
-    httpRequestHeaders: string | null,
+    httpRequestHeaders: PairListValue | null,
     httpRequestBody: string | null
     httpExpiredCertMod: string | null,
     httpCaptureHeaders: boolean | null,
@@ -71,7 +75,13 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         if (a1 != null && a2 != null && a1.length == a2.length && a1.every((n, i) => n == a2[i])) return true;
         return false;
     };
-    
+    const ple = (a1: PairListValue | null, a2: PairListValue | null): boolean => {
+        if (a1 == null && a2 == null) return true;
+        if (a1 != null && a2 != null && a1.length == a2.length
+            && a1.every((n, i) => n.key == a2[i].key && n.value == a2[i].value)) return true;
+        return false;
+    }
+
     return a.name == b.name
         && a.kind == b.kind
         && a.active == b.active
@@ -84,7 +94,7 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && ae(a.pluginArgs, b.pluginArgs)
         && a.httpRange == b.httpRange
         && a.httpMethod == b.httpMethod
-        && a.httpRequestHeaders == b.httpRequestHeaders
+        && ple(a.httpRequestHeaders, b.httpRequestHeaders)
         && a.httpRequestBody == b.httpRequestBody
         && a.httpExpiredCertMod == b.httpExpiredCertMod
         && a.httpCaptureHeaders == b.httpCaptureHeaders

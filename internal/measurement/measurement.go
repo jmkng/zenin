@@ -6,6 +6,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/jmkng/zenin/internal"
 )
 
 type ProbeState string
@@ -121,9 +123,9 @@ func ProbeKindFromString(value string) (ProbeKind, error) {
 }
 
 type HTTPFields struct {
-	HTTPStatusCode      *int    `json:"httpStatusCode,omitempty" db:"http_status_code"`
-	HTTPResponseHeaders *string `json:"httpResponseHeaders,omitempty" db:"http_response_headers"`
-	HTTPResponseBody    *string `json:"httpResponseBody,omitempty" db:"http_response_body"`
+	HTTPStatusCode      *int                    `json:"httpStatusCode,omitempty" db:"http_status_code"`
+	HTTPResponseHeaders *internal.PairListValue `json:"httpResponseHeaders,omitempty" db:"http_response_headers"`
+	HTTPResponseBody    *string                 `json:"httpResponseBody,omitempty" db:"http_response_body"`
 }
 
 type ICMPFields struct {

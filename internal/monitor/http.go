@@ -3,11 +3,11 @@ package monitor
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/measurement"
 )
 
@@ -30,25 +30,15 @@ func (h HTTPProbe) Poll(m Monitor) measurement.Span {
 	deadline, cancel := m.Deadline(context.Background())
 	defer cancel()
 
-	request, err := http.NewRequestWithContext(deadline,
-		*m.HTTPMethod,
-		*m.RemoteAddress,
-		requestBody)
+	request, err := http.NewRequestWithContext(deadline, *m.HTTPMethod, *m.RemoteAddress, requestBody)
 	if err != nil {
 		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
 		return span
 	}
 
 	if m.HTTPRequestHeaders != nil {
-		var requestHeaders map[string]string
-		err = json.Unmarshal([]byte(*m.HTTPRequestHeaders), &requestHeaders)
-		if err != nil {
-			span.Downgrade(measurement.Dead, "Request headers may be invalid.")
-			return span
-		}
-
-		for key, value := range requestHeaders {
-			request.Header.Add(key, value)
+		for _, pair := range *m.HTTPRequestHeaders {
+			request.Header.Add(pair.Key, pair.Value)
 		}
 	}
 
@@ -63,27 +53,41 @@ func (h HTTPProbe) Poll(m Monitor) measurement.Span {
 	defer response.Body.Close()
 
 	span.HTTPStatusCode = &response.StatusCode
-	responseRange := newHTTPRangeFromInt(response.StatusCode)
+	c := response.StatusCode
+
+	var responseRange string
+	if c >= 100 && c < 200 {
+		responseRange = Informational
+	} else if c >= 200 && c < 300 {
+		responseRange = Successful
+	} else if c >= 300 && c < 400 {
+		responseRange = Redirection
+	} else if c >= 400 && c < 500 {
+		responseRange = ClientError
+	} else {
+		responseRange = ServerError
+	}
+
 	if responseRange != *m.HTTPRange {
 		span.Downgrade(measurement.Dead, "Response status code was out of range.")
 	}
 
 	if m.HTTPCaptureHeaders != nil && *m.HTTPCaptureHeaders {
-		responseHeaders, err := json.Marshal(response.Header)
-		if err != nil {
-			span.Downgrade(measurement.Warn, "Response headers could not be serialized.")
-		} else {
-			headersString := string(responseHeaders)
-			span.HTTPResponseHeaders = &headersString
+		var headers internal.PairListValue
+		for k, v := range response.Header {
+			for _, x := range v {
+				headers = append(headers, internal.PairValue{Key: k, Value: x})
+			}
 		}
 	}
+
 	if m.HTTPCaptureBody != nil && *m.HTTPCaptureBody {
 		responseBody, err := io.ReadAll(response.Body)
 		if err != nil {
 			span.Downgrade(measurement.Warn, "Response body could not be read.")
 		} else {
-			bodyString := string(responseBody)
-			span.HTTPResponseBody = &bodyString
+			s := string(responseBody)
+			span.HTTPResponseBody = &s
 		}
 	}
 
@@ -105,17 +109,4 @@ func (h HTTPProbe) Poll(m Monitor) measurement.Span {
 	}
 
 	return span
-}
-
-func newHTTPRangeFromInt(value int) HTTPRange {
-	if value >= 100 && value < 200 {
-		return Informational
-	} else if value >= 200 && value < 300 {
-		return Successful
-	} else if value >= 300 && value < 400 {
-		return Redirection
-	} else if value >= 400 && value < 500 {
-		return ClientError
-	}
-	return ServerError
 }

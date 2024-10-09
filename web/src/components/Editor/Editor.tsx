@@ -1,20 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
 import { useMetaContext } from "../../internal/meta";
-import {
-    ACTIVE_UI,
-    HTTP_UI, ICMP_UI,
-    INACTIVE_UI,
-    Monitor, monitorEquals,
-    PLUGIN_UI, TCP_UI,
-    useMonitorContext,
-} from "../../internal/monitor";
+import { useEffect, useMemo, useState } from "react";
+import { ACTIVE_UI, HTTP_UI, ICMP_UI, INACTIVE_UI, Monitor, monitorEquals, PLUGIN_UI, TCP_UI, useMonitorContext, } from "../../internal/monitor";
 import { EditorPane } from "../../internal/monitor/split";
 import {
-    CLIENTERROR_API, DELETE_API, GET_API, HEAD_API, HTTP_API, ICMP_API,
-    INFORMATIONAL_API, OFF_API, OPTIONS_API, PATCH_API, PLUGIN_API,
-    POST_API, PUT_API, REDIRECTION_API, SERVERERROR_API, SUCCESSFUL_API, TCP_API,
+    CLIENTERROR_API,
+    DELETE_API,
+    GET_API,
+    HEAD_API,
+    HTTP_API,
+    ICMP_API,
+    INFORMATIONAL_API,
+    OPTIONS_API,
+    PATCH_API,
+    PLUGIN_API,
+    POST_API,
+    PUT_API,
+    REDIRECTION_API,
+    SERVERERROR_API,
+    SUCCESSFUL_API,
+    TCP_API,
     UDP_API
 } from "../../server";
+import {
+    EditorState,
+    isValidInterval,
+    isValidMonitor,
+    isValidName,
+    isValidNonZeroNumber,
+    isValidRemoteAddress,
+    isValidRemotePort,
+    isValidTimeout,
+    reset,
+    sanitize,
+    split
+} from ".";
 
 import Button from "../Button/Button";
 import NumberInput from "../Input/NumberInput/NumberInput";
@@ -22,79 +41,25 @@ import PluginInput from "../Input/PluginInput/PluginInput";
 import SelectInput from "../Input/SelectInput/SelectInput";
 import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../Input/TextInput/TextInput";
+import PairListInput from "../Input/PairListInput/PairListInput";
 import ToggleInput from "../Input/ToggleInput/ToggleInput";
 
 import "./Editor.css";
 
 interface EditorProps {
     state: EditorPane
-
     onChange: (target: Monitor) => void;
 }
 
 export default function Editor(props: EditorProps) {
-    const {
-        state,
-        onChange,
-    } = props;
-    const meta = {
-        context: useMetaContext()
-    };
-    const monitor = {
-        context: useMonitorContext(),
-    }
-    const defaultDraft = useMemo(() => ({
-        name: null,
-        kind: PLUGIN_API,
-        active: false,
-        interval: 1800,
-        timeout: 10,
-        description: null,
-        remoteAddress: null,
-        remotePort: null,
-        pluginName: meta.context.state.plugins[0] || null,
-        pluginArgs: null,
-        httpRange: SUCCESSFUL_API,
-        httpMethod: GET_API,
-        httpRequestHeaders: null,
-        httpRequestBody: null,
-        httpExpiredCertMod: OFF_API,
-        httpCaptureHeaders: false,
-        httpCaptureBody: false,
-        icmpSize: 56,
-        icmpWait: 100,
-        icmpCount: 3,
-        icmpTtl: 64,
-        icmpProtocol: ICMP_API
-    }), [meta.context.state.plugins])
-    const reset = useMemo(() => state.monitor
-        //@ts-expect-error Ignore type for assignment.
-        ? Object.fromEntries(Object.entries({ ...state.monitor } as Draft).map(([k, v]) => [k, v === null ? defaultDraft[k] : v])) as Draft
-        : defaultDraft, [defaultDraft, state.monitor])
-    const [editor, setEditor] = useState<{
-        draft: Draft,
-        original: Draft
-    }>({ draft: reset, original: reset })
+    const { state, onChange } = props;
+    const meta = { context: useMetaContext() };
+    const monitor = { context: useMonitorContext() }
 
-    const canSubmit = useMemo(() =>
-        !monitorEquals(editor.draft as Monitor, editor.original as Monitor)
-        && isValidMonitor(editor.draft), [editor])
+    const base = useMemo(() => reset(state.monitor), [state.monitor]);
+    const [editor, setEditor] = useState<EditorState>(split(base))
 
-    const hasValidName = useMemo(() => isValidName(editor.draft.name), [editor.draft.name])
-    const hasValidInterval = useMemo(() => isValidInterval(editor.draft.interval), [editor.draft.interval])
-    const hasValidTimeout = useMemo(() => isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
-    const hasValidRemoteAddress = useMemo(() => isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
-    const hasValidRemotePort = useMemo(() => isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
-    const hasValidHttpBody = useMemo(() => isValidJSON(editor.draft.httpRequestBody), [editor.draft.httpRequestBody]);
-    const hasValidHttpHeaders = useMemo(() => isValidJSON(editor.draft.httpRequestHeaders), [editor.draft.httpRequestHeaders]);
-    const hasValidIcmpSize = useMemo(() => isValidNonZeroNumber(editor.draft.icmpSize), [editor.draft.icmpSize]);
-    const hasValidIcmpWait = useMemo(() => isValidNonZeroNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
-    const hasValidIcmpCount = useMemo(() => isValidNonZeroNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
-    const hasValidIcmpTtl = useMemo(() => isValidNonZeroNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
-
-    useEffect(() => {
-        setEditor(prev => ({ ...prev, draft: reset, original: reset }))
-    }, [reset])
+    useEffect(() => setEditor(prev => ({ ...prev, ...split(base) })), [base])
 
     useEffect(() => {
         if (!state.monitor) return;
@@ -102,10 +67,16 @@ export default function Editor(props: EditorProps) {
         setEditor(prev => ({ ...prev, draft: { ...prev.draft, active }, original: { ...prev.original, active } }))
     }, [state.monitor])
 
-    const handleSubmit = () => {
-        const monitor = sanitizeToMonitor(editor.draft);
-        onChange(monitor);
-    };
+    const canSubmit = useMemo(() => !monitorEquals(editor.draft as Monitor, editor.original as Monitor) && isValidMonitor(editor.draft), [editor])
+    const hasValidName = useMemo(() => isValidName(editor.draft.name), [editor.draft.name])
+    const hasValidInterval = useMemo(() => isValidInterval(editor.draft.interval), [editor.draft.interval])
+    const hasValidTimeout = useMemo(() => isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
+    const hasValidRemoteAddress = useMemo(() => isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
+    const hasValidRemotePort = useMemo(() => isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
+    const hasValidIcmpSize = useMemo(() => isValidNonZeroNumber(editor.draft.icmpSize), [editor.draft.icmpSize]);
+    const hasValidIcmpWait = useMemo(() => isValidNonZeroNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
+    const hasValidIcmpCount = useMemo(() => isValidNonZeroNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
+    const hasValidIcmpTtl = useMemo(() => isValidNonZeroNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
 
     return <div className="zenin__detail_component">
         <div className="zenin__detail_body">
@@ -239,33 +210,23 @@ export default function Editor(props: EditorProps) {
             {editor.draft.kind == HTTP_API ?
                 <div>
                     <div className="zenin__detail_spaced">
-                        <TextAreaInput
-                            label={<span className={hasValidHttpHeaders ? "" : "zenin__h_error"}>Request Headers</span>}
-                            name="zenin__detail_monitor_http_headers"
-                            value={editor.draft.httpRequestHeaders}
-                            subtext="Headers to send with the HTTP request."
-                            onChange={httpRequestHeaders =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestHeaders } }))}
+                        <PairListInput
+                            label="Request Headers"
+                            name="zenin__detail_monitor_http_request_headers"
+                            value={editor.draft.httpRequestHeaders ?? [{ key: "", value: "" }]}
+                            onChange={httpRequestHeaders => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestHeaders } }))}
                         />
-                        {!hasValidHttpHeaders ?
-                            <span className="zenin__detail_validation zenin__h_error">Request headers must be valid JSON</span>
-                            :
-                            null}
                     </div>
 
                     <div className="zenin__detail_spaced">
                         <TextAreaInput
-                            label={<span className={hasValidHttpBody ? "" : "zenin__h_error"}>Request Body</span>}
+                            label="Request Body"
                             name="zenin__detail_monitor_http_body"
                             value={editor.draft.httpRequestBody}
                             subtext="A body to send with the HTTP request."
                             onChange={httpRequestBody =>
                                 setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRequestBody } }))}
                         />
-                        {!hasValidHttpBody ?
-                            <span className="zenin__detail_validation zenin__h_error">Request body must be valid JSON</span>
-                            :
-                            null}
                     </div>
 
                     <div className="zenin__detail_spaced">
@@ -283,8 +244,7 @@ export default function Editor(props: EditorProps) {
                             ]}
                             subtext={<span>Set the HTTP <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">method</a> used to make the request.</span>}
                             value={editor.draft.httpMethod!}
-                            onChange={httpMethod =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpMethod } }))}
+                            onChange={httpMethod => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpMethod } }))}
                         />
                     </div>
 
@@ -301,8 +261,7 @@ export default function Editor(props: EditorProps) {
                             ]}
                             subtext={<span>Set the range of <a href="https://datatracker.ietf.org/doc/html/rfc2616#section-10">status codes</a> that will indicate a successful probe.</span>}
                             value={editor.draft.httpRange}
-                            onChange={httpRange =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRange } }))}
+                            onChange={httpRange => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpRange } }))}
                         />
                     </div>
 
@@ -311,8 +270,7 @@ export default function Editor(props: EditorProps) {
                             name={"zenin__detail_capture_header"}
                             label="Capture Response Headers"
                             value={editor.draft.httpCaptureHeaders}
-                            onChange={httpCaptureHeaders =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureHeaders } }))}
+                            onChange={httpCaptureHeaders => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureHeaders } }))}
                         />
                     </div>
                     <div className="zenin__detail_spaced">
@@ -320,8 +278,7 @@ export default function Editor(props: EditorProps) {
                             name={"zenin__detail_capture_body"}
                             label="Capture Response Body"
                             value={editor.draft.httpCaptureBody}
-                            onChange={httpCaptureBody =>
-                                setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureBody } }))}
+                            onChange={httpCaptureBody => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureBody } }))}
                         />
                     </div>
                 </div>
@@ -419,7 +376,11 @@ export default function Editor(props: EditorProps) {
         </div >
 
         <div className="zenin__detail_controls">
-            <Button kind="primary" disabled={!canSubmit} onClick={() => { handleSubmit() }}>
+            <Button
+                kind="primary"
+                disabled={!canSubmit}
+                onClick={() => onChange(sanitize(editor.draft))}
+            >
                 <span>Save</span>
             </Button>
 
@@ -430,197 +391,5 @@ export default function Editor(props: EditorProps) {
                 <span>Close</span>
             </Button>
         </div>
-    </div>
-}
-
-function sanitizeToMonitor(draft: Draft): Monitor {
-    const monitor = { ...draft } as Monitor;
-    switch (monitor.kind) {
-        case HTTP_API:
-            sanitizeHTTP(monitor);
-            break;
-        case TCP_API:
-            sanitizeTCP(monitor);
-            break;
-        case ICMP_API:
-            sanitizeICMP(monitor);
-            break;
-        case PLUGIN_API:
-            sanitizePlugin(monitor);
-            break;
-    }
-    return monitor;
-}
-
-function sanitizeHTTP(monitor: Monitor) {
-    monitor.icmpSize = null;
-    monitor.icmpCount = null;
-    monitor.icmpProtocol = null;
-    monitor.icmpWait = null;
-    monitor.icmpTtl = null;
-    monitor.pluginName = null;
-    monitor.pluginArgs = null;
-}
-
-function sanitizeTCP(monitor: Monitor) {
-    monitor.httpRequestHeaders = null;
-    monitor.httpRequestBody = null;
-    monitor.httpExpiredCertMod = null;
-    monitor.httpCaptureHeaders = null;
-    monitor.httpCaptureBody = null;
-    monitor.httpMethod = null;
-    monitor.httpRange = null;
-    monitor.icmpSize = null;
-    monitor.icmpCount = null;
-    monitor.icmpProtocol = null;
-    monitor.icmpWait = null;
-    monitor.icmpTtl = null;
-    monitor.pluginName = null;
-    monitor.pluginArgs = null;
-}
-
-function sanitizeICMP(monitor: Monitor) {
-    monitor.remotePort = null;
-    monitor.httpRequestHeaders = null;
-    monitor.httpRequestBody = null;
-    monitor.httpExpiredCertMod = null;
-    monitor.httpCaptureHeaders = null;
-    monitor.httpCaptureBody = null;
-    monitor.httpMethod = null;
-    monitor.httpRange = null;
-    monitor.pluginName = null;
-}
-
-function sanitizePlugin(monitor: Monitor) {
-    monitor.remoteAddress = null;
-    monitor.remotePort = null;
-    monitor.httpRequestHeaders = null;
-    monitor.httpRequestBody = null;
-    monitor.httpExpiredCertMod = null;
-    monitor.httpCaptureHeaders = null;
-    monitor.httpCaptureBody = null;
-    monitor.httpMethod = null;
-    monitor.httpRange = null;
-    monitor.icmpSize = null;
-    monitor.icmpCount = null;
-    monitor.icmpProtocol = null;
-    monitor.icmpWait = null;
-    monitor.icmpTtl = null;
-}
-
-/** Similar to `Monitor`, but some fields may be null because they aren't filled in yet. */
-interface Draft {
-    name: string | null,
-    kind: string,
-    active: boolean,
-    interval: number | null,
-    timeout: number | null,
-    description: string | null,
-    remoteAddress: string | null,
-    remotePort: number | null,
-    pluginName: string | null,
-    pluginArgs: string[] | null,
-    httpRange: string,
-    httpMethod: string | null,
-    httpRequestHeaders: string | null,
-    httpRequestBody: string | null
-    httpExpiredCertMod: string | null,
-    httpCaptureHeaders: boolean,
-    httpCaptureBody: boolean,
-    icmpSize: number | null,
-    icmpWait: number | null,
-    icmpCount: number | null,
-    icmpTtl: number | null,
-    icmpProtocol: string,
-}
-
-function isValidMonitor(draft: Draft): boolean {
-    if (!isValidName(draft.name)
-        || !isValidState(draft.active)
-        || !isValidInterval(draft.interval)
-        || !isValidTimeout(draft.timeout)
-        || !isValidKind(draft.kind)) return false;
-
-    switch (draft.kind) {
-        case HTTP_API: return isValidHTTP(draft)
-        case ICMP_API: return isValidICMP(draft)
-        case TCP_API: return isValidTCP(draft)
-        case PLUGIN_API: return isValidPlugin(draft)
-        default: throw new Error("unrecognized probe")
-    }
-}
-
-function isValidHTTP(draft: Draft): boolean {
-    return isValidRemoteAddress(draft.remoteAddress) && isValidHeaderRange(draft.httpRange)
-        && isValidJSON(draft.httpRequestHeaders) && isValidJSON(draft.httpRequestBody);
-}
-
-function isValidICMP(draft: Draft): boolean {
-    return isValidRemoteAddress(draft.remoteAddress) && isValidNonZeroNumber(draft.icmpSize)
-        && isValidNonZeroNumber(draft.icmpWait) && isValidNonZeroNumber(draft.icmpCount) && isValidNonZeroNumber(draft.icmpTtl);
-}
-
-function isValidTCP(draft: Draft): boolean {
-    return isValidRemoteAddress(draft.remoteAddress) && isValidRemotePort(draft.remotePort)
-}
-
-function isValidPlugin(draft: Draft): boolean {
-    if (!draft.pluginName) return false;
-    return true;
-}
-
-function isValidHeaderRange(range: string | null): boolean {
-    const set = [
-        INFORMATIONAL_API,
-        SUCCESSFUL_API,
-        REDIRECTION_API,
-        CLIENTERROR_API,
-        SERVERERROR_API
-    ];
-    if (!range || !set.includes(range)) return false;
-    return true;
-}
-
-/** Return true if the provided string is valid JSON. **/
-function isValidJSON(body: string | null): boolean {
-    if (body == null) return true;
-    try {
-        JSON.parse(body);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-function isValidNonZeroNumber(value: number | null): boolean {
-    return value != null && value > 0;
-}
-
-function isValidName(name: string | null): boolean {
-    return name != null && name.trim() != "";
-}
-
-function isValidKind(kind: string | null): boolean {
-    return kind != null && [HTTP_API, ICMP_API, TCP_API, PLUGIN_API].includes(kind)
-}
-
-function isValidState(state: boolean): boolean {
-    return typeof state === 'boolean';
-}
-
-function isValidInterval(interval: number | null): boolean {
-    return interval != null && interval >= 0;
-}
-
-function isValidTimeout(timeout: number | null): boolean {
-    return timeout != null && timeout >= 0
-}
-
-function isValidRemoteAddress(remote: string | null): boolean {
-    if (!remote || remote.trim() == "") return false;
-    return true;
-}
-
-function isValidRemotePort(port: number | null): boolean {
-    return port != null && port >= 0 && port <= 65535;
+    </div >
 }

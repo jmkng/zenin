@@ -1,6 +1,7 @@
 import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/measurement";
 import { HTTP_API } from "../../../server";
+import PairList from "../../PairList/PairList";
 
 import Expand from "../Expand/Expand";
 import List from "../List/List";
@@ -30,7 +31,8 @@ export default function Property(props: PropertyProps) {
 
         {measurement.httpResponseHeaders ?
             <div className="zenin__property_response_headers zenin__h_margin_top">
-                <Expand title={"Response Headers"} text={measurement.httpResponseHeaders} />
+                {/* <PairList value={measurement.httpResponseHeaders} label="Response headers" /> */}
+                <List title="Response Headers" data={measurement.httpResponseHeaders} />
             </div>
             : null}
         {measurement.httpResponseBody ?
