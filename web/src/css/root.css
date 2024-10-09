@@ -10,8 +10,8 @@
 :root {
     --white: rgb(255, 255, 255);
     --black: rgb(18, 18, 18);
-    --fast: .15s;
-    --slow: .25s;
+    --fast: .20s;
+    --slow: .30s;
     --rounded: 4px;
     --px-a: 3px;
     --px-b: 6px;
