@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import InfoIcon from "../../Icon/InfoIcon";
 
 import "./List.css";
 
@@ -22,10 +21,6 @@ export default function List(props: ListProps) {
     return <div className="zenin__list_component" ref={listRef}>
         <div className="zenin__list_intro">
             <span className="zenin__list_intro_title">{title}</span>
-
-            <div className="zenin__list_intro_help_button">
-                <InfoIcon />
-            </div>
         </div>
 
 
