@@ -7,8 +7,7 @@
   position: fixed;
   top: -57px;
   transition: all var(--slow) ease-in-out;
-  transition-property: opacity, top;
-  opacity: 0;
+  transition-property: top;
   left: 0;
   right: 0;
   background: var(--background);
@@ -17,7 +16,6 @@
 
 .zenin__dashboard_select_menu.selection {
   top: 0;
-  opacity: 1
 }
 
 .zenin__dashboard_main {

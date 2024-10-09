@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import ChevronIcon from "../../Icon/ChevronIcon";
 
 import Button from "../../Button/Button";
+import ChevronIcon from "../../Icon/ChevronIcon";
 import CopyIcon from "../../Icon/CopyIcon";
 import FirstIcon from "../../Icon/FirstIcon";
 import LastIcon from "../../Icon/LastIcon";
@@ -15,6 +15,7 @@ interface ExpandProps {
 
 export default function Expand(props: ExpandProps) {
     const { title, text } = props;
+
     const [expanded, setExpanded] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
     const [isScrolledTop, setIsScrolledTop] = useState<boolean>(true);

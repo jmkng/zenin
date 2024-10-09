@@ -5,6 +5,7 @@
 }
 
 .zenin__chain_controls {
+    min-height: var(--px-h);
     display: flex;
     padding: var(--px-b) var(--px-d);
     align-items: center;

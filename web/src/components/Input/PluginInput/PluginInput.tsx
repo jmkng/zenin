@@ -21,9 +21,8 @@ export default function PluginInput(props: PluginSpecProps) {
         context: useMetaContext()
     };
 
-    const options = useMemo(() =>
-        Array.from(new Set([...meta.context.state.plugins, plugin.value || ""]))
-            .map(n => ({ text: n })).filter(n => n.text.trim() != ""), [meta.context.state.plugins]);
+    const options = useMemo(() => Array.from(new Set([...meta.context.state.plugins, plugin.value || ""]))
+        .map(n => ({ text: n })).filter(n => n.text.trim() != ""), [meta.context.state.plugins]);
 
     return <div className="zenin__plugin_spec">
         <div className="zenin__plugin_spec_control">

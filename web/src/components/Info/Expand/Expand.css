@@ -3,6 +3,10 @@
     border: 1px solid var(--off-b);
 }
 
+.zenin__expand_controls {
+    min-height: var(--px-h);
+}
+
 .zenin__expand_controls, .zenin__expand_popout {
     display: flex;
     padding: var(--px-b) var(--px-d);
