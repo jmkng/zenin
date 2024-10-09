@@ -5,9 +5,7 @@ export const useFlaggedDispatch = () => {
     const monitor = useMonitorContext();
 
     const action = (data: any) => {
-        if (isMeasurement(data)) {
-            monitor.dispatch({ type: 'poll', measurement: data })
-        }
+        if (isMeasurement(data)) monitor.dispatch({ type: 'poll', measurement: data })
     }
 
     return action;

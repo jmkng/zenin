@@ -1,7 +1,6 @@
 import { formatMilliseconds } from "../../../internal/layout/graphics";
 import { Measurement } from "../../../internal/measurement";
 import { HTTP_API } from "../../../server";
-import PairList from "../../PairList/PairList";
 
 import Expand from "../Expand/Expand";
 import List from "../List/List";
