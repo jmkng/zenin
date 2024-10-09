@@ -40,10 +40,6 @@
 }
 
 .zenin__list_map_item_value {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-x: auto;
 }

@@ -1,11 +1,11 @@
 ::-webkit-scrollbar {
-    width: inherit;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
     background-color: var(--off-b);
     border-radius: var(--rounded);
-    min-height: 25px;
 }
 
 ::-webkit-scrollbar-track {
