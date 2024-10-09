@@ -69,7 +69,7 @@ func (h *ArrayValue) Scan(value any) error {
 type Span struct {
 	State ProbeState `json:"state" db:"state"`
 	// StateHint is a series of user-friendly messages which indicate why a Span was given a state.
-	StateHint    ArrayValue    `json:"stateHint,omitempty" db:"state_hint"`
+	StateHint    ArrayValue    `json:"stateHint" db:"state_hint"`
 	Kind         ProbeKind     `json:"kind" db:"measurement_kind"`
 	Certificates []Certificate `json:"-"`
 
@@ -123,23 +123,23 @@ func ProbeKindFromString(value string) (ProbeKind, error) {
 }
 
 type HTTPFields struct {
-	HTTPStatusCode      *int                    `json:"httpStatusCode,omitempty" db:"http_status_code"`
-	HTTPResponseHeaders *internal.PairListValue `json:"httpResponseHeaders,omitempty" db:"http_response_headers"`
-	HTTPResponseBody    *string                 `json:"httpResponseBody,omitempty" db:"http_response_body"`
+	HTTPStatusCode      *int                    `json:"httpStatusCode" db:"http_status_code"`
+	HTTPResponseHeaders *internal.PairListValue `json:"httpResponseHeaders" db:"http_response_headers"`
+	HTTPResponseBody    *string                 `json:"httpResponseBody" db:"http_response_body"`
 }
 
 type ICMPFields struct {
-	ICMPPacketsIn  *int     `json:"icmpPacketsIn,omitempty" db:"icmp_packets_in"`
-	ICMPPacketsOut *int     `json:"icmpPacketsOut,omitempty" db:"icmp_packets_out"`
-	ICMPMinRTT     *float64 `json:"icmpMinRtt,omitempty" db:"icmp_min_rtt"`
-	ICMPAvgRTT     *float64 `json:"icmpAvgRtt,omitempty" db:"icmp_avg_rtt"`
-	ICMPMaxRTT     *float64 `json:"icmpMaxRtt,omitempty" db:"icmp_max_rtt"`
+	ICMPPacketsIn  *int     `json:"icmpPacketsIn" db:"icmp_packets_in"`
+	ICMPPacketsOut *int     `json:"icmpPacketsOut" db:"icmp_packets_out"`
+	ICMPMinRTT     *float64 `json:"icmpMinRtt" db:"icmp_min_rtt"`
+	ICMPAvgRTT     *float64 `json:"icmpAvgRtt" db:"icmp_avg_rtt"`
+	ICMPMaxRTT     *float64 `json:"icmpMaxRtt" db:"icmp_max_rtt"`
 }
 
 type PluginFields struct {
-	PluginExitCode *int    `json:"pluginExitCode,omitempty" db:"plugin_exit_code"`
-	PluginStdout   *string `json:"pluginStdout,omitempty" db:"plugin_stdout"`
-	PluginStderr   *string `json:"pluginStderr,omitempty" db:"plugin_stderr"`
+	PluginExitCode *int    `json:"pluginExitCode" db:"plugin_exit_code"`
+	PluginStdout   *string `json:"pluginStdout" db:"plugin_stdout"`
+	PluginStderr   *string `json:"pluginStderr" db:"plugin_stderr"`
 }
 
 // Certificate is an x509 certificate recorded by an HTTP probe.

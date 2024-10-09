@@ -33,7 +33,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <BrowserRouter>
             <Provider providers={providers}>
-                <Initialize><Root /></Initialize>
+                <Initialize>
+                    <Root />
+                </Initialize>
             </Provider>
         </BrowserRouter>
     </StrictMode>
