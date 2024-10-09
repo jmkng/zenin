@@ -47,10 +47,7 @@
 .zenin__expand_popout {
     overflow: scroll;
     border-radius: var(--rounded);
-}
-
-.zenin__expand_popout::-webkit-scrollbar {
-    display: none;
+    margin: var(--px-a) var(--px-a);
 }
 
 .zenin__expand_popout span {
