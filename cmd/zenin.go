@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/bundle"
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/log"
@@ -21,12 +22,15 @@ func main() {
 		log.EnableDebug()
 	}
 
+	fmt.Println(os.Args[0])
+	os.Exit(0)
+
 	// Check environment.
-	dd(check())
+	dd(validate()) // TODO: Pretty print these?
 
 	repository, err := repository.
 		Builder(env.Database).
-		WithValidate().
+		WithValidate(). // TODO: Bundle this up in validate step above?
 		Build()
 	dd(err)
 
@@ -64,15 +68,12 @@ func dd(err error) {
 	os.Exit(1)
 }
 
-// check will look for problems with environment variables.
-func check() error {
-	var err error
-	log.Debug("environment validation starting")
+// validate will run all validations, returning all messages bundled in a single `Validation`.
+func validate() internal.Validation {
+	v := internal.NewValidation()
 
-	err = errors.Join(err, env.Runtime.Validate())
+	// 1. Runtime
+	v.Join(env.Runtime.Validate())
 
-	if err == nil {
-		log.Debug("environment normal")
-	}
-	return err
+	return v
 }

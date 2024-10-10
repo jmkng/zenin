@@ -6,10 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/log"
 )
 
@@ -68,18 +70,24 @@ func NewRuntimeEnv() *RuntimeEnv {
 
 	var baseDir string
 	var pluginsDir string
-	switch runtime.GOOS {
-	case "windows":
-		baseDir = "C\\ProgramData\\zenin"
-		pluginsDir = "C\\ProgramData\\zenin\\plugins"
-	case "darwin", "linux":
-		baseDir = "/usr/local/zenin"
-		pluginsDir = "/usr/local/zenin/plugins"
+
+	configDir, err := os.UserConfigDir()
+	if err == nil {
+		baseDir = configDir
+		switch runtime.GOOS {
+		case "darwin", "windows":
+			baseDir = filepath.Join(baseDir, "Zenin")
+		case "linux":
+			baseDir = filepath.Join(baseDir, "zenin")
+		}
+		pluginsDir = filepath.Join(baseDir, "plugins")
 	}
+
+	// Directories provided by the user take precedence.
 	if base := os.Getenv(rtBaseDir); base != "" {
 		baseDir = base
 	}
-	if plugins := os.Getenv(rtPluginDir); plugins != "" {
+	if plugins := os.Getenv(rtPluginsDir); plugins != "" {
 		pluginsDir = plugins
 	}
 
@@ -112,32 +120,35 @@ type RuntimeEnv struct {
 
 var EnvironmentError = errors.New("the environment is invalid")
 
-func (r RuntimeEnv) Validate() error {
-	var err error
+// Validate will return an error of type `Validation` describing problems with the runtime environment.
+func (r RuntimeEnv) Validate() internal.Validation {
+	validation := internal.NewValidation()
+
 	if r.Kind == Prod && len(r.SignSecret) < 16 {
-		log.Error("sign secret must be >=16 bytes, provide a longer secret or unset `ZENIN_RT_SIGN_SECRET` to generate one",
-			"length", len(r.SignSecret))
-		err = EnvironmentError
+		validation.Push("sign secret must be >= 16 bytes\nprovide a longer secret or unset `ZENIN_RT_SIGN_SECRET` to have one generated")
 	}
 
-	// Not returning as error right now, because these may not even be required.
-	// Right now you only need them to set up plugin (script) monitors.
-	baseDir, err := os.Stat(r.PluginDir)
-	if err != nil || !baseDir.IsDir() {
-		log.Warn("plugin directory is inaccessible", "path", r.PluginDir)
+	base, err := os.Stat(r.BaseDir)
+	if err != nil || r.BaseDir == "" {
+		validation.Push("base directory path is not set\nprovide an absolute path by setting `ZENIN_RT_BASE_DIR`")
+	} else if !base.IsDir() {
+		validation.Push("base directory path points to a file\nmake sure `ZENIN_RT_BASE_DIR` points to a directory")
 	}
-	pluginsDir, err := os.Stat(r.PluginDir)
-	if err != nil || !pluginsDir.IsDir() {
-		log.Warn("plugin directory is inaccessible", "path", r.PluginDir)
+	plugins, err := os.Stat(r.PluginDir)
+	if err != nil || r.PluginDir == "" {
+		validation.Push("plugins directory path is not set\nprovide an absolute path by setting `ZENIN_RT_PLUGINS_DIR`")
+	} else if !plugins.IsDir() {
+		validation.Push("plugins directory path points to a file\nmake sure `ZENIN_RT_PLUGINS_DIR` points to a directory")
 	}
+
 	switch runtime.GOOS {
 	case "darwin", "linux":
 		if _, exists := os.LookupEnv("SHELL"); !exists {
-			log.Warn("env variable `$SHELL` must be set to execute shell script plugins")
+			validation.Push("must set `SHELL` to execute plugins")
 		}
 	}
 
-	return nil
+	return validation
 }
 
 func getSignSecret() (Secret, error) {
@@ -158,5 +169,5 @@ const (
 	rtRedirectKey   = "ZENIN_RT_REDIRECT"
 	rtSignSecretKey = "ZENIN_RT_SIGN_SECRET"
 	rtBaseDir       = "ZENIN_RT_BASE_DIR"
-	rtPluginDir     = "ZENIN_RT_PLUGIN_DIR"
+	rtPluginsDir    = "ZENIN_RT_PLUGINS_DIR"
 )
