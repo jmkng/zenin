@@ -38,7 +38,7 @@ func (r *Responder) Data(data any, status int) {
 // Error will send a status code and search the error chain for `Validation` errors.
 //
 // If any are found, the messages are extracted and sent to the client.
-// If none are found, the error is logged.
+// Other errors are logged.
 func (r *Responder) Error(err error, status int) {
 	r.writer.WriteHeader(status)
 
