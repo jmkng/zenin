@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/jmkng/zenin/internal"
-	"github.com/jmkng/zenin/internal/log"
 )
 
 type RuntimeKind string
