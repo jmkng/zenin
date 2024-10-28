@@ -11,13 +11,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jmkng/zenin/internal/bundle"
 	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/log"
+	"github.com/jmkng/zenin/internal/service"
 )
 
 // NewServer returns a new Server.
-func NewServer(config Configuration, bundle bundle.Bundle) *Server {
+func NewServer(config Configuration, bundle service.Bundle) *Server {
 	return &Server{
 		config: config,
 		bundle: bundle,
@@ -27,7 +26,7 @@ func NewServer(config Configuration, bundle bundle.Bundle) *Server {
 // Server is the Zenin server.
 type Server struct {
 	config Configuration
-	bundle bundle.Bundle
+	bundle service.Bundle
 }
 
 // Listen will block and start listening.
