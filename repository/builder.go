@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/repository"
 	"github.com/jmkng/zenin/repository/postgres"
 )
@@ -39,30 +38,25 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 		return repository, err
 	}
 
+	// Validation step will connect to the repository and check the schema,
+	// migrating if needed.
 	if b.withValidate {
-		log.Debug("repository validation starting")
-		if err = b.validate(repository); err != nil {
-			return repository, fmt.Errorf("failed to connect repository: %w", err)
+		env.Debug("repository validation starting")
+		valid, err := repository.Validate()
+		if err != nil {
+			return repository, fmt.Errorf("failed to validate repository: %w", err)
 		}
-		log.Debug("repository normal")
+		if !valid {
+			env.Debug("repository abnormal, attempting database migration")
+			return repository, repository.Migrate()
+		}
+		env.Debug("repository validation stopping", "status", "normal")
 	}
+
 	return repository, err
 }
 
-func (r *RepositoryBuilder) validate(repository repository.Repository) error {
-	valid, err := repository.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate repository schema: %w", err)
-	}
-	if !valid {
-		log.Debug("repository abnormal, attempting automatic migration")
-		return repository.Migrate()
-	}
-	return nil
-}
-
 type RepositoryBuilder struct {
-	env *env.DatabaseEnv
-	// withValidate is true when the Repository should be validated before building.
+	env          *env.DatabaseEnv
 	withValidate bool
 }

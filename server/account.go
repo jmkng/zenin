@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/account"
+	"github.com/jmkng/zenin/internal/env"
 )
 
 func NewAccountHandler(service account.AccountService) AccountHandler {
@@ -61,7 +61,7 @@ func (a AccountProvider) HandleClaim(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if count > 0 {
-		responder.Error(internal.NewValidation("Server has already been claimed. Try logging in."),
+		responder.Error(env.NewValidation("Server has already been claimed. Try logging in."),
 			http.StatusBadRequest)
 		return
 	}
@@ -69,7 +69,7 @@ func (a AccountProvider) HandleClaim(w http.ResponseWriter, r *http.Request) {
 	var application account.Application
 	err = StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected `username` and `password` keys."),
+		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
 			http.StatusBadRequest)
 		return
 	}
@@ -92,7 +92,7 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 	var application account.Application
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected `username` and `password` keys."),
+		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
 			http.StatusBadRequest)
 		return
 	}
@@ -103,7 +103,7 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if account == nil || a.Service.ValidateLogin([]byte(application.PasswordPlainText), account.VersionedSaltedHash) != nil {
-		responder.Error(internal.NewValidation("Invalid username or password."),
+		responder.Error(env.NewValidation("Invalid username or password."),
 			http.StatusBadRequest)
 		return
 	}
@@ -121,7 +121,7 @@ func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	var application account.Application
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected `username` and `password` keys."),
+		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
 			http.StatusBadRequest)
 		return
 	}
@@ -136,7 +136,7 @@ func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if exists {
-		responder.Error(internal.NewValidation("Username is taken. Try another."),
+		responder.Error(env.NewValidation("Username is taken. Try another."),
 			http.StatusBadRequest)
 		return
 	}

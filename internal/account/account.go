@@ -6,7 +6,6 @@ import (
 	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/env"
 )
 
@@ -44,7 +43,7 @@ type Application struct {
 func (a Application) Validate() error {
 	len := len(a.PasswordPlainText)
 	if a.Username == "" {
-		return internal.NewValidation("Username is required.")
+		return env.NewValidation("Username is required.")
 	}
 	lenCheck := len < ZeninAccPasswordMin || len > ZeninAccPasswordMax
 	hasLower := false
@@ -62,7 +61,7 @@ func (a Application) Validate() error {
 	}
 	caseCheck := !hasLower || !hasUpper
 	if lenCheck || caseCheck {
-		return internal.NewValidation("Password must be between 8-100 characters, including upper and lowercase letters and at least one number.")
+		return env.NewValidation("Password must be between 8-100 characters, including upper and lowercase letters and at least one number.")
 	}
 	return nil
 }

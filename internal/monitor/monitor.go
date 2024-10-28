@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/jmkng/zenin/internal"
-	"github.com/jmkng/zenin/internal/log"
+	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
 )
 
@@ -119,7 +119,7 @@ func (m Monitor) Deadline(ctx context.Context) (context.Context, context.CancelF
 // This function should only ever be called on a `Monitor` from the database,
 // it requires essential fields (including id) to be populated.
 func (m Monitor) Poll() measurement.Measurement {
-	log.Debug("poll starting", "monitor(id)", *m.Id)
+	env.Debug("poll starting", "monitor(id)", *m.Id)
 
 	var result measurement.Measurement
 	result.MonitorId = m.Id
@@ -147,7 +147,7 @@ func (m Monitor) Poll() measurement.Measurement {
 	result.UpdatedAt = start
 	result.Duration = duration
 
-	log.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
+	env.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
 		"state", result.State, "hint", result.StateHint)
 	return result
 }
@@ -192,7 +192,7 @@ func (m Monitor) Validate() error {
 	}
 
 	if len(errors) > 0 {
-		return internal.NewValidation(errors...)
+		return env.NewValidation(errors...)
 	}
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jmkng/zenin/internal"
+	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
 )
@@ -78,7 +78,7 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 	var incoming monitor.Monitor
 	err := StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(internal.
+		responder.Error(env.
 			NewValidation("Received unexpected data, keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
 			http.StatusBadRequest)
 		return
@@ -109,7 +109,7 @@ func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Requ
 
 	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
 	if len(*params.Id) == 0 {
-		responder.Error(internal.NewValidation("Expected `id` query parameter."),
+		responder.Error(env.NewValidation("Expected `id` query parameter."),
 			http.StatusBadRequest)
 		return
 	}
@@ -131,7 +131,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	responder := NewResponder(w)
 
 	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
-	validation := internal.NewValidation()
+	validation := env.NewValidation()
 	if params.Id == nil || len(*params.Id) == 0 {
 		validation.Push("Expected `id` query parameter.")
 	}
@@ -175,7 +175,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	param := chi.URLParam(r, "id")
 	parsed, err := strconv.Atoi(param)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected integer url parameter."),
+		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
 		return
 	}
@@ -188,14 +188,14 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	}
 	if len(found) == 0 {
 		message := fmt.Sprintf("Monitor with id `%v` does not exist.", param)
-		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
+		responder.Error(env.NewValidation(message), http.StatusBadRequest)
 		return
 	}
 
 	var incoming monitor.Monitor
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(internal.NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+		responder.Error(env.NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
 			http.StatusBadRequest)
 		return
 	}
@@ -226,7 +226,7 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 	rid := chi.URLParam(r, "id")
 	pid, err := strconv.Atoi(rid)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected integer url parameter."),
+		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
 		return
 	}
@@ -250,7 +250,7 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	rid := chi.URLParam(r, "id")
 	pid, err := strconv.Atoi(rid)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected integer url parameter."),
+		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
 		return
 	}
@@ -263,7 +263,7 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	}
 	if len(found) == 0 {
 		message := fmt.Sprintf("Monitor with id `%v` does not exist.", pid)
-		responder.Error(internal.NewValidation(message), http.StatusBadRequest)
+		responder.Error(env.NewValidation(message), http.StatusBadRequest)
 		return
 	}
 

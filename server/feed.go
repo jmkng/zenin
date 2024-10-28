@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
 	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/log"
 	"github.com/jmkng/zenin/internal/monitor"
 )
 
@@ -53,7 +52,7 @@ func (f FeedProvider) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 	}
 	connection, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Debug("rejected feed subscriber connection upgrade", "error", err)
+		env.Debug("rejected feed subscriber connection upgrade", "error", err)
 		return
 	}
 

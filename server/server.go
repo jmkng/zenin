@@ -32,11 +32,11 @@ type Server struct {
 
 // Listen will block and start listening.
 func (s *Server) Serve() error {
-	log.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
+	env.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
 
 	mux := chi.NewRouter()
 	if env.Runtime.Kind == env.Dev {
-		log.Warn("cors checks are disabled")
+		env.Warn("cors checks are disabled")
 		mux.Use(Insecure)
 	}
 	mux.Use(Logger)
@@ -73,7 +73,7 @@ func (s *Server) Serve() error {
 		return err
 	}
 
-	log.Debug("server stopping")
+	env.Debug("server stopping")
 	return nil
 }
 

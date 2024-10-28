@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/jmkng/zenin/internal"
-	"github.com/jmkng/zenin/internal/log"
+	"github.com/jmkng/zenin/internal/env"
 )
 
 // NewResponder returns a new `Responder`.
@@ -29,7 +28,7 @@ func (r *Responder) Data(data any, status int) {
 
 	response, err := NewDataPacket(data).JSON()
 	if err != nil {
-		log.Error("responder failed to send data response", "error", err)
+		env.Error("responder failed to send data response", "error", err)
 		return
 	}
 	r.writer.Write(response)
@@ -49,7 +48,7 @@ func (r *Responder) Error(err error, status int) {
 		if err == nil {
 			break
 		}
-		validation, ok := err.(internal.Validation)
+		validation, ok := err.(env.Validation)
 		if ok {
 			client = append(client, validation.Messages()...)
 		}
@@ -59,14 +58,14 @@ func (r *Responder) Error(err error, status int) {
 	if len(client) > 0 {
 		response, err := NewErrorPacket(client...).JSON()
 		if err != nil {
-			log.Error("responder failed to send error response", "error", err)
+			env.Error("responder failed to send error response", "error", err)
 			return
 		}
 
 		r.writer.Write(response)
 	}
 
-	log.Error(origin.Error())
+	env.Error(origin.Error())
 }
 
 // Status will send a status code.

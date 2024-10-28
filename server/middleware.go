@@ -7,12 +7,11 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/log"
 )
 
 func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Info("server request", "remote", r.RemoteAddr, "method", r.Method, "url", r.URL)
+		env.Info("server request", "remote", r.RemoteAddr, "method", r.Method, "url", r.URL)
 		next.ServeHTTP(w, r)
 	})
 }

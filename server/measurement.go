@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/jmkng/zenin/internal"
+	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
 )
 
@@ -47,7 +47,7 @@ func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *htt
 	param := chi.URLParam(r, "id")
 	parsed, err := strconv.Atoi(param)
 	if err != nil {
-		responder.Error(internal.NewValidation("Expected integer url parameter."),
+		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
 		return
 	}
