@@ -27,7 +27,7 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 	span := measurement.NewSpan(measurement.Ok)
 	command := *m.PluginName
 
-	path := filepath.Join(env.Runtime.PluginDir, command)
+	path := filepath.Join(env.Runtime.PluginsDir, command)
 	_, err := os.Stat(path)
 	if err != nil {
 		span.Downgrade(measurement.Dead, "Plugin was not found.")
