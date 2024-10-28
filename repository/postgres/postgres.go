@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/repository"
-
 	_ "github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmkng/zenin/internal/env"
+	"github.com/jmkng/zenin/internal/repository"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -38,8 +37,10 @@ type PostgresRepository struct {
 func (p PostgresRepository) Validate() (bool, error) {
 	var rows []string
 	if err := p.db.Select(&rows,
-		`SELECT table_name FROM information_schema.tables WHERE table_schema = 
-    	'public' AND table_type = 'BASE TABLE'`); err != nil {
+		`SELECT table_name 
+		FROM information_schema.tables 
+		WHERE table_schema = 'public' 
+		AND table_type = 'BASE TABLE'`); err != nil {
 		return false, err
 	}
 	for _, table := range repository.SchemaTables {
