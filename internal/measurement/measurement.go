@@ -107,6 +107,8 @@ const (
 	Plugin ProbeKind = "PLUGIN"
 )
 
+// ProbeKindFromString returns an equivalent `ProbeKind` from the provided string.
+// The value parameter is normalized to lowercase.
 func ProbeKindFromString(value string) (ProbeKind, error) {
 	switch strings.ToLower(value) {
 	case "http":

@@ -103,7 +103,7 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
 	return id, err
 }
 
-// SelectCertificate implements `MeasurementRepository.GetCertificate` for `PostgresRepository`.
+// SelectCertificate implements `MeasurementRepository.SelectCertificate` for `PostgresRepository`.
 func (p PostgresRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
 	query := `SELECT 
         id "certificate_id", 

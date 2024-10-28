@@ -18,6 +18,7 @@ type MetaService struct {
 	Repository account.AccountRepository
 }
 
+// GetSummary returns a `Meta` describing the state of the server.
 func (m MetaService) GetSummary(ctx context.Context) (Meta, error) {
 	total, err := m.Repository.SelectAccountTotal(ctx)
 	if err != nil {
@@ -29,9 +30,10 @@ func (m MetaService) GetSummary(ctx context.Context) (Meta, error) {
 	}, nil
 }
 
+// GetPlugins returns a list of the plugins in the plugins directory.
 func (m MetaService) GetPlugins() ([]string, error) {
 	var plugins []string
-	entries, err := os.ReadDir(env.Runtime.PluginDir)
+	entries, err := os.ReadDir(env.Runtime.PluginsDir)
 	if err != nil {
 		return plugins, err
 	}

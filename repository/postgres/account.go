@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// SelectAccountTotal implements `AccountRepository.SelectAccountTotal` for `PostgresRepository`.
 func (p PostgresRepository) SelectAccountTotal(ctx context.Context) (int64, error) {
 	var count int64
 	query := `SELECT COUNT(*) FROM account;`
@@ -20,6 +21,7 @@ func (p PostgresRepository) SelectAccountTotal(ctx context.Context) (int64, erro
 	return count, nil
 }
 
+// SelectAccountByUsername implements `AccountRepository.SelectAccountByUsername` for `PostgresRepository`.
 func (p PostgresRepository) SelectAccountByUsername(ctx context.Context, username string) (*account.Account, error) {
 	var account account.Account
 
@@ -38,6 +40,7 @@ func (p PostgresRepository) SelectAccountByUsername(ctx context.Context, usernam
 	return &account, nil
 }
 
+// InsertAccount implements `AccountRepository.InsertAccount` for `PostgresRepository`.
 func (p PostgresRepository) InsertAccount(ctx context.Context, account account.Account) (int, error) {
 	if account.Id != nil {
 		panic("attempting to insert account with non-nil id")
