@@ -1,4 +1,4 @@
-package bundle
+package service
 
 import (
 	"github.com/jmkng/zenin/internal/account"
