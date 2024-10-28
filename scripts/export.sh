@@ -8,6 +8,7 @@ export ZENIN_DB_USERNAME="username"
 export ZENIN_DB_PASSWORD="password"
 export ZENIN_RT_LEVEL="dev"
 export ZENIN_RT_PORT="50010"
+export ZENIN_RT_COLOR="true"
 
 export ZENIN_CONTAINER="zenin"
 export ZENIN_DB_CONTAINER="zenin-db"
