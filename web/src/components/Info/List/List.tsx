@@ -19,10 +19,9 @@ export default function List(props: ListProps) {
     const listRef = useRef<HTMLDivElement>(null);
 
     return <div className="zenin__list_component" ref={listRef}>
-        <div className="zenin__list_intro">
+        <div className={["zenin__list_intro", data.length == 0 ? 'empty' : ''].join(' ')}>
             <span className="zenin__list_intro_title">{title}</span>
         </div>
-
 
         <div className="zenin__list_body">
             {data.map((value, index) =>
@@ -33,7 +32,7 @@ export default function List(props: ListProps) {
                     {isKeyValueItem(value) ? <Pair item={value} /> : <Single item={value} />}
                 </div>)}
         </div>
-    </div>
+    </div >
 }
 
 function Pair({ item }: { item: KeyValueItem }) {

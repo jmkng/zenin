@@ -17,8 +17,11 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--px-b) var(--px-d);
-    border-bottom: 1px solid var(--off-b);
     color: var(--mid);
+}
+
+.zenin__list_intro:not(.empty) {
+    border-bottom: 1px solid var(--off-b);
 }
 
 .zenin__list_item_container {
