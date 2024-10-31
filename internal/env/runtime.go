@@ -67,9 +67,9 @@ func NewRuntimeEnv() *RuntimeEnv {
 		redirect = uint16(redirectPort)
 	}
 
-	color := false
-	if os.Getenv(rtColorKey) == "true" {
-		color = true
+	color := true
+	if os.Getenv(rtColorKey) == "false" {
+		color = false
 	}
 
 	signSecret, err := getSignSecret()
