@@ -145,7 +145,6 @@ func (r RuntimeEnv) Health(d *Diagnostic) {
 	} else {
 		base, err := os.Stat(r.BaseDir)
 		if err != nil || !base.IsDir() {
-			fmt.Println("a")
 			if errors.Is(err, fs.ErrNotExist) {
 				if err := os.MkdirAll(r.BaseDir, 0755); err != nil {
 					d.Error(fmt.Sprintf("make sure base directory exists and is accessible: `%v`", r.BaseDir))
