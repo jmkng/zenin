@@ -51,7 +51,7 @@ VALUES
     'UDP'),
     ('Venus', 
     'HTTP', 
-    true, 
+    false, 
     30, 
     10, 
     NULL, 
