@@ -1,15 +1,15 @@
 FROM golang:1.22-alpine AS builder
+RUN apk add --no-cache make git nodejs npm
 WORKDIR /build
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o zenin ./cmd/zenin.go
+RUN cd web && npm install
+RUN make build
 
 FROM alpine:latest
 WORKDIR /build
 COPY --from=builder /build/zenin .
-#COPY cert.pem .
-#COPY key.pem .
 EXPOSE 50010
 CMD ["./zenin"]

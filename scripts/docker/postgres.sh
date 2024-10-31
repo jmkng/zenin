@@ -6,6 +6,7 @@ if docker ps -a --format '{{.Names}}' | grep -q $ZENIN_DB_CONTAINER; then
 fi
 
 docker network create zenin-network
+
 docker run \
     --network zenin-network \
     -p $ZENIN_DB_PORT:$ZENIN_DB_PORT \
