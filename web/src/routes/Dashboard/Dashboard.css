@@ -77,6 +77,19 @@
   box-shadow: 0px 15px 0px 0px var(--background);
 }
 
+.zenin__dashboard_empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.zenin__dashboard_empty_message {
+    color: var(--mid);
+    margin-bottom: var(--px-b);
+}
+
 @container dashboard-container (max-width: 800px) {
   .zenin__dashboard.split .zenin__dashboard_monitors {
     display: none;

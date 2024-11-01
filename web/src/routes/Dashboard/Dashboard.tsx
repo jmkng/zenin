@@ -11,6 +11,7 @@ import SelectMenu from '../../components/Menu/SelectMenu';
 import Monitor from '../../components/Monitor/Monitor';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import Settings from '../../components/Settings/Settings';
+import Button from '../../components/Button/Button';
 
 import './Dashboard.css';
 
@@ -61,23 +62,15 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
 
-    const activity = split
-        ? <div className={"zenin__dashboard_activity"}>
-            {monitor.context.state.split.isEditorPane()
-                ? <Editor
-                    state={monitor.context.state.split.pane}
-                    onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
-                />
-                : null}
-            {monitor.context.state.split.isViewPane() ? <Info state={monitor.context.state.split.pane} /> : null}
-            {monitor.context.state.split.isSettingsPane() ? <Settings /> : null}
-        </div>
-        : null;
+    const handleDraft = () => {
+        monitor.context.dispatch({ type: 'draft' });
+    }
 
     return <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
         <div className="zenin__dashboard_side">
             <Sidebar />
         </div>
+
         <div className="zenin__dashboard_main">
             <div className="zenin__dashboard_main_top">
                 <div className={["zenin__dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
@@ -86,10 +79,31 @@ export default function Dashboard() {
                 <DefaultMenu />
             </div>
             <div className="zenin__dashboard_main_bottom">
-                <div className="zenin__dashboard_monitors">
-                    {sorted.map((n, i) => <Monitor key={i} monitor={n} service={monitor.service} />)}
-                </div>
-                {activity}
+                {sorted.length > 0
+                    ? <div className="zenin__dashboard_monitors">
+                        {sorted.map((n, i) => <Monitor key={i} monitor={n} service={monitor.service} />)}
+                    </div>
+                    : <div className="zenin__dashboard_empty">
+                        <span className="zenin__dashboard_empty_message">No monitors have been created.</span>
+                        <Button border={true} onClick={handleDraft} tooltip={{ text: "Add Monitor" }}>
+                            <span className="zenin__h_center zenin__menu_add">
+                                Add Monitor
+                            </span>
+                        </Button>
+                    </div>}
+
+                {split
+                    ? <div className={"zenin__dashboard_activity"}>
+                        {monitor.context.state.split.isEditorPane()
+                            ? <Editor
+                                state={monitor.context.state.split.pane}
+                                onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
+                            />
+                            : null}
+                        {monitor.context.state.split.isViewPane() ? <Info state={monitor.context.state.split.pane} /> : null}
+                        {monitor.context.state.split.isSettingsPane() ? <Settings /> : null}
+                    </div>
+                    : null}
             </div>
         </div>
     </div>
