@@ -60,7 +60,7 @@ func main() {
 	active, err := bundle.Monitor.GetActive(context.Background())
 	dd(err)
 
-	env.Debug("resuming active monitors", "count", len(active))
+	env.Debug("restoring distributor state", "active", len(active))
 	for _, v := range active {
 		bundle.Monitor.Distributor <- monitor.StartMessage{Monitor: v}
 	}

@@ -47,10 +47,13 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 			return repository, fmt.Errorf("failed to validate repository: %w", err)
 		}
 		if !valid {
-			env.Debug("repository abnormal, attempting database migration")
-			return repository, repository.Migrate()
+			env.Debug("repository migration starting")
+			if err := repository.Migrate(); err != nil {
+				return repository, err
+			}
+			env.Debug("repository migration stopping")
 		}
-		env.Debug("repository validation stopping", "status", "normal")
+		env.Debug("repository validation stopping")
 	}
 
 	return repository, err
