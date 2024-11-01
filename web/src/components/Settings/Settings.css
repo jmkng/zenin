@@ -1,8 +1,6 @@
 .zenin__settings {
     height: 100%;
-    padding: var(--px-c);
     border-radius: var(--rounded);
-    border: 1px solid var(--off-b);
 }
 
 .zenin__settings_about {
