@@ -92,7 +92,7 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 		for {
 			kind, message, err := subscriber.ReadMessage()
 			if err != nil {
-				env.Error("distributor discarding broken feed subscriber connection", "subscriber(id)", key)
+				env.Debug("distributor discarding broken feed subscriber connection", "subscriber(id)", key)
 				loopback <- UnsubscribeMessage{Id: key}
 				break
 			} else if kind == websocket.CloseMessage {
@@ -171,7 +171,7 @@ func (d *Distributor) poll(loopback chan<- any, m Monitor) {
 func (d *Distributor) stop(id int) {
 	channel, exists := d.polling[id]
 	if !exists {
-		env.Warn("distributor dropped no-op stop request")
+		env.Debug("distributor dropped no-op stop request")
 		return
 	}
 
@@ -201,11 +201,10 @@ func (d *Distributor) distributeMeasurement(loopback chan<- any, m measurement.M
 		err := v.WriteMessage(websocket.TextMessage, message)
 		if err != nil {
 			discard = append(discard, i)
-			env.Warn("distributor failed to send message to feed subscriber (discarding connection)")
 		}
 	}
 	for _, v := range discard {
-		env.Error("distributor discarding broken feed subscriber connection", "subscriber(id)", v)
+		env.Debug("distributor discarding broken feed subscriber connection", "subscriber(id)", v)
 		loopback <- UnsubscribeMessage{Id: v}
 	}
 }
