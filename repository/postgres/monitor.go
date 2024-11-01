@@ -158,6 +158,10 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	if err != nil {
 		return []monitor.Monitor{}, err
 	}
+	if len(mo) == 0 {
+		return []monitor.Monitor{}, nil
+	}
+
 	for _, v := range mo {
 		distinct = append(distinct, *v.Id)
 		store[*v.Id] = &v
