@@ -72,10 +72,57 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 
 // SelectMonitor implements `MonitorRepository.SelectMonitor` for `PostgresRepository`.
 func (p PostgresRepository) SelectMonitor(ctx context.Context, measurements int, params *monitor.SelectMonitorParams) ([]monitor.Monitor, error) {
+	var monitors []monitor.Monitor
+	var err error
+
 	if measurements > 0 {
-		return p.selectMonitorRelated(ctx, params, measurements)
+		monitors, err = p.selectMonitorRelated(ctx, params, measurements)
+	} else {
+		monitors, err = p.selectMonitor(ctx, params)
 	}
-	return p.selectMonitor(ctx, params)
+	if err != nil || len(monitors) == 0 {
+		return []monitor.Monitor{}, err
+	}
+
+	store := make(map[int]*monitor.Monitor)
+	var distinct []int
+
+	for _, v := range monitors {
+		distinct = append(distinct, *v.Id)
+		store[*v.Id] = &v
+	}
+
+	var builder = zsql.NewBuilder(zsql.Numbered)
+	builder.Push(`SELECT 
+		id "notification_id",
+		created_at,
+		updated_at,
+		monitor_id "notification_monitor_id",
+        plugin_name,
+        plugin_args,
+        threshold
+    FROM notification
+    WHERE monitor_id IN (`)
+	builder.SpreadInt(distinct...)
+	builder.Push(") ORDER BY id DESC")
+
+	no := []monitor.Notification{}
+	err = p.db.SelectContext(ctx, &no, builder.String(), builder.Args()...)
+	if err != nil {
+		return []monitor.Monitor{}, err
+	}
+
+	for _, v := range no {
+		owner := store[*v.MonitorId]
+		owner.Notifications = append(owner.Notifications, v)
+	}
+
+	result := []monitor.Monitor{}
+	for _, v := range store {
+		result = append(result, *v)
+	}
+
+	return result, err
 }
 
 func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.SelectMonitorParams) ([]monitor.Monitor, error) {
@@ -153,16 +200,13 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 	store := make(map[int]*monitor.Monitor)
 	var distinct []int
 
-	mo := []monitor.Monitor{}
-	err := p.db.SelectContext(ctx, &mo, builder.String(), builder.Args()...)
-	if err != nil {
+	monitors := []monitor.Monitor{}
+	err := p.db.SelectContext(ctx, &monitors, builder.String(), builder.Args()...)
+	if err != nil || len(monitors) == 0 {
 		return []monitor.Monitor{}, err
 	}
-	if len(mo) == 0 {
-		return []monitor.Monitor{}, nil
-	}
 
-	for _, v := range mo {
+	for _, v := range monitors {
 		distinct = append(distinct, *v.Id)
 		store[*v.Id] = &v
 	}

@@ -61,21 +61,23 @@ const (
 
 // Monitor is the monitor domain type.
 type Monitor struct {
-	Id            *int                  `json:"id" db:"monitor_id"`
-	CreatedAt     time.Time             `json:"createdAt" db:"created_at"`
-	UpdatedAt     time.Time             `json:"updatedAt" db:"updated_at"`
-	Name          string                `json:"name" db:"name"`
-	Kind          measurement.ProbeKind `json:"kind" db:"monitor_kind"`
-	Active        bool                  `json:"active" db:"active"`
-	Interval      int                   `json:"interval" db:"interval"`
-	Timeout       int                   `json:"timeout" db:"timeout"`
-	Description   *string               `json:"description" db:"description"`
-	RemoteAddress *string               `json:"remoteAddress" db:"remote_address"`
-	RemotePort    *int16                `json:"remotePort" db:"remote_port"`
+	Id            *int                      `json:"id" db:"monitor_id"`
+	CreatedAt     time.Time                 `json:"createdAt" db:"created_at"`
+	UpdatedAt     time.Time                 `json:"updatedAt" db:"updated_at"`
+	Name          string                    `json:"name" db:"name"`
+	Kind          measurement.ProbeKind     `json:"kind" db:"monitor_kind"`
+	Active        bool                      `json:"active" db:"active"`
+	Interval      int                       `json:"interval" db:"interval"`
+	Timeout       int                       `json:"timeout" db:"timeout"`
+	Description   *string                   `json:"description" db:"description"`
+	RemoteAddress *string                   `json:"remoteAddress" db:"remote_address"`
+	RemotePort    *int16                    `json:"remotePort" db:"remote_port"`
+	Measurements  []measurement.Measurement `json:"measurements"`
+	Notifications []Notification            `json:"notifications"`
+
 	PluginFields
 	HTTPFields
 	ICMPFields
-	Measurements []measurement.Measurement `json:"measurements"`
 }
 
 type PluginFields struct {

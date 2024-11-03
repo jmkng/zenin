@@ -369,3 +369,14 @@ VALUES
     'GTS Root R1', 
     '2024-07-01T17:45:24-06:00', 
     '2024-07-01T17:45:24-06:00');
+
+INSERT INTO notification
+    (monitor_id,
+    plugin_name,
+    plugin_args,
+    threshold)
+VALUES
+    (1,
+    'helloworld.sh', 
+    '["one", "two"]',
+    'DEAD')
