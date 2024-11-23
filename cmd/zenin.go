@@ -80,6 +80,6 @@ func dd(err error) {
 	if err == nil {
 		return
 	}
-	fmt.Println(err.Error())
+	env.Error(err.Error())
 	os.Exit(1)
 }

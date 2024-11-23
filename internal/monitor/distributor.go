@@ -84,7 +84,7 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 		}
 	}
 
-	env.Debug("distributor added feed subscriber", "subscriber(id)", key)
+	env.Debug("distributor adding feed subscriber", "subscriber(id)", key)
 	d.subscribers[key] = subscriber
 
 	// Listen for stop message.
@@ -96,11 +96,11 @@ func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn)
 				loopback <- UnsubscribeMessage{Id: key}
 				break
 			} else if kind == websocket.CloseMessage {
-				env.Debug("distributor closed feed subscriber connection", "subscriber(id)", key)
+				env.Debug("distributor closing feed subscriber connection", "subscriber(id)", key)
 				loopback <- UnsubscribeMessage{Id: key}
 				break
 			} else {
-				env.Info("distributor received feed message", "subscriber(id)", key, "message", string(message))
+				env.Debug("distributor received feed message", "subscriber(id)", key, "message", string(message))
 			}
 		}
 	}()
