@@ -1,4 +1,8 @@
+import { useCallback } from "react";
+import { adjustPosition } from "../../internal/layout/graphics";
+
 import CheckIcon from "../Icon/CheckIcon";
+
 import "./DialogMenu.css";
 
 export interface DialogGroup {
@@ -23,9 +27,18 @@ interface DialogMenuProps {
 }
 
 export default function DialogMenu(props: DialogMenuProps) {
-    const { content, side, onItemClick } = props;
+    const {
+        content,
+        side,
+        onItemClick
+    } = props;
 
-    return <div className="zenin__dialog_menu zenin__dialog" data-side={side}>
+    const modalRef = useCallback((node: HTMLDivElement) => {
+        if (node == null) return;
+        adjustPosition(node)
+    }, []);
+
+    return <div ref={modalRef} className="zenin__dialog_menu zenin__dialog" data-side={side}>
         <ul className="zenin__dialog_menu_list">
             {content.every(isDialogGroup)
                 ? content.map((group, index) => <div key={index} className="zenin__dialog_menu_group">
@@ -36,7 +49,7 @@ export default function DialogMenu(props: DialogMenuProps) {
                 </div>)
                 : content.map((item, index) => renderItem(index, item, onItemClick))}
         </ul>
-    </div >
+    </div>
 }
 
 function isDialogGroup(obj: DialogGroup | DialogItem): obj is DialogGroup {
@@ -56,8 +69,16 @@ function renderItem(index: number, item: DialogItem, onItemClick?: () => void) {
             item.onClick(event);
         }}
     >
-        {item.icon && <span className="zenin__dialog_menu_icon_container zenin__h_center">{item.icon}</span>}
+        {item.icon && <span className="zenin__dialog_menu_icon_container zenin__h_center">
+            {item.icon}
+        </span>}
+
         <span>{item.text}</span>
-        {item.active ? <div className="zenin__dialog_menu_item_active"><CheckIcon /></div> : null}
+
+        {item.active
+            ? <div className="zenin__dialog_menu_item_active">
+                <CheckIcon />
+            </div>
+            : null}
     </li>
 }

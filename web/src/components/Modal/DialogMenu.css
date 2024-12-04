@@ -1,9 +1,13 @@
 .zenin__dialog_menu {
     position: absolute;
-    right: calc(var(--px-b) + 100%);
     top: -1px;
-    height: auto;
     min-width: 160px;
+}
+
+.zenin__dialog_menu.zenin__h_limit_bottom {
+    top: unset;
+    right: 0 !important;
+    bottom: calc(var(--px-b) + 100%);
 }
 
 .zenin__dialog_menu[data-side="left"] {

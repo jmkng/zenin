@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { adjustPosition } from '../../internal/layout/graphics';
+import { adjustPosition, unlimit } from '../../internal/layout/graphics';
 import DialogMenu, { DialogGroup, DialogItem, DialogSideKind } from '../Modal/DialogMenu';
 
 import './Button.css';
@@ -52,25 +52,25 @@ export default function Button(props: ButtonProps) {
             if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) setDialogVisible(false)
         };
         document.addEventListener('click', handleClick, true);
+
         return () => {
             document.removeEventListener('click', handleClick, true);
         };
     }, [dialogVisible])
 
     const handleHideTooltip = () => {
-        const tooltipElement = tooltipRef.current;
-        if (!tooltipElement) return;
-        tooltipElement.classList.remove('visible')
-        tooltipElement.classList.remove('zenin__h_limit_top')
-        tooltipElement.classList.remove('zenin__h_limit_right')
-        tooltipElement.classList.remove('zenin__h_limit_bottom')
-        tooltipElement.classList.remove('zenin__h_limit_left')
+        const element = tooltipRef.current;
+        if (!element) return;
+
+        element.classList.remove('visible')
+        unlimit(element);
     };
 
     useEffect(() => {
         const handleShowTooltip = () => {
             const tooltipElement = tooltipRef.current;
             if (!tooltipElement || !tooltip) return;
+
             tooltipElement.classList.add('visible')
             adjustPosition(tooltipElement);
         };
@@ -114,10 +114,13 @@ export default function Button(props: ButtonProps) {
         {icon
             ? <span className={["zenin__button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
             : null}
+
         {children}
+
         {tooltip && !dialogVisible
             ? <div className="zenin__tooltip" ref={tooltipRef}>{tooltip.text}</div>
             : null}
+
         {dialog && dialogVisible
             ? <div role="dialog" ref={dialogRef} onClick={event => event.stopPropagation()}>
                 <DialogMenu content={dialog.content} side={dialog.side} onItemClick={() => setDialogVisible(false)} />

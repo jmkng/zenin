@@ -12,26 +12,6 @@
   margin-right: auto;
 }
 
-.zenin__h_limit_top {
-  bottom: unset !important;
-  top: 0 !important;
-}
-
-.zenin__h_limit_right {
-  left: unset !important;
-  right: 0 !important;
-}
-
-.zenin__h_limit_bottom {
-  top: unset !important;
-  bottom: 0 !important;
-}
-
-.zenin__h_limit_left {
-  right: unset !important;
-  left: 0 !important;
-}
-
 .zenin__h_stack_vertical {
   display: flex;
   flex-direction: column;

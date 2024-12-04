@@ -7,6 +7,26 @@
   transform: translate(-50%, -50%);
 }
 
+.zenin__dialog_modal.zenin__h_limit_top {
+  bottom: unset !important;
+  top: 0 !important;
+}
+
+.zenin__dialog_modal.zenin__h_limit_right {
+  left: unset !important;
+  right: 0 !important;
+}
+
+.zenin__dialog_modal.zenin__h_limit_bottom {
+  top: unset !important;
+  bottom: 0 !important;
+}
+
+.zenin__dialog_modal.zenin__h_limit_left {
+  right: unset !important;
+  left: 0 !important;
+}
+
 @media (max-width: 700px) {
   .zenin__dialog_modal {
     max-width: none;

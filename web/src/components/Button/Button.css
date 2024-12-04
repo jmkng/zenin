@@ -77,15 +77,13 @@
   display: block;
 }
 
-.zenin__tooltip.limit_center {
-  left: 50%;
-  transform: translateX(-50%);
+.zenin__tooltip.zenin__h_limit_left {
+  right: unset !important;
+  left: 0 !important;
 }
 
-.zenin__tooltip.limit_right {
-  right: 0; 
+.zenin__tooltip.zenin__h_limit_right {
+  left: unset !important;
+  right: 0 !important;
 }
 
-.zenin__tooltip.limit_left {
-  left: 0;
-}
