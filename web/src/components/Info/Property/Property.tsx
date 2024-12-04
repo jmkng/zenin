@@ -49,7 +49,7 @@ export default function Property(props: PropertyProps) {
                 <Expand title={"Standard Output"} text={measurement.pluginStderr} />
             </div>
             : null}
-        {measurement.stateHint ?
+        {measurement.stateHint && measurement.stateHint.length > 0 ?
             <div className="zenin__property_hints zenin__h_margin_top">
                 <List title="Hints" data={measurement.stateHint} />
             </div>
