@@ -24,32 +24,30 @@ export default function TextInput(props: TextProps) {
         placeholder
     } = props;
 
-    return (
-        <div className="zenin__text_input zenin__input_container zenin__h_stack_vertical">
-            {label ?
-                <label
-                    className="zenin__text_input_label zenin__input_label"
-                    htmlFor={name}
-                >
-                    {label}
-                </label>
-                : null}
+    return <div className="zenin__text_input zenin__input_container zenin__h_stack_vertical">
+        {label ?
+            <label
+                className="zenin__text_input_label zenin__input_label"
+                htmlFor={name}
+            >
+                {label}
+            </label>
+            : null}
 
-            {subtext ?
-                <p className="zenin__text_input_subtext zenin__input_subtext">
-                    {subtext}
-                </p>
-                : null}
+        {subtext ?
+            <p className="zenin__text_input_subtext zenin__input_subtext">
+                {subtext}
+            </p>
+            : null}
 
-            <input
-                className="zenin__text_input_box zenin__input"
-                type={type || "text"}
-                onChange={((event: ChangeEvent<HTMLInputElement>) => event.target.value == "" ? onChange(null) : onChange(event.target.value))}
-                name={name}
-                placeholder={placeholder}
-                id={name}
-                value={value == null ? "" : value}
-            />
-        </div>
-    )
+        <input
+            className="zenin__text_input_box zenin__input"
+            type={type || "text"}
+            onChange={((event: ChangeEvent<HTMLInputElement>) => event.target.value == "" ? onChange(null) : onChange(event.target.value))}
+            name={name}
+            placeholder={placeholder}
+            id={name}
+            value={value == null ? "" : value}
+        />
+    </div>
 }

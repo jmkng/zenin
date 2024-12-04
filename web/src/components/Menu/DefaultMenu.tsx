@@ -99,5 +99,5 @@ export default function DefaultMenu() {
                 </span>
             </Button>
         </div>
-    </div>
+    </div >
 }

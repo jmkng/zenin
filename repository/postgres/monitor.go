@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/jmkng/zenin/internal/measurement"
@@ -12,6 +14,11 @@ import (
 
 // InsertMonitor implements `MonitorRepository.InsertMonitor` for `PostgresRepository`.
 func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.Monitor) (int, error) {
+	tx, err := p.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+
 	var id int
 	query := `INSERT INTO monitor 
 		(name,
@@ -41,7 +48,7 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
     VALUES 
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
     RETURNING id`
-	row := p.db.QueryRowContext(ctx, query,
+	row := tx.QueryRowContext(ctx, query,
 		monitor.Name,
 		monitor.CreatedAt,
 		monitor.UpdatedAt,
@@ -66,8 +73,19 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		monitor.ICMPCount,
 		monitor.ICMPTTL,
 		monitor.ICMPProtocol)
-	err := row.Scan(&id)
-	return id, err
+	if err = row.Scan(&id); err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	if len(monitor.Events) > 0 {
+		if err = p.insertEvents(ctx, tx, id, monitor.Events); err != nil {
+			tx.Rollback()
+			return 0, err
+		}
+	}
+
+	return id, tx.Commit()
 }
 
 // SelectMonitor implements `MonitorRepository.SelectMonitor` for `PostgresRepository`.
@@ -94,27 +112,29 @@ func (p PostgresRepository) SelectMonitor(ctx context.Context, measurements int,
 
 	var builder = zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT 
-		id "notification_id",
-		created_at,
-		updated_at,
-		monitor_id "notification_monitor_id",
+		id "event_id",
+		monitor_id "event_monitor_id",
         plugin_name,
         plugin_args,
         threshold
-    FROM notification
+    FROM event
     WHERE monitor_id IN (`)
 	builder.SpreadInt(distinct...)
 	builder.Push(") ORDER BY id DESC")
 
-	no := []monitor.Notification{}
+	no := []monitor.Event{}
 	err = p.db.SelectContext(ctx, &no, builder.String(), builder.Args()...)
 	if err != nil {
 		return []monitor.Monitor{}, err
 	}
 
+	sort.Slice(no, func(i, j int) bool {
+		return *no[i].Id < *no[j].Id
+	})
+
 	for _, v := range no {
 		owner := store[*v.MonitorId]
-		owner.Notifications = append(owner.Notifications, v)
+		owner.Events = append(owner.Events, v)
 	}
 
 	result := []monitor.Monitor{}
@@ -302,7 +322,18 @@ func (p PostgresRepository) SelectMeasurement(ctx context.Context, id int, param
 
 // UpdateMonitor implements `MonitorRepository.UpdateMonitor` for `PostgresRepository`.
 func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.Monitor) error {
-	const query string = `UPDATE monitor SET
+	tx, err := p.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	const q1 string = `DELETE FROM event WHERE monitor_id = $1`
+	if _, err := tx.ExecContext(ctx, q1, monitor.Id); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	const q2 string = `UPDATE monitor SET
         name = $1,
 		updated_at = $2,
 		kind = $3,
@@ -327,7 +358,7 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		icmp_ttl = $22,
 		icmp_protocol = $23
     WHERE id = $24`
-	_, err := p.db.ExecContext(ctx, query,
+	if _, err = tx.ExecContext(ctx, q2,
 		monitor.Name,
 		monitor.UpdatedAt,
 		monitor.Kind,
@@ -351,8 +382,19 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		monitor.ICMPCount,
 		monitor.ICMPTTL,
 		monitor.ICMPProtocol,
-		monitor.Id)
-	return err
+		monitor.Id); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if len(monitor.Events) > 0 {
+		if err := p.insertEvents(ctx, tx, *monitor.Id, monitor.Events); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 // DeleteMonitor implements `MonitorRepository.DeleteMonitor` for `PostgresRepository`.
@@ -380,4 +422,18 @@ func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active 
 
 	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
 	return err
+}
+
+func (p PostgresRepository) insertEvents(ctx context.Context, tx *sql.Tx, id int, e []monitor.Event) error {
+	const q3 string = `INSERT INTO event 
+        (monitor_id, plugin_name, plugin_args, threshold)
+        VALUES ($1, $2, $3, $4)`
+
+	for _, v := range e {
+		if _, err := tx.ExecContext(ctx, q3, id, v.PluginName, v.PluginArgs, v.Threshold); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

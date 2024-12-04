@@ -370,7 +370,7 @@ VALUES
     '2024-07-01T17:45:24-06:00', 
     '2024-07-01T17:45:24-06:00');
 
-INSERT INTO notification
+INSERT INTO event
     (monitor_id,
     plugin_name,
     plugin_args,

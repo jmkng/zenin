@@ -1,6 +1,6 @@
 import { useMetaContext } from "../../internal/meta";
 import { useEffect, useMemo, useState } from "react";
-import { ACTIVE_UI, HTTP_UI, ICMP_UI, INACTIVE_UI, Monitor, monitorEquals, PLUGIN_UI, TCP_UI, useMonitorContext, } from "../../internal/monitor";
+import { ACTIVE_UI, HTTP_UI, ICMP_UI, INACTIVE_UI, Monitor, monitorEquals, Event, PLUGIN_UI, TCP_UI, useMonitorContext, } from "../../internal/monitor";
 import { EditorPane } from "../../internal/monitor/split";
 import {
     CLIENTERROR_API,
@@ -43,6 +43,7 @@ import TextAreaInput from "../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../Input/TextInput/TextInput";
 import PairListInput from "../Input/PairListInput/PairListInput";
 import ToggleInput from "../Input/ToggleInput/ToggleInput";
+import EventInput from "../Input/EventInput/EventInput";
 
 import "./Editor.css";
 
@@ -56,7 +57,7 @@ export default function Editor(props: EditorProps) {
     const meta = { context: useMetaContext() };
     const monitor = { context: useMonitorContext() }
 
-    const base = useMemo(() => reset(state.monitor), [state.monitor]);
+    const base = useMemo(() => reset(state.monitor, meta.context.state), [state.monitor]);
     const [editor, setEditor] = useState<EditorState>(split(base))
 
     useEffect(() => setEditor(prev => ({ ...prev, ...split(base) })), [base])
@@ -77,6 +78,28 @@ export default function Editor(props: EditorProps) {
     const hasValidIcmpWait = useMemo(() => isValidNonZeroNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
     const hasValidIcmpCount = useMemo(() => isValidNonZeroNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
     const hasValidIcmpTtl = useMemo(() => isValidNonZeroNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
+
+    type eventFields = 'pluginName' | 'pluginArgs' | 'threshold';
+
+    const updateEvent = (index: number, field: eventFields, value: any) => {
+        setEditor(prev => ({
+            ...prev,
+            draft: {
+                ...prev.draft,
+                events: prev.draft.events!.map((n, i) => i === index ? { ...n, [field]: value } : n)
+            }
+        }));
+    };
+
+    const deleteEvent = (index: number) => {
+        setEditor(prev => ({
+            ...prev,
+            draft: {
+                ...prev.draft,
+                events: prev.draft.events!.filter((_, i) => i !== index)
+            }
+        }));
+    };
 
     return <div className="zenin__detail_component">
         <div className="zenin__detail_body">
@@ -360,20 +383,66 @@ export default function Editor(props: EditorProps) {
                 : null}
 
             {editor.draft.kind == PLUGIN_API
-                ? <PluginInput
-                    plugin={{
-                        subtext: (<span>Choose the <a href="#">plugin</a> used to perform the poll.</span>),
-                        value: editor.draft.pluginName,
-                        onChange: pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))
-                    }}
-                    args={{
-                        subtext: "Arguments passed to the plugin.",
-                        value: editor.draft.pluginArgs,
-                        onChange: pluginArgs => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))
-                    }}
-                />
+                ? <div className="zenin__detail_spaced">
+                    <PluginInput
+                        plugin={{
+                            subtext: (<span>Choose a <a href="#">plugin</a> to probe the monitor.</span>),
+                            value: editor.draft.pluginName,
+                            onChange: pluginName => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginName } }))
+                        }}
+                        args={{
+                            subtext: "Arguments passed to the plugin.",
+                            value: editor.draft.pluginArgs,
+                            onChange: pluginArgs => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))
+                        }}
+                    />
+                </div>
                 : null}
-        </div >
+
+            {editor.draft.events && editor.draft.events.length > 0
+                ? <div className="zenin__detail_events">
+                    <span className="zenin__input_label">Events</span>
+                    {editor.draft.events.map((event, index) => <div key={index} className="zenin__detail_event_container">
+                        <div className="zenin__detail_event">
+                            <EventInput
+                                plugin={{
+                                    value: event.pluginName,
+                                    onChange: value => updateEvent(index, 'pluginName', value)
+                                }}
+                                args={{
+                                    value: event.pluginArgs,
+                                    onChange: value => updateEvent(index, 'pluginArgs', value)
+                                }}
+                                threshold={{
+                                    value: event.threshold,
+                                    onChange: value => updateEvent(index, 'threshold', value)
+                                }}
+                                onDelete={() => deleteEvent(index)}
+                            />
+                        </div>
+                    </div>)}
+                </div>
+                : null}
+
+            <Button
+                border={true}
+                onClick={() => setEditor(prev => ({
+                    ...prev,
+                    draft: {
+                        ...prev.draft,
+                        events: [
+                            ...(prev.draft.events || []),
+                            {
+                                pluginName: (meta.context.state.plugins[0] || null),
+                                pluginArgs: null, threshold: null
+                            } as Event
+                        ]
+                    }
+                }))}
+            >
+                <span>Add Event</span>
+            </Button>
+        </div>
 
         <div className="zenin__detail_controls">
             <Button
@@ -391,5 +460,5 @@ export default function Editor(props: EditorProps) {
                 <span>Close</span>
             </Button>
         </div>
-    </div >
+    </div>
 }

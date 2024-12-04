@@ -1,4 +1,5 @@
-import { Monitor, PairListValue } from "../../internal/monitor";
+import { MetaState } from "../../internal/meta/reducer";
+import { Monitor, Event, PairListValue } from "../../internal/monitor";
 import {
     CLIENTERROR_API,
     GET_API,
@@ -16,38 +17,42 @@ import {
 /** EditorState contains two seperate (!=) instances of `Draft`, one for the current values and one for the original. */
 export type EditorState = { draft: Draft, original: Draft };
 
-export const defaults = {
-    name: null,
-    kind: PLUGIN_API,
-    active: false,
-    interval: 1800,
-    timeout: 10,
-    description: null,
-    remoteAddress: null,
-    remotePort: null,
-    pluginName: null,
-    pluginArgs: null,
-    httpRange: SUCCESSFUL_API,
-    httpMethod: GET_API,
-    httpRequestHeaders: null,
-    httpRequestBody: null,
-    httpExpiredCertMod: OFF_API,
-    httpCaptureHeaders: false,
-    httpCaptureBody: false,
-    icmpSize: 56,
-    icmpWait: 100,
-    icmpCount: 3,
-    icmpTtl: 64,
-    icmpProtocol: ICMP_API
-};
-
 /** Perform a deep clone of the provided `Monitor` and cast it to `Draft`, updating any missing values. */
-export function reset(value: Monitor | null): Draft {
+export function reset(value: Monitor | null, state: MetaState): Draft {
+    const defaults = {
+        name: null,
+        kind: PLUGIN_API,
+        active: false,
+        interval: 1800,
+        timeout: 10,
+        description: null,
+        remoteAddress: null,
+        remotePort: null,
+        pluginName: state.plugins[0] || null,
+        pluginArgs: null,
+        httpRange: SUCCESSFUL_API,
+        httpMethod: GET_API,
+        httpRequestHeaders: null,
+        httpRequestBody: null,
+        httpExpiredCertMod: OFF_API,
+        httpCaptureHeaders: false,
+        httpCaptureBody: false,
+        icmpSize: 56,
+        icmpWait: 100,
+        icmpCount: 3,
+        icmpTtl: 64,
+        icmpProtocol: ICMP_API,
+        events: null
+    };
+
     if (value == null) return defaults;
 
     const draft = { ...value } as Draft;
-    //@ts-expect-error Ignore type for assignment.
-    for (const [key, value] of Object.entries(draft)) if (value === null) draft[key] = defaults[key];
+    for (const [key, value] of Object.entries(draft)) {
+        //@ts-expect-error Ignore type for assignment.
+        if (value === null) draft[key] = defaults[key];
+    }
+
     return draft;
 }
 
@@ -96,16 +101,18 @@ export interface Draft {
     icmpCount: number | null,
     icmpTtl: number | null,
     icmpProtocol: string,
+    events: Event[] | null
 }
 
 export function isValidMonitor(draft: Draft): boolean {
-    if (
-        !isValidName(draft.name)
-        || !isValidState(draft.active)
-        || !isValidInterval(draft.interval)
-        || !isValidTimeout(draft.timeout)
-        || !isValidKind(draft.kind)
-    ) return false;
+    if (!isValidName(draft.name) || !isValidState(draft.active) || !isValidInterval(draft.interval)
+        || !isValidTimeout(draft.timeout) || !isValidKind(draft.kind)) return false;
+
+    if (draft.events != null) {
+        for (const n of draft.events) {
+            if (!isValidEvent(n)) return false;
+        }
+    }
 
     switch (draft.kind) {
         case HTTP_API: return isValidHTTP(draft)
@@ -131,6 +138,11 @@ function isValidTCP(draft: Draft): boolean {
 
 function isValidPlugin(draft: Draft): boolean {
     if (!draft.pluginName) return false;
+
+    if (draft.pluginArgs && draft.pluginArgs.length > 0) {
+        for (const n of draft.pluginArgs) if (n.trim() == "") return false;
+    }
+
     return true;
 }
 
@@ -172,78 +184,72 @@ export function isValidRemotePort(port: number | null): boolean {
     return port != null && port >= 0 && port <= 65535;
 }
 
+export function isValidEvent(event: Event): boolean {
+    if (event.pluginName == null || event.pluginName.trim() == "") return false;
+
+    if (event.pluginArgs && event.pluginArgs.length > 0) {
+        for (const n of event.pluginArgs) if (n.trim() == "") return false;
+    }
+
+    return true;
+};
+
 export function sanitize(draft: Draft): Monitor {
     const monitor = { ...draft } as Monitor;
     switch (monitor.kind) {
         case HTTP_API:
-            sHTTP(monitor);
+            monitor.icmpSize = null;
+            monitor.icmpCount = null;
+            monitor.icmpProtocol = null;
+            monitor.icmpWait = null;
+            monitor.icmpTtl = null;
+            monitor.pluginName = null;
+            monitor.pluginArgs = null;
             break;
         case TCP_API:
-            sTCP(monitor);
+            monitor.httpRequestHeaders = null;
+            monitor.httpRequestBody = null;
+            monitor.httpExpiredCertMod = null;
+            monitor.httpCaptureHeaders = null;
+            monitor.httpCaptureBody = null;
+            monitor.httpMethod = null;
+            monitor.httpRange = null;
+            monitor.icmpSize = null;
+            monitor.icmpCount = null;
+            monitor.icmpProtocol = null;
+            monitor.icmpWait = null;
+            monitor.icmpTtl = null;
+            monitor.pluginName = null;
+            monitor.pluginArgs = null;
             break;
         case ICMP_API:
-            sICMP(monitor);
+            monitor.remotePort = null;
+            monitor.httpRequestHeaders = null;
+            monitor.httpRequestBody = null;
+            monitor.httpExpiredCertMod = null;
+            monitor.httpCaptureHeaders = null;
+            monitor.httpCaptureBody = null;
+            monitor.httpMethod = null;
+            monitor.httpRange = null;
+            monitor.pluginName = null;
             break;
         case PLUGIN_API:
-            sPlugin(monitor);
+            monitor.remoteAddress = null;
+            monitor.remotePort = null;
+            monitor.httpRequestHeaders = null;
+            monitor.httpRequestBody = null;
+            monitor.httpExpiredCertMod = null;
+            monitor.httpCaptureHeaders = null;
+            monitor.httpCaptureBody = null;
+            monitor.httpMethod = null;
+            monitor.httpRange = null;
+            monitor.icmpSize = null;
+            monitor.icmpCount = null;
+            monitor.icmpProtocol = null;
+            monitor.icmpWait = null;
+            monitor.icmpTtl = null;
             break;
     }
+
     return monitor;
 }
-
-function sHTTP(monitor: Monitor) {
-    monitor.icmpSize = null;
-    monitor.icmpCount = null;
-    monitor.icmpProtocol = null;
-    monitor.icmpWait = null;
-    monitor.icmpTtl = null;
-    monitor.pluginName = null;
-    monitor.pluginArgs = null;
-}
-
-function sTCP(monitor: Monitor) {
-    monitor.httpRequestHeaders = null;
-    monitor.httpRequestBody = null;
-    monitor.httpExpiredCertMod = null;
-    monitor.httpCaptureHeaders = null;
-    monitor.httpCaptureBody = null;
-    monitor.httpMethod = null;
-    monitor.httpRange = null;
-    monitor.icmpSize = null;
-    monitor.icmpCount = null;
-    monitor.icmpProtocol = null;
-    monitor.icmpWait = null;
-    monitor.icmpTtl = null;
-    monitor.pluginName = null;
-    monitor.pluginArgs = null;
-}
-
-function sICMP(monitor: Monitor) {
-    monitor.remotePort = null;
-    monitor.httpRequestHeaders = null;
-    monitor.httpRequestBody = null;
-    monitor.httpExpiredCertMod = null;
-    monitor.httpCaptureHeaders = null;
-    monitor.httpCaptureBody = null;
-    monitor.httpMethod = null;
-    monitor.httpRange = null;
-    monitor.pluginName = null;
-}
-
-function sPlugin(monitor: Monitor) {
-    monitor.remoteAddress = null;
-    monitor.remotePort = null;
-    monitor.httpRequestHeaders = null;
-    monitor.httpRequestBody = null;
-    monitor.httpExpiredCertMod = null;
-    monitor.httpCaptureHeaders = null;
-    monitor.httpCaptureBody = null;
-    monitor.httpMethod = null;
-    monitor.httpRange = null;
-    monitor.icmpSize = null;
-    monitor.icmpCount = null;
-    monitor.icmpProtocol = null;
-    monitor.icmpWait = null;
-    monitor.icmpTtl = null;
-}
-

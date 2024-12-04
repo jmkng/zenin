@@ -2,7 +2,9 @@ package meta
 
 import (
 	"context"
-	"os"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/jmkng/zenin/internal/account"
 	"github.com/jmkng/zenin/internal/env"
@@ -33,12 +35,25 @@ func (m MetaService) GetSummary(ctx context.Context) (Meta, error) {
 // GetPlugins returns a list of the plugins in the plugins directory.
 func (m MetaService) GetPlugins() ([]string, error) {
 	var plugins []string
-	entries, err := os.ReadDir(env.Runtime.PluginsDir)
-	if err != nil {
-		return plugins, err
-	}
-	for _, v := range entries {
-		plugins = append(plugins, v.Name())
-	}
-	return plugins, nil
+	root := env.Runtime.PluginsDir
+
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		n := d.Name()
+		// TODO: Limit discovery of files by platform.
+		if !d.IsDir() && (strings.HasSuffix(n, ".sh") || strings.HasSuffix(n, ".ps1")) {
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			plugins = append(plugins, rel)
+		}
+
+		return nil
+	})
+
+	return plugins, err
 }

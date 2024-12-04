@@ -3,6 +3,7 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jmkng/zenin/internal"
@@ -73,7 +74,7 @@ type Monitor struct {
 	RemoteAddress *string                   `json:"remoteAddress" db:"remote_address"`
 	RemotePort    *int16                    `json:"remotePort" db:"remote_port"`
 	Measurements  []measurement.Measurement `json:"measurements"`
-	Notifications []Notification            `json:"notifications"`
+	Events        []Event                   `json:"events"`
 
 	PluginFields
 	HTTPFields
@@ -157,39 +158,68 @@ func (m Monitor) Poll() measurement.Measurement {
 // Validate will return an error if the `Monitor` is in an invalid state.
 func (m Monitor) Validate() error {
 	errors := []string{}
-	push := func(value string) {
+
+	require := func(value string) {
 		message := fmt.Sprintf("value for field `%v` is required", value)
 		errors = append(errors, message)
 	}
 
+	// Monitor
 	if m.Interval == 0 {
-		push("interval")
+		require("interval")
 	}
 	if m.Timeout == 0 {
-		push("timeout")
+		require("timeout")
 	}
 	if m.Name == "" {
-		push("name")
+		require("name")
 	}
+
 	kind, err := measurement.ProbeKindFromString(string(m.Kind))
 	if err != nil {
-		push("kind")
+		require("kind")
 	}
 	switch kind {
 	case measurement.HTTP:
 		if m.RemoteAddress == nil {
-			push("remoteAddress")
+			require("remoteAddress")
 		}
 		if m.HTTPRange == nil {
-			push("httpRange")
+			require("httpRange")
 		}
 	case measurement.TCP, measurement.ICMP:
 		if m.RemoteAddress == nil {
-			push("remoteAddress")
+			require("remoteAddress")
 		}
 	case measurement.Plugin:
 		if m.PluginName == nil {
-			push("pluginName")
+			require("pluginName")
+		}
+	}
+
+	// Events
+	name := false
+	args := false
+	for _, v := range m.Events {
+		if !name {
+			if v.PluginName == nil || strings.TrimSpace(*v.PluginName) == "" {
+				errors = append(errors, "event must have a plugin name")
+				name = true
+			}
+		}
+		if !args {
+			if v.PluginArgs != nil {
+				for _, v := range *v.PluginArgs {
+					if strings.TrimSpace(v) == "" {
+						errors = append(errors, "event arguments must not be empty")
+						args = true
+					}
+				}
+			}
+		}
+
+		if name && args {
+			break
 		}
 	}
 
@@ -197,4 +227,14 @@ func (m Monitor) Validate() error {
 		return env.NewValidation(errors...)
 	}
 	return nil
+}
+
+type Event struct {
+	Id        *int      `json:"-" db:"event_id"`
+	CreatedAt time.Time `json:"-" db:"created_at"`
+	UpdatedAt time.Time `json:"-" db:"updated_at"`
+	MonitorId *int      `json:"-" db:"event_monitor_id"`
+	Threshold *string   `json:"threshold" db:"threshold"`
+
+	PluginFields
 }

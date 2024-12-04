@@ -1,0 +1,7 @@
+.zenin__event_input_threshold_container {
+    margin: var(--px-e) 0;
+}
+
+.zenin__event_input_controls > *:first-child {
+    margin-left: auto;
+}

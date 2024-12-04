@@ -57,7 +57,14 @@ export interface Monitor {
     icmpTtl: number | null,
     icmpProtocol: string | null,
     measurements: Measurement[] | null
+    events: Event[] | null
 }
+
+export interface Event {
+    pluginName: string,
+    pluginArgs: string[] | null,
+    threshold: string | null
+};
 
 // eslint-disable-next-line
 export function isMonitor(obj: any): obj is Monitor {
@@ -73,12 +80,28 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
     const ae = (a1: string[] | null, a2: string[] | null): boolean => {
         if (a1 == null && a2 == null) return true;
         if (a1 != null && a2 != null && a1.length == a2.length && a1.every((n, i) => n == a2[i])) return true;
+
         return false;
     };
+
     const ple = (a1: PairListValue | null, a2: PairListValue | null): boolean => {
         if (a1 == null && a2 == null) return true;
         if (a1 != null && a2 != null && a1.length == a2.length
             && a1.every((n, i) => n.key == a2[i].key && n.value == a2[i].value)) return true;
+
+        return false;
+    }
+
+    const ne = (a1: Event[] | null, a2: Event[] | null): boolean => {
+        if (a1 == null && a2 == null) return true;
+
+        if (a1 != null && a2 != null && a1.length === a2.length
+            && a1.every((n, i) => n.pluginName === a2[i].pluginName && n.threshold === a2[i].threshold
+                && ((n.pluginArgs == null && a2[i].pluginArgs == null) || (n.pluginArgs && a2[i].pluginArgs
+                    && n.pluginArgs.length == a2[i].pluginArgs.length
+                    && n.pluginArgs.every((a, ai) => a == a2[i].pluginArgs![ai]))
+                ))) return true;
+
         return false;
     }
 
@@ -104,6 +127,7 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.icmpCount == b.icmpCount
         && a.icmpTtl == b.icmpTtl
         && a.icmpProtocol == b.icmpProtocol
+        && ne(a.events, b.events)
 }
 
 export const useMonitorContext = () => {
