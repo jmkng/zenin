@@ -3,7 +3,7 @@ import { ViewPane } from "../../internal/monitor/split";
 
 import Button from "../Button/Button";
 import Aggregate from "./Aggregate/Aggregate";
-import Expand from "./Expand/Expand";
+import Text from "./Text/Text";
 import Summary from "./Summary/Summary";
 import Table from "./Table/Table";
 
@@ -21,7 +21,7 @@ export default function Info(props: InfoProps) {
         <div className="zenin__detail_body">
             <h1 className="zenin__info_name">{state.monitor.name}</h1>
 
-            {state.monitor.description ? <Expand title={"Description"} text={state.monitor.description} /> : null}
+            {state.monitor.description ? <Text title={"Description"} text={state.monitor.description} /> : null}
 
             <div className="zenin__info_summary_container zenin__h_margin_top">
                 <Summary state={state} />

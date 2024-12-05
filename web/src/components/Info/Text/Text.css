@@ -1,0 +1,30 @@
+.zenin__text_component {
+    border-radius: var(--rounded);
+    border: 1px solid var(--off-b);
+    display: flex;
+    flex-direction: column;
+}
+
+.zenin__text_title {
+    color: var(--mid);
+    height: var(--px-h);
+    padding: var(--px-b) var(--px-d);
+    border-bottom: 1px solid var(--off-b);
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.zenin__text_content {
+    display: flex;
+    min-height: var(--px-h);
+    padding: var(--px-b) var(--px-b) var(--px-b) var(--px-d);
+
+
+.zenin__text_scroller {
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    align-items: safe center;
+    padding-right: var(--px-b);
+}
