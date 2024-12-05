@@ -55,7 +55,7 @@ export default function Chain(props: ChainProps) {
                 className="zenin__chain_title"
                 onClick={handleExpand}
             >
-                {isReadyState(state) && state.certificates.length == 0 ? "None" : "Certificates"}
+                {isReadyState(state) && state.certificates.length == 0 ? "No Certificates Available" : "Certificates"}
             </div>
 
             <div
