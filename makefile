@@ -1,6 +1,6 @@
-.PHONY: all web run build
+.PHONY: all web run build test
 
-VERSION := 1.0.0
+VERSION := 0.1.0
 COMMIT := $(shell git rev-parse HEAD)
 LDFLAGS := \
 	-X github.com/jmkng/zenin/internal/env.Commit=$(COMMIT) \
@@ -16,3 +16,6 @@ run:
 
 build: web
 	go build -ldflags="$(LDFLAGS)" -o zenin cmd/zenin.go
+
+test:
+	go test ./...

@@ -223,8 +223,20 @@ Executing the script without passing the result to `jq` and `neovim` will just d
 {"data":[ ... ]}
 ```
 
+### Release
+
+Use the makefile to cut a new release.
+
+```
+make
+```
+
+This will build the user interface, place it in the expected location, and then compile the core. You should end up with a single "zenin" executable file.
+
+Linker flags are used to bake in a program version and the most recent commit hash.
+
 ## Testing
 
 ```
-go test ./...
+make test
 ```
