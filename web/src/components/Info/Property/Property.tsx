@@ -25,7 +25,7 @@ export default function Property(props: PropertyProps) {
 
     return <div className="zenin__property_component zenin__h_margin_top">
         <List
-            title={`Properties #${measurement.id}`}
+            title="Properties"
             data={Array.from(pairs, ([key, value]) => ({ key, value: value }))} />
 
         {measurement.httpResponseHeaders ?
