@@ -4,13 +4,13 @@ import { DEAD_API, OK_API, WARN_API } from "../../../server";
 
 import List from "../List/List";
 
-import "./Summary.css";
+import "./Statistics.css";
 
-interface SummaryProps {
+interface StatisticsProps {
     state: ViewPane,
 }
 
-export default function Summary(props: SummaryProps) {
+export default function Statistics(props: StatisticsProps) {
     const { state } = props;
 
     const measurements = (state.monitor.measurements || []);
@@ -42,11 +42,11 @@ export default function Summary(props: SummaryProps) {
 
     // The amount of measurements with a dead state in the measurement set.
     const totalDead = measurements.filter(n => n.state == DEAD_API).length;
-    if (totalDead > 0) pairs.set("Dead", totalDead.toString());
+    if (totalDead > 0) pairs.set("Total Dead", totalDead.toString());
 
     // The amount of measurements with a warn state in the measurement set.
     const totalWarn = measurements.filter(n => n.state == WARN_API).length;
-    if (totalWarn > 0) pairs.set("Warn", totalWarn.toString());
+    if (totalWarn > 0) pairs.set("Total Warn", totalWarn.toString());
 
     return <div className="zenin__summary_component">
         <List
