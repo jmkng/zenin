@@ -192,7 +192,7 @@ export function isValidEvent(event: Event): boolean {
     }
 
     return true;
-};
+}
 
 export function sanitize(draft: Draft): Monitor {
     const monitor = { ...draft } as Monitor;

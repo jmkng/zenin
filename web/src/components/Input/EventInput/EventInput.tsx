@@ -10,7 +10,7 @@ import "./EventInput.css";
 interface ThresholdProps {
     threshold: { value: string | null, onChange: (value: string | null) => void },
     onDelete: () => void
-};
+}
 
 type EventInputProps = ThresholdProps & PluginInputProps;
 

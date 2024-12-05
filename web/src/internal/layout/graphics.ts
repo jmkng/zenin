@@ -14,7 +14,7 @@ export function showLoadingScreen() {
 
 export function isOffScreen(rect: DOMRect): boolean {
     return isOffScreenRight(rect) || isOffScreenLeft(rect) || isOffScreenBottom(rect) || isOffScreenTop(rect);
-};
+}
 
 export function isOffScreenRight(rect: DOMRect): boolean {
     return rect.right > window.innerWidth;
@@ -52,7 +52,7 @@ export function unlimit(element: HTMLElement) {
     element.classList.remove('zenin__h_limit_right')
     element.classList.remove('zenin__h_limit_bottom')
     element.classList.remove('zenin__h_limit_left')
-};
+}
 
 export function formatDate(value: string): string {
     const date = new Date(value);

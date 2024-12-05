@@ -64,7 +64,7 @@ export interface Event {
     pluginName: string,
     pluginArgs: string[] | null,
     threshold: string | null
-};
+}
 
 // eslint-disable-next-line
 export function isMonitor(obj: any): obj is Monitor {

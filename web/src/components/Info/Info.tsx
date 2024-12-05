@@ -2,7 +2,6 @@ import { useMonitorContext } from "../../internal/monitor";
 import { ViewPane } from "../../internal/monitor/split";
 
 import Button from "../Button/Button";
-import Aggregate from "./Aggregate/Aggregate";
 import Text from "./Text/Text";
 import Summary from "./Summary/Summary";
 import Table from "./Table/Table";
@@ -25,9 +24,6 @@ export default function Info(props: InfoProps) {
 
             <div className="zenin__info_summary_container zenin__h_margin_top">
                 <Summary state={state} />
-            </div>
-            <div className="zenin__info_aggregate_container zenin__h_margin_top">
-                <Aggregate measurements={state.monitor.measurements || []} />
             </div>
             <div className="zenin__info_table_container zenin__h_margin_top">
                 <Table state={state} />
