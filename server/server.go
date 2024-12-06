@@ -7,6 +7,9 @@ import (
 	"io/fs"
 	"net"
 	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -101,6 +104,22 @@ func StrictDecoder(r io.Reader) *json.Decoder {
 	d := json.NewDecoder(r)
 	d.DisallowUnknownFields()
 	return d
+}
+
+// scanQueryParameterIds will return all comma separated ids in the value map.
+func scanQueryParameterIds(values url.Values) []int {
+	id := []int{}
+
+	if vid := values.Get("id"); vid != "" {
+		split := strings.Split(vid, ",")
+		for _, v := range split {
+			if num, err := strconv.Atoi(v); err == nil {
+				id = append(id, num)
+			}
+		}
+	}
+
+	return id
 }
 
 //go:embed build

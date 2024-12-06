@@ -3,6 +3,7 @@ import { useAccountContext } from '../../../internal/account';
 import { Measurement } from '../../../internal/measurement';
 import { useMonitorContext } from '../../../internal/monitor';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
+import { useDefaultMeasurementService } from '../../../internal/measurement/service';
 import { DetachedState, OriginState, ViewPane } from '../../../internal/monitor/split';
 import { DataPacket } from '../../../server';
 
@@ -28,6 +29,9 @@ export default function Table(props: TableProps) {
     const monitor = {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
+    }
+    const measurement = {
+        service: useDefaultMeasurementService()
     }
     const account = useAccountContext();
     const measurements = (state.monitor.measurements || []).toReversed();
@@ -88,7 +92,7 @@ export default function Table(props: TableProps) {
         }
 
         // Detach from HEAD, make duplicate monitor with fixed measurement set, freeze state.
-        const measurements = await monitor.service.getMeasurements(account.state.authenticated!.token.raw,
+        const measurements = await monitor.service.getMeasurement(account.state.authenticated!.token.raw,
             state.monitor.id, value);
         if (!measurements.ok()) return;
 
@@ -101,17 +105,25 @@ export default function Table(props: TableProps) {
         });
     }
 
+    const handleDelete = async () => {
+        const extract = await measurement.service.deleteMeasurement(account.state.authenticated!.token.raw, checked);
+        if (!extract.ok()) return;
+
+        monitor.context.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })
+        setChecked([]);
+        setAllChecked(false);
+    }
+
     const handleRowClick = (id: number) => {
         const measurement = measurements.find(n => n.id === id) || null;
         monitor.context.dispatch({ type: 'detail', measurement })
-    };
+    }
 
     return <div className="zenin__table_component">
         <div className="zenin__table_header">
             <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
             <div className="zenin__table_controls_container">
-                {/* <Button disabled={checked.length == 0} border={true} kind="destructive" icon={<ExportIcon />} /> */}
-                <Button disabled={checked.length == 0} border={true} icon={<TrashIcon />} />
+                <Button onClick={handleDelete} disabled={checked.length == 0} border={true} icon={<TrashIcon />} />
                 <Button border={true} icon={<ClockIcon />}
                     dialog={{
                         content: [

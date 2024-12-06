@@ -33,7 +33,7 @@ class MonitorService extends Service {
         const address = `/monitor?id=${joined}&active=${active}`;
         const request = new AuthenticatedRequest(token, address).method(PATCH_API)
         return await this.extract(request);
-    } 
+    }
 
     async updateMonitor(token: string, id: number, monitor: Monitor) {
         monitor.measurements = null;
@@ -50,7 +50,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async getMeasurements(token: string, id: number, after?: DetachedState) {
+    async getMeasurement(token: string, id: number, after?: DetachedState) {
         let address = `/monitor/${id}/measurement`
         if (after) address += `?after=${after.toAfterDate()}`
         const request = new AuthenticatedRequest(token, address).method(GET_API)

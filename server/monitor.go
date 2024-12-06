@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -57,7 +56,7 @@ func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Reques
 	responder := NewResponder(w)
 
 	query := r.URL.Query()
-	params := NewSelectMonitorParamsFromQuery(query)
+	params := newSelectMonitorParamsFromQuery(query)
 
 	measurements := 0
 	if m, err := strconv.Atoi(query.Get("measurements")); err == nil {
@@ -94,16 +93,16 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 	}
 
 	type Response struct {
-		ID   int       `json:"id"`
+		Id   int       `json:"id"`
 		Time time.Time `json:"time"`
 	}
-	responder.Data(Response{ID: id, Time: now}, http.StatusCreated)
+	responder.Data(Response{Id: id, Time: now}, http.StatusCreated)
 }
 
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
+	params := newSelectMonitorParamsFromQuery(r.URL.Query())
 	if len(*params.Id) == 0 {
 		responder.Error(env.NewValidation("Expected `id` query parameter."),
 			http.StatusBadRequest)
@@ -126,7 +125,7 @@ func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Requ
 func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	params := NewSelectMonitorParamsFromQuery(r.URL.Query())
+	params := newSelectMonitorParamsFromQuery(r.URL.Query())
 	validation := env.NewValidation()
 	if params.Id == nil || len(*params.Id) == 0 {
 		validation.Push("Expected `id` query parameter.")
@@ -227,7 +226,7 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	params := NewSelectMeasurementParamsFromQuery(r.URL.Query())
+	params := newSelectMeasurementParamsFromQuery(r.URL.Query())
 
 	measurements, err := m.
 		Service.
@@ -267,25 +266,18 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	responder.Status(http.StatusAccepted)
 }
 
-// NewSelectMonitorParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
+// newSelectMonitorParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
 // a `net/http` query string.
-func NewSelectMonitorParamsFromQuery(values url.Values) monitor.SelectMonitorParams {
+func newSelectMonitorParamsFromQuery(values url.Values) monitor.SelectMonitorParams {
+	// TODO: Limit use of this in handlers that don't want the extra information,
+	// use something like scanQueryParameterIds directly instead.
 	var id *[]int
+	if x := scanQueryParameterIds(values); len(x) > 0 {
+		id = &x
+	}
 	var active *bool
 	var kind *measurement.ProbeKind
 
-	if vid := values.Get("id"); vid != "" {
-		pid := []int{}
-		split := strings.Split(vid, ",")
-		for _, v := range split {
-			if num, err := strconv.Atoi(v); err == nil {
-				pid = append(pid, num)
-			}
-		}
-		if len(pid) > 0 {
-			id = &pid
-		}
-	}
 	if vactive, err := strconv.ParseBool(values.Get("active")); err == nil {
 		active = &vactive
 	}
@@ -300,9 +292,9 @@ func NewSelectMonitorParamsFromQuery(values url.Values) monitor.SelectMonitorPar
 	}
 }
 
-// NewSelectMeasurementParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
+// newSelectMeasurementParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
 // a `net/http` query string.
-func NewSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasurementParams {
+func newSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasurementParams {
 	params := monitor.SelectMeasurementParams{
 		After:  nil,
 		Before: nil,

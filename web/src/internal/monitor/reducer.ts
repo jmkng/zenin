@@ -21,52 +21,52 @@ export const monitorDefault: MonitorState = {
 const inventoryMaxMeasurements = 40;
 const inventoryChunkSize = 5;
 
-type RemoveAction = { 
-    type: 'remove', 
-    monitors: number[] 
+type RemoveAction = {
+    type: 'remove',
+    monitors: number[]
 };
 
-type ToggleAction = { 
-    type: 'toggle', 
-    monitors: number[], 
+type ToggleAction = {
+    type: 'toggle',
+    monitors: number[],
     active: boolean,
     time: string
 };
 
-type DraftAction = { 
-    type: 'draft' 
+type DraftAction = {
+    type: 'draft'
 };
 
-type FilterAction = { 
-    type: 'filter', 
-    filter: FilterKind 
+type FilterAction = {
+    type: 'filter',
+    filter: FilterKind
 };
 
-type DeleteAction = { 
-    type: 'delete', 
-    monitors: Monitor[] 
+type DeleteAction = {
+    type: 'delete',
+    monitors: Monitor[]
 };
 
 type SelectKind = Monitor | "ALL" | "NONE";
 
-type SelectAction = { 
-    type: 'select', 
+type SelectAction = {
+    type: 'select',
     monitor: SelectKind
 };
 
-type OverwriteAction = { 
-    type: 'overwrite', 
-    monitor: Monitor 
+type OverwriteAction = {
+    type: 'overwrite',
+    monitor: Monitor
 };
 
-type PollAction = { 
-    type: 'poll', 
-    measurement: Measurement 
+type PollAction = {
+    type: 'poll',
+    measurement: Measurement
 };
 
-type ResetAction = { 
-    type: 'reset', 
-    monitors: Monitor[] 
+type ResetAction = {
+    type: 'reset',
+    monitors: Monitor[]
 };
 
 type PaneAction = {
@@ -75,18 +75,18 @@ type PaneAction = {
 }
 
 type ViewPaneAction = {
-    type: 'view', 
-    target: { 
-        monitor: Monitor, 
+    type: 'view',
+    target: {
+        monitor: Monitor,
         measurement: Measurement | null,
         origin?: OriginState,
         disableToggle?: boolean
     } | null
 };
 
-type EditorPaneAction = { 
-    type: 'editor', 
-    monitor: Monitor | null 
+type EditorPaneAction = {
+    type: 'editor',
+    monitor: Monitor | null
 };
 
 type SettingsPaneAction = {
@@ -94,6 +94,8 @@ type SettingsPaneAction = {
 };
 
 type DetailAction = { type: 'detail', measurement: Measurement | null };
+
+type MeasurementAction = { type: 'measurement', id: number[], monitor: number };
 
 export type MonitorDispatch = (action: MonitorAction) => void;
 
@@ -109,15 +111,16 @@ export type MonitorAction =
     | ResetAction
     | PaneAction
     | DetailAction
+    | MeasurementAction
 
 const removeAction = (state: MonitorState, action: RemoveAction) => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) monitors.delete(n);
-    
+
     const selected: Monitor[] = [];
     const deleting: Monitor[] = [];
-    const split = state.split.overlaps(action.monitors) 
-        ? null 
+    const split = state.split.overlaps(action.monitors)
+        ? null
         : state.split;
     return { ...state, monitors, selected, deleting, split } as MonitorState
 }
@@ -154,7 +157,7 @@ const deleteAction = (state: MonitorState, action: DeleteAction) => {
 
 const selectAction = (state: MonitorState, action: SelectAction) => {
     if (action.monitor == "ALL") {
-        return { ...state, selected: [...state.monitors.values()]}
+        return { ...state, selected: [...state.monitors.values()] }
     }
     if (action.monitor == "NONE") {
         return { ...state, selected: [] }
@@ -201,7 +204,7 @@ const resetAction = (state: MonitorState, action: ResetAction) => {
         if (monitor.measurements) duplicate.measurements = [...monitor.measurements].reverse();
         monitors.set(duplicate.id, duplicate);
     }
-    
+
     return { ...state, monitors }
 }
 
@@ -217,7 +220,7 @@ const paneAction = (state: MonitorState, action: PaneAction) => {
 }
 
 const viewPaneAction = (state: MonitorState, action: ViewPaneAction) => {
-    if (!action.target || (state.split.equals(action.target.monitor) && !action.target.disableToggle)) 
+    if (!action.target || (state.split.equals(action.target.monitor) && !action.target.disableToggle))
         return { ...state, split: new SplitState(null) };
 
     const view = new ViewPane(action.target.monitor, action.target.measurement, action.target.origin);
@@ -227,8 +230,8 @@ const viewPaneAction = (state: MonitorState, action: ViewPaneAction) => {
 
 const editorPaneAction = (state: MonitorState, action: EditorPaneAction) => {
     let split: SplitState;
-    if (!action.monitor || state.split.isEditorPane() && state.split.pane.monitor == action.monitor) 
-            split = new SplitState(null)
+    if (!action.monitor || state.split.isEditorPane() && state.split.pane.monitor == action.monitor)
+        split = new SplitState(null)
     else split = new SplitState(new EditorPane(action.monitor))
     return { ...state, split }
 }
@@ -243,8 +246,16 @@ const settingsPaneAction = (state: MonitorState) => {
 const detailAction = (state: MonitorState, action: DetailAction) => {
     if (state.split.isViewPane()) {
         const view = new ViewPane(state.split.pane.monitor, action.measurement)
-        return {...state, split: new SplitState(view) }
+        return { ...state, split: new SplitState(view) }
     }
+    return state;
+}
+
+const measurementAction = (state: MonitorState, action: MeasurementAction) => {
+    const monitor = state.monitors.get(action.monitor);
+    if (!monitor) return state;
+
+    if (monitor.measurements) monitor.measurements = monitor.measurements.filter(n => !action.id.includes(n.id))
     return state;
 }
 
@@ -261,5 +272,6 @@ export const monitorReducer = (state: MonitorState, action: MonitorAction): Moni
         case "select": return selectAction(state, action);
         case "pane": return paneAction(state, action);
         case "detail": return detailAction(state, action);
+        case "measurement": return measurementAction(state, action);
     }
 }

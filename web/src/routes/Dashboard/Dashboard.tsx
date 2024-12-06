@@ -23,10 +23,14 @@ export default function Dashboard() {
     const account = useAccountContext();
     const sorted = [...monitor.context.state.monitors.values()].sort((a, b) => {
         switch (monitor.context.state.filter) {
-            case "NAME_ASC": return a.name > b.name ? 1 : -1;
-            case "NAME_DESC": return a.name > b.name ? -1 : 1;
-            case "UPDATED_NEW": return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
-            case "UPDATED_OLD": return Date.parse(a.updatedAt) - Date.parse(b.updatedAt);
+            case "NAME_ASC":
+                return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
+            case "NAME_DESC":
+                return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
+            case "UPDATED_NEW":
+                return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
+            case "UPDATED_OLD":
+                return Date.parse(a.updatedAt) - Date.parse(b.updatedAt);
         }
     })
     const split = monitor.context.state.split.pane != null;

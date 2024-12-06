@@ -39,6 +39,7 @@ type MeasurementProvider struct {
 func (m MeasurementProvider) Mux() http.Handler {
 	router := chi.NewRouter()
 	router.Get("/{id}/certificates", m.HandleGetCertificates)
+	router.Delete("/", m.HandleDeleteMeasurements)
 	return router
 }
 
@@ -59,4 +60,23 @@ func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *htt
 	}
 
 	responder.Data(certificates, http.StatusOK)
+}
+
+func (m MeasurementProvider) HandleDeleteMeasurements(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	id := scanQueryParameterIds(r.URL.Query())
+	if len(id) == 0 {
+		responder.Error(env.NewValidation("Expected `id` query parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	err := m.Service.Repository.DeleteMeasurement(r.Context(), id)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	responder.Status(http.StatusOK)
 }

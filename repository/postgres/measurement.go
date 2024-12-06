@@ -128,3 +128,14 @@ func (p PostgresRepository) SelectCertificate(ctx context.Context, id int) ([]me
 
 	return result, nil
 }
+
+// DeleteMeasurement implements `MeasurementRepository.DeleteMeasurement` for `PostgresRepository`.
+func (p PostgresRepository) DeleteMeasurement(ctx context.Context, id []int) error {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push("DELETE FROM measurement WHERE id in (")
+	builder.SpreadInt(id...)
+	builder.Push(")")
+
+	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
+	return err
+}

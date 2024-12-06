@@ -9,8 +9,7 @@ import (
 	"github.com/jmkng/zenin/pkg/sql"
 )
 
-// MonitorRepository is a type used to interact with the monitor domain
-// database table.
+// MonitorRepository is a type used to interact with the monitor domain database table.
 type MonitorRepository interface {
 	InsertMonitor(ctx context.Context, monitor Monitor) (int, error)
 	SelectMonitor(ctx context.Context, measurements int, params *SelectMonitorParams) ([]Monitor, error)
@@ -20,8 +19,7 @@ type MonitorRepository interface {
 	ToggleMonitor(ctx context.Context, id []int, active bool, time time.Time) error
 }
 
-// SelectMonitorParams is a set of parameters used to narrow the scope of the `SelectMonitor`
-// repository method.
+// SelectMonitorParams is a set of parameters used to narrow the scope of the `SelectMonitor` repository method.
 //
 // If the `Id` property is not nil, it will take priority over all other parameters.
 // Otherwise, all parameters that are not nil are applied to the query.

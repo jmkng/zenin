@@ -30,7 +30,7 @@ export default function Chain(props: ChainProps) {
         if (state == "WAITING") {
             setState("PENDING");
             const token = account.state.authenticated!.token.raw;
-            const certificates = await measurement.service.getCertificates(token, measurement.data.id);
+            const certificates = await measurement.service.getCertificate(token, measurement.data.id);
             if (!certificates.ok()) return;
             const packet: DataPacket<Certificate[]> = await certificates.json();
             if (packet.data == null) packet.data = [];
