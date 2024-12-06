@@ -79,8 +79,8 @@ func (d *defaultHandler) Handle(ctx context.Context, r slog.Record) error {
 		return true
 	})
 
-	//b, err := json.MarshalIndent(fields, "", "  ")
-	b, err := json.Marshal(fields)
+	b, err := json.MarshalIndent(fields, "", "  ") // Indented
+	//b, err := json.Marshal(fields)               // Flat
 	if err != nil {
 		return err
 	}
