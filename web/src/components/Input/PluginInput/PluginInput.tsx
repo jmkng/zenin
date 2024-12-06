@@ -31,8 +31,6 @@ export default function PluginInput(props: PluginInputProps) {
 
     const selection = useMemo(() => plugin.value || meta.context.state.plugins[0], [plugin.value, meta.context.state.plugins])
 
-    console.log(options);
-
     return <div className="zenin__plugin_spec">
         <div className="zenin__plugin_spec_control">
             <SelectInput
