@@ -33,12 +33,10 @@ type Argon2Params struct {
 
 // Hash implements `Scheme.Hash` for `Argon2Scheme`.
 func (a Argon2Scheme) Hash(hashable []byte, salt []byte) (VersionedSaltedHash, error) {
-	var err error
 	if len(salt) < ZeninAccSaltLength {
+		// This is a panic because the program will check for a salt of a valid length upon startup,
+		// or generate an adequate one itself.
 		panic("salt length below minimum threshold")
-	}
-	if err != nil {
-		return VersionedSaltedHash{}, err
 	}
 
 	hash := argon2.IDKey([]byte(hashable), salt, a.Time, a.Memory, a.Threads, a.KeyLength)
