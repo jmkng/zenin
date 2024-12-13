@@ -9,15 +9,17 @@
 
 .zenin__list_intro, .zenin__list_item_container {
     height: var(--px-h);
-    display: flex;
 }
 
 .zenin__list_intro {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: var(--px-b) var(--px-d);
     color: var(--mid);
+}
+
+.zenin__list_intro_title {
+    width: 100%;
 }
 
 .zenin__list_intro:not(.empty) {

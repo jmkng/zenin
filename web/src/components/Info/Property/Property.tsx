@@ -30,7 +30,7 @@ export default function Property(props: PropertyProps) {
 
         {measurement.httpResponseHeaders ?
             <div className="zenin__property_response_headers zenin__h_margin_top">
-                {/* <PairList value={measurement.httpResponseHeaders} label="Response headers" /> */}
+                {/* TODO: <PairList value={measurement.httpResponseHeaders} label="Response headers" /> */}
                 <List title="Response Headers" data={measurement.httpResponseHeaders} />
             </div>
             : null}

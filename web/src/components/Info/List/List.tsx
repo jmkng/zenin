@@ -1,15 +1,15 @@
-import { useRef } from "react";
+import { ReactNode, useRef } from "react";
 
 import "./List.css";
 
 type ListItem = KeyValueItem | StringItem;
 
-type KeyValueItem = { key: string; value: string };
+type KeyValueItem = { key: string; value: string | ReactNode };
 
 type StringItem = string;
 
 interface ListProps {
-    title: string;
+    title: string | ReactNode;
     data: ListItem[]
 }
 

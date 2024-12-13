@@ -10,3 +10,22 @@
 .zenin__detail_controls_delete {
     margin-left: auto;
 }
+
+.zenin__info_event_container > span{
+    display: block;
+    font-weight: 500;
+}
+
+.zenin__info_event_list {
+    margin-top: var(--px-c); 
+}
+
+.zenin__info_event_threshold {
+    background: var(--off-b);
+}
+
+.zenin__info_event_title {
+    display: flex;
+    justify-content: space-between;
+}
+
