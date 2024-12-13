@@ -30,23 +30,22 @@ export default function Property(props: PropertyProps) {
 
         {measurement.httpResponseHeaders ?
             <div className="zenin__property_response_headers zenin__h_margin_top">
-                {/* TODO: <PairList value={measurement.httpResponseHeaders} label="Response headers" /> */}
                 <List title="Response Headers" data={measurement.httpResponseHeaders} />
             </div>
             : null}
         {measurement.httpResponseBody ?
             <div className="zenin__property_response_body zenin__h_margin_top">
-                <Text title={"Response Body"} text={measurement.httpResponseBody} />
+                <Text title="Response Body" text={measurement.httpResponseBody} />
             </div>
             : null}
         {measurement.pluginStdout ?
             <div className="zenin__property_stdout zenin__h_margin_top">
-                <Text title={"Standard Output"} text={measurement.pluginStdout} />
+                <Text title="Standard Output" text={measurement.pluginStdout} />
             </div>
             : null}
         {measurement.pluginStderr ?
             <div className="zenin__property_stderr zenin__h_margin_top">
-                <Text title={"Standard Error"} text={measurement.pluginStderr} />
+                <Text title="Standard Error" text={measurement.pluginStderr} />
             </div>
             : null}
         {measurement.stateHint && measurement.stateHint.length > 0 ?

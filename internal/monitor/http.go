@@ -76,6 +76,7 @@ func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 				headers = append(headers, internal.PairValue{Key: k, Value: x})
 			}
 		}
+		span.HTTPResponseHeaders = &headers
 	}
 
 	if m.HTTPCaptureBody != nil && *m.HTTPCaptureBody {
