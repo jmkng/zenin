@@ -17,7 +17,7 @@ func NewICMPProbe() ICMPProbe {
 type ICMPProbe struct{}
 
 // Poll implements `Probe.Poll` for `ICMPProbe`.
-func (i ICMPProbe) Poll(m Monitor) measurement.Span {
+func (i ICMPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	span := measurement.NewSpan(measurement.Ok)
 
 	client := icmp.New(*m.RemoteAddress)
@@ -37,10 +37,7 @@ func (i ICMPProbe) Poll(m Monitor) measurement.Span {
 	client.Count = *m.ICMPCount
 	client.TTL = *m.ICMPTTL
 
-	deadline, cancel := m.Deadline(context.Background())
-	defer cancel()
-
-	err = client.RunWithContext(deadline)
+	err = client.RunWithContext(ctx)
 	if err != nil {
 		span.Downgrade(measurement.Dead)
 		if errors.Is(err, context.DeadlineExceeded) {

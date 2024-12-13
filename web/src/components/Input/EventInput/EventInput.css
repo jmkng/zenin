@@ -5,3 +5,8 @@
 .zenin__event_input_controls > *:first-child {
     margin-left: auto;
 }
+
+.zenin__event_input_threshold_description {
+    display: block;
+    margin-top: var(--px-c);
+}

@@ -43,13 +43,19 @@ export default function EventInput(props: EventInputProps) {
                     { value: DEAD_API, text: DEAD_UI },
                     { value: "NONE", text: "None" }, // No threshold, converted to null.
                 ]}
-                subtext={<span>Define a probe <a href="#">threshold</a>.</span>} /* TODO: Add documentation link. */
+                subtext={<span>Define a probe <a href="#">threshold</a>.</span>}/* TODO: Add documentation link. */
                 onChange={value => threshold.onChange(value == "NONE" ? null : value)}
             />
+            {<span className="zenin__event_input_threshold_description">
+                {threshold.value == null ? "The event will run for every measurement."
+                    : threshold.value == WARN_API ? "The event will run for measurements with a warn or dead state."
+                        : "The event will run for measurements with a dead state."}
+            </span>}
+
         </div>
 
         <div className="zenin__event_input_controls">
             <Button border={true} kind="destructive" onClick={onDelete}>Delete</Button>
         </div>
-    </div>
+    </div >
 }

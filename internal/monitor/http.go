@@ -19,7 +19,7 @@ func NewHTTPProbe() HTTPProbe {
 type HTTPProbe struct{}
 
 // Poll implements `Probe.Poll` for `HTTPProbe`.
-func (h HTTPProbe) Poll(m Monitor) measurement.Span {
+func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	span := measurement.NewSpan(measurement.Ok)
 
 	requestBody := bytes.NewBuffer([]byte{})
@@ -27,10 +27,7 @@ func (h HTTPProbe) Poll(m Monitor) measurement.Span {
 		requestBody = bytes.NewBuffer([]byte(*m.HTTPRequestBody))
 	}
 
-	deadline, cancel := m.Deadline(context.Background())
-	defer cancel()
-
-	request, err := http.NewRequestWithContext(deadline, *m.HTTPMethod, *m.RemoteAddress, requestBody)
+	request, err := http.NewRequestWithContext(ctx, *m.HTTPMethod, *m.RemoteAddress, requestBody)
 	if err != nil {
 		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
 		return span

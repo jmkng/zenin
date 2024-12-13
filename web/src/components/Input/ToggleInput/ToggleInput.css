@@ -62,5 +62,6 @@ input:checked + .zenin__toggle_input_slider::before {
 }
 
 .zenin__toggle_input_subtext {
+    margin-top: var(--px-c);
     color: var(--mid);
 }

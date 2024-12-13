@@ -2,7 +2,12 @@ package monitor
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -42,15 +47,11 @@ type Probe interface {
 	// Poll will execute an action that returns a `Span` describing the result.
 	//
 	// No error is returned because this should be an infallible operation,
-	// meaning any validation errors on a type that implements `Probe` should be caught
-	// ahead of time.
+	// meaning any errors are captured as hints on a span.
 	//
-	// Anything that might look like an "error" should be represented as a `Span` with a
-	// state of `Dead` or `Warn`.
-	//
-	// In this situation, the `Span` can be distributed normally, triggering alerts and
-	// calling attention to the failure.
-	Poll(m Monitor) measurement.Span
+	// This way, we can ensure some kind of span always comes out of this operation,
+	// and trigger events normally.
+	Poll(ctx context.Context, m Monitor) measurement.Span
 }
 
 type ProtocolKind string
@@ -112,15 +113,16 @@ type ICMPFields struct {
 // Deadline returns a copy of the parent context with a timeout set according to
 // the monitor `Timeout` field.
 func (m Monitor) Deadline(ctx context.Context) (context.Context, context.CancelFunc) {
-	deadline := time.Duration(m.Timeout) * time.Second
-	ctx, cancel := context.WithTimeout(ctx, deadline)
-	return ctx, cancel
+	return context.WithTimeout(ctx, time.Duration(m.Timeout)*time.Second)
 }
 
 // Poll will invoke a `Probe`, returning a `Measurement` describing the result.
 //
 // This function should only ever be called on a `Monitor` from the database,
-// it requires essential fields (including id) to be populated.
+// it requires essential fields (including id) to be populated, or it will panic.
+//
+// If the `Monitor` has events, the events will all be started in their own threads,
+// and the function will immediately return after that.
 func (m Monitor) Poll() measurement.Measurement {
 	env.Debug("poll starting", "monitor(id)", *m.Id)
 
@@ -141,17 +143,47 @@ func (m Monitor) Poll() measurement.Measurement {
 		panic("unrecognized probe")
 	}
 
+	deadline, cancel := m.Deadline(context.Background())
+	defer cancel()
+
+	// Start timer.
 	start := time.Now()
-	span := probe.Poll(m)
+
+	// Poll.
+	span := probe.Poll(deadline, m)
 	span.Kind = m.Kind
+
+	// End timer.
 	duration := float64(time.Since(start)) / float64(time.Millisecond)
+
 	result.Span = span
 	result.CreatedAt = start
 	result.UpdatedAt = start
 	result.Duration = duration
 
 	env.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
-		"state", result.State, "hint", result.StateHint)
+		"state", result.State, "hints", result.StateHint, "events", len(m.Events))
+
+	// Start events.
+	for _, v := range m.Events {
+		if v.IsEligible(span.State) {
+			env.Debug("event starting", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id)
+
+			go func() {
+				// Reset deadline.
+				deadline, cancel := m.Deadline(context.Background())
+				defer cancel()
+
+				output, err := v.Start(deadline)
+				if err != nil {
+					env.Error("event failed", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "error", err, "output", output)
+				} else {
+					env.Debug("event stopping", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "output", string(output))
+				}
+			}()
+		}
+	}
+
 	return result
 }
 
@@ -229,12 +261,80 @@ func (m Monitor) Validate() error {
 	return nil
 }
 
+type EventThreshold string
+
+const (
+	Warn EventThreshold = "WARN"
+	Dead EventThreshold = "DEAD"
+)
+
 type Event struct {
-	Id        *int      `json:"-" db:"event_id"`
-	CreatedAt time.Time `json:"-" db:"created_at"`
-	UpdatedAt time.Time `json:"-" db:"updated_at"`
-	MonitorId *int      `json:"-" db:"event_monitor_id"`
-	Threshold *string   `json:"threshold" db:"threshold"`
+	Id        *int            `json:"-" db:"event_id"`
+	CreatedAt time.Time       `json:"-" db:"created_at"`
+	UpdatedAt time.Time       `json:"-" db:"updated_at"`
+	MonitorId *int            `json:"-" db:"event_monitor_id"`
+	Threshold *EventThreshold `json:"threshold" db:"threshold"`
 
 	PluginFields
+}
+
+// IsEligible will return true if the `Event` should run based on the provided `ProbeState`.
+//
+// A null threshold will always run. A warn threshold runs for warn and dead states,
+// and a dead threshold runs only for dead states.
+func (e Event) IsEligible(s measurement.ProbeState) bool {
+	if e.Threshold == nil {
+		return true
+	}
+
+	if *e.Threshold == Warn && s != measurement.Ok || *e.Threshold == Dead && s == measurement.Dead {
+		return true
+	}
+	return false
+}
+
+// Start will execute the plugin specified by the `Event`.
+func (e Event) Start(ctx context.Context) ([]byte, error) {
+	command := *e.PluginName
+
+	path := filepath.Join(env.Runtime.PluginsDir, command)
+	_, err := os.Stat(path)
+	if err != nil {
+		return []byte{}, errors.New("plugin not found")
+	}
+
+	var args []string
+	if e.PluginArgs != nil {
+		args = append(args, *e.PluginArgs...)
+	}
+
+	cmd := exec.CommandContext(ctx, path, args...)
+	switch runtime.GOOS {
+	case "windows":
+		if strings.HasSuffix(command, ".ps1") {
+			panic("TODO")
+		}
+	case "darwin", "linux":
+		if strings.HasSuffix(command, ".sh") {
+			shell, exists := os.LookupEnv("SHELL")
+			if !exists {
+				return []byte{}, errors.New("shell environment variable is not accessible")
+			}
+			args := append([]string{path}, args...)
+			cmd = exec.Command(shell, args...)
+		}
+	}
+
+	// Start plugin. Collect combined output.
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return output, errors.New("timeout")
+		} else if exit, ok := err.(*exec.ExitError); ok {
+			return output, fmt.Errorf("exited with code %v", exit)
+		}
+		return output, errors.New("failed to start")
+	}
+
+	return output, nil
 }

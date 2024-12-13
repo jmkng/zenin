@@ -23,7 +23,7 @@ func NewPluginProbe() PluginProbe {
 type PluginProbe struct{}
 
 // Poll implements `Probe.Poll` for `PluginProbe`.
-func (s PluginProbe) Poll(m Monitor) measurement.Span {
+func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	span := measurement.NewSpan(measurement.Ok)
 	command := *m.PluginName
 
@@ -39,16 +39,19 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 		args = append(args, *m.PluginArgs...)
 	}
 
-	deadline, cancel := m.Deadline(context.Background())
-	defer cancel()
+	// Create an initial command pointing at the file with the arguments.
+	// This will work for binary plugins.
+	//
+	// Other types, like .ps1 or .sh, need to be handled by a shell, so check for that next.
+	cmd := exec.CommandContext(ctx, path, args...)
 
-	cmd := exec.CommandContext(deadline, path, args...)
 	switch runtime.GOOS {
 	case "windows":
 		if strings.HasSuffix(command, ".ps1") {
 			panic("todo")
 		}
 	case "darwin", "linux":
+		// If the plugin is a shell script, use the shell specified by $SHELL to execute it with the arguments.
 		if strings.HasSuffix(command, ".sh") {
 			shell, exists := os.LookupEnv("SHELL")
 			if !exists {
@@ -59,6 +62,7 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 			cmd = exec.Command(shell, args...)
 		}
 	}
+
 	stdoutPipe, stdoutPipeErr := cmd.StdoutPipe()
 	if stdoutPipeErr != nil {
 		span.Downgrade(measurement.Warn, "Failed to access plugin output stream.")
@@ -68,6 +72,7 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 		span.Downgrade(measurement.Warn, "Failed to access plugin error stream.")
 	}
 
+	// Start plugin.
 	if err := cmd.Start(); err != nil {
 		span.Downgrade(measurement.Dead, "Failed to start plugin.")
 		return span
@@ -94,6 +99,8 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 
 	def := 0
 	span.PluginExitCode = &def
+
+	// Wait for execution, collect output.
 	err = cmd.Wait()
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -124,5 +131,6 @@ func (s PluginProbe) Poll(m Monitor) measurement.Span {
 		str := strings.TrimSpace(stderr.String())
 		span.PluginStderr = &str
 	}
+
 	return span
 }

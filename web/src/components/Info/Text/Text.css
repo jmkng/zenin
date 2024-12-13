@@ -24,7 +24,5 @@
 .zenin__text_scroller {
     max-height: 200px;
     overflow-y: auto;
-    display: flex;
-    align-items: safe center;
-    padding-right: var(--px-b);
+    word-wrap: break-word;
 }
