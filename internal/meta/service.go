@@ -4,7 +4,6 @@ import (
 	"context"
 	"io/fs"
 	"path/filepath"
-	"strings"
 
 	"github.com/jmkng/zenin/internal/account"
 	"github.com/jmkng/zenin/internal/env"
@@ -37,14 +36,22 @@ func (m MetaService) GetPlugins() ([]string, error) {
 	var plugins []string
 	root := env.Runtime.PluginsDir
 
+	supported := map[string]struct{}{
+		".exe": {}, ".sh": {}, ".ps1": {}, ".bat": {},
+	}
+
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
+		if d.IsDir() {
+			return nil
+		}
 
-		n := d.Name()
-		// TODO: Limit discovery of files by platform.
-		if !d.IsDir() && (strings.HasSuffix(n, ".sh") || strings.HasSuffix(n, ".ps1")) {
+		ext := filepath.Ext(d.Name())
+
+		// Filter unsupported extensions.
+		if _, ok := supported[ext]; ok || ext == "" {
 			rel, err := filepath.Rel(root, path)
 			if err != nil {
 				return err
