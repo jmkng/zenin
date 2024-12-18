@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -44,15 +45,24 @@ func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	//
 	// Other types, like .ps1 or .sh, need to be handled by a shell, so check for that next.
 	cmd := exec.CommandContext(ctx, path, args...)
+	ext := filepath.Ext(command)
 
 	switch runtime.GOOS {
 	case "windows":
-		if strings.HasSuffix(command, ".ps1") {
-			panic("todo")
+		switch ext {
+		// powershell -File <path> ...
+		case ".ps1":
+			args = append([]string{"-File", path}, args...)
+			cmd = exec.Command("powershell", args...)
+		// cmd /c <path> ...
+		case ".bat":
+			args = append([]string{"/c", path}, args...)
+			cmd = exec.Command("cmd", args...)
 		}
 	case "darwin", "linux":
-		// If the plugin is a shell script, use the shell specified by $SHELL to execute it with the arguments.
-		if strings.HasSuffix(command, ".sh") {
+		switch ext {
+		// <shell> <path> ...
+		case ".sh":
 			shell, exists := os.LookupEnv("SHELL")
 			if !exists {
 				span.Downgrade(measurement.Dead, "Shell environment variable is not accessible.")
