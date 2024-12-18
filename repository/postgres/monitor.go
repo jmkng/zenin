@@ -44,9 +44,10 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		icmp_wait,
 		icmp_count,
 		icmp_ttl,
-		icmp_protocol)
+		icmp_protocol,
+        icmp_loss_threshold)
     VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
     RETURNING id`
 	row := tx.QueryRowContext(ctx, query,
 		monitor.Name,
@@ -72,7 +73,8 @@ func (p PostgresRepository) InsertMonitor(ctx context.Context, monitor monitor.M
 		monitor.ICMPWait,
 		monitor.ICMPCount,
 		monitor.ICMPTTL,
-		monitor.ICMPProtocol)
+		monitor.ICMPProtocol,
+		monitor.ICMPLossThreshold)
 	if err = row.Scan(&id); err != nil {
 		tx.Rollback()
 		return 0, err
@@ -175,7 +177,8 @@ func (p PostgresRepository) selectMonitor(ctx context.Context, params *monitor.S
 			mo.icmp_wait,
 			mo.icmp_count,
 			mo.icmp_ttl,
-			mo.icmp_protocol
+			mo.icmp_protocol,
+            mo.icmp_loss_threshold
         FROM monitor mo`)
 	builder.Inject(params)
 	builder.Push("ORDER BY mo.id;")
@@ -211,7 +214,8 @@ func (p PostgresRepository) selectMonitorRelated(ctx context.Context, params *mo
 		icmp_wait, 
 		icmp_count, 
 		icmp_ttl, 
-		icmp_protocol
+		icmp_protocol,
+        icmp_loss_threshold
 	FROM monitor`)
 	if params != nil {
 		builder.Inject(params)
@@ -356,8 +360,9 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		icmp_wait = $20,
 		icmp_count = $21,
 		icmp_ttl = $22,
-		icmp_protocol = $23
-    WHERE id = $24`
+		icmp_protocol = $23,
+        icmp_loss_threshold = $24
+    WHERE id = $25`
 	if _, err = tx.ExecContext(ctx, q2,
 		monitor.Name,
 		monitor.UpdatedAt,
@@ -382,6 +387,7 @@ func (p PostgresRepository) UpdateMonitor(ctx context.Context, monitor monitor.M
 		monitor.ICMPCount,
 		monitor.ICMPTTL,
 		monitor.ICMPProtocol,
+		monitor.ICMPLossThreshold,
 		monitor.Id); err != nil {
 		tx.Rollback()
 		return err

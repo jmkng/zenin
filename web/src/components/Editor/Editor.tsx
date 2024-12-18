@@ -44,6 +44,7 @@ import TextInput from "../Input/TextInput/TextInput";
 import PairListInput from "../Input/PairListInput/PairListInput";
 import ToggleInput from "../Input/ToggleInput/ToggleInput";
 import EventInput from "../Input/EventInput/EventInput";
+import SliderInput from "../Input/SliderInput/SliderInput";
 
 import "./Editor.css";
 
@@ -378,6 +379,25 @@ export default function Editor(props: EditorProps) {
                             <span className="zenin__detail_validation zenin__h_error">Packet TTL must be greater than 0</span>
                             :
                             null}
+                    </div>
+
+                    <div className="zenin__detail_spaced">
+                        {/* TODO */}
+                        <SliderInput
+                            label={"Allowable Packet Loss"}
+                            name={"zenin__detail_monitor_icmp_loss_threshold"}
+                            value={editor.draft.icmpLossThreshold || 0}
+                            max={99}
+                            subtext={`${editor.draft.icmpLossThreshold || 0}%`}
+                            onChange={icmpLossThreshold =>
+                                setEditor(prev => ({
+                                    ...prev, draft: {
+                                        ...prev.draft,
+                                        icmpLossThreshold: icmpLossThreshold == 0 ? null : icmpLossThreshold
+                                    }
+                                }))
+                            }
+                        />
                     </div>
                 </>
                 : null}

@@ -103,11 +103,12 @@ type HTTPFields struct {
 }
 
 type ICMPFields struct {
-	ICMPSize     *int          `json:"icmpSize" db:"icmp_size"`
-	ICMPWait     *int          `json:"icmpWait" db:"icmp_wait"`
-	ICMPCount    *int          `json:"icmpCount" db:"icmp_count"`
-	ICMPTTL      *int          `json:"icmpTtl" db:"icmp_ttl"`
-	ICMPProtocol *ProtocolKind `json:"icmpProtocol" db:"icmp_protocol"`
+	ICMPSize          *int          `json:"icmpSize" db:"icmp_size"`
+	ICMPWait          *int          `json:"icmpWait" db:"icmp_wait"`
+	ICMPCount         *int          `json:"icmpCount" db:"icmp_count"`
+	ICMPTTL           *int          `json:"icmpTtl" db:"icmp_ttl"`
+	ICMPProtocol      *ProtocolKind `json:"icmpProtocol" db:"icmp_protocol"`
+	ICMPLossThreshold *int          `json:"icmpLossThreshold" db:"icmp_loss_threshold"`
 }
 
 // Deadline returns a copy of the parent context with a timeout set according to

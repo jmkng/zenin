@@ -31,7 +31,8 @@ CREATE TABLE monitor (
     icmp_wait             INTEGER CHECK (icmp_wait > 0), -- Milliseconds
     icmp_count            INTEGER CHECK (icmp_count > 0),
     icmp_ttl              INTEGER CHECK (icmp_ttl > 0),
-    icmp_protocol         TEXT CHECK (icmp_protocol IN ('ICMP', 'UDP'))
+    icmp_protocol         TEXT CHECK (icmp_protocol IN ('ICMP', 'UDP')),
+    icmp_loss_threshold   INTEGER CHECK (icmp_loss_threshold < 100) -- Percentage (1 .. 99)
 );
 
 CREATE TABLE event (

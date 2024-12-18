@@ -56,6 +56,7 @@ export interface Monitor {
     icmpCount: number | null,
     icmpTtl: number | null,
     icmpProtocol: string | null,
+    icmpLossThreshold: number | null,
     measurements: Measurement[] | null
     events: Event[] | null
 }
@@ -127,6 +128,7 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.icmpCount == b.icmpCount
         && a.icmpTtl == b.icmpTtl
         && a.icmpProtocol == b.icmpProtocol
+        && a.icmpLossThreshold == b.icmpLossThreshold
         && ne(a.events, b.events)
 }
 

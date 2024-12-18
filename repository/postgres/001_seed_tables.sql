@@ -25,7 +25,8 @@ INSERT INTO monitor
     icmp_wait, 
     icmp_count, 
     icmp_ttl, 
-    icmp_protocol)
+    icmp_protocol,
+    icmp_loss_threshold)
 VALUES
     ('Mercury', 
     'ICMP', 
@@ -48,7 +49,8 @@ VALUES
     100, 
     3, 
     64, 
-    'UDP'),
+    'UDP',
+    25),
     ('Venus', 
     'HTTP', 
     false, 
@@ -70,6 +72,7 @@ VALUES
     NULL, 
     NULL, 
     NULL, 
+    NULL,
     NULL),
     ('Earth', 
     'PLUGIN', 
@@ -92,6 +95,7 @@ VALUES
     NULL, 
     NULL, 
     NULL, 
+    NULL,
     NULL),
     ('Mars', 
     'HTTP', 
@@ -114,6 +118,7 @@ VALUES
     NULL, 
     NULL, 
     NULL, 
+    NULL,
     NULL),
     ('Jupiter', 
     'HTTP', 
@@ -136,6 +141,7 @@ VALUES
     NULL, 
     NULL, 
     NULL, 
+    NULL,
     NULL),
     ('Saturn', 
     'HTTP', 
@@ -158,6 +164,7 @@ VALUES
     NULL, 
     NULL, 
     NULL, 
+    NULL,
     NULL),
     ('Uranus', 
     'HTTP', 
@@ -179,6 +186,7 @@ VALUES
     NULL,
     NULL, 
     NULL, 
+    NULL,
     NULL,
     NULL),
     ('Neptune', 
@@ -202,6 +210,7 @@ VALUES
     NULL, 
     NULL, 
     NULL, 
+    NULL,
     NULL);
 
 INSERT INTO measurement 

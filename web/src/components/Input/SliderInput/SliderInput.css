@@ -1,0 +1,35 @@
+.zenin__slider_input_box {
+    appearance: none;
+    width: 100%;
+    height: 5px;
+    background: var(--off-b);
+    border-radius: var(--rounded);
+    outline: none;
+}
+
+.zenin__slider_input_box::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 17px;
+    height: 17px;
+    background: var(--off-c);
+    border: 1px solid var(--off-d);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.zenin__slider_input_box:focus::-webkit-slider-thumb {
+    border: 1px solid var(--foreground);
+}
+
+.zenin__slider_input_subtext {
+    display: block;
+    color: var(--mid);
+    margin: var(--px-c) 0 0 0;
+}
+
+.zenin__slider_input_controls {
+    display: flex;
+    align-items: center;
+}
+

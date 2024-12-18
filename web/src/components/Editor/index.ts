@@ -42,6 +42,7 @@ export function reset(value: Monitor | null, state: MetaState): Draft {
         icmpCount: 3,
         icmpTtl: 64,
         icmpProtocol: ICMP_API,
+        icmpLossThreshold: 0,
         events: null
     };
 
@@ -101,6 +102,7 @@ export interface Draft {
     icmpCount: number | null,
     icmpTtl: number | null,
     icmpProtocol: string,
+    icmpLossThreshold: number | null,
     events: Event[] | null
 }
 
@@ -203,6 +205,7 @@ export function sanitize(draft: Draft): Monitor {
             monitor.icmpProtocol = null;
             monitor.icmpWait = null;
             monitor.icmpTtl = null;
+            monitor.icmpLossThreshold = null;
             monitor.pluginName = null;
             monitor.pluginArgs = null;
             break;
@@ -219,6 +222,7 @@ export function sanitize(draft: Draft): Monitor {
             monitor.icmpProtocol = null;
             monitor.icmpWait = null;
             monitor.icmpTtl = null;
+            monitor.icmpLossThreshold = null;
             monitor.pluginName = null;
             monitor.pluginArgs = null;
             break;
@@ -248,6 +252,7 @@ export function sanitize(draft: Draft): Monitor {
             monitor.icmpProtocol = null;
             monitor.icmpWait = null;
             monitor.icmpTtl = null;
+            monitor.icmpLossThreshold = null;
             break;
     }
 
