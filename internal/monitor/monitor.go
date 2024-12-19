@@ -309,14 +309,25 @@ func (e Event) Start(ctx context.Context) ([]byte, error) {
 		args = append(args, *e.PluginArgs...)
 	}
 
+	// Most of this function should behave the same as the plugin probe,
+	// but instead of downgrading a span, just return an error.
+
 	cmd := exec.CommandContext(ctx, path, args...)
+	ext := filepath.Ext(command)
+
 	switch runtime.GOOS {
 	case "windows":
-		if strings.HasSuffix(command, ".ps1") {
-			panic("TODO")
+		switch ext {
+		case ".ps1":
+			args = append([]string{"-File", path}, args...)
+			cmd = exec.Command("powershell", args...)
+		case ".bat":
+			args = append([]string{"/c", path}, args...)
+			cmd = exec.Command("cmd", args...)
 		}
 	case "darwin", "linux":
-		if strings.HasSuffix(command, ".sh") {
+		switch ext {
+		case ".sh":
 			shell, exists := os.LookupEnv("SHELL")
 			if !exists {
 				return []byte{}, errors.New("shell environment variable is not accessible")
