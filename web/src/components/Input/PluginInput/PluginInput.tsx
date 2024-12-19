@@ -43,7 +43,7 @@ export default function PluginInput(props: PluginInputProps) {
                 options={options}
             />
             {!selection ?
-                <span className="zenin__detail_validation zenin__h_error">Plugin selection is required</span>
+                <span className="zenin__detail_validation zenin__h_error">Plugin selection is required.</span>
                 :
                 null}
         </div>
@@ -56,7 +56,7 @@ export default function PluginInput(props: PluginInputProps) {
                 onChange={value => args.onChange(value.length == 0 ? null : value)}
             />
             {!hasValidArguments ?
-                <span className="zenin__detail_validation zenin__h_error">Plugin arguments must not be empty</span>
+                <span className="zenin__detail_validation zenin__h_error">Plugin arguments must not be empty.</span>
                 :
                 null}
         </div>
