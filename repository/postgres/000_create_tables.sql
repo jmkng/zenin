@@ -14,7 +14,7 @@ CREATE TABLE monitor (
     kind                  TEXT NOT NULL CHECK (kind IN ('HTTP', 'TCP', 'ICMP', 'PLUGIN')),
     active                BOOLEAN NOT NULL,
     "interval"            INTEGER NOT NULL CHECK ("interval" > 0), -- Seconds
-    timeout               INTEGER NOT NULL CHECK (timeout > 0), -- Seconds
+    timeout               INTEGER NOT NULL, -- Seconds
     description           TEXT,
     remote_address        TEXT,
     remote_port           INTEGER CHECK (remote_port >= 0 AND remote_port <= 65535),
