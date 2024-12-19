@@ -23,10 +23,9 @@ import {
 } from "../../server";
 import {
     EditorState,
-    isValidInterval,
     isValidMonitor,
     isValidName,
-    isValidNonZeroNumber,
+    isValidNonZeroWholeNumber,
     isValidRemoteAddress,
     isValidRemotePort,
     isValidTimeout,
@@ -69,16 +68,25 @@ export default function Editor(props: EditorProps) {
         setEditor(prev => ({ ...prev, draft: { ...prev.draft, active }, original: { ...prev.original, active } }))
     }, [state.monitor])
 
-    const canSubmit = useMemo(() => !monitorEquals(editor.draft as Monitor, editor.original as Monitor) && isValidMonitor(editor.draft), [editor])
+    const hasValidEditor = useMemo(() => !monitorEquals(editor.draft as Monitor, editor.original as Monitor) && isValidMonitor(editor.draft), [editor])
     const hasValidName = useMemo(() => isValidName(editor.draft.name), [editor.draft.name])
-    const hasValidInterval = useMemo(() => isValidInterval(editor.draft.interval), [editor.draft.interval])
+    const hasValidInterval = useMemo(() => isValidNonZeroWholeNumber(editor.draft.interval), [editor.draft.interval])
     const hasValidTimeout = useMemo(() => isValidTimeout(editor.draft.timeout), [editor.draft.timeout])
     const hasValidRemoteAddress = useMemo(() => isValidRemoteAddress(editor.draft.remoteAddress), [editor.draft.remoteAddress])
     const hasValidRemotePort = useMemo(() => isValidRemotePort(editor.draft.remotePort), [editor.draft.remotePort]);
-    const hasValidIcmpSize = useMemo(() => isValidNonZeroNumber(editor.draft.icmpSize), [editor.draft.icmpSize]);
-    const hasValidIcmpWait = useMemo(() => isValidNonZeroNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
-    const hasValidIcmpCount = useMemo(() => isValidNonZeroNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
-    const hasValidIcmpTtl = useMemo(() => isValidNonZeroNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
+    const hasValidIcmpSize = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpSize), [editor.draft.icmpSize]);
+    const hasValidIcmpWait = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpWait), [editor.draft.icmpWait]);
+    const hasValidIcmpCount = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
+    const hasValidIcmpTtl = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
+
+    // Check if the ICMP probe values might cause the operation to exceed the timeout.
+    const hasValidIcmpTime = useMemo(() => {
+        const { icmpCount, icmpWait, timeout, kind } = editor.draft;
+        if (!icmpCount || !icmpWait || !timeout || kind != ICMP_API)
+            return true;
+        // Compare the minimum time required to dispatch the packets to the timeout.
+        return icmpCount * icmpWait / 1000 < timeout;
+    }, [editor.draft.icmpWait, editor.draft.icmpCount, editor.draft.timeout, editor.draft.kind]);
 
     type eventFields = 'pluginName' | 'pluginArgs' | 'threshold';
 
@@ -114,7 +122,7 @@ export default function Editor(props: EditorProps) {
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, name } }))}
                 ></TextInput>
                 {!hasValidName ?
-                    <span className="zenin__detail_validation zenin__h_error">Must specify monitor name</span>
+                    <span className="zenin__detail_validation zenin__h_error">Name is required.</span>
                     :
                     null}
             </div>
@@ -134,6 +142,7 @@ export default function Editor(props: EditorProps) {
                 <SelectInput
                     name="zenin__detail_monitor_active"
                     value={editor.draft.active.toString()}
+                    label="State"
                     subtext="Controls the polling state of the monitor."
                     options={[
                         { value: "true", text: ACTIVE_UI },
@@ -155,24 +164,25 @@ export default function Editor(props: EditorProps) {
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, interval } }))}
                 />
                 {!hasValidInterval ?
-                    <span className="zenin__detail_validation zenin__h_error">Must specify valid, positive interval</span>
+                    <span className="zenin__detail_validation zenin__h_error">Requires an integer greater than zero.</span>
                     :
                     null}
             </div>
 
             <div className="zenin__detail_spaced">
                 <NumberInput
-                    label={<span className={hasValidTimeout ? "" : "zenin__h_error"}>Timeout</span>}
+                    label={<span className={!hasValidTimeout ? "zenin__h_error" : !hasValidIcmpTime ? "zenin__h_advice" : ""}>Timeout</span>}
                     name="zenin__detail_monitor_timeout"
                     value={editor.draft.timeout}
-                    subtext="The seconds to wait before declaring the measurement dead."
+                    subtext="The seconds that the probe has to complete before timing out."
                     onChange={timeout =>
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, timeout } }))}
                 />
-                {!hasValidTimeout ?
-                    <span className="zenin__detail_validation zenin__h_error">Must specify valid, positive timeout</span>
-                    :
-                    null}
+                {!hasValidTimeout
+                    ? <span className="zenin__detail_validation zenin__h_error">Requires a positive integer.</span>
+                    : !hasValidIcmpTime
+                        ? <span className="zenin__detail_validation zenin__h_advice">Timeout may be insufficient to complete probe.</span>
+                        : null}
             </div>
 
             <div className="zenin__detail_spaced zenin__detail_kind_container">
@@ -207,7 +217,7 @@ export default function Editor(props: EditorProps) {
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, remoteAddress } }))}
                     ></TextInput>
                     {!hasValidRemoteAddress ?
-                        <span className="zenin__detail_validation zenin__h_error">Must specify remote address</span>
+                        <span className="zenin__detail_validation zenin__h_error">Remote address is required.</span>
                         :
                         null}
                 </div>
@@ -225,7 +235,7 @@ export default function Editor(props: EditorProps) {
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, remotePort } }))}
                     />
                     {!hasValidRemotePort ?
-                        <span className="zenin__detail_validation zenin__h_error">Must specify remote port</span>
+                        <span className="zenin__detail_validation zenin__h_error">Requires an integer between 0 and 65535, inclusive.</span>
                         :
                         null}
                 </div>
@@ -315,7 +325,14 @@ export default function Editor(props: EditorProps) {
                         <ToggleInput
                             name={"zenin__detail_"}
                             label="Use UDP Protocol"
-                            offSubtext={<span className="zenin__h_advice">This monitor will use ICMP protocol. Requires root.</span>}
+                            offSubtext={<div className="zenin__detail_stacked_hint">
+                                <div>The probe will use ICMP protocol.</div>
+                                <div className="zenin__h_advice">Requires root on Unix systems.</div>
+                            </div>}
+                            onSubtext={<div className="zenin__detail_stacked_hint">
+                                <div>The probe will use UDP protocol.</div>
+                                <div className="zenin__h_advice">Unsupported on Windows systems.</div>
+                            </div>}
                             value={editor.draft.icmpProtocol == UDP_API}
                             onChange={value =>
                                 setEditor(prev => ({
@@ -334,35 +351,35 @@ export default function Editor(props: EditorProps) {
                             onChange={icmpSize => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpSize } }))}
                         />
                         {!hasValidIcmpSize ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet size must be greater than 0</span>
+                            <span className="zenin__detail_validation zenin__h_error">Packet size must be greater than zero.</span>
                             :
                             null}
                     </div>
 
                     <div className="zenin__detail_spaced">
                         <NumberInput
-                            label={<span className={hasValidIcmpWait ? "" : "zenin__h_error"}>Packet Wait</span>}
+                            label={<span className={!hasValidIcmpWait ? "zenin__h_error" : !hasValidIcmpTime ? "zenin__h_advice" : ""}>Packet Wait</span>}
                             name="zenin__detail_monitor_icmp_wait"
                             value={editor.draft.icmpWait}
                             subtext="The milliseconds to wait between each outgoing packet."
                             onChange={icmpWait => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpWait } }))}
                         />
                         {!hasValidIcmpWait ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet wait must be greater than 0</span>
+                            <span className="zenin__detail_validation zenin__h_error">Packet wait must be greater than zero.</span>
                             :
                             null}
                     </div>
 
                     <div className="zenin__detail_spaced">
                         <NumberInput
-                            label={<span className={hasValidIcmpCount ? "" : "zenin__h_error"}>Packet Count</span>}
+                            label={<span className={!hasValidIcmpCount ? "zenin__h_error" : !hasValidIcmpTime ? "zenin__h_advice" : ""}>Packet Count</span>}
                             name="zenin__detail_monitor_icmp_count"
                             value={editor.draft.icmpCount}
                             subtext="The total packets to send."
                             onChange={icmpCount => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpCount } }))}
                         />
                         {!hasValidIcmpCount ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet count must be greater than 0</span>
+                            <span className="zenin__detail_validation zenin__h_error">Packet count must be greater than zero.</span>
                             :
                             null}
                     </div>
@@ -376,13 +393,12 @@ export default function Editor(props: EditorProps) {
                             onChange={icmpTtl => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpTtl } }))}
                         />
                         {!hasValidIcmpTtl ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet TTL must be greater than 0</span>
+                            <span className="zenin__detail_validation zenin__h_error">Packet TTL must be greater than zero.</span>
                             :
                             null}
                     </div>
 
                     <div className="zenin__detail_spaced">
-                        {/* TODO */}
                         <SliderInput
                             label={"Allowable Packet Loss"}
                             name={"zenin__detail_monitor_icmp_loss_threshold"}
@@ -444,30 +460,32 @@ export default function Editor(props: EditorProps) {
                 </div>
                 : null}
 
-            <Button
-                border={true}
-                onClick={() => setEditor(prev => ({
-                    ...prev,
-                    draft: {
-                        ...prev.draft,
-                        events: [
-                            ...(prev.draft.events || []),
-                            {
-                                pluginName: (meta.context.state.plugins[0] || null),
-                                pluginArgs: null, threshold: null
-                            } as Event
-                        ]
-                    }
-                }))}
-            >
-                <span>Add Event</span>
-            </Button>
+            <div className="zenin__detail_add_event_container">
+                <Button
+                    border={true}
+                    onClick={() => setEditor(prev => ({
+                        ...prev,
+                        draft: {
+                            ...prev.draft,
+                            events: [
+                                ...(prev.draft.events || []),
+                                {
+                                    pluginName: (meta.context.state.plugins[0] || null),
+                                    pluginArgs: null, threshold: null
+                                } as Event
+                            ]
+                        }
+                    }))}
+                >
+                    <span>Add Event</span>
+                </Button>
+            </div>
         </div>
 
         <div className="zenin__detail_controls">
             <Button
                 kind="primary"
-                disabled={!canSubmit}
+                disabled={!hasValidEditor}
                 onClick={() => onChange(sanitize(editor.draft))}
             >
                 <span>Save</span>

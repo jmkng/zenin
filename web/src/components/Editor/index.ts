@@ -130,8 +130,8 @@ function isValidHTTP(draft: Draft): boolean {
 }
 
 function isValidICMP(draft: Draft): boolean {
-    return isValidRemoteAddress(draft.remoteAddress) && isValidNonZeroNumber(draft.icmpSize)
-        && isValidNonZeroNumber(draft.icmpWait) && isValidNonZeroNumber(draft.icmpCount) && isValidNonZeroNumber(draft.icmpTtl);
+    return isValidRemoteAddress(draft.remoteAddress) && isValidNonZeroWholeNumber(draft.icmpSize)
+        && isValidNonZeroWholeNumber(draft.icmpWait) && isValidNonZeroWholeNumber(draft.icmpCount) && isValidNonZeroWholeNumber(draft.icmpTtl);
 }
 
 function isValidTCP(draft: Draft): boolean {
@@ -153,8 +153,8 @@ function isValidHeaderRange(range: string | null): boolean {
     return true;
 }
 
-export function isValidNonZeroNumber(value: number | null): boolean {
-    return value != null && value > 0;
+export function isValidNonZeroWholeNumber(value: number | null): boolean {
+    return value != null && Number.isInteger(value) && value > 0;
 }
 
 export function isValidName(name: string | null): boolean {
@@ -170,11 +170,11 @@ export function isValidState(state: boolean): boolean {
 }
 
 export function isValidInterval(interval: number | null): boolean {
-    return interval != null && interval >= 0;
+    return isValidNonZeroWholeNumber(interval);
 }
 
 export function isValidTimeout(timeout: number | null): boolean {
-    return timeout != null && timeout >= 0
+    return timeout != null && Number.isInteger(timeout) && timeout >= 0
 }
 
 export function isValidRemoteAddress(remote: string | null): boolean {
@@ -183,7 +183,7 @@ export function isValidRemoteAddress(remote: string | null): boolean {
 }
 
 export function isValidRemotePort(port: number | null): boolean {
-    return port != null && port >= 0 && port <= 65535;
+    return port != null && Number.isInteger(port) && port >= 0 && port <= 65535;
 }
 
 export function isValidEvent(event: Event): boolean {
