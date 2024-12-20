@@ -24,10 +24,9 @@ type PluginProbe struct{}
 
 // Poll implements `Probe.Poll` for `PluginProbe`.
 func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
-	span := measurement.NewSpan(measurement.Ok)
-	command := *m.PluginName
+	span := measurement.NewSpan()
 
-	path := filepath.Join(env.Runtime.PluginsDir, command)
+	path := filepath.Join(env.Runtime.PluginsDir, *m.PluginName)
 	_, err := os.Stat(path)
 	if err != nil {
 		span.Downgrade(measurement.Dead, "Plugin was not found.")
@@ -44,7 +43,7 @@ func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	//
 	// Other types, like .ps1 or .sh, need to be handled by a shell, so check for that next.
 	cmd := exec.CommandContext(ctx, path, args...)
-	ext := filepath.Ext(command)
+	ext := filepath.Ext(*m.PluginName)
 
 	switch runtime.GOOS {
 	case "windows":

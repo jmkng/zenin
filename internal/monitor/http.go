@@ -5,7 +5,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 
 	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/measurement"
@@ -20,7 +22,23 @@ type HTTPProbe struct{}
 
 // Poll implements `Probe.Poll` for `HTTPProbe`.
 func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
-	span := measurement.NewSpan(measurement.Ok)
+	span := measurement.NewSpan()
+
+	// Check remote address.
+	result, err := url.Parse(*m.RemoteAddress)
+	if err != nil || result.Scheme == "" || result.Scheme != "http" && result.Scheme != "https" {
+		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
+		return span
+	}
+	// The `net.LookupHost` method will handle both IP and hostname.
+	// If you do pass a hostname and DNS resolution fails, the user will see an "invalid address" hint.
+	// This might be confusing, because the address may technically be valid -- so add another hint.
+	_, err = net.LookupHost(result.Host)
+	if err != nil {
+		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
+		span.Hint("Remote address DNS name resolution failed.")
+		return span
+	}
 
 	requestBody := bytes.NewBuffer([]byte{})
 	if m.HTTPRequestBody != nil {

@@ -19,8 +19,9 @@ type ICMPProbe struct{}
 
 // Poll implements `Probe.Poll` for `ICMPProbe`.
 func (i ICMPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
-	span := measurement.NewSpan(measurement.Ok)
+	span := measurement.NewSpan()
 
+	// Check remote address.
 	client := icmp.New(*m.RemoteAddress)
 	err := client.Resolve()
 	if err != nil {

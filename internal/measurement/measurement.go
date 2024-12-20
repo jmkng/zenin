@@ -28,11 +28,10 @@ type Measurement struct {
 	Span
 }
 
-// NewSpan returns a new `Span` with the provided default state.
-// `Certificates` is an empty slice. All other fields are nil.
-func NewSpan(state ProbeState) Span {
+// NewSpan returns a new `Span` with a default state of `Ok`.
+func NewSpan() Span {
 	return Span{
-		State:        state,
+		State:        Ok,
 		StateHint:    []string{},
 		Certificates: []Certificate{},
 		HTTPFields:   HTTPFields{},

@@ -7,7 +7,7 @@ import (
 )
 
 func TestSpanDowngrade(t *testing.T) {
-	span := NewSpan(Ok)
+	span := NewSpan()
 	debug.Assert(t, span.State == Ok)
 	span.Downgrade(Warn)
 	debug.Assert(t, span.State == Warn)
