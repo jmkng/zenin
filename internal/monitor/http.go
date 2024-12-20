@@ -47,7 +47,10 @@ func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 
 	request, err := http.NewRequestWithContext(ctx, *m.HTTPMethod, *m.RemoteAddress, requestBody)
 	if err != nil {
-		span.Downgrade(measurement.Dead, RemoteAddressInvalidMessage)
+		// No hint, because after reviewing the source code for `NewRequestWithContext`,
+		// it seems the only time this could fail in our use case would be the internal call to `url.Parse`,
+		// which we already performed above.
+		span.Downgrade(measurement.Dead)
 		return span
 	}
 
