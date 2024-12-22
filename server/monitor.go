@@ -83,6 +83,12 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	err = incoming.Validate()
+	if err != nil {
+		responder.Error(err, http.StatusBadRequest)
+		return
+	}
+
 	now := time.Now()
 	incoming.CreatedAt = now
 	incoming.UpdatedAt = now
