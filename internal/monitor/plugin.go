@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"text/template"
 
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
@@ -22,10 +24,16 @@ func NewPluginProbe() PluginProbe {
 
 type PluginProbe struct{}
 
+// PluginStore is a container for plugin argument template data.
+type PluginStore struct {
+	Monitor EventMonitor
+}
+
 // Poll implements `Probe.Poll` for `PluginProbe`.
 func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	span := measurement.NewSpan()
 
+	// Identify plugin.
 	path := filepath.Join(env.Runtime.PluginsDir, *m.PluginName)
 	_, err := os.Stat(path)
 	if err != nil {
@@ -33,9 +41,31 @@ func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 		return span
 	}
 
+	// Render plugin arguments.
+	store := PluginStore{
+		Monitor: NewEventMonitor(m),
+	}
 	var args []string
 	if m.PluginArgs != nil {
-		args = append(args, *m.PluginArgs...)
+		for i, v := range *m.PluginArgs {
+			name := fmt.Sprintf("%d-%d", *m.Id, i)
+			t, err := template.New(name).Parse(v)
+			if err != nil {
+				span.Downgrade(measurement.Dead, "Failed to parse plugin argument.")
+				return span
+			}
+
+			var result bytes.Buffer
+
+			err = t.Execute(&result, store)
+			if err != nil {
+				span.Downgrade(measurement.Dead, "Failed to render plugin argument.")
+				return span
+
+			}
+
+			args = append(args, result.String())
+		}
 	}
 
 	// Create an initial command pointing at the file with the arguments.
@@ -44,7 +74,6 @@ func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	// Other types, like .ps1 or .sh, need to be handled by a shell, so check for that next.
 	cmd := exec.CommandContext(ctx, path, args...)
 	ext := filepath.Ext(*m.PluginName)
-
 	switch runtime.GOOS {
 	case "windows":
 		switch ext {

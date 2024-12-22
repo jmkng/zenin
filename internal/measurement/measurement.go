@@ -64,6 +64,32 @@ func (h *ArrayValue) Scan(value any) error {
 	return err
 }
 
+type ProbeKind string
+
+const (
+	HTTP   ProbeKind = "HTTP"
+	TCP    ProbeKind = "TCP"
+	ICMP   ProbeKind = "ICMP"
+	Plugin ProbeKind = "PLUGIN"
+)
+
+// ProbeKindFromString returns an equivalent `ProbeKind` from the provided string.
+// The value parameter is normalized to lowercase.
+func ProbeKindFromString(value string) (ProbeKind, error) {
+	switch strings.ToLower(value) {
+	case "http":
+		return HTTP, nil
+	case "tcp":
+		return TCP, nil
+	case "icmp":
+		return ICMP, nil
+	case "plugin":
+		return Plugin, nil
+	default:
+		return "", errors.New("invalid monitor kind")
+	}
+}
+
 // Span is a common set of fields for all `Measurement`.
 type Span struct {
 	State ProbeState `json:"state" db:"state"`
@@ -95,32 +121,6 @@ func (s *Span) Downgrade(state ProbeState, hint ...string) {
 // Hint will add hints to the `Span`.
 func (s *Span) Hint(hint ...string) {
 	s.StateHint = append(s.StateHint, hint...)
-}
-
-type ProbeKind string
-
-const (
-	HTTP   ProbeKind = "HTTP"
-	TCP    ProbeKind = "TCP"
-	ICMP   ProbeKind = "ICMP"
-	Plugin ProbeKind = "PLUGIN"
-)
-
-// ProbeKindFromString returns an equivalent `ProbeKind` from the provided string.
-// The value parameter is normalized to lowercase.
-func ProbeKindFromString(value string) (ProbeKind, error) {
-	switch strings.ToLower(value) {
-	case "http":
-		return HTTP, nil
-	case "tcp":
-		return TCP, nil
-	case "icmp":
-		return ICMP, nil
-	case "plugin":
-		return Plugin, nil
-	default:
-		return "", errors.New("invalid monitor kind")
-	}
 }
 
 type HTTPFields struct {
