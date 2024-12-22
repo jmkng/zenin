@@ -177,7 +177,7 @@ func (m Monitor) Poll() measurement.Measurement {
 
 				output, err := v.Start(deadline)
 				if err != nil {
-					env.Error("event failed", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "error", err, "output", output)
+					env.Error("event failed", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "error", err.Error(), "output", output)
 				} else {
 					env.Debug("event stopping", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "output", string(output))
 				}
