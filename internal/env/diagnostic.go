@@ -31,15 +31,7 @@ func (d Diagnostic) Empty() bool {
 	return len(d.Warnings) == 0 && len(d.Errors) == 0
 }
 
-// Report will log all warnings and errors using the global logging mechanism,
-// and return true if the `Diagnostic` is fatal.
-func (d Diagnostic) Report() bool {
-	for _, w := range d.Warnings {
-		Warn(w)
-	}
-	for _, e := range d.Errors {
-		Error(e)
-	}
-
+// Fatal returns true if the `Diagnostic` contains any errors.
+func (d Diagnostic) Fatal() bool {
 	return len(d.Errors) > 0
 }

@@ -10,70 +10,101 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"text/template"
 
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
+	"github.com/jmkng/zenin/internal/settings"
 )
 
 // NewPluginProbe returns a new `PluginProbe`
-func NewPluginProbe() PluginProbe {
-	return PluginProbe{}
+func NewPluginProbe(settings settings.Settings) PluginProbe {
+	return PluginProbe{Settings: settings}
 }
 
-type PluginProbe struct{}
-
-// PluginStore is a container for plugin argument template data.
-type PluginStore struct {
-	Monitor EventMonitor
+type PluginProbe struct {
+	Settings settings.Settings
 }
 
 // Poll implements `Probe.Poll` for `PluginProbe`.
 func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	span := measurement.NewSpan()
 
+	code, stdout, stderr, dx := PluginExecutor{
+		Settings: s.Settings,
+		Data:     struct{ Monitor EventMonitor }{Monitor: NewEventMonitor(m)},
+	}.Run(ctx, m.PluginFields)
+
+	span.PluginExitCode = &code
+	span.PluginStdout = &stdout
+	span.PluginStderr = &stderr
+
+	if len(dx.Warnings) > 0 {
+		span.Downgrade(measurement.Warn)
+		for _, v := range dx.Warnings {
+			span.Hint(v)
+		}
+	}
+	if len(dx.Errors) > 0 {
+		span.Downgrade(measurement.Dead)
+		for _, v := range dx.Errors {
+			span.Hint(v)
+		}
+	}
+
+	return span
+}
+
+// PluginExecutor can execute a plugin identified by a `PluginFields`.
+type PluginExecutor struct {
+	Settings settings.Settings
+	// Data supplied to argument templates.
+	Data any
+}
+
+// Run will start the plugin.
+// It returns the exit code, standard output, standard error, and a `Diagnostic`.
+func (p PluginExecutor) Run(ctx context.Context, f PluginFields) (int, string, string, env.Diagnostic) {
+	dx := env.NewDiagnostic()
+
+	var code int
+	var stdout string
+	var stderr string
+
 	// Identify plugin.
-	path := filepath.Join(env.Runtime.PluginsDir, *m.PluginName)
+	path := filepath.Join(env.Runtime.PluginsDir, *f.PluginName)
 	_, err := os.Stat(path)
 	if err != nil {
-		span.Downgrade(measurement.Dead, "Plugin was not found.")
-		return span
+		dx.Error("Plugin was not found.")
+		return code, stdout, stderr, dx
 	}
 
 	// Render plugin arguments.
-	store := PluginStore{
-		Monitor: NewEventMonitor(m),
-	}
 	var args []string
-	if m.PluginArgs != nil {
-		for i, v := range *m.PluginArgs {
-			name := fmt.Sprintf("%d-%d", *m.Id, i)
-			t, err := template.New(name).Parse(v)
+	if f.PluginArgs != nil {
+		for i, v := range *f.PluginArgs {
+			name := fmt.Sprintf("%d", i)
+			t, err := template.New(name).Delims(p.Settings.Delimiters[0], p.Settings.Delimiters[1]).Parse(v)
 			if err != nil {
-				span.Downgrade(measurement.Dead, "Failed to parse plugin argument.")
-				return span
+				dx.Error("Failed to parse plugin argument.")
+				return code, stdout, stderr, dx
 			}
 
 			var result bytes.Buffer
 
-			err = t.Execute(&result, store)
+			err = t.Execute(&result, p.Data)
 			if err != nil {
-				span.Downgrade(measurement.Dead, "Failed to render plugin argument.")
-				return span
-
+				dx.Error("Failed to render plugin argument.")
+				return code, stdout, stderr, dx
 			}
 
 			args = append(args, result.String())
 		}
 	}
 
-	// Create an initial command pointing at the file with the arguments.
-	// This will work for binary plugins.
-	//
-	// Other types, like .ps1 or .sh, need to be handled by a shell, so check for that next.
 	cmd := exec.CommandContext(ctx, path, args...)
-	ext := filepath.Ext(*m.PluginName)
+	ext := filepath.Ext(*f.PluginName)
+
 	switch runtime.GOOS {
 	case "windows":
 		switch ext {
@@ -92,8 +123,8 @@ func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 		case ".sh":
 			shell, exists := os.LookupEnv("SHELL")
 			if !exists {
-				span.Downgrade(measurement.Dead, "Shell environment variable is not accessible.")
-				return span
+				dx.Error("Shell environment variable is not accessible.")
+				return code, stdout, stderr, dx
 			}
 			args := append([]string{path}, args...)
 			cmd = exec.Command(shell, args...)
@@ -102,72 +133,57 @@ func (s PluginProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 
 	stdoutPipe, stdoutPipeErr := cmd.StdoutPipe()
 	if stdoutPipeErr != nil {
-		span.Downgrade(measurement.Warn, "Failed to access plugin output stream.")
+		dx.Warn("Failed to access plugin output stream.")
 	}
 	stderrPipe, stderrPipeErr := cmd.StderrPipe()
 	if stderrPipeErr != nil {
-		span.Downgrade(measurement.Warn, "Failed to access plugin error stream.")
+		dx.Warn("Failed to access plugin error stream.")
 	}
 
 	// Start plugin.
 	if err := cmd.Start(); err != nil {
-		span.Downgrade(measurement.Dead, "Failed to start plugin.")
-		return span
+		dx.Error("Failed to start plugin.")
+		return code, stdout, stderr, dx
 	}
 
-	var stdout *bytes.Buffer
 	if stdoutPipeErr == nil {
 		b, err := io.ReadAll(stdoutPipe)
 		if err != nil {
-			span.Downgrade(measurement.Warn, "Failed to read plugin output stream.")
+			dx.Warn("Failed to read plugin output stream.")
 		} else {
-			stdout = bytes.NewBuffer(b)
+			stdout = string(bytes.TrimSpace(b))
 		}
 	}
-	var stderr *bytes.Buffer
 	if stderrPipeErr == nil {
 		b, err := io.ReadAll(stderrPipe)
 		if err != nil {
-			span.Downgrade(measurement.Warn, "Failed to read plugin error stream.")
+			dx.Warn("Failed to read plugin error stream.")
 		} else {
-			stderr = bytes.NewBuffer(b)
+			stderr = string(bytes.TrimSpace(b))
 		}
 	}
-
-	def := 0
-	span.PluginExitCode = &def
 
 	// Wait for execution, collect output.
 	err = cmd.Wait()
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			span.Downgrade(measurement.Dead, TimeoutMessage)
-			return span
+			dx.Error(TimeoutMessage)
+			return code, stdout, stderr, dx
 		} else if exit, ok := err.(*exec.ExitError); ok {
-			code := exit.ExitCode()
-			span.PluginExitCode = &code
+			code = exit.ExitCode()
 
 			switch code {
 			case 0:
 				break
 			case 1:
-				span.Downgrade(measurement.Warn, "Plugin returned a warn exit code.")
+				dx.Warn("Plugin returned a warn exit code.")
 			default:
-				span.Downgrade(measurement.Dead, "Plugin returned a dead exit code.")
+				dx.Error("Plugin returned a dead exit code.")
 			}
 		} else {
-			span.Downgrade(measurement.Dead, "Failed to execute plugin.")
+			dx.Error("Failed to execute plugin.")
 		}
 	}
 
-	if stdout != nil {
-		str := strings.TrimSpace(stdout.String())
-		span.PluginStdout = &str
-	}
-	if stderr != nil {
-		str := strings.TrimSpace(stderr.String())
-		span.PluginStderr = &str
-	}
-
-	return span
+	return code, stdout, stderr, dx
 }

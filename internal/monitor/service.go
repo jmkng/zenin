@@ -1,12 +1,18 @@
 package monitor
 
-import "context"
+import (
+	"context"
+	"io/fs"
+	"path/filepath"
+
+	"github.com/jmkng/zenin/internal/env"
+)
 
 // NewMonitorService returns a new `MonitorService`.
-func NewMonitorService(repository MonitorRepository, distributor chan<- any) MonitorService {
+func NewMonitorService(r MonitorRepository, d chan<- any) MonitorService {
 	return MonitorService{
-		Repository:  repository,
-		Distributor: distributor,
+		Repository:  r,
+		Distributor: d,
 	}
 }
 
@@ -43,4 +49,37 @@ func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) erro
 	}
 
 	return nil
+}
+
+func (m MonitorService) GetPlugins() ([]string, error) {
+	var plugins []string
+	root := env.Runtime.PluginsDir
+
+	supported := map[string]struct{}{
+		".exe": {}, ".sh": {}, ".ps1": {}, ".bat": {},
+	}
+
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		ext := filepath.Ext(d.Name())
+
+		// Filter unsupported extensions.
+		if _, ok := supported[ext]; ok || ext == "" {
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			plugins = append(plugins, rel)
+		}
+
+		return nil
+	})
+
+	return plugins, err
 }

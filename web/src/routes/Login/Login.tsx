@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAccountContext } from "../../internal/account";
 import { useDefaultAccountService } from "../../internal/account/service";
 import { useLayoutContext } from "../../internal/layout";
-import { Meta } from "../../internal/meta";
-import { useDefaultMetaService } from "../../internal/meta/service";
 import { DataPacket, Packet, isErrorPacket } from "../../server";
 
 import Button from "../../components/Button/Button";
@@ -16,8 +14,7 @@ import "./Login.css";
 export default function Login() {
     const [form, setForm] = useState<LoginState>(defaultState);
     const [errors, setErrors] = useState<string[]>([]);
-    const [summary, setSummary] = useState<Meta | null>(null);
-    const meta = useDefaultMetaService();
+    const [claim, setClaim] = useState<boolean | null>(null);
     const account = {
         service: useDefaultAccountService(),
         context: useAccountContext()
@@ -30,30 +27,29 @@ export default function Login() {
     }, [])
 
     useEffect(() => {
-        if (!summary) return;
+        if (claim === null) return;
         layout.dispatch({ type: 'load', loading: false })
-    }, [summary])
-
+    }, [claim])
 
     const handleInitialize = async () => {
-        const extract = await meta.getSummary();
+        const extract = await account.service.getClaim();
         if (!extract.ok()) return;
-        const packet: DataPacket<Meta> = await extract.json();
-        setSummary(packet.data);
+        const packet: DataPacket<boolean> = await extract.json();
+        setClaim(packet.data);
     }
 
     const handleSubmit = async () => {
-        if (!summary || !handleFormValidate()) return;
+        if (claim === null || !handleFormValidate()) return;
         let extract;
         const username = form.username || "";
         const password = form.password || "";
         layout.dispatch({ type: 'load', loading: true });
-        if (summary.isClaimed) extract = await account.service.login(username, password);
-        else extract = await account.service.claim(username, password);
+        if (claim) extract = await account.service.login(username, password);
+        else extract = await account.service.setClaim(username, password);
         const packet: Packet<string> = await extract.json();
         if (!extract.ok()) return handleFailure(packet);
         const token = (packet as DataPacket<string>).data;
-        account.service.set(token);
+        account.service.setLSToken(token);
         account.context.dispatch({ type: 'login', token });
         setErrors([]);
         navigate("/login");
@@ -61,8 +57,8 @@ export default function Login() {
 
     const handleFormValidate = () => {
         let result = true;
-        if (!summary) return;
-        if (!summary.isClaimed && (form.password != form.confirm)) {
+        if (claim === null) return;
+        if (claim === false && (form.password != form.confirm)) {
             setErrors(["Passwords do not match."]);
             result = false;
         }
@@ -103,7 +99,7 @@ export default function Login() {
                     value={form.password}
                     onChange={(password: string | null) => setForm(prev => ({ ...prev, password }))} />
             </div>
-            {!summary?.isClaimed
+            {claim !== null && claim === false
                 ?
                 <div className="zenin__login_spaced">
                     <TextInput
@@ -115,21 +111,24 @@ export default function Login() {
                 </div>
                 : null}
             <div className="zenin__login_controls">
-                <Button kind="primary" onClick={handleSubmit}>{summary?.isClaimed ? "Submit" : "Claim"}</Button>
+                <Button
+                    kind="primary"
+                    onClick={handleSubmit}>{claim !== null && claim === true ? "Submit" : "Claim"}
+                </Button>
             </div>
         </div>
 
         <div className="zenin__login_message_container">
-            {errors.length == 0 && !summary?.isClaimed
+            {errors.length == 0 && claim !== null && claim === false
                 ? warning
                 : null}
             {errors
                 ? errors.map((error, index) => <div key={index} className="zenin__login_message error">{error}</div>)
                 : null}
         </div>
-    </div >
+    </div>
 
-    return summary ? login : null
+    return claim !== null ? login : null
 }
 
 interface LoginState {

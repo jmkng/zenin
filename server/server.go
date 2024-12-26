@@ -14,25 +14,25 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jmkng/zenin/internal/account"
 	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/service"
+	"github.com/jmkng/zenin/internal/measurement"
+	"github.com/jmkng/zenin/internal/monitor"
+	"github.com/jmkng/zenin/internal/settings"
 )
 
-// NewServer returns a new Server.
-func NewServer(config Configuration, bundle service.Bundle) *Server {
-	return &Server{
-		config: config,
-		bundle: bundle,
-	}
+// NewServer returns a new `Server`.
+func NewServer(c Config, s Services) *Server {
+	return &Server{config: c, services: s}
 }
 
 // Server is the Zenin server.
 type Server struct {
-	config Configuration
-	bundle service.Bundle
+	config   Config
+	services Services
 }
 
-// Listen will block and start listening.
+// Listen will block and listen for incoming requests.
 func (s *Server) Serve() error {
 	env.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
 
@@ -48,7 +48,7 @@ func (s *Server) Serve() error {
 	var webFS = fs.FS(web)
 	sub, err := fs.Sub(webFS, "build")
 	if err != nil {
-		panic("failed to set web embed sub directory to `build`")
+		panic("failed to set web embed sub directory")
 	}
 	webHandler := http.FileServerFS(sub)
 	mux.NotFound(webHandler.ServeHTTP)
@@ -57,15 +57,15 @@ func (s *Server) Serve() error {
 	mux.Route("/api/v1", func(v1 chi.Router) {
 		v1.Use(Defaults)
 		v1.Use(middleware.AllowContentType("application/json"))
-		v1.Mount("/meta", NewMetaHandler(s.bundle.Meta))
-		v1.Mount("/account", NewAccountHandler(s.bundle.Account))
-		v1.Mount("/feed", NewFeedHandler(s.bundle.Monitor))
+		v1.Mount("/settings", NewSettingsHandler(s.services.Settings))
+		v1.Mount("/account", NewAccountHandler(s.services.Account))
+		v1.Mount("/feed", NewFeedHandler(s.services.Monitor))
 
 		//// private /////
 		v1.Group(func(private chi.Router) {
 			private.Use(Authenticator)
-			private.Mount("/monitor", NewMonitorHandler(s.bundle.Monitor))
-			private.Mount("/measurement", NewMeasurementHandler(s.bundle.Measurement))
+			private.Mount("/monitor", NewMonitorHandler(s.services.Monitor))
+			private.Mount("/measurement", NewMeasurementHandler(s.services.Measurement))
 		})
 		//////////////////
 	})
@@ -79,22 +79,22 @@ func (s *Server) Serve() error {
 	return nil
 }
 
-func NewConfiguration(runtime *env.RuntimeEnv) Configuration {
+func NewConfig(runtime *env.RuntimeEnv) Config {
 	address := net.TCPAddr{
 		IP:   net.IPv4(127, 0, 0, 1),
 		Port: int(runtime.Port),
 	}
-	return Configuration{Address: address, Tls: nil} // todo TLS setup will happen here.
+	return Config{Address: address, Tls: nil} // TODO: TLS setup will happen here.
 }
 
-// Configuration controls the behavior of a Zenin Server.
-type Configuration struct {
+// Config controls the behavior of a Zenin Server.
+type Config struct {
 	Address net.TCPAddr
-	Tls     *TlsConfiguration
+	Tls     *TlsConfig
 }
 
-// TlsConfiguration contains TLS configuration options for the Zenin Server.
-type TlsConfiguration struct {
+// TlsConfig contains TLS configuration options for the Zenin Server.
+type TlsConfig struct {
 	Cert []byte
 	Key  []byte
 }
@@ -120,6 +120,13 @@ func scanQueryParameterIds(values url.Values) []int {
 	}
 
 	return id
+}
+
+type Services struct {
+	Settings    settings.SettingsService
+	Measurement measurement.MeasurementService
+	Monitor     monitor.MonitorService
+	Account     account.AccountService
 }
 
 //go:embed build

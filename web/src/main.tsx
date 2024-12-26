@@ -1,6 +1,6 @@
 import AccountProvider from './internal/account/context.tsx';
 import LayoutProvider from './internal/layout/context.tsx';
-import MetaProvider from './internal/meta/context.tsx';
+import SettingsProvider from './internal/settings/context.tsx';
 import MonitorProvider from './internal/monitor/context.tsx';
 
 import Initialize from './components/Initialize/Initialize.tsx';
@@ -26,7 +26,7 @@ const providers = [
     MonitorProvider,
     LayoutProvider,
     AccountProvider,
-    MetaProvider
+    SettingsProvider
 ];
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

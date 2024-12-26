@@ -9,11 +9,12 @@ interface PairListInputProps {
     name: string
     label?: string | React.ReactNode;
     value: PairListValue;
+    allowMultipleRows?: boolean;
     onChange: (value: PairListValue) => void;
 }
 
 export default function PairListInput(props: PairListInputProps) {
-    const { name, label, value, onChange } = props;
+    const { name, label, value, allowMultipleRows = true, onChange } = props;
 
     const handleUpdate = (index: number, kind: "key" | "value", updated: string) => {
         const state = [...value];
@@ -24,6 +25,7 @@ export default function PairListInput(props: PairListInputProps) {
     };
 
     const handleDelete = (index: number) => {
+        if (!allowMultipleRows) return;
         const state = value.filter((_, i) => i !== index);
         onChange(state);
     };
@@ -53,27 +55,31 @@ export default function PairListInput(props: PairListInputProps) {
                     onChange={value => handleUpdate(index, "value", value ?? "")}
                 />
             </div>
-            <div className="zenin__pair_list_input_delete">
-                <Button
-                    onClick={() => handleDelete(index)}
-                    border={true}
-                    kind="destructive"
-                >
-                    <span className="zenin__pair_list_input_delete_icon">
-                        <AddIcon />
-                    </span>
-                </Button>
-            </div>
+            {allowMultipleRows
+                ? <div className="zenin__pair_list_input_delete">
+                    <Button
+                        onClick={() => handleDelete(index)}
+                        border={true}
+                        kind="destructive"
+                    >
+                        <span className="zenin__pair_list_input_delete_icon">
+                            <AddIcon />
+                        </span>
+                    </Button>
+                </div>
+                : null}
         </div>
         )}
 
-        <Button
-            disabled={false}
-            border={true}
-            onClick={() => onChange([...value, { key: "", value: "" }])}
-        >
-            Add Row
-        </Button>
+        {allowMultipleRows
+            ? <Button
+                disabled={false}
+                border={true}
+                onClick={() => onChange([...value, { key: "", value: "" }])}
+            >
+                Add Row
+            </Button>
+            : null}
     </div>
 }
 

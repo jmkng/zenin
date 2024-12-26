@@ -16,14 +16,14 @@ func Builder(env *env.DatabaseEnv) *RepositoryBuilder {
 	}
 }
 
-// WithValidate will cause the Repository connection to be tested
-// when `build` is called.
+// WithValidate will cause the `Repository` connection to be tested
+// when build is called.
 func (b *RepositoryBuilder) WithValidate() *RepositoryBuilder {
 	b.withValidate = true
 	return b
 }
 
-// Build will return a Repository from the builder.
+// Build will return a `Repository` from the builder.
 func (b RepositoryBuilder) Build() (repository.Repository, error) {
 	var repository repository.Repository
 	var err error
@@ -38,14 +38,14 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 		return repository, err
 	}
 
-	// Validation step will connect to the repository and check the schema,
-	// migrating if needed.
+	// Validation step will connect to check the schema, migrating if needed.
 	if b.withValidate {
 		env.Debug("repository validation starting")
 		valid, err := repository.Validate()
 		if err != nil {
 			return repository, fmt.Errorf("failed to validate repository: %w", err)
 		}
+
 		if !valid {
 			env.Debug("repository migration starting")
 			if err := repository.Migrate(); err != nil {
@@ -53,6 +53,7 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 			}
 			env.Debug("repository migration stopping")
 		}
+
 		env.Debug("repository validation stopping")
 	}
 

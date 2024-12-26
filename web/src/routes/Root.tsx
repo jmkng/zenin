@@ -4,32 +4,27 @@ import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
 import { useAccountContext } from '../internal/account';
 import { useLayoutContext } from '../internal/layout';
 import { hideLoadingScreen, showLoadingScreen } from '../internal/layout/graphics';
-import { useMetaContext } from '../internal/meta';
-import { useDefaultMetaService } from '../internal/meta/service';
 import { Monitor, useMonitorContext } from '../internal/monitor';
 import { useDefaultMonitorService } from '../internal/monitor/service';
+import { useSettingsContext } from '../internal/settings';
+import { SettingsState } from '../internal/settings/reducer';
+import { useDefaultSettingsService } from '../internal/settings/service';
 import { DataPacket } from '../server';
 import { FEED, handleConnect, handleDisconnect } from '../server/feed';
 
 import Private from '../components/Guard/Guard';
 import Hidden from '../components/Hidden/Hidden';
-import Bundle from './Bundle';
 import Dashboard from './Dashboard/Dashboard';
 import Login from './Login/Login';
+import ModalGroup from './ModalGroup';
 
 import './Root.css';
 
 export default function Root() {
     const account = useAccountContext();
     const layout = useLayoutContext();
-    const monitor = {
-        context: useMonitorContext(),
-        service: useDefaultMonitorService()
-    }
-    const meta = {
-        context: useMetaContext(),
-        service: useDefaultMetaService()
-    };
+    const monitor = { context: useMonitorContext(), service: useDefaultMonitorService() };
+    const settings = { context: useSettingsContext(), service: useDefaultSettingsService() };
     const dispatch = useFlaggedDispatch();
 
     useEffect(() => {
@@ -51,18 +46,21 @@ export default function Root() {
     }, [account.state.authenticated])
 
     const handleInitialize = async (token: string) => {
-        const plugins = await meta.service.getPlugins(token);
-        if (plugins.ok()) {
-            const packet: DataPacket<string[]> = await plugins.json();
-            if (packet) meta.context.dispatch({ type: 'reset', plugins: packet.data ?? [] })
+        const settingsExtract = await settings.service.getSettings(token);
+        if (settingsExtract.ok()) {
+            const packet: DataPacket<SettingsState> = await settingsExtract.json();
+            settings.context.dispatch({ type: 'reset', delimiters: packet.data.delimiters })
         }
-        const monitors = await monitor.service.getMonitor(token, 35);
-        if (monitors.ok()) {
-            const packet: DataPacket<Monitor[]> = await monitors.json();
-            if (packet) monitor.context.dispatch({ type: 'reset', monitors: packet.data });
+        const pluginExtract = await monitor.service.getPlugins(token);
+        if (pluginExtract.ok()) {
+            const packet: DataPacket<string[]> = await pluginExtract.json();
+            monitor.context.dispatch({ type: 'update', plugins: packet.data })
         }
-        if (!plugins.ok() || !monitors.ok()) return;
-
+        const monitorExtract = await monitor.service.getMonitor(token, 35);
+        if (monitorExtract.ok()) {
+            const packet: DataPacket<Monitor[]> = await monitorExtract.json();
+            monitor.context.dispatch({ type: 'reset', monitors: packet.data });
+        }
         const loading = false;
         layout.dispatch({ type: 'load', loading })
     }
@@ -78,6 +76,7 @@ export default function Root() {
                 </Route>
             </Routes>
         </div>
-        <Bundle />
+
+        <ModalGroup />
     </div>
 }

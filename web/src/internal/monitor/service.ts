@@ -56,6 +56,12 @@ class MonitorService extends Service {
         const request = new AuthenticatedRequest(token, address).method(GET_API)
         return await this.extract(request);
     }
+
+    async getPlugins(token: string) {
+        const address = '/monitor/plugins';
+        const request = new AuthenticatedRequest(token, address);
+        return await this.extract(request);
+    }
 }
 
 export const useDefaultMonitorService = () => {

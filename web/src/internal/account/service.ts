@@ -19,22 +19,28 @@ class AccountService extends Service {
         return await this.extract(request);
     }
 
-    async claim(username: string, password: string) {
+    async getClaim() {
+        const address = '/account/claim';
+        const request = new Request(address);
+        return await this.extract(request);
+    }
+
+    async setClaim(username: string, password: string) {
         const address = `/account/claim`;
         const body = JSON.stringify({ username, password });
         const request = new Request(address).body(body).method(POST_API);
         return await this.extract(request);
     }
 
-    set(token: string) {
+    setLSToken(token: string) {
         localStorage.setItem(this.#token, token);
     }
 
-    read() {
+    readLSToken() {
         return localStorage.getItem(this.#token);
     }
 
-    clear() {
+    clearLSToken() {
         localStorage.removeItem(this.#token);
     }
 }

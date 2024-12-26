@@ -8,6 +8,7 @@ export interface MonitorState {
     selected: Monitor[],
     split: SplitState,
     deleting: Monitor[],
+    plugins: string[],
 }
 
 export const monitorDefault: MonitorState = {
@@ -16,21 +17,37 @@ export const monitorDefault: MonitorState = {
     selected: [],
     split: new SplitState(null),
     deleting: [],
+    plugins: []
 }
 
 const inventoryMaxMeasurements = 40;
 const inventoryChunkSize = 5;
 
-type RemoveAction = {
+type ResetAction = {
+    type: 'reset',
+    monitors: Monitor[]
+};
+
+type RemoveMonitorAction = {
     type: 'remove',
     monitors: number[]
 };
 
-type ToggleAction = {
+type ToggleMonitorAction = {
     type: 'toggle',
     monitors: number[],
     active: boolean,
     time: string
+};
+
+type DeleteMonitorAction = {
+    type: 'delete',
+    monitors: Monitor[]
+};
+
+type OverwriteMonitorAction = {
+    type: 'overwrite',
+    monitor: Monitor
 };
 
 type DraftAction = {
@@ -42,11 +59,6 @@ type FilterAction = {
     filter: FilterKind
 };
 
-type DeleteAction = {
-    type: 'delete',
-    monitors: Monitor[]
-};
-
 type SelectKind = Monitor | "ALL" | "NONE";
 
 type SelectAction = {
@@ -54,19 +66,14 @@ type SelectAction = {
     monitor: SelectKind
 };
 
-type OverwriteAction = {
-    type: 'overwrite',
-    monitor: Monitor
-};
-
 type PollAction = {
     type: 'poll',
     measurement: Measurement
 };
 
-type ResetAction = {
-    type: 'reset',
-    monitors: Monitor[]
+type DetailAction = { 
+    type: 'detail', 
+    measurement: Measurement | null 
 };
 
 type PaneAction = {
@@ -93,27 +100,35 @@ type SettingsPaneAction = {
     type: 'settings'
 };
 
-type DetailAction = { type: 'detail', measurement: Measurement | null };
+type AddMeasurementAction = { 
+    type: 'measurement', 
+    id: number[], 
+    monitor: number 
+};
 
-type MeasurementAction = { type: 'measurement', id: number[], monitor: number };
+type UpdatePluginAction = {
+    type: 'update'
+    plugins: string[]
+}
 
 export type MonitorDispatch = (action: MonitorAction) => void;
 
 export type MonitorAction =
-    | RemoveAction
-    | ToggleAction
+    | RemoveMonitorAction
+    | ToggleMonitorAction
     | DraftAction
     | FilterAction
-    | DeleteAction
+    | DeleteMonitorAction
     | SelectAction
-    | OverwriteAction
+    | OverwriteMonitorAction
     | PollAction
     | ResetAction
     | PaneAction
     | DetailAction
-    | MeasurementAction
+    | AddMeasurementAction
+    | UpdatePluginAction
 
-const removeAction = (state: MonitorState, action: RemoveAction) => {
+const removeMonitorAction = (state: MonitorState, action: RemoveMonitorAction) => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) monitors.delete(n);
 
@@ -125,7 +140,7 @@ const removeAction = (state: MonitorState, action: RemoveAction) => {
     return { ...state, monitors, selected, deleting, split } as MonitorState
 }
 
-const toggleAction = (state: MonitorState, action: ToggleAction) => {
+const toggleMonitorAction = (state: MonitorState, action: ToggleMonitorAction) => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) {
         const found = monitors.get(n);
@@ -150,7 +165,7 @@ const filterAction = (state: MonitorState, action: FilterAction) => {
     return { ...state, filter }
 }
 
-const deleteAction = (state: MonitorState, action: DeleteAction) => {
+const deleteMonitorAction = (state: MonitorState, action: DeleteMonitorAction) => {
     const deleting = action.monitors;
     return { ...state, deleting }
 }
@@ -168,10 +183,13 @@ const selectAction = (state: MonitorState, action: SelectAction) => {
     return { ...state, selected }
 }
 
-const overwriteAction = (state: MonitorState, action: OverwriteAction) => {
+const overwriteMonitorAction = (state: MonitorState, action: OverwriteMonitorAction) => {
     const monitors = new Map(state.monitors);
     const target = monitors.get(action.monitor.id);
-    if (target) action.monitor.measurements = target.measurements; // Recycle the measurement information.
+
+    // Recycle the measurement information.
+    if (target) action.monitor.measurements = target.measurements; 
+
     monitors.set(action.monitor.id, action.monitor);
     const split = new SplitState(new EditorPane(action.monitor))
     return { ...state, monitors, split }
@@ -210,12 +228,9 @@ const resetAction = (state: MonitorState, action: ResetAction) => {
 
 const paneAction = (state: MonitorState, action: PaneAction) => {
     switch (action.pane.type) {
-        case "view":
-            return viewPaneAction(state, action.pane);
-        case "editor":
-            return editorPaneAction(state, action.pane);
-        case "settings":
-            return settingsPaneAction(state);
+        case "view": return viewPaneAction(state, action.pane);
+        case "editor": return editorPaneAction(state, action.pane);
+        case "settings": return settingsPaneAction(state);
     }
 }
 
@@ -251,7 +266,7 @@ const detailAction = (state: MonitorState, action: DetailAction) => {
     return state;
 }
 
-const measurementAction = (state: MonitorState, action: MeasurementAction) => {
+const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction) => {
     const monitor = state.monitors.get(action.monitor);
     if (!monitor) return state;
 
@@ -259,19 +274,24 @@ const measurementAction = (state: MonitorState, action: MeasurementAction) => {
     return state;
 }
 
+const updatePluginAction = (state: MonitorState, action: UpdatePluginAction) => {
+    return { ...state, plugins: action.plugins.sort() };
+}
+
 export const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorState => {
     switch (action.type) {
-        case "remove": return removeAction(state, action);
-        case "toggle": return toggleAction(state, action);
-        case "overwrite": return overwriteAction(state, action);
+        case "remove": return removeMonitorAction(state, action);
+        case "toggle": return toggleMonitorAction(state, action);
+        case "overwrite": return overwriteMonitorAction(state, action);
         case "poll": return pollAction(state, action);
         case "reset": return resetAction(state, action);
         case "draft": return draftAction(state);
         case "filter": return filterAction(state, action);
-        case "delete": return deleteAction(state, action);
+        case "delete": return deleteMonitorAction(state, action);
         case "select": return selectAction(state, action);
         case "pane": return paneAction(state, action);
         case "detail": return detailAction(state, action);
-        case "measurement": return measurementAction(state, action);
+        case "measurement": return addMeasurementAction(state, action);
+        case "update": return updatePluginAction(state, action);
     }
 }

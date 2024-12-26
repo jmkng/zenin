@@ -1,3 +1,10 @@
+CREATE TABLE settings (
+    created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    "key"                 TEXT NOT NULL UNIQUE,
+    text_value            TEXT
+);
+
 CREATE TABLE account (
     created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -88,6 +95,11 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_settings_timestamp
+BEFORE UPDATE ON settings
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
 
 CREATE TRIGGER update_account_timestamp
 BEFORE UPDATE ON account

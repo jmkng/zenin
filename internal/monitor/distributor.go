@@ -10,15 +10,16 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
+	"github.com/jmkng/zenin/internal/settings"
 )
 
-// NewDistributor returns a new `Distributor` using the provided `MeasurementService`
-// to handle incoming measurements.
-func NewDistributor(service measurement.MeasurementService) Distributor {
+// NewDistributor returns a new `Distributor`.
+func NewDistributor(m1 measurement.MeasurementService, m2 settings.Settings) Distributor {
 	return Distributor{
-		measurement: service,
 		subscribers: map[int]*websocket.Conn{},
 		polling:     map[int]chan<- any{},
+		measurement: m1,
+		settings:    m2,
 	}
 }
 
@@ -29,53 +30,44 @@ type Distributor struct {
 	// A list of polling monitors, and a channel to contact them.
 	polling map[int]chan<- any
 
-	// A `MeasurementService` used to handle measurements.
 	measurement measurement.MeasurementService
+	settings    settings.Settings
 }
 
 // Listen will block and listen for incoming messages.
-//
-// Returns a channel that can be used to send messages to the `Distributor`.
-//
-// The channel should be sent a message type that is defined `message.go`.
-// Unrecognized messages are logged and dropped.
-func (d *Distributor) Listen() chan<- any {
-	channel := make(chan any, 1)
-	go func(in chan any) {
-		env.Debug("distributor starting")
+func (d *Distributor) Listen(s chan any) {
+	env.Debug("distributor starting")
 
-		for message := range in {
-			switch x := message.(type) {
-			case SubscribeMessage:
-				d.subscribe(channel, x.Subscriber)
-			case UnsubscribeMessage:
-				d.unsubscribe(x.Id)
-			case StartMessage:
-				d.start(channel, x.Monitor)
-			case StopMessage:
-				d.stop(x.Id)
-			case MeasurementMessage:
-				d.distributeMeasurement(channel, x.Measurement)
-			case PollMessage:
-				if monitor, ok := d.polling[*x.Monitor.Id]; ok {
-					monitor <- x
-				} else {
-					go d.poll(channel, x.Monitor)
-				}
-			default:
-				env.Debug("distributor dropped unrecognized message: %v", "message", message)
+	for message := range s {
+		switch x := message.(type) {
+		case SubscribeMessage:
+			d.subscribe(s, x.Subscriber)
+		case UnsubscribeMessage:
+			d.unsubscribe(x.Id)
+		case StartMessage:
+			d.start(s, x.Monitor)
+		case StopMessage:
+			d.stop(x.Id)
+		case MeasurementMessage:
+			d.distributeMeasurement(s, x.Measurement)
+		case PollMessage:
+			if monitor, ok := d.polling[*x.Monitor.Id]; ok {
+				monitor <- x
+			} else {
+				go d.poll(s, x.Monitor)
 			}
+		case settings.SettingsMessage:
+			d.settings = x.Settings
+		default:
+			env.Debug("distributor dropped unrecognized message: %v", "message", message)
 		}
+	}
 
-		env.Debug("distributor stopping")
-	}(channel)
-
-	return channel
+	env.Debug("distributor stopping")
 }
 
 // subscribe will add a new feed subscriber.
 func (d *Distributor) subscribe(loopback chan<- any, subscriber *websocket.Conn) {
-	// todo Rethink this later.
 	var key int
 	for {
 		key = rand.IntN(math.MaxInt)
@@ -134,6 +126,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 		delay := rand.IntN(800)
 		env.Debug("distributor started polling monitor", "monitor(id)", *mon.Id, "delay(ms)", delay)
 		time.Sleep(time.Duration(delay) * time.Millisecond)
+
 	POLLING:
 		for {
 			select {
@@ -145,7 +138,6 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 
 				switch message.(type) {
 				case StopMessage:
-					env.Debug("monitor received stop signal", "monitor(id)", *mon.Id)
 					break POLLING
 				case PollMessage:
 					go d.poll(loopback, mon)
@@ -161,7 +153,7 @@ func (d *Distributor) start(loopback chan<- any, mon Monitor) {
 
 // poll will begin polling a `Monitor`.
 func (d *Distributor) poll(loopback chan<- any, m Monitor) {
-	measurement := m.Poll()
+	measurement := m.Poll(d.settings)
 	loopback <- MeasurementMessage{
 		Measurement: measurement,
 	}

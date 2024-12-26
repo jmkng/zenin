@@ -7,12 +7,12 @@ import (
 
 	g "github.com/jmkng/zenin/pkg/graphics"
 
+	"github.com/jmkng/zenin/internal/account"
 	"github.com/jmkng/zenin/internal/env"
-	"github.com/jmkng/zenin/internal/meta"
+	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
-	"github.com/jmkng/zenin/internal/service"
+	"github.com/jmkng/zenin/internal/settings"
 	"github.com/jmkng/zenin/repository"
-	"github.com/jmkng/zenin/repository/mock"
 	"github.com/jmkng/zenin/server"
 )
 
@@ -22,25 +22,41 @@ func main() {
 	}
 	env.Debug("main starting")
 
+	ctx := context.Background()
+
 	commit := ""
 	if env.Runtime.Kind == env.Dev {
 		commit = " " + env.Commit
 	}
-
 	c := env.Runtime.Color
 	fmt.Printf("Zenin %v%v\n", env.Version, g.MagentaC(commit, c))
 	fmt.Printf("%v Environment\n", g.BrightBlackC(">", c))
 	fmt.Printf("Base: %v\n", env.Runtime.BaseDir)
 	fmt.Printf("Plugins: %v\n", env.Runtime.PluginsDir)
 
-	diag := env.NewDiagnostic()
-	env.Runtime.Health(&diag)
-	if diag.Report() {
+	dx := env.NewDiagnostic()
+
+	env.Runtime.Health(&dx)
+
+	for _, w := range dx.Warnings {
+		env.Warn(w)
+	}
+	for _, e := range dx.Errors {
+		env.Error(e)
+	}
+	if dx.Fatal() {
 		os.Exit(1)
 	}
 
-	meta := meta.NewMetaService(mock.NewMockRepository())
-	plugins, err := meta.GetPlugins()
+	repository, err := repository.Builder(env.Database).
+		WithValidate().
+		Build()
+	dd(err)
+
+	channel := make(chan any, 1)
+
+	mosv := monitor.NewMonitorService(repository, channel)
+	plugins, err := mosv.GetPlugins()
 	dd(err)
 
 	fmt.Printf("Using %v plugins\n", g.BrightBlackC(fmt.Sprintf("%v", len(plugins)), c))
@@ -48,27 +64,29 @@ func main() {
 		fmt.Printf("    [%v]\n", g.BrightBlackC(v, c))
 	}
 
-	repository, err := repository.
-		Builder(env.Database).
-		WithValidate().
-		Build()
+	ssv := settings.NewSettingsService(repository, channel)
+	settings, err := ssv.GetSettings(ctx)
 	dd(err)
 
-	bundle := service.NewBundle(repository)
+	mesv := measurement.NewMeasurementService(repository)
+	distributor := monitor.NewDistributor(mesv, settings)
+	go distributor.Listen(channel)
 
-	// Resume polling active monitors.
-	active, err := bundle.Monitor.GetActive(context.Background())
+	active, err := mosv.GetActive(context.Background())
 	dd(err)
 
 	env.Debug("restoring distributor state", "active", len(active))
 	for _, v := range active {
-		bundle.Monitor.Distributor <- monitor.StartMessage{Monitor: v}
+		channel <- monitor.StartMessage{Monitor: v}
 	}
 
-	// 🌩️ ->
+	asv := account.NewAccountService(repository)
+
+	// Start server.
 	fmt.Printf("%v Server\n", g.BrightBlackC(">", c))
-	err = server.
-		NewServer(server.NewConfiguration(env.Runtime), bundle).
+	server.
+		NewServer(server.NewConfig(env.Runtime),
+			server.Services{Settings: ssv, Measurement: mesv, Monitor: mosv, Account: asv}).
 		Serve()
 	dd(err)
 

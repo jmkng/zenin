@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAccountContext } from '../../../internal/account';
 import { Measurement } from '../../../internal/measurement';
+import { useDefaultMeasurementService } from '../../../internal/measurement/service';
 import { useMonitorContext } from '../../../internal/monitor';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
-import { useDefaultMeasurementService } from '../../../internal/measurement/service';
 import { DetachedState, OriginState, ViewPane } from '../../../internal/monitor/split';
 import { DataPacket } from '../../../server';
 

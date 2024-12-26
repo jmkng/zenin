@@ -77,28 +77,28 @@ export function isMonitor(obj: any): obj is Monitor {
         Object.hasOwn(obj, 'timeout') && typeof obj.timeout === 'number'
 }
 
-export function monitorEquals(a: Monitor, b: Monitor): boolean {
-    const ae = (a1: string[] | null, a2: string[] | null): boolean => {
-        if (a1 == null && a2 == null) return true;
-        if (a1 != null && a2 != null && a1.length == a2.length && a1.every((n, i) => n == a2[i])) return true;
+export function isArrayEqual(a1: any[] | null, a2: any[] | null): boolean {
+    if (a1 == null && a2 == null) return true;
+    if (a1 != null && a2 != null && a1.length == a2.length && a1.every((n, i) => n == a2[i])) return true;
 
-        return false;
-    };
+    return false;
+}
 
-    const ple = (a1: PairListValue | null, a2: PairListValue | null): boolean => {
+export function isMonitorEqual(a: Monitor, b: Monitor): boolean {
+    const pleq = (a1: PairListValue | null, a2: PairListValue | null): boolean => {
         if (a1 == null && a2 == null) return true;
         if (a1 != null && a2 != null && a1.length == a2.length
             && a1.every((n, i) => n.key == a2[i].key && n.value == a2[i].value)) return true;
 
         return false;
     }
-
-    const ne = (a1: Event[] | null, a2: Event[] | null): boolean => {
+    const eveq = (a1: Event[] | null, a2: Event[] | null): boolean => {
         if (a1 == null && a2 == null) return true;
 
         if (a1 != null && a2 != null && a1.length === a2.length
             && a1.every((n, i) => n.pluginName === a2[i].pluginName && n.threshold === a2[i].threshold
-                && ((n.pluginArgs == null && a2[i].pluginArgs == null) || (n.pluginArgs && a2[i].pluginArgs
+                && ((n.pluginArgs == null && a2[i].pluginArgs == null) 
+                    || (n.pluginArgs && a2[i].pluginArgs
                     && n.pluginArgs.length == a2[i].pluginArgs.length
                     && n.pluginArgs.every((a, ai) => a == a2[i].pluginArgs![ai]))
                 ))) return true;
@@ -115,10 +115,10 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.remoteAddress == b.remoteAddress
         && a.remotePort == b.remotePort
         && a.pluginName == b.pluginName
-        && ae(a.pluginArgs, b.pluginArgs)
+        && isArrayEqual(a.pluginArgs, b.pluginArgs)
         && a.httpRange == b.httpRange
         && a.httpMethod == b.httpMethod
-        && ple(a.httpRequestHeaders, b.httpRequestHeaders)
+        && pleq(a.httpRequestHeaders, b.httpRequestHeaders)
         && a.httpRequestBody == b.httpRequestBody
         && a.httpExpiredCertMod == b.httpExpiredCertMod
         && a.httpCaptureHeaders == b.httpCaptureHeaders
@@ -129,7 +129,7 @@ export function monitorEquals(a: Monitor, b: Monitor): boolean {
         && a.icmpTtl == b.icmpTtl
         && a.icmpProtocol == b.icmpProtocol
         && a.icmpLossThreshold == b.icmpLossThreshold
-        && ne(a.events, b.events)
+        && eveq(a.events, b.events)
 }
 
 export const useMonitorContext = () => {

@@ -15,10 +15,7 @@ import (
 
 func NewMonitorHandler(service monitor.MonitorService) MonitorHandler {
 	provider := NewMonitorProvider(service)
-	return MonitorHandler{
-		Provider: provider,
-		mux:      provider.Mux(),
-	}
+	return MonitorHandler{Provider: provider, mux: provider.Mux()}
 }
 
 type MonitorHandler struct {
@@ -49,6 +46,7 @@ func (m MonitorProvider) Mux() http.Handler {
 	router.Put("/{id}", m.HandleUpdateMonitor)
 	router.Get("/{id}/measurement", m.HandleGetMeasurements)
 	router.Get("/{id}/poll", m.HandlePollMonitor)
+	router.Get("/plugins", m.HandleGetPlugins)
 	return router
 }
 
@@ -68,6 +66,7 @@ func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Reques
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
+
 	responder.Data(monitors, http.StatusOK)
 }
 
@@ -102,6 +101,7 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		Id   int       `json:"id"`
 		Time time.Time `json:"time"`
 	}
+
 	responder.Data(Response{Id: id, Time: now}, http.StatusCreated)
 }
 
@@ -167,6 +167,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	type Response struct {
 		Time time.Time `json:"time"`
 	}
+
 	responder.Data(Response{Time: now}, http.StatusOK)
 }
 
@@ -218,6 +219,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	type Response struct {
 		Time time.Time `json:"time"`
 	}
+
 	responder.Data(Response{Time: now}, http.StatusOK)
 }
 
@@ -269,7 +271,20 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	}
 
 	m.Service.Distributor <- monitor.PollMessage{Monitor: found[0]}
+
 	responder.Status(http.StatusAccepted)
+}
+
+func (m MonitorProvider) HandleGetPlugins(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	plugins, err := m.Service.GetPlugins()
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	responder.Data(plugins, http.StatusOK)
 }
 
 // newSelectMonitorParamsFromQuery returns a `SelectMonitorParams` by parsing the values from
@@ -317,5 +332,6 @@ func newSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasur
 			params.After = &aparsed
 		}
 	}
+
 	return params
 }

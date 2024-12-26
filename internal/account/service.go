@@ -17,6 +17,15 @@ type AccountService struct {
 	Repository AccountRepository
 }
 
+func (a AccountService) GetClaim(ctx context.Context) (bool, error) {
+	total, err := a.Repository.SelectAccountTotal(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return total > 0, nil
+}
+
 func (a AccountService) AddAccount(ctx context.Context, application Application) (Account, error) {
 	salt, err := env.GetRandomBytes(ZeninAccSaltLength)
 	if err != nil {
@@ -36,7 +45,9 @@ func (a AccountService) AddAccount(ctx context.Context, application Application)
 	if err != nil {
 		return Account{}, err
 	}
+
 	account.Id = &id
+
 	return account, nil
 }
 
@@ -53,5 +64,6 @@ func (a AccountService) AccountExists(ctx context.Context, username string) (boo
 	if account != nil {
 		return true, nil
 	}
+
 	return false, nil
 }

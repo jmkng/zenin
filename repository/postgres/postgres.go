@@ -25,7 +25,9 @@ func NewPostgresRepository(env *env.DatabaseEnv) (*PostgresRepository, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	db.SetMaxOpenConns(int(env.MaxConn))
+
 	return &PostgresRepository{db}, nil
 }
 
@@ -36,11 +38,13 @@ type PostgresRepository struct {
 // Validate implements `Repository.Validate` for `PostgresRepository`.
 func (p PostgresRepository) Validate() (bool, error) {
 	var rows []string
-	if err := p.db.Select(&rows,
-		`SELECT table_name 
+
+	query := `SELECT table_name 
 		FROM information_schema.tables 
 		WHERE table_schema = 'public' 
-		AND table_type = 'BASE TABLE'`); err != nil {
+		AND table_type = 'BASE TABLE'`
+
+	if err := p.db.Select(&rows, query); err != nil {
 		return false, err
 	}
 	for _, table := range repository.SchemaTables {
@@ -48,6 +52,7 @@ func (p PostgresRepository) Validate() (bool, error) {
 			return false, nil
 		}
 	}
+
 	return true, nil
 }
 
@@ -64,6 +69,7 @@ func (p PostgresRepository) Migrate() error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+
 	return nil
 }
 

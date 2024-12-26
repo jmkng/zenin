@@ -4,6 +4,7 @@ import (
 	"github.com/jmkng/zenin/internal/account"
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
+	"github.com/jmkng/zenin/internal/settings"
 )
 
 // SchemaTables is a list of the tables expected to be found within a Zenin repository.
@@ -18,4 +19,5 @@ type Repository interface {
 	monitor.MonitorRepository
 	measurement.MeasurementRepository
 	account.AccountRepository
+	settings.SettingsRepository
 }

@@ -74,15 +74,16 @@ func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	c := response.StatusCode
 
 	var responseRange string
-	if c >= 100 && c < 200 {
+	switch {
+	case c >= 100 && c < 200:
 		responseRange = Informational
-	} else if c >= 200 && c < 300 {
+	case c >= 200 && c < 300:
 		responseRange = Successful
-	} else if c >= 300 && c < 400 {
+	case c >= 300 && c < 400:
 		responseRange = Redirection
-	} else if c >= 400 && c < 500 {
+	case c >= 400 && c < 500:
 		responseRange = ClientError
-	} else {
+	default:
 		responseRange = ServerError
 	}
 

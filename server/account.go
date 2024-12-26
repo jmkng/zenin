@@ -10,10 +10,7 @@ import (
 
 func NewAccountHandler(service account.AccountService) AccountHandler {
 	provider := NewAccountProvider(service)
-	return AccountHandler{
-		Provider: provider,
-		mux:      provider.Mux(),
-	}
+	return AccountHandler{Provider: provider, mux: provider.Mux()}
 }
 
 type AccountHandler struct {
@@ -37,7 +34,8 @@ type AccountProvider struct {
 
 func (a AccountProvider) Mux() http.Handler {
 	router := chi.NewRouter()
-	router.Post("/claim", a.HandleClaim)
+	router.Get("/claim", a.HandleGetClaim)
+	router.Post("/claim", a.HandleCreateClaim)
 	router.Post("/authenticate", a.HandleAuthenticate)
 
 	//// private /////
@@ -50,9 +48,18 @@ func (a AccountProvider) Mux() http.Handler {
 	return router
 }
 
-// HandleClaim reads an `Application` from the request body and attempts to
-// create the first account on the server.
-func (a AccountProvider) HandleClaim(w http.ResponseWriter, r *http.Request) {
+func (a AccountProvider) HandleGetClaim(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+	claim, err := a.Service.GetClaim(r.Context())
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	responder.Data(claim, http.StatusOK)
+}
+
+func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 	count, err := a.Service.Repository.SelectAccountTotal(r.Context())
 	if err != nil {
@@ -79,11 +86,17 @@ func (a AccountProvider) HandleClaim(w http.ResponseWriter, r *http.Request) {
 	}
 
 	account, err := a.Service.AddAccount(r.Context(), application)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
 	token, err := account.Token()
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
+
 	responder.Data(token, http.StatusOK)
 }
 
@@ -113,6 +126,7 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
+
 	responder.Data(token, http.StatusOK)
 }
 
@@ -146,5 +160,6 @@ func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
+
 	responder.Status(http.StatusCreated)
 }

@@ -6,9 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
+	"github.com/jmkng/zenin/internal/settings"
 )
 
 const (
@@ -58,19 +60,20 @@ const (
 
 // Monitor is the monitor domain type.
 type Monitor struct {
-	Id            *int                      `json:"id" db:"monitor_id"`
-	CreatedAt     time.Time                 `json:"createdAt" db:"created_at"`
-	UpdatedAt     time.Time                 `json:"updatedAt" db:"updated_at"`
-	Name          string                    `json:"name" db:"name"`
-	Kind          measurement.ProbeKind     `json:"kind" db:"monitor_kind"`
-	Active        bool                      `json:"active" db:"active"`
-	Interval      int                       `json:"interval" db:"interval"`
-	Timeout       int                       `json:"timeout" db:"timeout"`
-	Description   *string                   `json:"description" db:"description"`
-	RemoteAddress *string                   `json:"remoteAddress" db:"remote_address"`
-	RemotePort    *int16                    `json:"remotePort" db:"remote_port"`
-	Measurements  []measurement.Measurement `json:"measurements"`
-	Events        []Event                   `json:"events"`
+	Id            *int                  `json:"id" db:"monitor_id"`
+	CreatedAt     time.Time             `json:"createdAt" db:"created_at"`
+	UpdatedAt     time.Time             `json:"updatedAt" db:"updated_at"`
+	Name          string                `json:"name" db:"name"`
+	Kind          measurement.ProbeKind `json:"kind" db:"monitor_kind"`
+	Active        bool                  `json:"active" db:"active"`
+	Interval      int                   `json:"interval" db:"interval"`
+	Timeout       int                   `json:"timeout" db:"timeout"`
+	Description   *string               `json:"description" db:"description"`
+	RemoteAddress *string               `json:"remoteAddress" db:"remote_address"`
+	RemotePort    *int16                `json:"remotePort" db:"remote_port"`
+
+	Measurements []measurement.Measurement `json:"measurements"`
+	Events       []Event                   `json:"events"`
 
 	PluginFields
 	HTTPFields
@@ -106,9 +109,9 @@ type ICMPFields struct {
 	ICMPLossThreshold *int          `json:"icmpLossThreshold" db:"icmp_loss_threshold"`
 }
 
-// Deadline returns a copy of the parent context with a timeout set according to
+// Context returns a copy of the parent context with a timeout set according to
 // the monitor `Timeout` field.
-func (m Monitor) Deadline(ctx context.Context) (context.Context, context.CancelFunc) {
+func (m Monitor) Context(ctx context.Context) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(ctx, time.Duration(m.Timeout)*time.Second)
 }
 
@@ -119,11 +122,11 @@ func (m Monitor) Deadline(ctx context.Context) (context.Context, context.CancelF
 //
 // If the `Monitor` has events, the events will all be started in their own threads,
 // and the function will immediately return after that.
-func (m Monitor) Poll() measurement.Measurement {
+func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 	env.Debug("poll starting", "monitor(id)", *m.Id)
 
-	var me measurement.Measurement
-	me.MonitorId = m.Id
+	var e measurement.Measurement
+	e.MonitorId = m.Id
 
 	var probe Probe
 	switch m.Kind {
@@ -134,53 +137,53 @@ func (m Monitor) Poll() measurement.Measurement {
 	case measurement.TCP:
 		probe = NewTCPProbe()
 	case measurement.Plugin:
-		probe = NewPluginProbe()
+		probe = NewPluginProbe(s)
 	default:
 		panic("unrecognized probe")
 	}
 
-	deadline, cancel := m.Deadline(context.Background())
+	ctx, cancel := m.Context(context.Background())
 	defer cancel()
 
-	// Start timer.
 	start := time.Now()
-
-	// Poll.
-	span := probe.Poll(deadline, m)
+	span := probe.Poll(ctx, m)
 	span.Kind = m.Kind
-
-	// End timer, convert to ms.
 	duration := float64(time.Since(start)) / float64(time.Millisecond)
 
-	me.Span = span
-	me.CreatedAt = start
-	me.UpdatedAt = start
-	me.Duration = duration
+	e.Span = span
+	e.CreatedAt = start
+	e.UpdatedAt = start
+	e.Duration = duration
 
 	env.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
-		"state", me.State, "hints", me.StateHint, "events", len(m.Events))
+		"state", e.State, "hints", e.StateHint, "events", len(m.Events))
+
+	executor := PluginExecutor{
+		Settings: s,
+		Data: struct {
+			Monitor     EventMonitor
+			Measurement EventMeasurement
+		}{Monitor: NewEventMonitor(m), Measurement: NewEventMeasurement(e)},
+	}
 
 	// Start events.
 	for _, v := range m.Events {
-		if v.IsEligible(span.State) {
-			env.Debug("event starting", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id)
-
-			go func() {
-				// Reset deadline.
-				deadline, cancel := m.Deadline(context.Background())
-				defer cancel()
-
-				output, err := v.Start(deadline, m, me)
-				if err != nil {
-					env.Error("event failed", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "error", err.Error(), "output", output)
-				} else {
-					env.Debug("event stopping", "monitor(id)", m.Id, "event(plugin)", v.PluginName, "event(id)", v.Id, "output", string(output))
-				}
-			}()
+		if !v.IsEligible(span.State) {
+			continue
 		}
+
+		env.Debug("event starting", "monitor(id)", m.Id, "event(id)", v.Id, "plugin", v.PluginName, "arguments", v.PluginArgs)
+		go func() {
+			ctx, cancel := m.Context(context.Background())
+			defer cancel()
+
+			code, stdout, stderr, dx := executor.Run(ctx, v.PluginFields)
+			hints := append(dx.Warnings, dx.Errors...)
+			env.Debug("event stopping", "monitor(id)", *m.Id, "hints", hints, "code", code, "stdout", stdout, "stderr", stderr)
+		}()
 	}
 
-	return me
+	return e
 }
 
 // Validate will return an error if the `Monitor` is in an invalid state.
@@ -255,4 +258,36 @@ func (m Monitor) Validate() error {
 		return env.NewValidation(errors...)
 	}
 	return nil
+}
+
+// MeasurementMessage is used to distribute a `Measurement` to the
+// repository and feed subscribers.
+type MeasurementMessage struct {
+	Measurement measurement.Measurement
+}
+
+// SubscribeMessage is used to add a new feed subscriber.
+type SubscribeMessage struct {
+	Subscriber *websocket.Conn
+}
+
+// UnsubscribeMessage is used to remove an existing feed subscriber,
+// and close the connection.
+type UnsubscribeMessage struct {
+	Id int
+}
+
+// StartMessage is used to begin polling a `Monitor`
+type StartMessage struct {
+	Monitor Monitor
+}
+
+// StopMessage is used to stop polling an active `Monitor`
+type StopMessage struct {
+	Id int
+}
+
+// PollMessage is used to manually trigger a poll action.
+type PollMessage struct {
+	Monitor Monitor
 }
