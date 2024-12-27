@@ -34,10 +34,7 @@ func main() {
 	fmt.Printf("Base: %v\n", env.Runtime.BaseDir)
 	fmt.Printf("Plugins: %v\n", env.Runtime.PluginsDir)
 
-	dx := env.NewDiagnostic()
-
-	env.Runtime.Health(&dx)
-
+	dx := env.Runtime.Diagnose()
 	for _, w := range dx.Warnings {
 		env.Warn(w)
 	}

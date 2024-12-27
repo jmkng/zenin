@@ -134,38 +134,40 @@ type RuntimeEnv struct {
 	Color bool
 }
 
-// Health uses the provided `Diagnostic` to check for problems with the `RuntimeEnv`.
-func (r RuntimeEnv) Health(d *Diagnostic) {
+// Diagnose will check the `RuntimeEnv` for problems.
+func (r RuntimeEnv) Diagnose() Diagnostic {
+	dx := NewDiagnostic()
+
 	if r.Kind == Prod && len(r.SignSecret) < 16 {
-		d.Warn("sign secret is weak, expected >= 16 bytes")
+		dx.Warn("sign secret is weak, expected >= 16 bytes")
 	}
 
 	if r.BaseDir == "" {
-		d.Error("cannot find base directory, provide a path with the `ZENIN_RT_BASE_DIR` environment variable")
+		dx.Error("cannot find base directory, provide a path with the `ZENIN_RT_BASE_DIR` environment variable")
 	} else {
 		base, err := os.Stat(r.BaseDir)
 		if err != nil || !base.IsDir() {
 			if errors.Is(err, fs.ErrNotExist) {
 				if err := os.MkdirAll(r.BaseDir, 0755); err != nil {
-					d.Error(fmt.Sprintf("make sure base directory exists and is accessible: `%v`", r.BaseDir))
+					dx.Error(fmt.Sprintf("make sure base directory exists and is accessible: `%v`", r.BaseDir))
 				}
 			} else {
-				d.Error(fmt.Sprintf("unable to access base directory: `%v`", r.BaseDir))
+				dx.Error(fmt.Sprintf("unable to access base directory: `%v`", r.BaseDir))
 			}
 		}
 	}
 
 	if r.PluginsDir == "" {
-		d.Error("cannot find plugins directory, provide a path with the `ZENIN_RT_PLUGINS_DIR` environment variable")
+		dx.Error("cannot find plugins directory, provide a path with the `ZENIN_RT_PLUGINS_DIR` environment variable")
 	} else {
 		plugins, err := os.Stat(r.PluginsDir)
 		if err != nil || !plugins.IsDir() {
 			if errors.Is(err, fs.ErrNotExist) {
 				if err := os.MkdirAll(r.PluginsDir, 0755); err != nil {
-					d.Error(fmt.Sprintf("make sure plugins directory exists and is accessible: `%v`", r.PluginsDir))
+					dx.Error(fmt.Sprintf("make sure plugins directory exists and is accessible: `%v`", r.PluginsDir))
 				}
 			} else {
-				d.Error(fmt.Sprintf("unable to access plugins directory: `%v`", r.PluginsDir))
+				dx.Error(fmt.Sprintf("unable to access plugins directory: `%v`", r.PluginsDir))
 			}
 		}
 	}
@@ -173,10 +175,12 @@ func (r RuntimeEnv) Health(d *Diagnostic) {
 	switch runtime.GOOS {
 	case "darwin", "linux":
 		if _, exists := os.LookupEnv("SHELL"); !exists {
-			d.Error("must set `SHELL` environment variable to execute plugins")
+			dx.Error("must set `SHELL` environment variable to execute plugins")
 		}
 		// On Windows, PowerShell is assumed.
 	}
+
+	return dx
 }
 
 func getSignSecret() (Secret, error) {
