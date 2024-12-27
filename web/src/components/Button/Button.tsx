@@ -38,7 +38,7 @@ export default function Button(props: ButtonProps) {
     const tooltipRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const dialogRef = useRef<HTMLDivElement>(null);
-    const timeoutRef = useRef<number | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         if (dialog) setDialogVisible(prev => !prev);
