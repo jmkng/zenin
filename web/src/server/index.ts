@@ -1,4 +1,5 @@
 import { Request } from "./request";
+import { FEED, handleConnect, handleDisconnect } from "./feed";
 
 export const
     HTTP_API = 'HTTP',
@@ -99,3 +100,5 @@ const PORT = import.meta.env.DEV ? '50010' : window.location.port
 const BASE_ENDPOINT = `${window.location.hostname}:${PORT}/api/v1`;
 export const BASE_WINDOW_PROTO_ENDPOINT = `${window.location.protocol}//${BASE_ENDPOINT}`;
 export const FEED_WS_ENDPOINT = `ws://${BASE_ENDPOINT}/feed/subscribe`;
+
+export { FEED, handleConnect, handleDisconnect };
