@@ -1,7 +1,7 @@
 import { isMeasurement } from "../internal/measurement";
 import { useMonitorContext } from "../internal/monitor";
 
-export const useFlaggedDispatch = () => {
+export const useFeedDispatch = () => {
     const monitor = useMonitorContext();
 
     const action = (data: any) => {

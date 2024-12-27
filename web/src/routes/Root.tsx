@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Route, Routes } from "react-router";
-import { useFlaggedDispatch } from '../hooks/useFlaggedDispatch';
+
+import { useFeedDispatch } from '../hooks/useFlaggedDispatch';
 import { useAccountContext } from '../internal/account';
 import { useLayoutContext } from '../internal/layout';
 import { hideLoadingScreen, showLoadingScreen } from '../internal/layout/graphics';
