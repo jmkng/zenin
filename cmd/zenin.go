@@ -35,12 +35,9 @@ func main() {
 	fmt.Printf("Plugins: %v\n", env.Runtime.PluginsDir)
 
 	dx := env.Runtime.Diagnose()
-	for _, w := range dx.Warnings {
-		env.Warn(w)
-	}
-	for _, e := range dx.Errors {
-		env.Error(e)
-	}
+	err := dx.Write(os.Stdout)
+	dd(err)
+
 	if dx.Fatal() {
 		os.Exit(1)
 	}
