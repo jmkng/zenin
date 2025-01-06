@@ -10,3 +10,19 @@
     display: block;
     margin-top: var(--px-c);
 }
+
+.zenin__detail_event {
+    padding: var(--px-c); 
+    border: 1px solid var(--off-b);
+    border-radius: var(--rounded);
+}
+
+.zenin__detail_event_container {
+    margin-bottom: var(--px-c);
+}
+
+.zenin__detail_event_marker {
+    display: block;
+    margin-bottom: var(--px-b);
+    cursor: default;
+}
