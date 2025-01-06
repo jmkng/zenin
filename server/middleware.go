@@ -135,7 +135,7 @@ func validateBearerToken(token string, root bool) error {
 		return err
 	}
 	if !parsed.Valid {
-		errors.New("token is invalid")
+		return errors.New("token is invalid")
 	}
 
 	return nil
