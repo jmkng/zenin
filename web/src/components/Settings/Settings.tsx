@@ -23,7 +23,7 @@ export default function Settings() {
     const settings = { context: useSettingsContext(), service: useDefaultSettingsService() };
     const account = { context: useAccountContext() };
 
-    const [theme, setTheme] = useState(localStorage.getItem(KEY) || AUTO);  
+    const [theme, setTheme] = useState(localStorage.getItem(KEY) || AUTO);
     const [editor, setEditor] = useState<SettingsType>(settings.context.state);
 
     // NOTE: May need to convert `settings.context.state` to a common type if the reducer state type
@@ -36,13 +36,13 @@ export default function Settings() {
         handleThemeChange(theme);
 
         const token = account.context.state.authenticated!.token.raw;
-        
+
         // Save settings to repository.
         const extract = await settings.service.updateSettings(token, editor);
         if (!extract.ok()) return;
 
         // Update context.
-        settings.context.dispatch({type: 'reset', delimiters: editor.delimiters });
+        settings.context.dispatch({ type: 'reset', delimiters: editor.delimiters });
     }
 
     const handleThemeChange = (value: string) => {
@@ -53,7 +53,7 @@ export default function Settings() {
         root.classList.remove(AUTO)
         root.classList.add(value);
         setTheme(value)
-        
+
         if (value == AUTO) localStorage.removeItem(KEY)
         else localStorage.setItem(KEY, value);
         window.requestAnimationFrame(() => root.classList.remove("static"));
@@ -80,24 +80,20 @@ export default function Settings() {
                     name="zenin__detail_monitor_http_request_headers"
                     allowMultipleRows={false}
                     value={[{ key: editor.delimiters[0], value: editor.delimiters[1] }]}
-                    onChange={delimiters => 
-                        setEditor(prev => ({...prev, delimiters: [delimiters[0].key, delimiters[0].value]}))}
+                    onChange={delimiters =>
+                        setEditor(prev => ({ ...prev, delimiters: [delimiters[0].key, delimiters[0].value] }))}
                 />
-                {!hasValidDelimiters 
+                {!hasValidDelimiters
                     ? <span className="zenin__detail_validation zenin__h_error">Delimiters are required. They must not contain whitespace.</span>
                     : null}
             </div>
             <div className="zenin__settings_about zenin__h_margin_top">
-                <span className="zenin__settings_version">0.1.0</span>
-
-                <a href="#" className="zenin__settings_link">
-                    <BookIcon />
-                    User Guide
-                </a>
-                <a href="#" className="zenin__settings_link">
-                    <BugIcon />
-                    Report Issue
-                </a>
+                <Button background={true} icon={<BookIcon />} kind={"primary"}>
+                    <a href="#">User Guide</a>
+                </Button>
+                <Button background={true} icon={<BugIcon />}>
+                    <a href="#">Report Issue</a>
+                </Button>
             </div>
         </div>
 

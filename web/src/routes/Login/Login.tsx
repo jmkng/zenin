@@ -15,10 +15,7 @@ export default function Login() {
     const [form, setForm] = useState<LoginState>(defaultState);
     const [errors, setErrors] = useState<string[]>([]);
     const [claim, setClaim] = useState<boolean | null>(null);
-    const account = {
-        service: useDefaultAccountService(),
-        context: useAccountContext()
-    }
+    const account = { service: useDefaultAccountService(), context: useAccountContext() };
     const layout = useLayoutContext();
     const navigate = useNavigate();
 
