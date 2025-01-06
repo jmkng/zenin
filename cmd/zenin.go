@@ -30,7 +30,6 @@ func main() {
 	}
 	c := env.Runtime.Color
 	fmt.Printf("Zenin %v%v\n", env.Version, g.MagentaC(commit, c))
-	fmt.Printf("%v Environment\n", g.BrightBlackC(">", c))
 	fmt.Printf("Base: %v\n", env.Runtime.BaseDir)
 	fmt.Printf("Plugins: %v\n", env.Runtime.PluginsDir)
 
@@ -53,9 +52,9 @@ func main() {
 	plugins, err := mosv.GetPlugins()
 	dd(err)
 
-	fmt.Printf("Using %v plugins\n", g.BrightBlackC(fmt.Sprintf("%v", len(plugins)), c))
+	fmt.Printf("Using %v plugins\n", len(plugins))
 	for _, v := range plugins {
-		fmt.Printf("    [%v]\n", g.BrightBlackC(v, c))
+		fmt.Printf("    [%v]\n", v)
 	}
 
 	ssv := settings.NewSettingsService(repository, channel)
@@ -77,7 +76,6 @@ func main() {
 	asv := account.NewAccountService(repository)
 
 	// Start server.
-	fmt.Printf("%v Server\n", g.BrightBlackC(">", c))
 	server.
 		NewServer(server.NewConfig(env.Runtime),
 			server.Services{Settings: ssv, Measurement: mesv, Monitor: mosv, Account: asv}).
