@@ -26,7 +26,7 @@ func (p PostgresRepository) SelectAccountByUsername(ctx context.Context, usernam
 	var account account.Account
 
 	builder := zsql.NewBuilder(zsql.Numbered)
-	builder.Push("SELECT id, username, versioned_salted_hash FROM account WHERE username =")
+	builder.Push("SELECT id, username, versioned_salted_hash, root FROM account WHERE username =")
 	builder.BindString(username)
 
 	err := p.db.GetContext(ctx, &account, builder.String(), builder.Args()...)
@@ -48,8 +48,10 @@ func (p PostgresRepository) InsertAccount(ctx context.Context, account account.A
 	var id int
 
 	builder := zsql.NewBuilder(zsql.Numbered)
-	builder.Push(`INSERT INTO account (username, versioned_salted_hash) VALUES (`)
+	builder.Push(`INSERT INTO account (username, versioned_salted_hash, root) VALUES (`)
 	builder.SpreadString(account.Username, account.VersionedSaltedHash.String())
+	builder.Push(",")
+	builder.SpreadBool(account.Root)
 	builder.Push(") RETURNING id")
 
 	err := p.db.QueryRowContext(ctx, builder.String(), builder.Args()...).Scan(&id)

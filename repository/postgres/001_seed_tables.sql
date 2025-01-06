@@ -1,7 +1,7 @@
 INSERT INTO account 
-    (username, versioned_salted_hash)
+    (username, versioned_salted_hash, root)
 VALUES 
-    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=');
+    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', true);
 
 INSERT INTO monitor 
     (name, 

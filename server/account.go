@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -34,23 +35,23 @@ type AccountProvider struct {
 
 func (a AccountProvider) Mux() http.Handler {
 	router := chi.NewRouter()
-	router.Get("/claim", a.HandleGetClaim)
+	router.Get("/claim", a.HandleGetClaimStatus)
 	router.Post("/claim", a.HandleCreateClaim)
 	router.Post("/authenticate", a.HandleAuthenticate)
 
-	//// private /////
+	//// root /////
 	router.Group(func(private chi.Router) {
-		private.Use(Authenticator)
-		private.Post("/create", a.HandleCreate)
+		private.Use(AuthenticateRoot)
+		private.Post("/", a.HandleCreateAccount)
 	})
-	//////////////////
+	///////////////
 
 	return router
 }
 
-func (a AccountProvider) HandleGetClaim(w http.ResponseWriter, r *http.Request) {
+func (a AccountProvider) HandleGetClaimStatus(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
-	claim, err := a.Service.GetClaim(r.Context())
+	claim, err := a.Service.GetClaimStatus(r.Context())
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -61,20 +62,10 @@ func (a AccountProvider) HandleGetClaim(w http.ResponseWriter, r *http.Request) 
 
 func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
-	count, err := a.Service.Repository.SelectAccountTotal(r.Context())
-	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
-		return
-
-	}
-	if count > 0 {
-		responder.Error(env.NewValidation("Server has already been claimed. Try logging in."),
-			http.StatusBadRequest)
-		return
-	}
 
 	var application account.Application
-	err = StrictDecoder(r.Body).Decode(&application)
+
+	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
 			http.StatusBadRequest)
@@ -85,13 +76,21 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	account, err := a.Service.AddAccount(r.Context(), application)
+	// Signal intent to claim server by setting `Root`.
+	application.Root = true
+
+	acc, err := a.Service.AddAccount(r.Context(), application)
 	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.Is(err, account.ServerClaimedError) {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
 		return
 	}
 
-	token, err := account.Token()
+	token, err := acc.Token()
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -102,7 +101,9 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 
 func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	var application account.Application
+
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
@@ -130,9 +131,11 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 	responder.Data(token, http.StatusOK)
 }
 
-func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
+func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	var application account.Application
+
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
@@ -144,20 +147,14 @@ func (a AccountProvider) HandleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := a.Service.AccountExists(r.Context(), application.Username)
-	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
-		return
-	}
-	if exists {
-		responder.Error(env.NewValidation("Username is taken. Try another."),
-			http.StatusBadRequest)
-		return
-	}
-
 	_, err = a.Service.AddAccount(r.Context(), application)
 	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.Is(err, account.AccountExistsError) {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
 		return
 	}
 

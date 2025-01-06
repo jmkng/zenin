@@ -154,6 +154,16 @@ func (b *Builder) SpreadInt(values ...int) {
 	b.SpreadOpaque(opaque...)
 }
 
+// SpreadBool will spread any number of bool arguments into a comma separated list
+// using bind markers.
+func (b *Builder) SpreadBool(values ...bool) {
+	opaque := make([]any, len(values))
+	for i, v := range values {
+		opaque[i] = v
+	}
+	b.SpreadOpaque(opaque...)
+}
+
 func (b *Builder) SpreadOpaque(values ...any) {
 	for i, v := range values {
 		b.pushArg(v)

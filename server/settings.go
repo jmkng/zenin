@@ -40,7 +40,7 @@ func (a SettingsProvider) Mux() http.Handler {
 
 	//// private /////
 	router.Group(func(private chi.Router) {
-		private.Use(Authenticator)
+		private.Use(Authenticate)
 		router.Get("/", a.HandleGetSettings)
 		router.Post("/", a.HandleUpdateSettings)
 	})

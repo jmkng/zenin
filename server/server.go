@@ -41,7 +41,7 @@ func (s *Server) Serve() error {
 		env.Warn("cors checks are disabled")
 		mux.Use(Insecure)
 	}
-	mux.Use(Logger)
+	mux.Use(Log)
 	mux.Use(middleware.Timeout(60 * time.Second))
 
 	// UI ->
@@ -55,7 +55,7 @@ func (s *Server) Serve() error {
 
 	// API ->
 	mux.Route("/api/v1", func(v1 chi.Router) {
-		v1.Use(Defaults)
+		v1.Use(Default)
 		v1.Use(middleware.AllowContentType("application/json"))
 		v1.Mount("/settings", NewSettingsHandler(s.services.Settings))
 		v1.Mount("/account", NewAccountHandler(s.services.Account))
@@ -63,7 +63,7 @@ func (s *Server) Serve() error {
 
 		//// private /////
 		v1.Group(func(private chi.Router) {
-			private.Use(Authenticator)
+			private.Use(Authenticate)
 			private.Mount("/monitor", NewMonitorHandler(s.services.Monitor))
 			private.Mount("/measurement", NewMeasurementHandler(s.services.Measurement))
 		})

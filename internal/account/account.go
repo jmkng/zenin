@@ -12,24 +12,35 @@ import (
 // Account is the account domain type.
 type Account struct {
 	Id                  *int                `db:"id"`
-	CreatedAt           time.Time           `json:"createdAt" db:"created_at"`
-	UpdatedAt           time.Time           `json:"updatedAt" db:"updated_at"`
+	CreatedAt           time.Time           `db:"created_at"`
+	UpdatedAt           time.Time           `db:"updated_at"`
 	Username            string              `db:"username"`
 	VersionedSaltedHash VersionedSaltedHash `db:"versioned_salted_hash"`
+	Root                bool                `db:"root"`
+}
+
+type AccountClaims struct {
+	Root bool `json:"root"`
+	jwt.RegisteredClaims
 }
 
 // Token returns a base64 encoded JWT from the `Account`.
 func (a Account) Token() (string, error) {
 	now := time.Now()
-	claims := jwt.RegisteredClaims{
-		Subject:   a.Username,
-		ExpiresAt: jwt.NewNumericDate(now.AddDate(0, 0, 7)),
-		IssuedAt:  jwt.NewNumericDate(now),
+
+	claims := AccountClaims{
+		Root: a.Root,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   a.Username,
+			ExpiresAt: jwt.NewNumericDate(now.AddDate(0, 0, 7)),
+			IssuedAt:  jwt.NewNumericDate(now),
+		},
 	}
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(env.Runtime.SignSecret))
 	if err != nil {
 		return "", fmt.Errorf("failed to sign token: %w", err)
 	}
+
 	return token, err
 }
 
@@ -37,6 +48,7 @@ func (a Account) Token() (string, error) {
 type Application struct {
 	Username          string `json:"username"`
 	PasswordPlainText string `json:"password"`
+	Root              bool   `json:"-"`
 }
 
 // Validate will return an error if the `Application` is in an invalid state.

@@ -10,7 +10,8 @@ CREATE TABLE account (
     updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     id                    SERIAL PRIMARY KEY,
     username              TEXT NOT NULL UNIQUE,
-    versioned_salted_hash TEXT NOT NULL
+    versioned_salted_hash TEXT NOT NULL,
+    root                  BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE monitor (
