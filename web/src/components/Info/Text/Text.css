@@ -22,7 +22,10 @@
 
 
 .zenin__text_scroller {
+    display: flex;
+    align-items: center;
     max-height: 200px;
     overflow-y: auto;
     word-wrap: break-word;
+    vertical-align: baseline;
 }
