@@ -7,8 +7,8 @@ import Button from "../Button/Button";
 import AddIcon from "../Icon/AddIcon";
 import PauseIcon from "../Icon/PauseIcon";
 import PlayIcon from "../Icon/PlayIcon";
+import SelectIcon from "../Icon/SelectIcon";
 import TrashIcon from "../Icon/TrashIcon";
-import YesIcon from "../Icon/YesIcon";
 
 import "./SelectMenu.css";
 
@@ -40,19 +40,15 @@ export default function SelectMenu() {
                 <Button
                     tooltip={{ text: "Select All" }}
                     onClick={() => monitor.context.dispatch({ 'type': 'select', monitor: "ALL" })}
-                >
-                    <YesIcon />
-                </Button>
+                    icon={<SelectIcon />}
+                />
             </div>
             <div className="zenin__menu_margin_right">
                 <Button
                     tooltip={{ text: "Clear Selection" }}
                     onClick={() => monitor.context.dispatch({ type: 'select', monitor: 'NONE' })}
-                >
-                    <div className="zenin__deselect_all_control">
-                        <AddIcon />
-                    </div>
-                </Button>
+                    icon={<div className="zenin__deselect_all_control"><AddIcon /></div>}
+                />
             </div>
             {monitor.context.state.selected.length > 0
                 ? <span className="zenin__select_menu_count">{monitor.context.state.selected.length} Selected</span>
@@ -64,22 +60,22 @@ export default function SelectMenu() {
                 <Button
                     disabled={!monitor.context.state.selected.some(n => !n.active)}
                     tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}
-                >
-                    <PlayIcon />
-                </Button>
+                    icon={<PlayIcon />}
+                />
             </div>
             <div className="zenin__menu_margin_right">
                 <Button
                     disabled={!monitor.context.state.selected.some(n => n.active)}
                     tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}
-                >
-                    <PauseIcon />
-                </Button>
+                    icon={<PauseIcon />}
+                />
             </div>
             <div onClick={(event) => event.stopPropagation()}>
-                <Button tooltip={{ text: "Delete Selected" }} onClick={() => handleDelete()}>
-                    <TrashIcon />
-                </Button>
+                <Button
+                    tooltip={{ text: "Delete Selected" }}
+                    onClick={() => handleDelete()}
+                    icon={<TrashIcon />}
+                />
             </div>
         </div>
     </div>

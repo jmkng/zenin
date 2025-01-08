@@ -1,4 +1,4 @@
-import SelectIcon from '../../Icon/SelectIcon';
+import UpDownIcon from '../../Icon/UpDownIcon';
 
 import './SelectInput.css';
 
@@ -63,7 +63,7 @@ export default function SelectInput(props: SelectProps) {
                 {list}
             </select>
             <div className="zenin__select_input_icon_container">
-                <SelectIcon />
+                <UpDownIcon />
             </div>
         </div>
     </div>

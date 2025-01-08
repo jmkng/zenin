@@ -1,5 +1,50 @@
 export default function SelectIcon() {
-    return (
-        <svg className="zenin__select_icon zenin__icon" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4.93179 5.43179C4.75605 5.60753 4.75605 5.89245 4.93179 6.06819C5.10753 6.24392 5.39245 6.24392 5.56819 6.06819L7.49999 4.13638L9.43179 6.06819C9.60753 6.24392 9.89245 6.24392 10.0682 6.06819C10.2439 5.89245 10.2439 5.60753 10.0682 5.43179L7.81819 3.18179C7.73379 3.0974 7.61933 3.04999 7.49999 3.04999C7.38064 3.04999 7.26618 3.0974 7.18179 3.18179L4.93179 5.43179ZM10.0682 9.56819C10.2439 9.39245 10.2439 9.10753 10.0682 8.93179C9.89245 8.75606 9.60753 8.75606 9.43179 8.93179L7.49999 10.8636L5.56819 8.93179C5.39245 8.75606 5.10753 8.75606 4.93179 8.93179C4.75605 9.10753 4.75605 9.39245 4.93179 9.56819L7.18179 11.8182C7.35753 11.9939 7.64245 11.9939 7.81819 11.8182L10.0682 9.56819Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
-    )
+    return <svg
+        className="zenin__select_icon zenin__icon"
+        style={{
+            fillRule: "evenodd",
+            clipRule: "evenodd",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            strokeMiterlimit: 1.5,
+        }}
+        viewBox="0 0 24 24"
+    >
+        <path
+            d="m12 15 5-7"
+            style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2.76px",
+            }}
+            transform="matrix(.61745 .1684 -.2105 .77181 5.116 -.871)"
+        />
+        <path
+            d="m12 15 5-7"
+            style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2.91px",
+            }}
+            transform="matrix(.27874 -.5071 .53043 -.03089 -1.98 19.314)"
+        />
+        <path
+            d="M18.471 1.5h2.567c.531 0 .962.453.962 1.012v18.476c0 .559-.431 1.012-.962 1.012H3.462c-.531 0-.962-.453-.962-1.012V18.29h15.009c.531 0 .962-.453.962-1.012V1.5Z"
+            style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2.36px",
+            }}
+            transform="matrix(.86827 0 0 .82591 2.893 3.825)"
+        />
+        <path
+            d="M22 2.512v18.476c0 .559-.431 1.012-.962 1.012H3.462c-.531 0-.962-.453-.962-1.012V2.512c0-.559.431-1.012.962-1.012h17.576c.531 0 .962.453.962 1.012Z"
+            style={{
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2.36px",
+            }}
+            transform="matrix(.86827 0 0 .82591 -.17 .761)"
+        />
+    </svg>
 }
