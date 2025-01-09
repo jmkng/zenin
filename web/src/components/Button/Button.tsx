@@ -14,6 +14,7 @@ interface ButtonProps {
     disabled?: boolean;
     tooltip?: ButtonTooltipOptions;
     dialog?: { content: DialogGroup[] | DialogItem[], side: DialogSideKind }
+    loading?: boolean;
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -32,6 +33,7 @@ export default function Button(props: ButtonProps) {
         disabled = false,
         tooltip = null,
         dialog,
+        loading = false,
         onClick
     } = props;
     const [dialogVisible, setDialogVisible] = useState(false);
@@ -100,7 +102,7 @@ export default function Button(props: ButtonProps) {
 
     return <button
         ref={buttonRef}
-        onClick={event => { if (!disabled) handleClick(event) }}
+        onClick={event => { if (!disabled && !loading) handleClick(event) }}
         className={[
             'zenin__button',
             'zenin__input',
@@ -109,13 +111,20 @@ export default function Button(props: ButtonProps) {
             hover ? 'hover' : '',
             (background || dialogVisible) ? 'background' : '',
             disabled ? 'disabled' : '',
+            loading ? 'loading' : '',
         ].join(' ')}
     >
+        {loading ?
+            <div className="zenin__button_spinner_overlay">
+                <div className="zenin__button_spinner"></div>
+            </div>
+            : null}
+
         {icon
             ? <span className={["zenin__button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
             : null}
 
-        {children}
+        <span className="zenin__button_child">{children}</span>
 
         {tooltip && !dialogVisible
             ? <div className="zenin__tooltip" ref={tooltipRef}>{tooltip.text}</div>

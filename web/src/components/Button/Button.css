@@ -1,89 +1,126 @@
 .zenin__button {  
-  appearance: none;
-  white-space: nowrap;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  border-radius: var(--rounded);
-  user-select: none;
-  font-weight: 500;
-  cursor: pointer;
-  color: var(--foreground);
-  fill: var(--foreground);
-  border: 1px solid transparent;
-  background: transparent;
+    appearance: none;
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border-radius: var(--rounded);
+    user-select: none;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--foreground);
+    fill: var(--foreground);
+    border: 1px solid transparent;
+    background: transparent;
 }
 
 .zenin__button_icon {
-  display: flex;
+    display: flex;
 }
 
 .zenin__button_icon.pair {
-  margin-right: var(--px-b);
+    margin-right: var(--px-b);
 }
 
 .zenin__button.border {
-  border-color: var(--off-b);
+    border-color: var(--off-b);
 }
 
 .zenin__button.background {
-  background-color: var(--off-b);
+    background-color: var(--off-b);
 }
 
 .zenin__button.disabled {
-  color: var(--off-d);
-  fill: var(--off-d);
-  cursor: not-allowed;
+    color: var(--off-d);
+    fill: var(--off-d);
+    cursor: not-allowed;
+}
+
+.zenin__button.loading .zenin__button_child {
+    opacity: 0;
 }
 
 .zenin__button:not(.disabled).primary {
-  color: var(--background);
-  fill: var(--background);
-  background: var(--foreground);
+    color: var(--background);
+    fill: var(--background);
+    background: var(--foreground);
 }
 
 .zenin__button:not(.disabled).destructive {
-  color: var(--dead-a);
+    color: var(--dead-a);
 }
 
 .zenin__button:not(.disabled).destructive:hover {
-  color: var(--dead-b);
+    color: var(--dead-b);
 }
 
 .zenin__button:not(.disabled).hover.primary:hover {
-  background: var(--primary-hl);  
+    background: var(--primary-hl);  
 }
 
 .zenin__button:not(.disabled).hover:hover {
-  background: var(--off-b);  
+    background: var(--off-b);  
 }
 
 .zenin__tooltip {
-  display: none;
-  position: absolute;
-  z-index: 100;
-  background: var(--foreground);
-  color: var(--background);
-  top: calc(100% + var(--px-b)); /* Appear below button. */
-  font-size: 1rem;
-  padding: var(--px-b);
-  border-radius: 4px;
-  pointer-events: none;
-  white-space: nowrap;
+    display: none;
+    position: absolute;
+    z-index: 100;
+    background: var(--foreground);
+    color: var(--background);
+    top: calc(100% + var(--px-b)); /* Appear below button. */
+    font-size: 1rem;
+    padding: var(--px-b);
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: nowrap;
 }
 
 .zenin__tooltip.visible {
-  display: block;
+    display: block;
 }
 
 .zenin__tooltip.zenin__h_limit_left {
-  right: unset !important;
-  left: 0 !important;
+    right: unset !important;
+    left: 0 !important;
 }
 
 .zenin__tooltip.zenin__h_limit_right {
-  left: unset !important;
-  right: 0 !important;
+    left: unset !important;
+    right: 0 !important;
+}
+
+.zenin__button_spinner_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    border-radius: var(--rounded);
+    align-items: center;
+}
+
+.zenin__button_spinner {
+    border: 4px solid var(--off-c);
+    border-top: 4px solid var(--mid);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation-name: zenin-button-loading-spin;
+    animation-duration: 1000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes zenin-button-loading-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
