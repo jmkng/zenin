@@ -1,9 +1,9 @@
 import { Measurement } from '../../internal/measurement';
 import { useEffect, useRef, useState } from 'react';
 
-import './Series.css';
+import './MeasurementTimeline.css';
 
-interface SeriesProps {
+interface MeasurementTimelineProps {
     measurements: Measurement[]
 
     onSlotClick: (measurement: Measurement) => void;
@@ -12,7 +12,7 @@ interface SeriesProps {
 const slotWidth = 20;
 const slotGap = 2;
 
-export default function Series(props: SeriesProps) {
+export default function MeasurementTimeline(props: MeasurementTimelineProps) {
     const { measurements, onSlotClick } = props;
     const [slots, setSlots] = useState<number>(0);
     const containerRef = useRef(null);
@@ -41,10 +41,10 @@ export default function Series(props: SeriesProps) {
                 <div
                     key={index}
                     onClick={() => onSlotClick(measurement)}
-                    className="zenin__series_slot_container"
+                    className="zenin__measurement_timeline_slot_container"
                     style={{ width: slotWidth }}
                 >
-                    <div className={["zenin__series_slot", measurement.state].join(' ')}></div>
+                    <div className={["zenin__measurement_timeline_slot", measurement.state].join(' ')}></div>
                 </div>
             );
         }
@@ -53,7 +53,7 @@ export default function Series(props: SeriesProps) {
 
 
     return (
-        <div className="zenin__series" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
+        <div className="zenin__measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
             {renderSlots()}
         </div>
     )

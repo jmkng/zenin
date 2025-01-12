@@ -1,4 +1,4 @@
-.zenin__series {
+.zenin__measurement_timeline {
   display: flex;
   width: 100%;
   border-bottom-right-radius: var(--rounded);
@@ -6,37 +6,36 @@
   padding: 0 2px;
 }
 
-.zenin__series_slot_container {
+.zenin__measurement_timeline_slot_container {
   cursor: pointer;
   height: 100%;
   display: flex;
   flex-direction: column-reverse;
 }
 
-.zenin__monitor.selected .zenin__series_slot {
+.zenin__monitor.selected .zenin__measurement_timeline_slot {
   height: 5px;
 }
 
-.zenin__series_slot_container:hover > .zenin__series_slot {
+.zenin__measurement_timeline_slot_container:hover > .zenin__measurement_timeline_slot {
   height: 100%;
 }
 
-.zenin__series_slot {
-  transition: 
-    height var(--fast) ease-in-out;
+.zenin__measurement_timeline_slot {
+  transition: height var(--fast) ease-in-out;
   height: 2px;
   border-top-right-radius: 1px;
   border-top-left-radius: 1px;
 }
 
-.zenin__series_slot.OK {
+.zenin__measurement_timeline_slot.OK {
   background: var(--ok);
 }
 
-.zenin__series_slot.WARN {
+.zenin__measurement_timeline_slot.WARN {
   background: var(--warn);
 }
 
-.zenin__series_slot.DEAD {
+.zenin__measurement_timeline_slot.DEAD {
   background: var(--dead-a);
 }

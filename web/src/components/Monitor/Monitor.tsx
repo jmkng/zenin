@@ -12,7 +12,7 @@ import PauseIcon from '../Icon/PauseIcon';
 import PlayIcon from '../Icon/PlayIcon';
 import TrashIcon from '../Icon/TrashIcon';
 import VMenuIcon from '../Icon/VMenuIcon';
-import Series from './Series';
+import MeasurementTimeline from './MeasurementTimeline';
 import ActiveWidget from './Widget/ActiveWidget';
 import IDWidget from './Widget/IDWidget';
 import KindWidget from './Widget/KindWidget';
@@ -77,18 +77,24 @@ export default function Monitor(props: MonitorProps) {
                                 items: [
                                     { text: "Info", onClick: () => handleView(), icon: <InfoIcon /> },
                                     { text: "Poll", onClick: () => handlePoll(), icon: <DatabaseIcon /> },
-                                    { text: monitor.data.active ? "Pause" : "Resume", onClick: () => handleToggle(), icon: monitor.data.active ? <PauseIcon /> : <PlayIcon /> },
+                                    {
+                                        text: monitor.data.active ? "Pause" : "Resume",
+                                        onClick: () => handleToggle(),
+                                        icon: monitor.data.active ? <PauseIcon /> : <PlayIcon />
+                                    },
                                 ]
                             },
                             {
                                 items: [
                                     {
                                         text: "Edit",
-                                        onClick: () => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: monitor.data } }), icon: <EditIcon />
+                                        onClick: () => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: monitor.data } }),
+                                        icon: <EditIcon />
                                     },
                                     {
                                         text: "Delete",
-                                        onClick: () => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] }), icon: <TrashIcon />, destructive: true
+                                        onClick: () => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] }),
+                                        icon: <TrashIcon />, destructive: true
                                     },
                                 ]
                             }
@@ -100,6 +106,7 @@ export default function Monitor(props: MonitorProps) {
                     <span onClick={event => event.stopPropagation()}>
                         <IDWidget id={monitor.data.id!} />
                     </span>
+
                     <KindWidget kind={monitor.data.kind} />
                     {!monitor.data.active ?
                         <span onClick={event => event.stopPropagation()}>
@@ -109,10 +116,12 @@ export default function Monitor(props: MonitorProps) {
                 </div>
             </div>
         </div>
+
         <div className="zenin__monitor_middle" onClick={handleSelect}>
         </div>
+
         <div className='zenin__monitor_bottom'>
-            <Series
+            <MeasurementTimeline
                 measurements={monitor.data.measurements?.toReversed() || []}
                 onSlotClick={measurement => monitor.context.dispatch({
                     type: 'pane',
