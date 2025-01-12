@@ -1,9 +1,14 @@
+import { useNavigate } from 'react-router-dom';
+import { useAccountContext } from '../../internal/account';
+import { useDefaultAccountService } from '../../internal/account/service';
 import { useLayoutContext } from '../../internal/layout';
 import { NAME_ASC_UI, NAME_DESC_UI, UPDATED_NEW_UI, UPDATED_OLD_UI, useMonitorContext } from '../../internal/monitor';
 import { useDefaultMonitorService } from '../../internal/monitor/service';
 
 import Button from '../Button/Button';
+import AccountIcon from '../Icon/AccountIcon';
 import AddIcon from '../Icon/AddIcon';
+import LogoutIcon from '../Icon/LogoutIcon';
 import MenuIcon from '../Icon/MenuIcon';
 import SettingsIcon from '../Icon/SettingsIcon';
 import SortIcon from '../Icon/SortIcon';
@@ -16,6 +21,13 @@ export default function DefaultMenu() {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
     }
+    const account = {
+        context: useAccountContext(),
+        service: useDefaultAccountService()
+    }
+    const navigate = useNavigate();
+    const authenticated = account.context.state.authenticated != null;
+    const root = account.context.state.authenticated?.token.payload.root || false;
 
     let indicator;
     switch (monitor.context.state.filter) {
@@ -39,6 +51,12 @@ export default function DefaultMenu() {
 
     const handleAdd = () => {
         monitor.context.dispatch({ type: 'draft' });
+    }
+
+    const handleLogout = () => {
+        account.service.clearLSToken();
+        account.context.dispatch({ type: 'logout' });
+        navigate("/login");
     }
 
     return <div className='zenin__default_menu zenin__menu'>
@@ -68,14 +86,30 @@ export default function DefaultMenu() {
                                 content: [
                                     {
                                         items: [
-                                            { text: NAME_ASC_UI, onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'NAME_ASC' }), active: monitor.context.state.filter == 'NAME_ASC' },
-                                            { text: NAME_DESC_UI, onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'NAME_DESC' }), active: monitor.context.state.filter == 'NAME_DESC' },
+                                            {
+                                                text: NAME_ASC_UI,
+                                                onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'NAME_ASC' }),
+                                                active: monitor.context.state.filter == 'NAME_ASC'
+                                            },
+                                            {
+                                                text: NAME_DESC_UI,
+                                                onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'NAME_DESC' }),
+                                                active: monitor.context.state.filter == 'NAME_DESC'
+                                            },
                                         ]
                                     },
                                     {
                                         items: [
-                                            { text: UPDATED_NEW_UI, onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'UPDATED_NEW' }), active: monitor.context.state.filter == 'UPDATED_NEW' },
-                                            { text: UPDATED_OLD_UI, onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'UPDATED_OLD' }), active: monitor.context.state.filter == 'UPDATED_OLD' },
+                                            {
+                                                text: UPDATED_NEW_UI,
+                                                onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'UPDATED_NEW' }),
+                                                active: monitor.context.state.filter == 'UPDATED_NEW'
+                                            },
+                                            {
+                                                text: UPDATED_OLD_UI,
+                                                onClick: () => monitor.context.dispatch({ type: 'filter', filter: 'UPDATED_OLD' }),
+                                                active: monitor.context.state.filter == 'UPDATED_OLD'
+                                            },
                                         ]
                                     }
                                 ],
@@ -93,11 +127,36 @@ export default function DefaultMenu() {
         </div>
 
         <div className='zenin__menu_right'>
-            <Button onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })} tooltip={{ text: "Toggle Settings" }}>
-                <span className="zenin__h_center">
-                    <SettingsIcon />
-                </span>
-            </Button>
+            <div className="zenin__menu_margin_right">
+                <Button
+                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
+                    tooltip={{ text: "Settings" }}
+                >
+                    <span className="zenin__h_center">
+                        <SettingsIcon />
+                    </span>
+                </Button>
+            </div>
+            {root
+                ? <div className="zenin__menu_margin_right">
+                    <Button onClick={() => { }} tooltip={{ text: "Accounts" }}>
+                        <span className="zenin__h_center">
+                            <AccountIcon />
+                        </span>
+                    </Button>
+                </div>
+                : null}
+
+            {authenticated
+                ? <div>
+                    <Button onClick={handleLogout} tooltip={{ text: "Log Out" }}>
+                        <span className="zenin__h_center">
+                            <LogoutIcon />
+                        </span>
+                    </Button>
+                </div>
+                : null}
+
         </div>
     </div >
 }
