@@ -19,7 +19,8 @@ interface TokenHeader {
 interface TokenPayload {
     sub: string,
     iat: number,
-    exp: number
+    exp: number,
+    root: boolean,
 }
 
 export const useAccountContext = () => {
