@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/fs"
 	"net"
@@ -79,12 +80,18 @@ func (s *Server) Serve() error {
 	return nil
 }
 
-func NewConfig(runtime *env.RuntimeEnv) Config {
+func NewConfig(runtime *env.RuntimeEnv) (Config, error) {
+	ip := net.ParseIP(runtime.Address)
+	if ip == nil {
+		return Config{}, errors.New("server ip address is invalid")
+	}
+
 	address := net.TCPAddr{
-		IP:   net.IPv4(127, 0, 0, 1),
+		IP:   ip,
 		Port: int(runtime.Port),
 	}
-	return Config{Address: address, Tls: nil} // TODO: TLS setup will happen here.
+
+	return Config{Address: address, Tls: nil}, nil // TODO: TLS setup will happen here.
 }
 
 // Config controls the behavior of a Zenin Server.

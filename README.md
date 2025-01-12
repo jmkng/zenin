@@ -56,7 +56,7 @@ You might export variables like these:
 
 ```
 export ZENIN_DB_KIND=postgres
-export ZENIN_DB_HOST=0.0.0.0
+export ZENIN_DB_ADDRESS=0.0.0.0
 export ZENIN_DB_PORT=5432
 export ZENIN_DB_NAME=postgres
 export ZENIN_DB_USERNAME=username
@@ -68,13 +68,14 @@ Supported environment variables are documented below. Values are case sensitive.
 | Name                           | Explanation                                                  | Accepted Values      | Example                                     | Default
 | :--------------------------    | :----------------------------------------------------------- | :------------------- | :------------------------------------------ | :-------
 | ZENIN_DB_KIND                  | The database kind.                                           | postgres             | export ZENIN_DB_KIND=postgres               | N/A
-| ZENIN_DB_HOST                  | The address of the server that is running the database.      | any x.x.x.x address  | export ZENIN_DB_HOST=0.0.0.0.0              | N/A
+| ZENIN_DB_ADDRESS               | The address of the server that is running the database.      | any x.x.x.x address  | export ZENIN_DB_ADDRESS=0.0.0.0.0           | N/A
 | ZENIN_DB_PORT                  | The port that the database is listening on.                  | any u16              | export ZENIN_DB_PORT=5432                   | N/A
 | ZENIN_DB_NAME                  | The name of the database.                                    | any string           | export ZENIN_DB_NAME=postgres               | N/A
 | ZENIN_DB_USERNAME              | The username used to sign in to the database.                | any string           | export ZENIN_DB_USERNAME=username           | N/A
 | ZENIN_DB_PASSWORD              | The password used to sign in to the database.                | any string           | export ZENIN_DB_PASSWORD=password           | N/A
 | ZENIN_DB_MAX_CONN              | The maximum number of open database connections.             | any number           | export ZENIN_DB_MAX_CONN=5                  | N/A
 | ZENIN_RT_LEVEL                 | The process run level. (optional)                            | prod, dev            | export ZENIN_RT_LEVEL=prod                  | prod
+| ZENIN_RT_ADDRESS               | An address for Zenin to bind on.                             | any x.x.x.x address  | export ZENIN_RT_ADDRESS=0.0.0.0.0           | 127.0.0.1
 | ZENIN_RT_PORT                  | A port number for Zenin to run on. (optional)                | any u16              | export ZENIN_RT_PORT=4884                   | 50010
 | ZENIN_RT_SIGN_SECRET           | A sequence used to sign tokens. (optional)[^1]               | any >=16 byte string | export ZENIN_RT_SIGN_SECRET=ab93Be(...)     | random
 | ZENIN_RT_COLOR                 | Determines if ANSI escape codes are used in logging.         | true, false          | export ZENIN_RT_COLOR=true                  | false

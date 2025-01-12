@@ -23,7 +23,7 @@ func NewDatabaseEnv() *DatabaseEnv {
 	}
 	username := os.Getenv(dbUsernameKey)
 	password := os.Getenv(dbPasswordKey)
-	host := os.Getenv(dbHostKey)
+	host := os.Getenv(dbAddressKey)
 	port := os.Getenv(dbPortKey)
 	name := os.Getenv(dbNameKey)
 	var maxConn uint16
@@ -57,7 +57,7 @@ const (
 	dbKindKey     = "ZENIN_DB_KIND"
 	dbUsernameKey = "ZENIN_DB_USERNAME"
 	dbPasswordKey = "ZENIN_DB_PASSWORD"
-	dbHostKey     = "ZENIN_DB_HOST"
+	dbAddressKey  = "ZENIN_DB_ADDRESS"
 	dbPortKey     = "ZENIN_DB_PORT"
 	dbNameKey     = "ZENIN_DB_NAME"
 	dbMaxKey      = "ZENIN_DB_MAX_CONN"

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 export ZENIN_DB_KIND="postgres"
-export ZENIN_DB_HOST="0.0.0.0"
+export ZENIN_DB_ADDRESS="0.0.0.0"
 export ZENIN_DB_PORT="5432"
 export ZENIN_DB_NAME="postgres"
 export ZENIN_DB_USERNAME="username"

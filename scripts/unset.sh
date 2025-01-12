@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 unset ZENIN_DB_KIND
-unset ZENIN_DB_HOST
+unset ZENIN_DB_ADDRESS
 unset ZENIN_DB_PORT
 unset ZENIN_DB_NAME
 unset ZENIN_DB_USERNAME

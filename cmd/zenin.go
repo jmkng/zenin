@@ -76,11 +76,13 @@ func main() {
 	asv := account.NewAccountService(repository)
 
 	// Start server.
-	server.
-		NewServer(server.NewConfig(env.Runtime),
-			server.Services{Settings: ssv, Measurement: mesv, Monitor: mosv, Account: asv}).
-		Serve()
+	config, err := server.NewConfig(env.Runtime)
 	dd(err)
+
+	server.NewServer(
+		config,
+		server.Services{Settings: ssv, Measurement: mesv, Monitor: mosv, Account: asv},
+	).Serve()
 
 	env.Debug("main stopping")
 }

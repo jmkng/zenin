@@ -55,6 +55,11 @@ func NewRuntimeEnv() *RuntimeEnv {
 		kind = Dev
 	}
 
+	var address = "127.0.0.1"
+	if envAddress := os.Getenv(rtAddressKey); envAddress != "" {
+		address = envAddress
+	}
+
 	var port uint16 = 50010
 	envPort, err := strconv.ParseUint(os.Getenv(rtPortKey), 10, 16)
 	if err == nil {
@@ -102,6 +107,7 @@ func NewRuntimeEnv() *RuntimeEnv {
 
 	return &RuntimeEnv{
 		Kind:       kind,
+		Address:    address,
 		Port:       port,
 		Color:      color,
 		Redirect:   redirect,
@@ -114,6 +120,8 @@ func NewRuntimeEnv() *RuntimeEnv {
 type RuntimeEnv struct {
 	// Kind is the runtime environment, either "dev" or "prod".
 	Kind RuntimeKind
+	// Local address for server to start on.
+	Address string
 	// Port is the port number that Zenin runs the primary server on.
 	Port uint16
 	// Redirect is the port that Zenin should run the unsecure (HTTP) server on,
@@ -197,6 +205,7 @@ func getSignSecret() (Secret, error) {
 
 const (
 	rtKindKey       = "ZENIN_RT_LEVEL"
+	rtAddressKey    = "ZENIN_RT_ADDRESS"
 	rtPortKey       = "ZENIN_RT_PORT"
 	rtColorKey      = "ZENIN_RT_COLOR"
 	rtRedirectKey   = "ZENIN_RT_REDIRECT"
