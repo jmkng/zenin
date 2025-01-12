@@ -77,11 +77,16 @@ export default function Dashboard() {
 
         <div className="zenin__dashboard_main">
             <div className="zenin__dashboard_main_top">
-                <div className={["zenin__dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
+                <div className={[
+                    "zenin__dashboard_select_menu",
+                    monitor.context.state.selected.length > 0 ? 'selection' : ''
+                ].join(' ')}>
                     <SelectMenu />
                 </div>
+
                 <DefaultMenu />
             </div>
+
             <div className="zenin__dashboard_main_bottom">
                 {sorted.length > 0
                     ? <div className="zenin__dashboard_monitors">
@@ -104,8 +109,14 @@ export default function Dashboard() {
                                 onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
                             />
                             : null}
-                        {monitor.context.state.split.isViewPane() ? <Info state={monitor.context.state.split.pane} /> : null}
-                        {monitor.context.state.split.isSettingsPane() ? <Settings /> : null}
+
+                        {monitor.context.state.split.isViewPane()
+                            ? <Info state={monitor.context.state.split.pane} />
+                            : null}
+
+                        {monitor.context.state.split.isSettingsPane()
+                            ? <Settings />
+                            : null}
                     </div>
                     : null}
             </div>

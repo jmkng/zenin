@@ -27,7 +27,7 @@ export default function Root() {
     useEffect(() => {
         if (!account.state.authenticated) return;
         const token = account.state.authenticated.token.raw;
-        
+
         (async () => {
             const [
                 settingsEx,

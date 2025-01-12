@@ -10,9 +10,10 @@
 :root {
     --white: rgb(255, 255, 255);
     --black: rgb(18, 18, 18);
+
     --fast: .20s;
     --slow: .30s;
-    --rounded: 4px;
+
     --px-a: 3px;
     --px-b: 6px;
     --px-c: 9px;
@@ -22,6 +23,8 @@
     --px-g: 36px;
     --px-h: 38px;
     --px-i: 57px;
+
+    --rounded: 5px;
 
     /* Theme: Dark */
     --theme-dark-background: var(--black);
