@@ -121,7 +121,10 @@ export default function Table(props: TableProps) {
 
     return <div className="zenin__table_component">
         <div className="zenin__table_header">
-            <span className="zenin__table_measurement_count">{measurements.length} measurements</span>
+            <span className="zenin__table_measurement_count">
+                {measurements.length} {measurements.length == 1 ? "measurement" : "measurements"}
+            </span>
+
             <div className="zenin__table_controls_container">
                 <Button onClick={handleDelete} disabled={checked.length == 0} border={true} icon={<TrashIcon />} />
                 <Button border={true} icon={<ClockIcon />}
