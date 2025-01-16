@@ -21,6 +21,7 @@ import './css/root.css';
 import './css/scrollbar.css';
 import './css/state.css';
 import './css/widget.css';
+import './css/spinner.css';
 
 const providers = [
     MonitorProvider,

@@ -115,8 +115,8 @@ export default function Button(props: ButtonProps) {
         ].join(' ')}
     >
         {loading ?
-            <div className="zenin__button_spinner_overlay">
-                <div className="zenin__button_spinner"></div>
+            <div className="zenin__spinner_overlay">
+                <div className="zenin__spinner"></div>
             </div>
             : null}
 

@@ -1,0 +1,32 @@
+.zenin__spinner_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    border-radius: var(--rounded);
+    align-items: center;
+}
+
+.zenin__spinner {
+    border: 4px solid var(--off-c);
+    border-top: 4px solid var(--mid);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    animation-name: zenin-spinner;
+    animation-duration: 1000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes zenin-spinner {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
