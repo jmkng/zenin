@@ -44,7 +44,7 @@ export default function DialogMenu(props: DialogMenuProps) {
                 ? content.map((group, index) => <div key={index} className="zenin__dialog_menu_group">
                     {group.items.map((item, index) => renderItem(index, item, onItemClick))}
                     {index < content.length - 1
-                        ? <div className="zenin__dialog_menu_group_border" />
+                        ? <div className="zenin__dialog_menu_group_border"></div>
                         : null}
                 </div>)
                 : content.map((item, index) => renderItem(index, item, onItemClick))}

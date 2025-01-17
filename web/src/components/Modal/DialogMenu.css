@@ -4,12 +4,6 @@
     min-width: 160px;
 }
 
-.zenin__dialog_menu.zenin__h_limit_bottom {
-    top: unset;
-    right: 0 !important;
-    bottom: calc(var(--px-b) + 100%);
-}
-
 .zenin__dialog_menu[data-side="left"] {
     right: calc(var(--px-b) + 100%);
 }
@@ -24,8 +18,11 @@
 }
 
 .zenin__dialog_menu_list {
+    border: 1px solid var(--off-b);
+    background: var(--background);
     list-style: none;
     padding: var(--px-b);
+    border-radius: var(--rounded);
     margin: 0;
     display: flex;
     flex-direction: column;
