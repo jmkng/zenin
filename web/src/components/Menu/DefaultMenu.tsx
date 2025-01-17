@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAccountContext } from '../../internal/account';
 import { useDefaultAccountService } from '../../internal/account/service';
-import { useLayoutContext } from '../../internal/layout';
+//import { useLayoutContext } from '../../internal/layout';
 import { NAME_ASC_UI, NAME_DESC_UI, UPDATED_NEW_UI, UPDATED_OLD_UI, useMonitorContext } from '../../internal/monitor';
 import { useDefaultMonitorService } from '../../internal/monitor/service';
 
@@ -9,14 +9,14 @@ import Button from '../Button/Button';
 import AccountIcon from '../Icon/AccountIcon';
 import AddIcon from '../Icon/AddIcon';
 import LogoutIcon from '../Icon/LogoutIcon';
-import MenuIcon from '../Icon/MenuIcon';
+//import MenuIcon from '../Icon/MenuIcon';
 import SettingsIcon from '../Icon/SettingsIcon';
 import SortIcon from '../Icon/SortIcon';
 
 import './DefaultMenu.css';
 
 export default function DefaultMenu() {
-    const layout = useLayoutContext();
+    //const layout = useLayoutContext();
     const monitor = {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
@@ -45,9 +45,9 @@ export default function DefaultMenu() {
             break;
     }
 
-    const handleMenuToggle = () => {
-        layout.dispatch({ type: 'shortcut', shortcut: !layout.state.shortcut });
-    }
+    //const handleMenuToggle = () => {
+    //    layout.dispatch({ type: 'shortcut', shortcut: !layout.state.shortcut });
+    //}
 
     const handleAdd = () => {
         monitor.context.dispatch({ type: 'draft' });
@@ -61,7 +61,7 @@ export default function DefaultMenu() {
 
     return <div className='zenin__default_menu zenin__menu'>
         <div className='zenin__menu_left'>
-            <div className="zenin__menu_toggle_container">
+            {/*<div className="zenin__menu_toggle_container">
                 <Button onClick={handleMenuToggle}>
                     <span className="zenin__h_center">
                         <MenuIcon />
@@ -69,14 +69,16 @@ export default function DefaultMenu() {
                 </Button>
             </div>
             <div className="zenin__menu_spacer first"></div>
+        */}
 
             <div className="zenin__menu_left_contextual">
                 <div className="zenin__dashboard_menu">
                     <div className="zenin__menu_margin_right">
-                        <Button onClick={handleAdd} tooltip={{ text: "Add Monitor" }}>
-                            <span className="zenin__h_center zenin__menu_add">
-                                <AddIcon />
-                            </span>
+                        <Button
+                            icon={<AddIcon />}
+                            onClick={handleAdd}
+                            tooltip={{ text: "Add Monitor" }}
+                        >
                         </Button>
                     </div>
                     <div className="zenin__menu_margin_right">
@@ -129,32 +131,27 @@ export default function DefaultMenu() {
         <div className='zenin__menu_right'>
             <div className="zenin__menu_margin_right">
                 <Button
+                    icon={<SettingsIcon />}
                     onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
                     tooltip={{ text: "Settings" }}
-                >
-                    <span className="zenin__h_center">
-                        <SettingsIcon />
-                    </span>
-                </Button>
+                />
             </div>
             {root
                 ? <div className="zenin__menu_margin_right">
-                    <Button onClick={() => { }} tooltip={{ text: "Accounts" }}>
-                        <span className="zenin__h_center">
-                            <AccountIcon />
-                        </span>
-                    </Button>
+                    <Button
+                        icon={<AccountIcon />}
+                        onClick={() => { }}
+                        tooltip={{ text: "Accounts" }}
+                    />
                 </div>
                 : null}
 
             {authenticated
-                ? <div>
-                    <Button onClick={handleLogout} tooltip={{ text: "Log Out" }}>
-                        <span className="zenin__h_center">
-                            <LogoutIcon />
-                        </span>
-                    </Button>
-                </div>
+                ? <Button
+                    icon={<LogoutIcon />}
+                    onClick={handleLogout}
+                    tooltip={{ text: "Log Out" }}
+                />
                 : null}
 
         </div>
