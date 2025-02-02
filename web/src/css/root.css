@@ -168,6 +168,10 @@ dialog {
     background-color: transparent;
 }
 
+[popover] {
+    color: inherit;
+}
+
 * {
     box-sizing: border-box;
 }
