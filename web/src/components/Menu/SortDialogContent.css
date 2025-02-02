@@ -1,5 +1,5 @@
 .zenin__sort_dialog_content {
-    width: 150px;
+    min-width: 150px;
     background: var(--background);
     border: 1px solid var(--off-b);
     border-radius: var(--rounded);
