@@ -1,4 +1,3 @@
 .zenin__router {
-    /* TODO(ios/android): Consider using dvh units here. Needs test on simulator. */
-    height: 100vh;
+    height: 100dvh;
 }
