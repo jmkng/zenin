@@ -68,7 +68,7 @@ export default function Monitor(props: MonitorProps) {
 
                 <div className="zenin__monitor_menu_container" onClick={e => e.stopPropagation()}>
                     <Dialog dialog={{content: <MonitorDialogContent monitor={monitor.data} />}}>
-                        <Button icon={<VMenuIcon />}>
+                        <Button hover={false} icon={<VMenuIcon />}>
                         </Button>
                     </Dialog>
                 </div>
