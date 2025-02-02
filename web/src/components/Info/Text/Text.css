@@ -19,7 +19,7 @@
     display: flex;
     min-height: var(--px-h);
     padding: var(--px-b) var(--px-b) var(--px-b) var(--px-d);
-
+}
 
 .zenin__text_scroller {
     display: flex;
