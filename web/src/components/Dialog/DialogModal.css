@@ -49,10 +49,6 @@
   font-size: 1.125rem;
 }
 
-.zenin__dialog_modal_lower {
-  height: 100%;
-}
-
 .zenin__dialog_modal::backdrop {
   background: black;
   opacity: 0.75;
