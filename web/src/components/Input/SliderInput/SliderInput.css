@@ -15,7 +15,6 @@
     background: var(--off-c);
     border: 1px solid var(--off-d);
     border-radius: 50%;
-    cursor: pointer;
 }
 
 .zenin__slider_input_box:focus::-webkit-slider-thumb {

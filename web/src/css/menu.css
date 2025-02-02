@@ -1,14 +1,10 @@
 .zenin__menu {
+    height: var(--px-i);
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--off-b);
     justify-content: space-between;
     padding: var(--px-c);
-}
-
-.zenin__menu .zenin__button {
-    justify-content: center;
-    align-items: center;
 }
 
 .zenin__menu_left, .zenin__menu_right {
@@ -24,4 +20,3 @@
       width: 100vw;
     }
 }
-  

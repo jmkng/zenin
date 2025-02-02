@@ -10,7 +10,6 @@
     border-radius: var(--rounded);
     user-select: none;
     font-weight: 500;
-    cursor: pointer;
     background: var(--background);
     border: 1px solid var(--foreground);
 }

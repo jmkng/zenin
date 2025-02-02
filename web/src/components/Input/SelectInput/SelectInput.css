@@ -4,7 +4,6 @@
   appearance: none;
   color: var(--foreground);
   outline: none;
-  cursor: pointer;
   padding: 8px 22px 8px var(--px-c) !important;
   border-radius: var(--rounded);
   border: 1px solid var(--off-b);
@@ -20,7 +19,6 @@
 
 .zenin__select_input_icon_container {
   position: absolute;
-  cursor: pointer;
   right: var(--px-c);
   top: 50%;
   transform: translateY(-50%);

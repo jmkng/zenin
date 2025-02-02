@@ -11,9 +11,9 @@ export const useDefaultInterceptors = () => {
     const navigate = useNavigate();
     const redirect = (extract: Extract) => {
         if (extract.unauthorized()) {
-            account.service.clearLSToken();                        // 1. Clear old token.
-            account.context.dispatch({ type: 'logout' })    // 2. Update the state.
-            navigate("/login")                              // 3. Redirect.
+            account.service.clearLSToken();                         // 1. Clear old token.
+            account.context.dispatch({ type: 'logout' })            // 2. Update the state.
+            navigate("/login")                                      // 3. Redirect.
         }
     }
     const logger = (extract: Extract) => {

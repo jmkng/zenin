@@ -13,11 +13,10 @@ import Private from '../components/Guard/Guard';
 import Hidden from '../components/Hidden/Hidden';
 import Dashboard from './Dashboard/Dashboard';
 import Login from './Login/Login';
-import ModalGroup from './ModalGroup';
 
-import './Root.css';
+import './Router.css';
 
-export default function Root() {
+export default function Router() {
     const account = useAccountContext();
     const layout = useLayoutContext();
     const monitor = { context: useMonitorContext(), service: useDefaultMonitorService() };
@@ -67,18 +66,14 @@ export default function Root() {
         else handleDisconnect();
     }, [account.state.authenticated])
 
-    return <div className='zenin__root_component'>
-        <div className='zenin__main'>
-            <Routes>
-                <Route element={<Hidden />}>
-                    <Route path="/login" element={<Login />} />
-                </Route>
-                <Route element={<Private />}>
-                    <Route path="/" element={<Dashboard />} />
-                </Route>
-            </Routes>
-        </div>
-
-        <ModalGroup />
+    return <div className='zenin__router'>
+        <Routes>
+            <Route element={<Hidden />}>
+                <Route path="/login" element={<Login />} />
+            </Route>
+            <Route element={<Private />}>
+                <Route path="/" element={<Dashboard />} />
+            </Route>
+        </Routes>
     </div>
 }

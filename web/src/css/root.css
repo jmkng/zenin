@@ -11,7 +11,7 @@
     --white: rgb(255, 255, 255);
     --black: rgb(18, 18, 18);
 
-    --fast: .20s;
+    --fast: .15s;
     --slow: .30s;
 
     --px-a: 3px;
@@ -161,6 +161,13 @@
     -ms-transition: none !important;
 }
 
+dialog {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -170,5 +177,5 @@ body {
 }
 
 a {
-  color: var(--link);
+    color: var(--link);
 }

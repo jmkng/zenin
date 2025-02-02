@@ -87,7 +87,6 @@
   padding: var(--px-c);
   width: 100%;
   white-space: nowrap;
-  cursor: pointer;
   display: flex;
   border-radius: var(--rounded);
 }

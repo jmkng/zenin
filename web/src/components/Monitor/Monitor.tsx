@@ -1,18 +1,15 @@
 import { useAccountContext } from '../../internal/account';
+import { Measurement } from '../../internal/measurement';
 import * as monitor from "../../internal/monitor";
 import { useMonitorContext } from "../../internal/monitor";
 import { MonitorService } from '../../internal/monitor/service';
 import { DataPacket } from '../../server';
 
 import Button from '../Button/Button';
-import DatabaseIcon from '../Icon/DatabaseIcon';
-import EditIcon from '../Icon/EditIcon';
-import InfoIcon from '../Icon/InfoIcon';
-import PauseIcon from '../Icon/PauseIcon';
-import PlayIcon from '../Icon/PlayIcon';
-import TrashIcon from '../Icon/TrashIcon';
+import Dialog from '../Dialog/Dialog';
 import VMenuIcon from '../Icon/VMenuIcon';
-import MeasurementTimeline from './MeasurementTimeline';
+import MonitorDialogContent from './MonitorDialogContent';
+import MonitorTimeline from './MonitorTimeline';
 import ActiveWidget from './Widget/ActiveWidget';
 import IDWidget from './Widget/IDWidget';
 import KindWidget from './Widget/KindWidget';
@@ -31,21 +28,11 @@ export default function Monitor(props: MonitorProps) {
         service: props.service
     }
     const account = useAccountContext();
-
-    const handlePoll = async () => {
-        const token = account.state.authenticated!.token.raw;
-        await monitor.service.pollMonitor(token, monitor.data.id!);
-    }
+    const measurements = monitor.data.measurements?.toReversed() || [];
+    const classes = ['zenin__monitor', monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''];
 
     const handleSelect = () => {
         monitor.context.dispatch({ type: 'select', monitor: monitor.data })
-    }
-
-    const handleView = () => {
-        monitor.context.dispatch({
-            type: 'pane',
-            pane: { type: 'view', target: { monitor: monitor.data, measurement: null } }
-        })
     }
 
     const handleToggle = async () => {
@@ -59,61 +46,47 @@ export default function Monitor(props: MonitorProps) {
         monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
     }
 
-    return <div
-        className={['zenin__monitor', monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''].join(' ')}>
+    const handleView = () => {
+        const measurement = null;
+        const target = { monitor: monitor.data, measurement };
+        monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target } });
+    }
+
+    const handleTimelineSlotClick = (measurement: Measurement) => {
+        const target = { monitor: monitor.data, measurement, disableToggle: true };
+        monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target } });
+    }
+
+    return <div className={classes.join(' ')}>
         <div className="zenin__monitor_top" onClick={handleSelect}>
             <div className="zenin__monitor_top_upper">
                 <div onClick={event => event.stopPropagation()}>
-                    <span className="zenin__monitor_name zenin__h_left" onClick={() => handleView()}>
+                    <span className="zenin__monitor_name zenin__h_left" onClick={handleView}>
                         {monitor.data.name}
                     </span>
                 </div>
-                <Button
-                    icon={<VMenuIcon />}
-                    onClick={event => event.stopPropagation()}
-                    dialog={{
-                        content: [
-                            {
-                                items: [
-                                    { text: "Info", onClick: () => handleView(), icon: <InfoIcon /> },
-                                    { text: "Poll", onClick: () => handlePoll(), icon: <DatabaseIcon /> },
-                                    {
-                                        text: monitor.data.active ? "Pause" : "Resume",
-                                        onClick: () => handleToggle(),
-                                        icon: monitor.data.active ? <PauseIcon /> : <PlayIcon />
-                                    },
-                                ]
-                            },
-                            {
-                                items: [
-                                    {
-                                        text: "Edit",
-                                        onClick: () => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: monitor.data } }),
-                                        icon: <EditIcon />
-                                    },
-                                    {
-                                        text: "Delete",
-                                        onClick: () => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] }),
-                                        icon: <TrashIcon />, destructive: true
-                                    },
-                                ]
-                            }
-                        ], side: "left"
-                    }} />
-            </div>
-            <div onClick={event => event.stopPropagation()}>
-                <div className="zenin__monitor_top_lower" onClick={() => handleSelect()}>
-                    <span onClick={event => event.stopPropagation()}>
-                        <IDWidget id={monitor.data.id!} />
-                    </span>
 
-                    <KindWidget kind={monitor.data.kind} />
-                    {!monitor.data.active ?
-                        <span onClick={event => event.stopPropagation()}>
-                            <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
-                        </span>
-                        : null}
+                <div className="zenin__monitor_menu_container" onClick={e => e.stopPropagation()}>
+                    <Dialog dialog={{content: <MonitorDialogContent monitor={monitor.data} />}}>
+                        <Button icon={<VMenuIcon />}>
+                        </Button>
+                    </Dialog>
                 </div>
+            </div>
+            <div className="zenin__monitor_top_lower" onClick={e =>{
+                    e.stopPropagation();
+                    handleSelect();
+                }}>
+                <span onClick={event => event.stopPropagation()}>
+                    <IDWidget id={monitor.data.id!} />
+                </span>
+
+                <KindWidget kind={monitor.data.kind} />
+                {!monitor.data.active
+                    ? <div onClick={event => event.stopPropagation()}>
+                        <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
+                    </div>
+                    : null}
             </div>
         </div>
 
@@ -121,13 +94,7 @@ export default function Monitor(props: MonitorProps) {
         </div>
 
         <div className='zenin__monitor_bottom'>
-            <MeasurementTimeline
-                measurements={monitor.data.measurements?.toReversed() || []}
-                onSlotClick={measurement => monitor.context.dispatch({
-                    type: 'pane',
-                    pane: { type: 'view', target: { monitor: monitor.data, measurement, disableToggle: true } }
-                })}
-            />
+            <MonitorTimeline measurements={measurements} onSlotClick={handleTimelineSlotClick} />
         </div>
     </div>
 }

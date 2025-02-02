@@ -38,14 +38,14 @@ export default function SelectMenu() {
         <div className="zenin__menu_left">
             <div className="zenin__menu_margin_right">
                 <Button
-                    tooltip={{ text: "Select All" }}
+                    tooltip="Select All"
                     onClick={() => monitor.context.dispatch({ 'type': 'select', monitor: "ALL" })}
                     icon={<SelectIcon />}
                 />
             </div>
             <div className="zenin__menu_margin_right">
                 <Button
-                    tooltip={{ text: "Clear Selection" }}
+                    tooltip = "Clear Selection"
                     onClick={() => monitor.context.dispatch({ type: 'select', monitor: 'NONE' })}
                     icon={<div className="zenin__deselect_all_control"><AddIcon /></div>}
                 />
@@ -58,23 +58,25 @@ export default function SelectMenu() {
         <div className="zenin__menu_right">
             <div className="zenin__menu_margin_right">
                 <Button
+                    tooltip="Resume Selected"
                     disabled={!monitor.context.state.selected.some(n => !n.active)}
-                    tooltip={{ text: "Resume Selected" }} onClick={() => handleToggle(true)}
                     icon={<PlayIcon />}
-                />
+                    onClick={() => handleToggle(true)}
+                    />
             </div>
             <div className="zenin__menu_margin_right">
                 <Button
+                    tooltip="Pause Selected"
                     disabled={!monitor.context.state.selected.some(n => n.active)}
-                    tooltip={{ text: "Pause Selected" }} onClick={() => handleToggle(false)}
                     icon={<PauseIcon />}
+                    onClick={() => handleToggle(false)}
                 />
             </div>
             <div onClick={(event) => event.stopPropagation()}>
                 <Button
-                    tooltip={{ text: "Delete Selected" }}
-                    onClick={() => handleDelete()}
+                    tooltip="Delete Selected"
                     icon={<TrashIcon />}
+                    onClick={handleDelete}
                 />
             </div>
         </div>

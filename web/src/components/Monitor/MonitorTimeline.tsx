@@ -1,18 +1,18 @@
 import { Measurement } from '../../internal/measurement';
 import { useEffect, useRef, useState } from 'react';
 
-import './MeasurementTimeline.css';
+import './MonitorTimeline.css';
 
-interface MeasurementTimelineProps {
+interface MonitorTimelineProps {
     measurements: Measurement[]
 
     onSlotClick: (measurement: Measurement) => void;
 }
 
-const slotWidth = 20;
+const slotWidth = 22.5;
 const slotGap = 2;
 
-export default function MeasurementTimeline(props: MeasurementTimelineProps) {
+export default function MonitorTimeline(props: MonitorTimelineProps) {
     const { measurements, onSlotClick } = props;
     const [slots, setSlots] = useState<number>(0);
     const containerRef = useRef(null);
@@ -52,9 +52,7 @@ export default function MeasurementTimeline(props: MeasurementTimelineProps) {
     }
 
 
-    return (
-        <div className="zenin__measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
-            {renderSlots()}
-        </div>
-    )
+    return <div className="zenin__measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
+        {renderSlots()}
+    </div>
 }

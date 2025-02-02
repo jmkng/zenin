@@ -76,7 +76,7 @@
     margin-left: auto;
 }
 
-.zenin__table_controls_container > *:not(:last-of-type) {
+.zenin__table_controls_container > *:not(:last-child) {
     margin-right: var(--px-b);
 }
 
@@ -95,4 +95,4 @@
 
 .zenin__table_container th:last-child, .zenin__table_container td:last-child {
     text-align: center;
-} 
+}

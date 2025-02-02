@@ -3,18 +3,17 @@
   width: 100%;
   border-bottom-right-radius: var(--rounded);
   border-bottom-left-radius: var(--rounded);
-  padding: 0 2px;
+  padding: 0 3px;
 }
 
 .zenin__measurement_timeline_slot_container {
-  cursor: pointer;
   height: 100%;
   display: flex;
   flex-direction: column-reverse;
 }
 
 .zenin__monitor.selected .zenin__measurement_timeline_slot {
-  height: 5px;
+  height: 25%;
 }
 
 .zenin__measurement_timeline_slot_container:hover > .zenin__measurement_timeline_slot {

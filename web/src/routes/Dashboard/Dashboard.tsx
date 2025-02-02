@@ -4,14 +4,16 @@ import { isMonitor, useMonitorContext } from '../../internal/monitor';
 import { useDefaultMonitorService } from '../../internal/monitor/service';
 import { DataPacket } from '../../server';
 
+import Button from '../../components/Button/Button';
+import DialogModal from '../../components/Dialog/DialogModal';
 import Editor from '../../components/Editor/Editor';
 import Info from '../../components/Info/Info';
-import DefaultMenu from '../../components/Menu/DefaultMenu';
+import Menu from '../../components/Menu/Menu';
 import SelectMenu from '../../components/Menu/SelectMenu';
 import Monitor from '../../components/Monitor/Monitor';
-import Sidebar from '../../components/Sidebar/Sidebar';
 import Settings from '../../components/Settings/Settings';
-import Button from '../../components/Button/Button';
+import Sidebar from '../../components/Sidebar/Sidebar';
+import DeleteDialogContent from '../DeleteDialogContent';
 
 import './Dashboard.css';
 
@@ -66,8 +68,12 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
 
-    const handleDraft = () => {
-        monitor.context.dispatch({ type: 'draft' });
+    const handleRemove = async (monitors: monitor.Monitor[]) => {
+        const id = monitors.map(n => n.id!);
+        const token = account.state.authenticated!.token.raw;
+        const extract = await monitor.service.deleteMonitor(token, id);
+        if (!extract.ok()) return;
+        monitor.context.dispatch({ type: 'remove', monitors: id });
     }
 
     return <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
@@ -77,14 +83,10 @@ export default function Dashboard() {
 
         <div className="zenin__dashboard_main">
             <div className="zenin__dashboard_main_top">
-                <div className={[
-                    "zenin__dashboard_select_menu",
-                    monitor.context.state.selected.length > 0 ? 'selection' : ''
-                ].join(' ')}>
+                <div className={["zenin__dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
                     <SelectMenu />
                 </div>
-
-                <DefaultMenu />
+                <Menu />
             </div>
 
             <div className="zenin__dashboard_main_bottom">
@@ -94,7 +96,7 @@ export default function Dashboard() {
                     </div>
                     : <div className="zenin__dashboard_empty">
                         <span className="zenin__dashboard_empty_message">No monitors have been created.</span>
-                        <Button border={true} onClick={handleDraft} tooltip={{ text: "Add Monitor" }}>
+                        <Button border={true} onClick={() => monitor.context.dispatch({ type: 'draft' })}>
                             <span className="zenin__h_center zenin__menu_add">
                                 Add Monitor
                             </span>
@@ -121,5 +123,12 @@ export default function Dashboard() {
                     : null}
             </div>
         </div>
+
+        <DialogModal
+            title="Confirm"
+            visible={monitor.context.state.deleting.length > 0}
+            onCancel={() => monitor.context.dispatch({ type: 'delete', monitors: [] })}
+            content={<DeleteDialogContent onConfirm={() => handleRemove(monitor.context.state.deleting)} />} 
+        />
     </div>
 }

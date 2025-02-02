@@ -24,17 +24,7 @@
     margin-left: auto;
     transition: transform var(--fast) ease-in-out;
     transform: rotate(90deg);
-    cursor: pointer;
     padding: 4px;
-}
-
-.zenin__chain_component.disabled {
-    background: var(--off-b);
-}
-
-.zenin__chain_component.disabled,
-.zenin__chain_component.disabled * {
-    cursor: not-allowed;
 }
 
 .zenin__chain_component.expanded .zenin__chain_toggle {
@@ -42,7 +32,6 @@
 }
 
 .zenin__chain_title {
-    cursor: pointer;
     color: var(--mid);
     flex: 0 0 auto;
     margin-right: var(--px-f);

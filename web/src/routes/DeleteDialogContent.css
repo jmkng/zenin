@@ -1,17 +1,17 @@
-.zenin__confirm_modal_top {
+.zenin__dialog_confirm_content_top {
     color: var(--mid);
 }
 
-.zenin__confirm_modal_top > *:last-child {
+.zenin__dialog_confirm_content_top > *:last-child {
     margin-top: var(--px-b);
 }
 
-.zenin__confirm_modal {
+.zenin__dialog_confirm_content {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.zenin__confirm_modal_bottom {
+.zenin__dialog_confirm_content_bottom {
     margin-top: var(--px-e);
 }

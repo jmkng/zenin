@@ -32,7 +32,6 @@
 }
 
 .zenin__radio_input_element:not(:checked) ~ .zenin__radio_input_label {
-    cursor: pointer;
 }
 
 .zenin__radio_input_element:checked ~ .zenin__radio_input_label {

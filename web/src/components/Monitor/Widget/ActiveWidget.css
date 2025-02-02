@@ -2,7 +2,6 @@
   display: flex;
   align-items: center;
   font-weight: 500;
-  cursor: pointer;
 }
 
 .zenin__active_widget[data-active="Inactive"] {

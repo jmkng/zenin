@@ -1,6 +1,5 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { adjustPosition, unlimit } from '../../internal/layout/graphics';
-import DialogMenu, { DialogGroup, DialogItem, DialogSideKind } from '../Modal/DialogMenu';
+import { ReactNode, useCallback, useEffect, useRef } from 'react';
+import { PositionStrategy } from '../Dialog/position';
 
 import './Button.css';
 
@@ -12,14 +11,9 @@ interface ButtonProps {
     icon?: ReactNode;
     background?: boolean;
     disabled?: boolean;
-    tooltip?: ButtonTooltipOptions;
-    dialog?: { content: DialogGroup[] | DialogItem[], side: DialogSideKind }
+    tooltip?: string;
     loading?: boolean;
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}
-
-interface ButtonTooltipOptions {
-    text: string
 }
 
 export default function Button(props: ButtonProps) {
@@ -32,75 +26,62 @@ export default function Button(props: ButtonProps) {
         background = false,
         disabled = false,
         tooltip = null,
-        dialog,
         loading = false,
         onClick
     } = props;
-    const [dialogVisible, setDialogVisible] = useState(false);
+    const rootRef = useRef<HTMLDivElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
-    const dialogRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if (dialog) setDialogVisible(prev => !prev);
         if (onClick) onClick(event);
         handleHideTooltip();
-    }, [dialog, onClick])
-
-    useEffect(() => {
-        if (!dialogVisible) return;
-        const handleClick = (event: MouseEvent) => {
-            if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) setDialogVisible(false)
-        };
-        document.addEventListener('click', handleClick, true);
-
-        return () => {
-            document.removeEventListener('click', handleClick, true);
-        };
-    }, [dialogVisible])
+    }, [onClick])
 
     const handleHideTooltip = () => {
+        const id = timeoutRef.current;
+        if (!id) return;
+        clearTimeout(id);
+        timeoutRef.current = null;
+
         const element = tooltipRef.current;
         if (!element) return;
 
         element.classList.remove('visible')
-        unlimit(element);
     };
 
     useEffect(() => {
         const handleShowTooltip = () => {
             const tooltipElement = tooltipRef.current;
-            if (!tooltipElement || !tooltip) return;
+            const root = rootRef.current;
+            if (!tooltipElement || !tooltip || !root) return;
+
+            const { top, left } = relativeTooltipStrategy(root.getBoundingClientRect(), tooltipElement.getBoundingClientRect())
+
+            tooltipElement.style.left = `${left}px`;
+            tooltipElement.style.top = `${top}px`;
 
             tooltipElement.classList.add('visible')
-            adjustPosition(tooltipElement);
         };
         const handleMouseEnter = () => {
-            if (!window.matchMedia("(max-width: 700px)").matches && !dialogVisible) {
+            if (!window.matchMedia("(max-width: 700px)").matches) {
                 timeoutRef.current = setTimeout(() => handleShowTooltip(), 1000);
             }
-        }
-        const handleMouseLeave = () => {
-            const id = timeoutRef.current;
-            if (!id) return;
-            clearTimeout(id);
-            timeoutRef.current = null;
-            handleHideTooltip();
         }
 
         const buttonElement = buttonRef.current;
         if (!buttonElement) return;
         buttonElement.addEventListener('mouseenter', handleMouseEnter);
-        buttonElement.addEventListener('mouseleave', handleMouseLeave);
+        buttonElement.addEventListener('mouseleave', handleHideTooltip);
         return () => {
             if (!buttonElement) return;
             buttonElement.removeEventListener('mouseenter', handleMouseEnter);
-            buttonElement.removeEventListener('mouseleave', handleMouseLeave);
+            buttonElement.removeEventListener('mouseleave', handleHideTooltip);
         }
-    }, [dialogVisible, tooltip])
+    }, [tooltip])
 
-    return <button
+    const button = <button
         ref={buttonRef}
         onClick={event => { if (!disabled && !loading) handleClick(event) }}
         className={[
@@ -109,7 +90,7 @@ export default function Button(props: ButtonProps) {
             kind,
             border ? 'border' : '',
             hover ? 'hover' : '',
-            (background || dialogVisible) ? 'background' : '',
+            background ? 'background' : '',
             disabled ? 'disabled' : '',
             loading ? 'loading' : '',
         ].join(' ')}
@@ -125,16 +106,36 @@ export default function Button(props: ButtonProps) {
             : null}
 
         <span className="zenin__button_child">{children}</span>
-
-        {tooltip && !dialogVisible
-            ? <div className="zenin__tooltip" ref={tooltipRef}>{tooltip.text}</div>
-            : null}
-
-        {dialog && dialogVisible
-            ? <div role="dialog" ref={dialogRef} onClick={event => event.stopPropagation()}>
-                <DialogMenu content={dialog.content} side={dialog.side} onItemClick={() => setDialogVisible(false)} />
+    </button>;
+    
+    return tooltip 
+            ? <div ref={rootRef} className="zenin__button_tooltip">
+                {button}
+                <div className="zenin__tooltip" ref={tooltipRef}>{tooltip}</div>
             </div>
-            : null}
-    </button >
+            : button
 }
 
+// Put the tooltip below the anchor, and try to center it. 
+// Prefer left/right side based on available space.
+const relativeTooltipStrategy: PositionStrategy = (rootRect: DOMRect, portalRect: DOMRect) => {
+    const top = rootRect.height + 6; // Padding equal to var(--px-b);
+    let left = (rootRect.width - portalRect.width) / 2;
+
+    // Check for viewport overflow on wide tooltips.
+    if (portalRect.width > rootRect.width) {
+        // Assumed left position of the portal relative to viewport after calculations.
+        const leftPosRelViewport = rootRect.left + left;
+        const rightPosRelViewport = leftPosRelViewport + portalRect.width;
+
+        // Stick to left/right of anchor.
+        if (leftPosRelViewport < 0) left = 0;
+        else if (rightPosRelViewport > window.innerWidth) left = -(portalRect.width - rootRect.width)
+        
+        // Alternatively, stick to viewport edges instead...
+        // if (leftPosRelViewport < 0) left = -rootRect.left;
+        // else if (rightPosRelViewport > window.innerWidth) left -= (rightPosRelViewport - window.innerWidth)
+    }
+
+    return { top, left };
+};

@@ -20,7 +20,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     margin-left: var(--px-b);
 }
 

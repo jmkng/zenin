@@ -4,10 +4,11 @@ import { Measurement } from '../../../internal/measurement';
 import { useDefaultMeasurementService } from '../../../internal/measurement/service';
 import { useMonitorContext } from '../../../internal/monitor';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
-import { DetachedState, OriginState, ViewPane } from '../../../internal/monitor/split';
+import { OriginState, ViewPane } from '../../../internal/monitor/split';
 import { DataPacket } from '../../../server';
 
 import Button from '../../Button/Button';
+import Dialog from '../../Dialog/Dialog';
 import ClockIcon from '../../Icon/ClockIcon';
 import FirstIcon from '../../Icon/FirstIcon';
 import LastIcon from '../../Icon/LastIcon';
@@ -17,6 +18,7 @@ import TrashIcon from '../../Icon/TrashIcon';
 import CheckboxInput from '../../Input/CheckboxInput/CheckboxInput';
 import Property from '../Property/Property';
 import Row from './Row/Row';
+import TableDialogContent from './TableDialogContext';
 
 import './Table.css';
 
@@ -126,19 +128,18 @@ export default function Table(props: TableProps) {
             </span>
 
             <div className="zenin__table_controls_container">
-                <Button onClick={handleDelete} disabled={checked.length == 0} border={true} icon={<TrashIcon />} />
-                <Button border={true} icon={<ClockIcon />}
-                    dialog={{
-                        content: [
-                            { text: "Recent", onClick: () => handleDateChange("HEAD") },
-                            { text: "Past Day", onClick: () => handleDateChange(new DetachedState("DAY")) },
-                            { text: "Past Week", onClick: () => handleDateChange(new DetachedState("WEEK")) },
-                            { text: "Past Month", onClick: () => handleDateChange(new DetachedState("MONTH")) },
-                            { text: "Past Year", onClick: () => handleDateChange(new DetachedState("YEAR")) },
-                        ], side: "left"
-                    }}>
-                    {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
-                </Button>
+                <Button 
+                    onClick={handleDelete} 
+                    disabled={checked.length == 0} 
+                    border={true} 
+                    icon={<TrashIcon />} 
+                />
+
+                <Dialog dialog={{content: <TableDialogContent onDateChange={handleDateChange}/>}}>
+                    <Button border={true} icon={<ClockIcon />} >
+                        {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
+                    </Button>
+                </Dialog>
             </div>
         </div>
         <div className="zenin__table_container">

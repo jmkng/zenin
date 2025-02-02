@@ -1,0 +1,59 @@
+.zenin__dialog_modal {
+  padding: var(--px-e);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: default;
+  border: 1px solid var(--off-b);
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: var(--rounded);
+  width: 50%;
+  max-width: 550px;
+}
+
+@media (max-width: 700px) {
+  .zenin__dialog_modal {
+    max-width: unset;
+    width: 90vw;
+  }
+}
+
+.zenin__dialog_modal[open] {
+  animation: modal-fade-in var(--fast) ease-in-out;
+}
+
+.zenin__dialog_modal::backdrop {
+  animation: backdrop-fade-in var(--fast) ease-in-out;
+}
+
+@keyframes modal-fade-in {
+  0% { opacity: 0; }
+  100%{ opacity: 1; }
+}
+
+@keyframes backdrop-fade-in {
+  0% { opacity: 0; }
+  100%{ opacity: 0.75; }
+}
+
+.zenin__dialog_modal_upper {
+  display: flex;
+  margin-bottom: var(--px-c);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zenin__dialog_modal_title {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.zenin__dialog_modal_lower {
+  height: 100%;
+}
+
+.zenin__dialog_modal::backdrop {
+  background: black;
+  opacity: 0.75;
+}

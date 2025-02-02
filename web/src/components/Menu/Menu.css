@@ -28,9 +28,3 @@
   color: var(--mid);
   user-select: none;
 }
-
-@media (max-width: 700px) {
-  .zenin__filter_indicator {
-    display: none;
-  }
-}
