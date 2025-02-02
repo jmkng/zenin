@@ -19,14 +19,14 @@ export default function SortDialogContent(props: SortDialogContentProps) {
                 disabled={filter == 'NAME_ASC'}
                 onClick={() => onFilterChange('NAME_ASC')} 
                 icon={filter === 'NAME_ASC' ? <CheckIcon/> : null}
-                >
+            >
                 {NAME_ASC_UI}
             </Button>
             <Button
                 disabled={filter == 'NAME_DESC'}
                 onClick={() => onFilterChange('NAME_DESC')} 
                 icon={filter === 'NAME_DESC' ? <CheckIcon/> : null}
-                >
+            >
                 {NAME_DESC_UI}
             </Button>
         </div>
@@ -35,7 +35,7 @@ export default function SortDialogContent(props: SortDialogContentProps) {
                 disabled={filter == 'UPDATED_NEW'}
                 onClick={() => onFilterChange('UPDATED_NEW')} 
                 icon={filter === 'UPDATED_NEW' ? <CheckIcon/> : null}
-                >
+            >
                 {UPDATED_NEW_UI}
             </Button>
             <Button 
