@@ -1,6 +1,5 @@
 export default function MenuIcon() {
-    return (
-        <svg className="zenin__icon zenin__menu_icon" width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ fillRule: "evenodd", clipRule: "evenodd", strokeLinejoin: "round", strokeMiterlimit: 2 }}>
+    return <svg className="zenin__icon zenin__menu_icon" width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ fillRule: "evenodd", clipRule: "evenodd", strokeLinejoin: "round", strokeMiterlimit: 2 }}>
             <g transform="matrix(0.333333,0,0,0.333333,1.33333,1)">
                 <path d="M60,18C61.105,18 62,17.105 62,16C62,14.895 61.105,14 60,14L4,14C2.895,14 2,14.895 2,16C2,17.105 2.895,18 4,18L60,18Z" style={{ fillRule: "nonzero", stroke: "currentcolor", strokeWidth: 2 }} />
             </g>
@@ -10,6 +9,5 @@ export default function MenuIcon() {
             <g transform="matrix(0.333333,0,0,0.333333,1.33333,1.66667)">
                 <path d="M36,48C36,49.105 35.105,50 34,50L4,50C2.895,50 2,49.105 2,48C2,46.895 2.895,46 4,46L34,46C35.105,46 36,46.895 36,48Z" style={{ fillRule: "nonzero", stroke: "currentcolor", strokeWidth: 2 }} />
             </g>
-        </svg>
-    );
+    </svg>
 }

@@ -1,6 +1,5 @@
 export default function EditIcon() {
-    return (
-        <svg
+    return <svg
             className="zenin__icon zenin__edit_icon"
             style={{
                 fillRule: "evenodd",
@@ -17,6 +16,5 @@ export default function EditIcon() {
                 }}
                 transform="matrix(.28653 0 0 .28653 -2.326 -2.326)"
             />
-        </svg>
-    )
+    </svg>
 }

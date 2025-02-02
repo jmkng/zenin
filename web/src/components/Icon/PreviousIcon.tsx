@@ -1,6 +1,5 @@
 export default function PreviousIcon() {
-    return (
-        <svg
+    return <svg
             className="zenin__icon zenin__previous_icon"
             xmlns="http://www.w3.org/2000/svg"
             xmlSpace="preserve"
@@ -22,8 +21,7 @@ export default function PreviousIcon() {
                 }}
                 transform="rotate(180 11.875 12)"
             />
-        </svg>
-    )
+    </svg>
 }
 
 

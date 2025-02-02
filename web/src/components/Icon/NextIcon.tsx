@@ -1,6 +1,5 @@
 export default function NextIcon() {
-    return (
-        <svg
+    return <svg
             className="zenin__icon zenin__next_icon"
             xmlns="http://www.w3.org/2000/svg"
             xmlSpace="preserve"
@@ -22,8 +21,7 @@ export default function NextIcon() {
                 }}
                 transform="translate(.25)"
             />
-        </svg>
-    );
+    </svg>
 }
 
 

@@ -1,6 +1,5 @@
 export default function LastIcon() {
-    return (
-        <svg
+    return <svg
             className="zenin__icon zenin__last_icon"
             xmlns="http://www.w3.org/2000/svg"
             xmlSpace="preserve"
@@ -31,8 +30,7 @@ export default function LastIcon() {
                 }}
                 transform="matrix(1 0 0 .96206 1.031 1.076)"
             />
-        </svg>
-    )
+    </svg>
 }
 
 

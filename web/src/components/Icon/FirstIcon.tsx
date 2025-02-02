@@ -1,6 +1,5 @@
 export default function MenuIcon() {
-    return (
-        <svg
+    return <svg
             className="zenin__icon zenin__first_icon"
             xmlns="http://www.w3.org/2000/svg"
             xmlSpace="preserve"
@@ -31,7 +30,6 @@ export default function MenuIcon() {
                 }}
                 transform="matrix(-1 0 0 -.96206 22.969 22.924)"
             />
-        </svg>
-    );
+    </svg>
 }
 
