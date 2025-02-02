@@ -43,7 +43,7 @@ export default function Dialog(props: DialogProps) {
     const [state, setState] = useState<DialogState>(defaultDialogState);
 
     const rootRef = useRef<HTMLDivElement>(null);
-    const portalRef = useRef<HTMLDialogElement>(null);
+    const portalRef = useRef<HTMLDivElement>(null);
 
     const handleClose = useCallback(() => {
         setState(defaultDialogState);
@@ -81,7 +81,7 @@ export default function Dialog(props: DialogProps) {
         else stage1().then(stage2);
     }, [handleClose, state.isPositioned, strategy])
 
-    const handleClick = (e: React.MouseEvent<HTMLDialogElement, MouseEvent>) => {
+    const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const target = e.target as HTMLElement;
         if (closers.some(n => target.closest(`.${n}`))) {
             handleClose();
@@ -119,7 +119,7 @@ export default function Dialog(props: DialogProps) {
         <div className="zenin__dialog_anchor" onClick={handleToggle}>
             {children}
         </div>
-        <dialog
+        <div
             className="zenin__dialog_portal"
             popover="auto"
             ref={portalRef}
@@ -127,7 +127,7 @@ export default function Dialog(props: DialogProps) {
             onClick={e => handleClick(e)}
         >
             {content}
-        </dialog>
+        </div>
     </div>
 }
 
