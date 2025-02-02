@@ -23,8 +23,3 @@
 .zenin__menu_selected_count {
   margin: 0 var(--px-b);
 }
-
-.zenin__filter_indicator {
-  color: var(--mid);
-  user-select: none;
-}

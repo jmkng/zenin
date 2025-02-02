@@ -26,8 +26,6 @@ export default function Menu() {
         monitor.context.dispatch({ type: 'draft' });
     }
 
-
-
     return <div className='zenin__default_menu zenin__menu'>
         <div className='zenin__menu_left'>
             {/*<div className="zenin__menu_toggle_container">
@@ -56,9 +54,6 @@ export default function Menu() {
                             <Button tooltip="Sort Dashboard" icon={<SortIcon/>} />
                         </Dialog>
                     </div>
-                    <span className="zenin__filter_indicator">
-                        {getFilterLabel(monitor.context.state.filter)}
-                    </span>
                 </div>
             </div>
         </div>
