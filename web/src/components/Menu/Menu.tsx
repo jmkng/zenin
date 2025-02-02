@@ -1,4 +1,4 @@
-import { FilterKind, NAME_ASC_UI, NAME_DESC_UI, UPDATED_NEW_UI, UPDATED_OLD_UI, useMonitorContext } from '../../internal/monitor';
+import { useMonitorContext } from '../../internal/monitor';
 import { useDefaultMonitorService } from '../../internal/monitor/service';
 
 import Button from '../Button/Button';
@@ -64,17 +64,4 @@ export default function Menu() {
         </Dialog>
         </div>
     </div>
-}
-
-function getFilterLabel(filter: FilterKind): string {
-    switch (filter) {
-        case 'NAME_ASC':
-            return NAME_ASC_UI
-        case 'NAME_DESC':
-            return NAME_DESC_UI
-        case 'UPDATED_NEW':
-            return UPDATED_NEW_UI
-        case 'UPDATED_OLD':
-            return UPDATED_OLD_UI
-    }
 }
