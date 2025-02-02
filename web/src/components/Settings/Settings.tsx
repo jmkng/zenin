@@ -18,41 +18,48 @@ const LIGHT = "zenin__theme_light";
 const DARK = "zenin__theme_dark";
 const KEY = "zenin__theme";
 
+interface SettingsState {
+    settings: SettingsType
+    theme: string
+}
+
 export default function Settings() {
     const monitor = { context: useMonitorContext() };
-    const settings = { context: useSettingsContext(), service: useDefaultSettingsService() };
+    const settings = {
+        context: useSettingsContext(),
+        service: useDefaultSettingsService()
+    };
     const account = { context: useAccountContext() };
+    const theme = localStorage.getItem(KEY) || AUTO;
 
-    const [theme, setTheme] = useState(localStorage.getItem(KEY) || AUTO);
-    const [editor, setEditor] = useState<SettingsType>(settings.context.state);
+    const [editor, setEditor] = useState<SettingsState>({ settings: settings.context.state, theme });
 
-    // NOTE: May need to convert `settings.context.state` to a common type if the reducer state type
-    // deviates from the domain type.
-    const hasValidDelimiters = useMemo(() => isValidDelimiters(editor.delimiters), [editor.delimiters])
-    const hasValidEditor = useMemo(() => !isSettingsEqual(editor, settings.context.state) && hasValidDelimiters, [editor, settings.context.state])
+    const hasValidDelimiters = useMemo(() => isValidDelimiters(editor.settings.delimiters), [editor.settings.delimiters])
+    const canSave = useMemo(() =>
+        !isSettingsEqual(editor, { settings: settings.context.state, theme })
+        && hasValidDelimiters, [editor, settings.context.state])
 
     const handleSubmit = async () => {
         // Update local storage.
-        handleThemeChange(theme);
+        handleThemeSave(editor.theme);
 
         const token = account.context.state.authenticated!.token.raw;
 
         // Save settings to repository.
-        const extract = await settings.service.updateSettings(token, editor);
+        const extract = await settings.service.updateSettings(token, editor.settings);
         if (!extract.ok()) return;
 
         // Update context.
-        settings.context.dispatch({ type: 'reset', delimiters: editor.delimiters });
+        settings.context.dispatch({ type: 'reset', delimiters: editor.settings.delimiters });
     }
 
-    const handleThemeChange = (value: string) => {
+    const handleThemeSave = (value: string) => {
         const root = document.documentElement;
         root.classList.add("static");
         root.classList.remove(DARK)
         root.classList.remove(LIGHT)
         root.classList.remove(AUTO)
         root.classList.add(value);
-        setTheme(value)
 
         if (value == AUTO) localStorage.removeItem(KEY)
         else localStorage.setItem(KEY, value);
@@ -65,13 +72,13 @@ export default function Settings() {
                 <SelectInput
                     label="Theme"
                     name={"zenin__settings_theme"}
-                    value={theme}
+                    value={editor.theme}
                     options={[
                         { text: "Auto", value: AUTO },
                         { text: "Light", value: LIGHT },
                         { text: "Dark", value: DARK }
                     ]}
-                    onChange={value => setTheme(value)}
+                    onChange={theme => setEditor(prev => ({ ...prev, theme }))}
                 />
             </div>
             <div>
@@ -79,9 +86,14 @@ export default function Settings() {
                     label="Template Delimiters"
                     name="zenin__detail_monitor_http_request_headers"
                     allowMultipleRows={false}
-                    value={[{ key: editor.delimiters[0], value: editor.delimiters[1] }]}
+                    value={[{ key: editor.settings.delimiters[0], value: editor.settings.delimiters[1] }]}
                     onChange={delimiters =>
-                        setEditor(prev => ({ ...prev, delimiters: [delimiters[0].key, delimiters[0].value] }))}
+                        setEditor(prev => ({
+                            ...prev,
+                            settings: {
+                                ...prev.settings, delimiters: [delimiters[0].key, delimiters[0].value]
+                            }
+                        }))}
                 />
                 {!hasValidDelimiters
                     ? <span className="zenin__detail_validation zenin__h_error">Delimiters are required. They must not contain whitespace.</span>
@@ -98,7 +110,7 @@ export default function Settings() {
         </div>
 
         <div className="zenin__detail_controls">
-            <Button kind="primary" onClick={handleSubmit} disabled={!hasValidEditor}>
+            <Button kind="primary" onClick={handleSubmit} disabled={!canSave}>
                 <span>Save</span>
             </Button>
 
@@ -122,7 +134,7 @@ function isValidDelimiters(delimiters: string[]): boolean {
     return false
 }
 
-const isSettingsEqual = (s1: SettingsType, s2: SettingsType) => {
-    if (isArrayEqual(s1.delimiters, s2.delimiters)) return true;
+const isSettingsEqual = (s1: SettingsState, s2: SettingsState) => {
+    if (isArrayEqual(s1.settings.delimiters, s2.settings.delimiters) && s1.theme == s2.theme) return true;
     return false
 }
