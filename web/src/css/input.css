@@ -1,8 +1,8 @@
 .zenin__input {
   min-height: var(--px-h);
+  padding: var(--px-b) var(--px-d);
   font-family: inherit;
   font-size: inherit;
-  padding: var(--px-b) var(--px-d);
 }
 
 .zenin__input_label {

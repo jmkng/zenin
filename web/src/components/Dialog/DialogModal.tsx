@@ -35,7 +35,9 @@ export default function DialogModal(props: DialogModalProps) {
     return <dialog ref={modalRef} onCancel={onCancel} className="zenin__dialog_modal">
         <div className="zenin__dialog_modal_upper">
             <span className="zenin__dialog_modal_title">{title}</span>
-            <Button onClick={handleCancel} icon={<AddIcon style={{ transform: "rotate(45deg)" }} />}>
+            <Button onClick={handleCancel} icon={<span className="zenin__dialog_modal_close_icon">
+                <AddIcon />
+            </span>}>
             </Button>
         </div>
         <div className="zenin__dialog_modal_lower">

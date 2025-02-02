@@ -24,6 +24,7 @@
 }
 
 .zenin__array_input_delete_icon {
+    display: flex;
     transform: rotate(45deg);
 }
 

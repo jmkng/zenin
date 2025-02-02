@@ -47,7 +47,9 @@ export default function SelectMenu() {
                 <Button
                     tooltip = "Clear Selection"
                     onClick={() => monitor.context.dispatch({ type: 'select', monitor: 'NONE' })}
-                    icon={<div className="zenin__deselect_all_control"><AddIcon /></div>}
+                    icon={<div className="zenin__deselect_all_control">
+                        <AddIcon />
+                    </div>}
                 />
             </div>
             {monitor.context.state.selected.length > 0

@@ -8,8 +8,6 @@
 }
 
 .zenin__deselect_all_control {
-    transform: rotate(45deg);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    transform: rotate(45deg);
 }

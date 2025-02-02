@@ -9,6 +9,6 @@
 }
 
 .zenin__pair_list_input_delete_icon {
-    display: block;
+    display: flex;
     transform: rotate(45deg);
 }
