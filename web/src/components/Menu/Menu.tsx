@@ -1,6 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-import { useAccountContext } from '../../internal/account';
-import { useDefaultAccountService } from '../../internal/account/service';
 import { FilterKind, NAME_ASC_UI, NAME_DESC_UI, UPDATED_NEW_UI, UPDATED_OLD_UI, useMonitorContext } from '../../internal/monitor';
 import { useDefaultMonitorService } from '../../internal/monitor/service';
 

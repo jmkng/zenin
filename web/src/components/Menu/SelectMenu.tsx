@@ -4,7 +4,6 @@ import { useDefaultMonitorService } from "../../internal/monitor/service";
 import { DataPacket } from "../../server";
 
 import Button from "../Button/Button";
-import AddIcon from "../Icon/AddIcon";
 import DeselectIcon from "../Icon/DeselectIcon";
 import PauseIcon from "../Icon/PauseIcon";
 import PlayIcon from "../Icon/PlayIcon";
