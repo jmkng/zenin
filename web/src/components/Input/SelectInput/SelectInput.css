@@ -10,7 +10,7 @@
 }
 
 .zenin__select_input_box:focus {
-  border-color: var(--foreground);
+  outline: 1px solid var(--link);
 }
 
 .zenin__select_input_controls_container {

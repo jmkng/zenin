@@ -5,12 +5,19 @@
     justify-content: center;
     align-items: center;
     border-radius: var(--rounded);
-    user-select: none;
     font-weight: 500;
     color: var(--foreground);
     fill: var(--foreground);
     border: 1px solid transparent;
     background: transparent;
+}
+
+.zenin__button:focus {
+    outline: none;
+}
+
+.zenin__button:focus-visible {
+    outline: 1px solid var(--link);
 }
 
 .zenin__button_tooltip {

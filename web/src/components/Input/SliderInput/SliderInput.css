@@ -18,7 +18,7 @@
 }
 
 .zenin__slider_input_box:focus::-webkit-slider-thumb {
-    border: 1px solid var(--foreground);
+    outline: 1px solid var(--link);
 }
 
 .zenin__slider_input_subtext {

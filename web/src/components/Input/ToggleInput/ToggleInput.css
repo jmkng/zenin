@@ -29,6 +29,11 @@
     height: 0;
 }
 
+.zenin__toggle_input input:focus + .zenin__toggle_input_slider {
+    outline: 1px solid var(--link);
+    transition: none;
+}
+
 .zenin__toggle_input_slider {
     position: absolute;
     top: 0;
@@ -43,10 +48,10 @@
 .zenin__toggle_input_slider::before {
     position: absolute;
     content: "";
-    height: 14px;
-    width: 14px;
-    left: 3px;
-    bottom: 3px;
+    height: 17px;
+    width: 17px;
+    left: 2px;
+    bottom: 1.5px;
     background-color: var(--background);
     transition: var(--fast);
     border-radius: 50%;

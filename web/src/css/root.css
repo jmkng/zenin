@@ -163,13 +163,15 @@
 
 dialog {
     border: none;
-    padding: 0;
     margin: 0;
-    background-color: transparent;
 }
 
 [popover] {
+    background: none;
     color: inherit;
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 * {

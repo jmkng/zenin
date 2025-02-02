@@ -10,7 +10,7 @@
 }
 
 .zenin__text_input_box:focus {
-  border-color: var(--foreground);
+  outline: 1px solid var(--link);
 }
 
 .zenin__text_input_label {
