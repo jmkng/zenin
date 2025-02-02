@@ -5,6 +5,7 @@ import { DataPacket } from "../../server";
 
 import Button from "../Button/Button";
 import AddIcon from "../Icon/AddIcon";
+import DeselectIcon from "../Icon/DeselectIcon";
 import PauseIcon from "../Icon/PauseIcon";
 import PlayIcon from "../Icon/PlayIcon";
 import SelectIcon from "../Icon/SelectIcon";
@@ -47,9 +48,7 @@ export default function SelectMenu() {
                 <Button
                     tooltip = "Clear Selection"
                     onClick={() => monitor.context.dispatch({ type: 'select', monitor: 'NONE' })}
-                    icon={<div className="zenin__deselect_all_control">
-                        <AddIcon />
-                    </div>}
+                    icon={<DeselectIcon />}
                 />
             </div>
             {monitor.context.state.selected.length > 0

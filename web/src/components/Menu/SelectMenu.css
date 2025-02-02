@@ -6,8 +6,3 @@
     color: var(--mid);
     user-select: none;
 }
-
-.zenin__deselect_all_control {
-    display: flex;
-    transform: rotate(45deg);
-}
