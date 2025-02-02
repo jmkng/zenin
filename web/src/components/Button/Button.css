@@ -22,7 +22,7 @@
 }
 
 .zenin__button_icon.pair {
-    margin-right: var(--px-b);
+    margin-right: var(--px-c);
 }
 
 .zenin__button.border {
@@ -51,6 +51,7 @@
 
 .zenin__button:not(.disabled).destructive {
     color: var(--dead-a);
+    fill: var(--dead-a);
 }
 
 .zenin__button:not(.disabled).destructive:hover {
