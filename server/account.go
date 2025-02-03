@@ -42,6 +42,7 @@ func (a AccountProvider) Mux() http.Handler {
 	//// root /////
 	router.Group(func(private chi.Router) {
 		private.Use(AuthenticateRoot)
+		private.Get("/", a.HandleGetAccounts)
 		private.Post("/", a.HandleCreateAccount)
 	})
 	///////////////
@@ -111,18 +112,21 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	account, err := a.Service.Repository.SelectAccountByUsername(r.Context(), application.Username)
+	params := &account.SelectAccountParams{
+		Username: &application.Username,
+	}
+	account, err := a.Service.Repository.SelectAccount(r.Context(), params)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
-	if account == nil || a.Service.ValidateLogin([]byte(application.PasswordPlainText), account.VersionedSaltedHash) != nil {
+	if len(account) == 0 || a.Service.ValidateLogin([]byte(application.PasswordPlainText), account[0].VersionedSaltedHash) != nil {
 		responder.Error(env.NewValidation("Invalid username or password."),
 			http.StatusBadRequest)
 		return
 	}
 
-	token, err := account.Token()
+	token, err := account[0].Token()
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -131,6 +135,26 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 	responder.Data(token, http.StatusOK)
 }
 
+func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	query := r.URL.Query()
+	var params *account.SelectAccountParams
+
+	if n := query.Get("username"); n != "" {
+		params = &account.SelectAccountParams{
+			Username: &n,
+		}
+	}
+
+	accounts, err := a.Service.Repository.SelectAccount(r.Context(), params)
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	responder.Data(accounts, http.StatusOK)
+}
 func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 

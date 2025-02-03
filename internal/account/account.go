@@ -11,12 +11,12 @@ import (
 
 // Account is the account domain type.
 type Account struct {
-	Id                  *int                `db:"id"`
-	CreatedAt           time.Time           `db:"created_at"`
-	UpdatedAt           time.Time           `db:"updated_at"`
-	Username            string              `db:"username"`
-	VersionedSaltedHash VersionedSaltedHash `db:"versioned_salted_hash"`
-	Root                bool                `db:"root"`
+	Id                  *int                `json:"id" db:"account_id"`
+	CreatedAt           time.Time           `json:"createdAt" db:"created_at"`
+	UpdatedAt           time.Time           `json:"updatedAt" db:"updated_at"`
+	Username            string              `json:"username" db:"username"`
+	VersionedSaltedHash VersionedSaltedHash `json:"-" db:"versioned_salted_hash"`
+	Root                bool                `json:"root" db:"root"`
 }
 
 type AccountClaims struct {

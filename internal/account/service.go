@@ -86,11 +86,15 @@ func (a AccountService) ValidateLogin(password []byte, target VersionedSaltedHas
 }
 
 func (a AccountService) AccountExists(ctx context.Context, username string) (bool, error) {
-	account, err := a.Repository.SelectAccountByUsername(ctx, username)
+	params := &SelectAccountParams{
+		Username: &username,
+	}
+
+	account, err := a.Repository.SelectAccount(ctx, params)
 	if err != nil {
 		return false, err
 	}
-	if account != nil {
+	if len(account) > 0 {
 		return true, nil
 	}
 

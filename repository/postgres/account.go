@@ -1,8 +1,6 @@
 package postgres
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/jmkng/zenin/internal/account"
@@ -21,23 +19,28 @@ func (p PostgresRepository) SelectAccountTotal(ctx context.Context) (int64, erro
 	return count, nil
 }
 
-// SelectAccountByUsername implements `AccountRepository.SelectAccountByUsername` for `PostgresRepository`.
-func (p PostgresRepository) SelectAccountByUsername(ctx context.Context, username string) (*account.Account, error) {
-	var account account.Account
+func (p PostgresRepository) SelectAccount(ctx context.Context, params *account.SelectAccountParams) ([]account.Account, error) {
+	accounts := []account.Account{}
 
-	builder := zsql.NewBuilder(zsql.Numbered)
-	builder.Push("SELECT id, username, versioned_salted_hash, root FROM account WHERE username =")
-	builder.BindString(username)
-
-	err := p.db.GetContext(ctx, &account, builder.String(), builder.Args()...)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("failed to select account by username: %w", err)
+	var builder = zsql.NewBuilder(zsql.Numbered)
+	builder.Push(`SELECT
+        created_at,
+        updated_at,
+        id "account_id",
+        username,
+        versioned_salted_hash,
+        root
+    FROM account`)
+	if params != nil {
+		builder.Inject(params)
 	}
 
-	return &account, nil
+	err := p.db.SelectContext(ctx, &accounts, builder.String(), builder.Args()...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to select account: %w", err)
+	}
+
+	return accounts, nil
 }
 
 // InsertAccount implements `AccountRepository.InsertAccount` for `PostgresRepository`.
