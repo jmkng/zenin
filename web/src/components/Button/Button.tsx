@@ -107,13 +107,13 @@ export default function Button(props: ButtonProps) {
 
         <span className="zenin__button_child">{children}</span>
     </button>;
-    
-    return tooltip 
-            ? <div ref={rootRef} className="zenin__button_tooltip">
-                {button}
-                <div className="zenin__tooltip" ref={tooltipRef}>{tooltip}</div>
-            </div>
-            : button
+
+    return tooltip
+        ? <div ref={rootRef} className="zenin__button_tooltip">
+            {button}
+            <div className="zenin__tooltip" ref={tooltipRef}>{tooltip}</div>
+        </div>
+        : button
 }
 
 // Put the tooltip below the anchor, and try to center it. 
@@ -131,7 +131,7 @@ const relativeTooltipStrategy: PositionStrategy = (rootRect: DOMRect, portalRect
         // Stick to left/right of anchor.
         if (leftPosRelViewport < 0) left = 0;
         else if (rightPosRelViewport > window.innerWidth) left = -(portalRect.width - rootRect.width)
-        
+
         // Alternatively, stick to viewport edges instead...
         // if (leftPosRelViewport < 0) left = -rootRect.left;
         // else if (rightPosRelViewport > window.innerWidth) left -= (rightPosRelViewport - window.innerWidth)

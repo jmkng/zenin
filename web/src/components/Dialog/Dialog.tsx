@@ -18,7 +18,7 @@ const defaultDialogState = {
     isPositioned: false,
 };
 
-interface Dialog { 
+interface Dialog {
     /** The dialog content. */
     content: React.ReactNode,
     /** Element classes within the dialog that will cause the dialog to close. */
@@ -51,7 +51,7 @@ export default function Dialog(props: DialogProps) {
         if (!portal) return;
         portal.hidePopover();
     }, [])
-    
+
     const handleToggle = useCallback(() => {
         const stage1 = async () => {
             const root = rootRef.current;
@@ -100,18 +100,18 @@ export default function Dialog(props: DialogProps) {
                 setState(defaultDialogState)
             }
         }
-        portal.addEventListener('beforetoggle', handleClose, false)
-        
+        portal.addEventListener('toggle', handleClose, false)
+
         // Popover API doesn't seem to support closing on scroll, so this handles that.
         const handleScroll = () => {
             portal.hidePopover();
         }
         const scrollParents = getScrollParents(root);
         scrollParents.forEach(n => n.addEventListener('scroll', handleScroll, false));
-        
+
         return () => {
             scrollParents.forEach(n => n.removeEventListener('scroll', handleScroll, false));
-            portal.removeEventListener('beforetoggle', handleClose, false)
+            portal.removeEventListener('toggle', handleClose, false)
         };
     }, [state.isPositioned])
 
