@@ -38,7 +38,7 @@ type FeedProvider struct {
 
 func (f FeedProvider) Mux() http.Handler {
 	router := chi.NewRouter()
-	router.Get("/subscribe", f.HandleSubscribe)
+	router.Get("/", f.HandleSubscribe)
 	return router
 }
 
