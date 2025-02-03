@@ -10,6 +10,9 @@
     fill: var(--foreground);
     border: 1px solid transparent;
     background: transparent;
+    transition: 
+        background var(--fast) ease-in-out,
+        color var(--fast) ease-in-out;
 }
 
 .zenin__button:focus {
