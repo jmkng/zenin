@@ -43,7 +43,7 @@ export default function Settings() {
         // Update local storage.
         handleThemeSave(editor.theme);
 
-        const token = account.context.state.authenticated!.token.raw;
+        const token = account.context.state.token!.raw;
 
         // Save settings to repository.
         const extract = await settings.service.updateSettings(token, editor.settings);

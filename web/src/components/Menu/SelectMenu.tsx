@@ -21,7 +21,7 @@ export default function SelectMenu() {
 
     const handleToggle = async (active: boolean) => {
         const monitors = [...monitor.context.state.selected.map(n => n.id!)];
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
 

@@ -38,7 +38,7 @@ export default function Monitor(props: MonitorProps) {
     const handleToggle = async () => {
         const active = !monitor.data.active;
         const monitors = [monitor.data.id!];
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
 

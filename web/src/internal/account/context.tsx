@@ -12,13 +12,11 @@ const AccountProvider = (props: AccountProviderProps) => {
     const { children } = props;
     const [state, dispatch] = useReducer(accountReducer, accountDefault);
 
-    return (
-        <AccountContext.Provider value={state}>
-            <AccountDispatchContext.Provider value={dispatch}>
-                {children}
-            </AccountDispatchContext.Provider>
-        </AccountContext.Provider>
-    )
+    return <AccountContext.Provider value={state}>
+        <AccountDispatchContext.Provider value={dispatch}>
+            {children}
+        </AccountDispatchContext.Provider>
+    </AccountContext.Provider>
 }
 
 export default AccountProvider;

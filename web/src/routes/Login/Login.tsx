@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAccountContext } from "../../internal/account";
 import { useDefaultAccountService } from "../../internal/account/service";
 import { useLayoutContext } from "../../internal/layout";
-import { DataPacket, Packet, isErrorPacket } from "../../server";
+import { DataPacket, isErrorPacket } from "../../server";
 
 import Button from "../../components/Button/Button";
 import LogoIcon from "../../components/Icon/LogoIcon";
@@ -37,15 +37,22 @@ export default function Login() {
 
     const handleSubmit = async () => {
         if (claim === null || !handleFormValidate()) return;
-        let extract;
+
         const username = form.username || "";
         const password = form.password || "";
         layout.dispatch({ type: 'load', loading: true });
-        if (claim) extract = await account.service.login(username, password);
-        else extract = await account.service.setClaim(username, password);
-        const packet: Packet<string> = await extract.json();
-        if (!extract.ok()) return handleFailure(packet);
-        const token = (packet as DataPacket<string>).data;
+
+        const extract = claim
+            ? await account.service.authenticate(username, password)
+            : await account.service.setClaim(username, password)
+
+        const packet: DataPacket<string> = await extract.json();
+        if (!extract.ok()) {
+            handleFailure(packet);
+            return;
+        }
+
+        const token = packet.data;
         account.service.setLSToken(token);
         account.context.dispatch({ type: 'login', token });
         setErrors([]);

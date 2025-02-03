@@ -94,7 +94,7 @@ export default function Table(props: TableProps) {
         }
 
         // Detach from HEAD, make duplicate monitor with fixed measurement set, freeze state.
-        const measurements = await monitor.service.getMeasurement(account.state.authenticated!.token.raw,
+        const measurements = await monitor.service.getMeasurement(account.state.token!.raw,
             state.monitor.id, value);
         if (!measurements.ok()) return;
 
@@ -108,7 +108,7 @@ export default function Table(props: TableProps) {
     }
 
     const handleDelete = async () => {
-        const extract = await measurement.service.deleteMeasurement(account.state.authenticated!.token.raw, checked);
+        const extract = await measurement.service.deleteMeasurement(account.state.token!.raw, checked);
         if (!extract.ok()) return;
 
         monitor.context.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { AccountState } from "./reducer";
 import { POST_API, Service } from "../../server";
-import { Request } from "../../server/request";
+import { AuthenticatedRequest, Request } from "../../server/request";
 
 class AccountService extends Service {
     #token = "zenin__auth_tk"
@@ -9,10 +9,10 @@ class AccountService extends Service {
     constructor() { super(); }
 
     isAuthenticated(state: AccountState) {
-        return state.initialized && (state.authenticated != null)
+        return state.initialized && (state.token !== null)
     }
 
-    async login(username: string, password: string) {
+    async authenticate(username: string, password: string) {
         const address = `/account/authenticate`;
         const body = JSON.stringify({ username, password });
         const request = new Request(address).body(body).method(POST_API);
@@ -30,6 +30,12 @@ class AccountService extends Service {
         const body = JSON.stringify({ username, password });
         const request = new Request(address).body(body).method(POST_API);
         return await this.extract(request);
+    }
+
+    async getAccounts(token: string) {
+        const address = '/account'
+        const request = new AuthenticatedRequest(token, address);
+        return await this.extract(request)
     }
 
     setLSToken(token: string) {

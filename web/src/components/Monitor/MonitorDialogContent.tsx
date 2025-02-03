@@ -32,7 +32,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
     const handleToggle = async () => {
         const active = !monitor.data.active;
         const monitors = [monitor.data.id!];
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
         const body: DataPacket<{ time: string }> = await extract.json();
@@ -40,7 +40,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
     }
 
     const handlePoll = async () => {
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         await monitor.service.pollMonitor(token, monitor.data.id!);
     }
 

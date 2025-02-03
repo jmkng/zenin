@@ -38,7 +38,7 @@ export default function Dashboard() {
     const split = monitor.context.state.split.pane != null;
 
     const handleAdd = async (value: monitor.Monitor) => {
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         const extract = await monitor.service.addMonitor(token, value);
         if (!extract.ok()) return;
 
@@ -57,7 +57,7 @@ export default function Dashboard() {
         if (!value.id) {
             throw new Error("monitor is missing id in dashboard update");
         }
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         const extract = await monitor.service.updateMonitor(token, value.id, value);
         if (!extract.ok()) return;
         const body: DataPacket<{ time: string }> = await extract.json();
@@ -70,7 +70,7 @@ export default function Dashboard() {
 
     const handleRemove = async (monitors: monitor.Monitor[]) => {
         const id = monitors.map(n => n.id!);
-        const token = account.state.authenticated!.token.raw;
+        const token = account.state.token!.raw;
         const extract = await monitor.service.deleteMonitor(token, id);
         if (!extract.ok()) return;
         monitor.context.dispatch({ type: 'remove', monitors: id });

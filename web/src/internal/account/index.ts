@@ -2,7 +2,11 @@ import { useContext } from "react"
 import { AccountContext, AccountDispatchContext } from "./context"
 
 export interface Account {
-    token: Token
+    id: number,
+    createdAt: string,
+    updatedAt: string,
+    username: string,
+    root: boolean
 }
 
 export interface Token {
