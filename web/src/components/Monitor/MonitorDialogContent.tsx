@@ -6,6 +6,8 @@ import Button from "../Button/Button";
 import DatabaseIcon from "../Icon/DatabaseIcon";
 import EditIcon from "../Icon/EditIcon";
 import InfoIcon from "../Icon/InfoIcon";
+import PauseIcon from "../Icon/PauseIcon";
+import PlayIcon from "../Icon/PlayIcon";
 import TrashIcon from "../Icon/TrashIcon";
 
 interface MonitorDialogContentProps {
@@ -37,6 +39,10 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
         monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
     }
 
+    const handlePoll = async () => {
+        const token = account.state.authenticated!.token.raw;
+        await monitor.service.pollMonitor(token, monitor.data.id!);
+    }
 
     return <div className="zenin__monitor_dialog_content zenin__dialog_content">
         <div className="zenin__dialog_section">
@@ -47,8 +53,14 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
                 Info
             </Button>
             <Button
-                icon={<DatabaseIcon />}
                 onClick={handleToggle}
+                icon={monitor.data.active ? <PauseIcon /> : <PlayIcon />}
+            >
+                {monitor.data.active ? "Pause" : "Resume"}
+            </Button>
+            <Button
+                icon={<DatabaseIcon />}
+                onClick={handlePoll}
             >
                 Poll
             </Button>
