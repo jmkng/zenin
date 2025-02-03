@@ -27,21 +27,23 @@ export default function ActionMenuContent() {
     return <div className="zenin__action_menu_dialog_content zenin__dialog_content">
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             <div className="zenin__action_menu_dialog_name">
-                {account.context.state.authenticated?.token.payload.sub}
+                {account.context.state.token?.payload.sub}
             </div>
             <div className="zenin__action_menu_dialog_rank">
-                {account.context.state.authenticated?.token.payload.root
+                {account.context.state.token?.payload.root
                     ? "Root User"
                     : "Standard User"}
             </div>
         </div>
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
-            <Button
-                onClick={() => { }} // TODO
-                icon={<AccountIcon />}
-            >
-                Manage Accounts
-            </Button>
+            {account.context.state.token?.payload.root
+                ? <Button
+                    onClick={() => { }} // TODO
+                    icon={<AccountIcon />}
+                >
+                    Manage Accounts
+                </Button>
+                : null}
             <Button
                 onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
                 icon={<SettingsIcon />}
