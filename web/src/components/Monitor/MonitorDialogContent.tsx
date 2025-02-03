@@ -8,8 +8,6 @@ import EditIcon from "../Icon/EditIcon";
 import InfoIcon from "../Icon/InfoIcon";
 import TrashIcon from "../Icon/TrashIcon";
 
-import "./MonitorDialogContent.css"
-
 interface MonitorDialogContentProps {
     monitor: Monitor
 }
@@ -39,8 +37,9 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
         monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
     }
 
-    return <div className="zenin__monitor_dialog_content">
-        <div className="zenin__monitor_dialog_section">
+
+    return <div className="zenin__monitor_dialog_content zenin__dialog_content">
+        <div className="zenin__dialog_section">
             <Button
                 icon={<InfoIcon />}
                 onClick={handleView}
@@ -53,15 +52,14 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
             >
                 Poll
             </Button>
-        </div>
-
-        <div className="zenin__monitor_dialog_section">
             <Button
                 icon={<EditIcon />}
                 onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: monitor.data } })}
             >
                 Edit
             </Button>
+        </div>
+        <div className="zenin__dialog_section">
             <Button
                 kind="destructive"
                 icon={<TrashIcon />}

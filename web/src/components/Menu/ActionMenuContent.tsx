@@ -23,9 +23,9 @@ export default function ActionMenuContent() {
         account.context.dispatch({ type: 'logout' });
         navigate("/login");
     }
-    
-    return <div className="zenin__action_menu_dialog_content">
-        <div className="zenin__action_menu_dialog_section">
+
+    return <div className="zenin__action_menu_dialog_content zenin__dialog_content">
+        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             <div className="zenin__action_menu_dialog_name">
                 {account.context.state.authenticated?.token.payload.sub}
             </div>
@@ -35,26 +35,26 @@ export default function ActionMenuContent() {
                     : "Standard User"}
             </div>
         </div>
-        <div className="zenin__action_menu_dialog_section">
-            <Button 
-                onClick={() => {}} // TODO
-                icon={<AccountIcon/>}
+        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
+            <Button
+                onClick={() => { }} // TODO
+                icon={<AccountIcon />}
             >
                 Manage Accounts
             </Button>
             <Button
                 onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
-                icon={<SettingsIcon/>}
+                icon={<SettingsIcon />}
             >
                 Settings
             </Button>
         </div>
-        <div className="zenin__action_menu_dialog_section">
-            <Button 
+        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
+            <Button
                 onClick={handleLogout}
                 kind="destructive"
                 icon={<span className="zenin__action_menu_log_out_icon">
-                    <AddIcon/>
+                    <AddIcon />
                 </span>}
             >
                 Log Out
