@@ -24,7 +24,7 @@ export default function TextInput(props: TextProps) {
         placeholder
     } = props;
 
-    return <div className="zenin__text_input zenin__input_container zenin__h_stack_vertical">
+    return <div className="zenin__text_input zenin__input_container zenin__h_f-col">
         {label ?
             <label
                 className="zenin__text_input_label zenin__input_label"

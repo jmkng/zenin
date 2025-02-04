@@ -34,7 +34,7 @@ export default function PluginInput(props: PluginInputProps) {
         <div className="zenin__plugin_spec_control">
             <SelectInput
                 name={plugin.name || "zenin__plugin_input_name"}
-                label={<span className={selection ? "" : "zenin__h_error"}>Plugin</span>}
+                label={<span className={selection ? "" : "zenin__h_c-dead-a"}>Plugin</span>}
                 subtext={plugin.subtext}
                 value={selection}
                 onChange={value => plugin.onChange ? plugin.onChange(value) : {}}
@@ -42,7 +42,7 @@ export default function PluginInput(props: PluginInputProps) {
                 options={options}
             />
             {!selection ?
-                <span className="zenin__detail_validation zenin__h_error">Plugin selection is required.</span>
+                <span className="zenin__detail_validation zenin__h_c-dead-a">Plugin selection is required.</span>
                 :
                 null}
         </div>
@@ -50,12 +50,12 @@ export default function PluginInput(props: PluginInputProps) {
         <div className="zenin__plugin_spec_control">
             <ArrayInput
                 name={args.name || "zenin__plugin_input_arguments"}
-                label={<span className={hasValidArguments ? "" : "zenin__h_error"}>Arguments</span>}
+                label={<span className={hasValidArguments ? "" : "zenin__h_c-dead-a"}>Arguments</span>}
                 value={args.value ?? []}
                 onChange={value => args.onChange(value.length == 0 ? null : value)}
             />
             {!hasValidArguments ?
-                <span className="zenin__detail_validation zenin__h_error">Plugin arguments must not be empty.</span>
+                <span className="zenin__detail_validation zenin__h_c-dead-a">Plugin arguments must not be empty.</span>
                 :
                 null}
         </div>

@@ -66,7 +66,7 @@ export default function Settings() {
 
     return <div className="zenin__settings">
         <div className="zenin__detail_body">
-            <div className="zenin__detail_spaced">
+            <div className="zenin__h_mb-c">
                 <SelectInput
                     label="Theme"
                     name={"zenin__settings_theme"}
@@ -94,10 +94,10 @@ export default function Settings() {
                         }))}
                 />
                 {!hasValidDelimiters
-                    ? <span className="zenin__detail_validation zenin__h_error">Delimiters are required. They must not contain whitespace.</span>
+                    ? <span className="zenin__detail_validation zenin__h_c-dead-a">Delimiters are required. They must not contain whitespace.</span>
                     : null}
             </div>
-            <div className="zenin__settings_about zenin__h_margin_top">
+            <div className="zenin__settings_about zenin__h_mt-c">
                 <Button background={true} icon={<BookIcon />} kind={"primary"}>
                     <a href="#">User Guide</a>
                 </Button>

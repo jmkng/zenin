@@ -61,7 +61,7 @@ export default function Monitor(props: MonitorProps) {
         <div className="zenin__monitor_top" onClick={handleSelect}>
             <div className="zenin__monitor_top_upper">
                 <div onClick={event => event.stopPropagation()}>
-                    <span className="zenin__monitor_name zenin__h_left" onClick={handleView}>
+                    <span className="zenin__monitor_name zenin__h_mr-auto" onClick={handleView}>
                         {monitor.data.name}
                     </span>
                 </div>

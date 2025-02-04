@@ -7,13 +7,13 @@
 
 .zenin__input_label {
   display: block;
-  margin: 0 0 var(--px-c) 0;
+  margin: 0 0 var(--px-b) 0;
   font-weight: 500;
 }
 
 .zenin__input_subtext {
   color: var(--mid);
-  margin: 0 0 var(--px-c) 0;
+  margin: 0 0 var(--px-b) 0;
 }
 
 input[type=number]::-webkit-inner-spin-button {

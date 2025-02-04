@@ -28,7 +28,7 @@
 
 .zenin__dashboard_main_bottom {
     display: flex;
-    padding: var(--px-b);
+    padding: var(--px-c);
     
     /* px-i is equal to the height of the menu bar. */
     height: calc(100% - var(--px-i));
@@ -46,7 +46,7 @@
     overflow-x: hidden;
     display: grid;
     flex: 1;
-    gap: var(--px-c);
+    gap: var(--px-b);
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     grid-auto-rows: 200px;
     padding-right: var(--px-a);

@@ -19,13 +19,13 @@ export default function Info(props: InfoProps) {
 
     return <div className="zenin__info_component">
         <div className="zenin__detail_body">
-            <h1 className="zenin__info_name">{state.monitor.name}</h1>
+            <h1 className="zenin__info_name zenin__h_m-0 zenin__h_mb-c">{state.monitor.name}</h1>
             {state.monitor.description ? <Text title={"Description"} text={state.monitor.description} /> : null}
-            <div className="zenin__info_statistics_container zenin__h_margin_top">
+            <div className="zenin__info_statistics_container zenin__h_mt-c">
                 <Statistics state={state} />
             </div>
             {state.monitor.events && state.monitor.events.length > 0 ?
-                <div className="zenin__h_margin_top zenin__info_event_container">
+                <div className="zenin__h_mt-c zenin__info_event_container">
                     <span>Events</span>
                     {state.monitor.events?.map((event, index) =>
                         <div className="zenin__info_event_list" key={index}>
@@ -39,7 +39,7 @@ export default function Info(props: InfoProps) {
                         </div>)}
                 </div>
                 : null}
-            <div className="zenin__info_table_container zenin__h_margin_top">
+            <div className="zenin__info_table_container zenin__h_mt-c">
                 <Table state={state} />
             </div>
         </div>

@@ -14,7 +14,7 @@ interface NumberProps {
 export default function NumberInput(props: NumberProps) {
     const { name, value, onChange, label, subtext } = props;
     return (
-        <div className="zenin__number_input zenin__input_container zenin__h_stack_vertical">
+        <div className="zenin__number_input zenin__input_container zenin__h_f-col">
             {label ? (
                 <label className="zenin__number_input_label zenin__input_label" htmlFor={name}>
                     {label}

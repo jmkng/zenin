@@ -29,7 +29,7 @@ export default function Menu() {
         <div className='zenin__menu_left'>
             {/*<div className="zenin__menu_toggle_container">
                 <Button onClick={handleMenuToggle}>
-                    <span className="zenin__h_center">
+                    <span className="zenin__h_f-row-center">
                         <MenuIcon />
                     </span>
                 </Button>

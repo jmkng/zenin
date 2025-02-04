@@ -22,7 +22,7 @@ export default function TextAreaInput(props: TextAreaProps) {
         placeholder
     } = props;
 
-    return <div className="zenin__text_area_input zenin__input_container zenin__h_stack_vertical">
+    return <div className="zenin__text_area_input zenin__input_container zenin__h_f-col">
         {label ?
             <label
                 className="zenin__text_area_input_label zenin__input_label"

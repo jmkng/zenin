@@ -23,7 +23,7 @@ export default function StateWidget(props: StateWidgetProps) {
                     : null
 
     return <div
-            className="zenin__widget zenin__h_center zenin__state_widget"
+            className="zenin__widget zenin__h_f-row-center zenin__state_widget"
             data-state={state}
         >
             {icon}

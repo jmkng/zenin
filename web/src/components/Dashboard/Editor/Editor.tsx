@@ -111,9 +111,9 @@ export default function Editor(props: EditorProps) {
 
     return <div className="zenin__detail_component">
         <div className="zenin__detail_body">
-            <div className="zenin__detail_spaced">
+            <div className="zenin__h_mb-c">
                 <TextInput
-                    label={<span className={hasValidName ? "" : "zenin__h_error"}>Name</span>}
+                    label={<span className={hasValidName ? "" : "zenin__h_c-dead-a"}>Name</span>}
                     name="zenin__detail_monitor_name"
                     value={editor.draft.name}
                     subtext="The monitor display name."
@@ -121,12 +121,12 @@ export default function Editor(props: EditorProps) {
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, name } }))}
                 ></TextInput>
                 {!hasValidName ?
-                    <span className="zenin__detail_validation zenin__h_error">Name is required.</span>
+                    <span className="zenin__detail_validation zenin__h_c-dead-a">Name is required.</span>
                     :
                     null}
             </div>
 
-            <div className="zenin__detail_spaced">
+            <div className="zenin__h_mb-c">
                 <TextAreaInput
                     label="Description"
                     name="zenin__detail_monitor_description"
@@ -137,7 +137,7 @@ export default function Editor(props: EditorProps) {
                 />
             </div>
 
-            <div className="zenin__detail_spaced">
+            <div className="zenin__h_mb-c">
                 <SelectInput
                     name="zenin__detail_monitor_active"
                     value={editor.draft.active.toString()}
@@ -153,9 +153,9 @@ export default function Editor(props: EditorProps) {
                 />
             </div>
 
-            <div className="zenin__detail_spaced">
+            <div className="zenin__h_mb-c">
                 <NumberInput
-                    label={<span className={hasValidInterval ? "" : "zenin__h_error"}>Interval</span>}
+                    label={<span className={hasValidInterval ? "" : "zenin__h_c-dead-a"}>Interval</span>}
                     name="zenin__detail_monitor_interval"
                     value={editor.draft.interval}
                     subtext="The seconds between each measurement when the monitor is active."
@@ -163,14 +163,14 @@ export default function Editor(props: EditorProps) {
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, interval } }))}
                 />
                 {!hasValidInterval ?
-                    <span className="zenin__detail_validation zenin__h_error">Requires an integer greater than zero.</span>
+                    <span className="zenin__detail_validation zenin__h_c-dead-a">Requires an integer greater than zero.</span>
                     :
                     null}
             </div>
 
-            <div className="zenin__detail_spaced">
+            <div className="zenin__h_mb-c">
                 <NumberInput
-                    label={<span className={!hasValidTimeout ? "zenin__h_error" : !hasValidIcmpTime ? "zenin__h_advice" : ""}>Timeout</span>}
+                    label={<span className={!hasValidTimeout ? "zenin__h_c-dead-a" : !hasValidIcmpTime ? "zenin__h_c-warn" : ""}>Timeout</span>}
                     name="zenin__detail_monitor_timeout"
                     value={editor.draft.timeout}
                     subtext="The seconds that the probe has to complete before timing out."
@@ -178,13 +178,13 @@ export default function Editor(props: EditorProps) {
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, timeout } }))}
                 />
                 {!hasValidTimeout
-                    ? <span className="zenin__detail_validation zenin__h_error">Requires a positive integer.</span>
+                    ? <span className="zenin__detail_validation zenin__h_c-dead-a">Requires a positive integer.</span>
                     : !hasValidIcmpTime
-                        ? <span className="zenin__detail_validation zenin__h_advice">Timeout may be insufficient to complete probe.</span>
+                        ? <span className="zenin__detail_validation zenin__h_c-warn">Timeout may be insufficient to complete probe.</span>
                         : null}
             </div>
 
-            <div className="zenin__detail_spaced zenin__detail_kind_container">
+            <div className="zenin__h_mb-c zenin__detail_kind_container">
                 <SelectInput
                     label="Kind"
                     name="zenin__detail_monitor_kind"
@@ -206,9 +206,9 @@ export default function Editor(props: EditorProps) {
             </div>
 
             {editor.draft.kind == HTTP_API || editor.draft.kind == ICMP_API || editor.draft.kind == TCP_API ?
-                <div className="zenin__detail_spaced zenin__detail_remote_address_container">
+                <div className="zenin__h_mb-c zenin__detail_remote_address_container">
                     <TextInput
-                        label={<span className={hasValidRemoteAddress ? "" : "zenin__h_error"}>Remote Address</span>}
+                        label={<span className={hasValidRemoteAddress ? "" : "zenin__h_c-dead-a"}>Remote Address</span>}
                         name="zenin__detail_monitor_remote_address"
                         value={editor.draft.remoteAddress}
                         subtext="The address of the remote server." /* TODO: Provide instructions on valid format, should it include "http", etc.. */
@@ -216,7 +216,7 @@ export default function Editor(props: EditorProps) {
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, remoteAddress } }))}
                     ></TextInput>
                     {!hasValidRemoteAddress ?
-                        <span className="zenin__detail_validation zenin__h_error">Remote address is required.</span>
+                        <span className="zenin__detail_validation zenin__h_c-dead-a">Remote address is required.</span>
                         :
                         null}
                 </div>
@@ -224,9 +224,9 @@ export default function Editor(props: EditorProps) {
                 null}
 
             {editor.draft.kind == TCP_API ?
-                <div className="zenin__detail_spaced zenin__detail_remote_port_container">
+                <div className="zenin__h_mb-c zenin__detail_remote_port_container">
                     <NumberInput
-                        label={<span className={hasValidRemotePort ? "" : "zenin__h_error"}>Remote Port</span>}
+                        label={<span className={hasValidRemotePort ? "" : "zenin__h_c-dead-a"}>Remote Port</span>}
                         name="zenin__detail_monitor_remote_port"
                         value={editor.draft.remotePort}
                         subtext="The port number on the remote server."
@@ -234,7 +234,7 @@ export default function Editor(props: EditorProps) {
                             setEditor(prev => ({ ...prev, draft: { ...prev.draft, remotePort } }))}
                     />
                     {!hasValidRemotePort ?
-                        <span className="zenin__detail_validation zenin__h_error">Requires an integer between 0 and 65535, inclusive.</span>
+                        <span className="zenin__detail_validation zenin__h_c-dead-a">Requires an integer between 0 and 65535, inclusive.</span>
                         :
                         null}
                 </div>
@@ -242,7 +242,7 @@ export default function Editor(props: EditorProps) {
 
             {editor.draft.kind == HTTP_API ?
                 <div>
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <PairListInput
                             label="Request Headers"
                             name="zenin__detail_monitor_http_request_headers"
@@ -251,7 +251,7 @@ export default function Editor(props: EditorProps) {
                         />
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <TextAreaInput
                             label="Request Body"
                             name="zenin__detail_monitor_http_body"
@@ -262,7 +262,7 @@ export default function Editor(props: EditorProps) {
                         />
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <SelectInput
                             label="Method"
                             name="zenin__detail_monitor_method"
@@ -281,7 +281,7 @@ export default function Editor(props: EditorProps) {
                         />
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <SelectInput
                             label="Header Range"
                             name="zenin__detail_monitor_range"
@@ -298,7 +298,7 @@ export default function Editor(props: EditorProps) {
                         />
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <ToggleInput
                             name={"zenin__detail_capture_header"}
                             label="Capture Response Headers"
@@ -306,7 +306,7 @@ export default function Editor(props: EditorProps) {
                             onChange={httpCaptureHeaders => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureHeaders } }))}
                         />
                     </div>
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <ToggleInput
                             name={"zenin__detail_capture_body"}
                             label="Capture Response Body"
@@ -320,17 +320,17 @@ export default function Editor(props: EditorProps) {
 
             {editor.draft.kind == ICMP_API ?
                 <>
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <ToggleInput
                             name={"zenin__detail_"}
                             label="Use UDP Protocol"
                             offSubtext={<div className="zenin__detail_stacked_hint">
                                 <div>The probe will use ICMP protocol.</div>
-                                <div className="zenin__h_advice">Requires root on Unix systems.</div>
+                                <div className="zenin__h_c-warn">Requires root on Unix systems.</div>
                             </div>}
                             onSubtext={<div className="zenin__detail_stacked_hint">
                                 <div>The probe will use UDP protocol.</div>
-                                <div className="zenin__h_advice">Unsupported on Windows systems.</div>
+                                <div className="zenin__h_c-warn">Unsupported on Windows systems.</div>
                             </div>}
                             value={editor.draft.icmpProtocol == UDP_API}
                             onChange={value =>
@@ -341,63 +341,63 @@ export default function Editor(props: EditorProps) {
                         />
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <NumberInput
-                            label={<span className={hasValidIcmpSize ? "" : "zenin__h_error"}>Packet Size</span>}
+                            label={<span className={hasValidIcmpSize ? "" : "zenin__h_c-dead-a"}>Packet Size</span>}
                             name="zenin__detail_monitor_icmp_size"
                             value={editor.draft.icmpSize}
                             subtext="The packet size in bytes."
                             onChange={icmpSize => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpSize } }))}
                         />
                         {!hasValidIcmpSize ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet size must be greater than zero.</span>
+                            <span className="zenin__detail_validation zenin__h_c-dead-a">Packet size must be greater than zero.</span>
                             :
                             null}
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <NumberInput
-                            label={<span className={!hasValidIcmpWait ? "zenin__h_error" : !hasValidIcmpTime ? "zenin__h_advice" : ""}>Packet Wait</span>}
+                            label={<span className={!hasValidIcmpWait ? "zenin__h_c-dead-a" : !hasValidIcmpTime ? "zenin__h_c-warn" : ""}>Packet Wait</span>}
                             name="zenin__detail_monitor_icmp_wait"
                             value={editor.draft.icmpWait}
                             subtext="The milliseconds to wait between each outgoing packet."
                             onChange={icmpWait => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpWait } }))}
                         />
                         {!hasValidIcmpWait ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet wait must be greater than zero.</span>
+                            <span className="zenin__detail_validation zenin__h_c-dead-a">Packet wait must be greater than zero.</span>
                             :
                             null}
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <NumberInput
-                            label={<span className={!hasValidIcmpCount ? "zenin__h_error" : !hasValidIcmpTime ? "zenin__h_advice" : ""}>Packet Count</span>}
+                            label={<span className={!hasValidIcmpCount ? "zenin__h_c-dead-a" : !hasValidIcmpTime ? "zenin__h_c-warn" : ""}>Packet Count</span>}
                             name="zenin__detail_monitor_icmp_count"
                             value={editor.draft.icmpCount}
                             subtext="The total packets to send."
                             onChange={icmpCount => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpCount } }))}
                         />
                         {!hasValidIcmpCount ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet count must be greater than zero.</span>
+                            <span className="zenin__detail_validation zenin__h_c-dead-a">Packet count must be greater than zero.</span>
                             :
                             null}
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <NumberInput
-                            label={<span className={hasValidIcmpTtl ? "" : "zenin__h_error"}>Packet TTL</span>}
+                            label={<span className={hasValidIcmpTtl ? "" : "zenin__h_c-dead-a"}>Packet TTL</span>}
                             name="zenin__detail_monitor_icmp_ttl"
                             value={editor.draft.icmpTtl}
                             subtext="The TTL for each outgoing packet."
                             onChange={icmpTtl => setEditor(prev => ({ ...prev, draft: { ...prev.draft, icmpTtl } }))}
                         />
                         {!hasValidIcmpTtl ?
-                            <span className="zenin__detail_validation zenin__h_error">Packet TTL must be greater than zero.</span>
+                            <span className="zenin__detail_validation zenin__h_c-dead-a">Packet TTL must be greater than zero.</span>
                             :
                             null}
                     </div>
 
-                    <div className="zenin__detail_spaced">
+                    <div className="zenin__h_mb-c">
                         <SliderInput
                             label={"Allowable Packet Loss"}
                             name={"zenin__detail_monitor_icmp_loss_threshold"}
@@ -418,7 +418,7 @@ export default function Editor(props: EditorProps) {
                 : null}
 
             {editor.draft.kind == PLUGIN_API
-                ? <div className="zenin__detail_spaced">
+                ? <div className="zenin__h_mb-c">
                     <PluginInput
                         plugin={{
                             subtext: (<span>Choose a <a href="#">plugin</a> to probe the monitor.</span>),

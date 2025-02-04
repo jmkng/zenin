@@ -60,7 +60,7 @@ export default function Chain(props: ChainProps) {
             </div>
 
             <div
-                className={["zenin__chain_toggle zenin__h_center"].join(' ')}
+                className={["zenin__chain_toggle zenin__h_f-row-center"].join(' ')}
                 onClick={handleExpand}
             >
                 <ChevronIcon />

@@ -26,10 +26,6 @@
   margin-left: auto;
 }
 
-.zenin__detail_spaced {
-  margin-bottom: var(--px-e);
-}
-
 .zenin__text_area_input_box {
   height: 150px;
 }

@@ -98,7 +98,7 @@ export default function Dashboard() {
                     : <div className="zenin__dashboard_empty">
                         <span className="zenin__dashboard_empty_message">No monitors have been created.</span>
                         <Button border={true} onClick={() => monitor.context.dispatch({ type: 'draft' })}>
-                            <span className="zenin__h_center zenin__menu_add">
+                            <span className="zenin__h_f-row-center zenin__menu_add">
                                 Add Monitor
                             </span>
                         </Button>

@@ -35,7 +35,7 @@ export default function SelectInput(props: SelectProps) {
                 </optgroup>)
             : options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
 
-    return <div className={["zenin__select", "zenin__input_container", "zenin__h_stack_vertical"].join(' ')}>
+    return <div className={["zenin__select", "zenin__input_container", "zenin__h_f-col"].join(' ')}>
         {label
             ? <label
                 className="zenin__text_input_label zenin__input_label"
