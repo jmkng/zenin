@@ -3,18 +3,18 @@ import LayoutProvider from './internal/layout/context.tsx';
 import MonitorProvider from './internal/monitor/context.tsx';
 import SettingsProvider from './internal/settings/context.tsx';
 
-import Initialize from './components/Initialize/Initialize.tsx';
-import Provider from './components/Provider/Provider.tsx';
-import Router from "./routes/Router.tsx";
+import Initialize from './components/Router/Initialize.tsx';
+import Provider from './components/Router/Provider.tsx';
+import Router from "./components/Router/Router.tsx";
 
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import './css/cover.css';
+import './css/dialog.css';
 import './css/helper.css';
 import './css/icon.css';
-import './css/dialog.css';
 import './css/input.css';
 import './css/menu.css';
 import './css/root.css';
