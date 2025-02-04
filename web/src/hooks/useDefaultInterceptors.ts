@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAccountContext } from "../internal/account";
 import { useDefaultAccountService } from "../internal/account/service";
-import { Interceptor, Extract } from "../server";
+import { Interceptor, Extract } from "../internal/server";
 
 export const useDefaultInterceptors = () => {
     const account = {

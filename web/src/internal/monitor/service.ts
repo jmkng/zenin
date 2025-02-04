@@ -1,8 +1,8 @@
 import { useRef } from "react";
 import { Monitor } from ".";
 import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
-import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../../server";
-import { AuthenticatedRequest } from "../../server/request";
+import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../server";
+import { AuthenticatedRequest } from "../server/request";
 import { DetachedState } from "./split";
 
 class MonitorService extends Service {

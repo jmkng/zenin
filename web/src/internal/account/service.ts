@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { AccountState } from "./reducer";
-import { POST_API, Service } from "../../server";
-import { AuthenticatedRequest, Request } from "../../server/request";
+import { POST_API, Service } from "../server";
+import { AuthenticatedRequest, Request } from "../server/request";
 
 class AccountService extends Service {
     #token = "zenin__auth_tk"

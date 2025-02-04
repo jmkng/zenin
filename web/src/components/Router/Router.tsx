@@ -8,7 +8,7 @@ import { useLayoutContext } from '../../internal/layout';
 import { hideLoadingScreen, showLoadingScreen } from '../../internal/layout/graphics';
 import { Monitor, useDefaultMonitorService, useMonitorContext } from '../../internal/monitor';
 import { SettingsState, useDefaultSettingsService, useSettingsContext } from '../../internal/settings';
-import { DataPacket, FEED, handleConnect, handleDisconnect } from '../../server';
+import { DataPacket, FEED, handleConnect, handleDisconnect } from '../../internal/server';
 
 import Dashboard from './Dashboard/Dashboard';
 import Private from './Private';

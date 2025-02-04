@@ -2,7 +2,7 @@ import { monitor } from '../../../internal';
 import { useAccountContext } from '../../../internal/account';
 import { isMonitor, useMonitorContext } from '../../../internal/monitor';
 import { useDefaultMonitorService } from '../../../internal/monitor/service';
-import { DataPacket } from '../../../server';
+import { DataPacket } from '../../../internal/server';
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';

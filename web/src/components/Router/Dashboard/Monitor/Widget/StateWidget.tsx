@@ -1,4 +1,4 @@
-import { DEAD_API, OK_API, WARN_API } from "../../../../../server";
+import { DEAD_API, OK_API, WARN_API } from "../../../../../internal/server";
 
 import NoIcon from "../../../Icon/NoIcon";
 import WarnIcon from "../../../Icon/WarnIcon";

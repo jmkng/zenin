@@ -1,6 +1,6 @@
 import { formatDate, formatMilliseconds } from "../../../../../internal/layout/graphics";
 import { ViewPane } from "../../../../../internal/monitor/split";
-import { DEAD_API, OK_API, WARN_API } from "../../../../../server";
+import { DEAD_API, OK_API, WARN_API } from "../../../../../internal/server";
 
 import List from "../List/List";
 

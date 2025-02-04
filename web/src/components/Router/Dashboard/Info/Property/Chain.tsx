@@ -3,7 +3,7 @@ import { useAccountContext } from "../../../../../internal/account";
 import { formatDate } from "../../../../../internal/layout/graphics";
 import { Certificate, Measurement } from "../../../../../internal/measurement";
 import { useDefaultMeasurementService } from "../../../../../internal/measurement/service";
-import { DataPacket } from "../../../../../server";
+import { DataPacket } from "../../../../../internal/server";
 
 import ChevronIcon from "../../../Icon/ChevronIcon";
 

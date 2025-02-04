@@ -1,6 +1,6 @@
 import { formatMilliseconds } from "../../../../../internal/layout/graphics";
 import { Measurement } from "../../../../../internal/measurement";
-import { HTTP_API } from "../../../../../server";
+import { HTTP_API } from "../../../../../internal/server";
 
 import Text from "../Text/Text";
 import List from "../List/List";

@@ -1,6 +1,6 @@
 import { useAccountContext } from "../../../../internal/account"
 import { Monitor, useDefaultMonitorService, useMonitorContext } from "../../../../internal/monitor"
-import { DataPacket } from "../../../../server"
+import { DataPacket } from "../../../../internal/server"
 
 import Button from "../../Button/Button"
 import DatabaseIcon from "../../Icon/DatabaseIcon"

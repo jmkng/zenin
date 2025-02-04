@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import { AuthenticatedRequest } from "../../server/request";
-import { DELETE_API, Service } from "../../server";
+import { AuthenticatedRequest } from "../server/request";
+import { DELETE_API, Service } from "../server";
 import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
 
 class MeasurementService extends Service {

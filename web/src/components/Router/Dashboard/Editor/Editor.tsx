@@ -32,7 +32,7 @@ import {
     SUCCESSFUL_API,
     TCP_API,
     UDP_API
-} from "../../../../server";
+} from "../../../../internal/server";
 
 import Button from "../../Button/Button";
 import EventInput from "../../Input/EventInput/EventInput";
