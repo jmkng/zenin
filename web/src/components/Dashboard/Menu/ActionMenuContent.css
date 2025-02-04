@@ -3,7 +3,6 @@
 }
 
 .zenin__action_menu_dialog_rank {
-    font-size: .85em;
     color: var(--mid);
     padding: 0 var(--px-d) var(--px-b) var(--px-d);
 }
