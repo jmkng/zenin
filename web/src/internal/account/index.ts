@@ -2,8 +2,7 @@ import { useContext } from "react";
 import AccountProvider, { AccountContext, AccountDispatchContext } from "./context";
 
 export const
-    ROOT_ACCOUNT_UI = 'Root User',
-    STANDARD_ACCOUNT_UI = 'Standard User'
+    ROOT_ACCOUNT_UI = "Root Account"
     ;
 
 export interface Account {

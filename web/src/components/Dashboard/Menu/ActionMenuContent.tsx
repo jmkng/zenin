@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ROOT_ACCOUNT_UI, STANDARD_ACCOUNT_UI, useAccountContext } from "@/internal/account";
+import { ROOT_ACCOUNT_UI, useAccountContext } from "@/internal/account";
 import { useDefaultAccountService } from "@/internal/account/service";
 import { useMonitorContext } from "@/internal/monitor";
 
@@ -29,11 +29,11 @@ export default function ActionMenuContent() {
             <div className="zenin__action_menu_dialog_name">
                 {account.context.state.token?.payload.sub}
             </div>
-            <div className="zenin__action_menu_dialog_rank">
-                {account.context.state.token?.payload.root
-                    ? ROOT_ACCOUNT_UI
-                    : STANDARD_ACCOUNT_UI}
-            </div>
+            {account.context.state.token?.payload.root 
+                ? <div className="zenin__action_menu_dialog_rank">
+                    {ROOT_ACCOUNT_UI}
+                </div>
+                : null}
         </div>
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             {account.context.state.token?.payload.root
@@ -50,8 +50,6 @@ export default function ActionMenuContent() {
             >
                 Settings
             </Button>
-        </div>
-        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             <Button
                 onClick={handleLogout}
                 kind="destructive"
