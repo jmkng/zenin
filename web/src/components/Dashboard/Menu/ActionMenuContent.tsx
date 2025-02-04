@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "@/internal/account";
+import { ROOT_ACCOUNT_UI, STANDARD_ACCOUNT_UI, useAccountContext } from "@/internal/account";
 import { useDefaultAccountService } from "@/internal/account/service";
 import { useMonitorContext } from "@/internal/monitor";
 
@@ -31,8 +31,8 @@ export default function ActionMenuContent() {
             </div>
             <div className="zenin__action_menu_dialog_rank">
                 {account.context.state.token?.payload.root
-                    ? "Root User"
-                    : "Standard User"}
+                    ? ROOT_ACCOUNT_UI
+                    : STANDARD_ACCOUNT_UI}
             </div>
         </div>
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
