@@ -46,7 +46,7 @@
     /* Theme: Light */
     --theme-light-background: var(--white);
     --theme-light-foreground: var(--black);
-    --theme-light-primary-hl: rgb(24, 24, 26);
+    --theme-light-primary-hl: rgb(47, 45, 45);
     --theme-light-subtle: rgb(150, 150, 50);
     --theme-light-mid: rgb(100, 100, 102);
     --theme-light-link: rgb(60, 100, 255);
