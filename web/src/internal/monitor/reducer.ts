@@ -1,6 +1,6 @@
 import { FilterKind, Monitor } from ".";
 import { Measurement } from "../measurement";
-import { EditorPane, OriginState, SettingsPane, SplitState, ViewPane } from "./split";
+import { AccountsPane, EditorPane, OriginState, SettingsPane, SplitState, ViewPane } from "./split";
 
 export interface MonitorState {
     monitors: Map<number, Monitor>,
@@ -71,14 +71,14 @@ type PollAction = {
     measurement: Measurement
 };
 
-type DetailAction = { 
-    type: 'detail', 
-    measurement: Measurement | null 
+type DetailAction = {
+    type: 'detail',
+    measurement: Measurement | null
 };
 
 type PaneAction = {
     type: 'pane',
-    pane: ViewPaneAction | EditorPaneAction | SettingsPaneAction
+    pane: ViewPaneAction | EditorPaneAction | SettingsPaneAction | AccountsPaneAction
 }
 
 type ViewPaneAction = {
@@ -100,10 +100,14 @@ type SettingsPaneAction = {
     type: 'settings'
 };
 
-type AddMeasurementAction = { 
-    type: 'measurement', 
-    id: number[], 
-    monitor: number 
+type AccountsPaneAction = {
+    type: 'accounts'
+}
+
+type AddMeasurementAction = {
+    type: 'measurement',
+    id: number[],
+    monitor: number
 };
 
 type UpdatePluginAction = {
@@ -188,7 +192,7 @@ const overwriteMonitorAction = (state: MonitorState, action: OverwriteMonitorAct
     const target = monitors.get(action.monitor.id);
 
     // Recycle the measurement information.
-    if (target) action.monitor.measurements = target.measurements; 
+    if (target) action.monitor.measurements = target.measurements;
 
     monitors.set(action.monitor.id, action.monitor);
     const split = new SplitState(new EditorPane(action.monitor))
@@ -231,6 +235,7 @@ const paneAction = (state: MonitorState, action: PaneAction) => {
         case "view": return viewPaneAction(state, action.pane);
         case "editor": return editorPaneAction(state, action.pane);
         case "settings": return settingsPaneAction(state);
+        case "accounts": return accountsPaneAction(state);
     }
 }
 
@@ -255,6 +260,13 @@ const settingsPaneAction = (state: MonitorState) => {
     let split: SplitState;
     if (state.split.pane != null && state.split.isSettingsPane()) split = new SplitState(null);
     else split = new SplitState(new SettingsPane())
+    return { ...state, split }
+}
+
+const accountsPaneAction = (state: MonitorState) => {
+    let split: SplitState;
+    if (state.split.pane != null && state.split.isAccountsPane()) split = new SplitState(null);
+    else split = new SplitState(new AccountsPane())
     return { ...state, split }
 }
 

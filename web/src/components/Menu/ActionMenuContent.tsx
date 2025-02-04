@@ -38,7 +38,7 @@ export default function ActionMenuContent() {
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             {account.context.state.token?.payload.root
                 ? <Button
-                    onClick={() => { }} // TODO
+                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } })}
                     icon={<AccountIcon />}
                 >
                     Manage Accounts

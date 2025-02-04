@@ -12,6 +12,7 @@ import Menu from '../../components/Menu/Menu';
 import SelectMenu from '../../components/Menu/SelectMenu';
 import Monitor from '../../components/Monitor/Monitor';
 import Settings from '../../components/Settings/Settings';
+import Accounts from '../../components/Accounts/Accounts';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import DeleteDialogContent from '../DeleteDialogContent';
 
@@ -35,7 +36,7 @@ export default function Dashboard() {
                 return Date.parse(a.updatedAt) - Date.parse(b.updatedAt);
         }
     })
-    const split = monitor.context.state.split.pane != null;
+    const isSplit = monitor.context.state.split.pane != null;
 
     const handleAdd = async (value: monitor.Monitor) => {
         const token = account.state.token!.raw;
@@ -76,7 +77,7 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'remove', monitors: id });
     }
 
-    return <div className={["zenin__dashboard", split ? 'split' : ''].join(' ')}>
+    return <div className={["zenin__dashboard", isSplit ? 'split' : ''].join(' ')}>
         <div className="zenin__dashboard_side">
             <Sidebar />
         </div>
@@ -103,7 +104,7 @@ export default function Dashboard() {
                         </Button>
                     </div>}
 
-                {split
+                {isSplit
                     ? <div className={"zenin__dashboard_activity"}>
                         {monitor.context.state.split.isEditorPane()
                             ? <Editor
@@ -111,13 +112,14 @@ export default function Dashboard() {
                                 onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
                             />
                             : null}
-
                         {monitor.context.state.split.isViewPane()
                             ? <Info state={monitor.context.state.split.pane} />
                             : null}
-
                         {monitor.context.state.split.isSettingsPane()
                             ? <Settings />
+                            : null}
+                        {monitor.context.state.split.isAccountsPane()
+                            ? <Accounts />
                             : null}
                     </div>
                     : null}
@@ -128,7 +130,7 @@ export default function Dashboard() {
             title="Confirm"
             visible={monitor.context.state.deleting.length > 0}
             onCancel={() => monitor.context.dispatch({ type: 'delete', monitors: [] })}
-            content={<DeleteDialogContent onConfirm={() => handleRemove(monitor.context.state.deleting)} />} 
+            content={<DeleteDialogContent onConfirm={() => handleRemove(monitor.context.state.deleting)} />}
         />
     </div>
 }

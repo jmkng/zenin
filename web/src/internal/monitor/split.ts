@@ -5,7 +5,7 @@ export class SplitState {
     constructor(
         /** The active pane. */
         public pane: ViewPane | EditorPane | SettingsPane | null
-    ) {}
+    ) { }
 
     isViewPane(): this is { pane: ViewPane } {
         return this.pane instanceof ViewPane;
@@ -15,8 +15,12 @@ export class SplitState {
         return this.pane instanceof EditorPane;
     }
 
-    isSettingsPane(): this is { pane : SettingsPane } {
+    isSettingsPane(): this is { pane: SettingsPane } {
         return this.pane instanceof SettingsPane;
+    }
+
+    isAccountsPane(): this is { pane: AccountsPane } {
+        return this.pane instanceof AccountsPane;
     }
 
     /** Return true if any of the provided IDs match the id of the monitor in this state. */
@@ -50,18 +54,22 @@ export class ViewPane {
          * `Head` means we are tracking the most recent data for a monitor,
          * `Detached` means we are looking at historical data. */
         public origin: OriginState = "HEAD"
-    ) {}
+    ) { }
 }
 
 export class EditorPane {
     constructor(
         /** The monitor being modified. Null represents `drafting` a new monitor. */
         public monitor: Monitor | null
-    ) {}
+    ) { }
 }
 
 export class SettingsPane {
-    constructor() {}
+    constructor() { }
+}
+
+export class AccountsPane {
+    constructor() { }
 }
 
 export type OriginState = HeadState | DetachedState;
