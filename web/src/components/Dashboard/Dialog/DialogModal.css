@@ -34,7 +34,7 @@
 
 @keyframes backdrop-fade-in {
   0% { opacity: 0; }
-  100%{ opacity: 0.75; }
+  100%{ opacity: 0.25; }
 }
 
 .zenin__dialog_modal_upper {
@@ -51,7 +51,7 @@
 
 .zenin__dialog_modal::backdrop {
   background: black;
-  opacity: 0.75;
+  opacity: 0.25;
 }
 
 .zenin__dialog_modal_close_icon {
