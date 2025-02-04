@@ -1,0 +1,29 @@
+.zenin__account {
+    padding: var(--px-c);
+    border: 1px solid var(--off-b);
+    border-radius: var(--rounded);
+}
+
+.zenin__account_rank{
+    color: var(--mid);
+}
+
+.zenin__account:not(:last-of-type) {
+    margin-bottom: var(--px-c);
+}
+
+.zenin__account_updated_timestamp {
+    display: block;
+    color: var(--mid);
+}
+
+.zenin__account_top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zenin__account_top_right {
+    display: flex;
+    align-items: center;
+}
