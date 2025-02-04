@@ -10,9 +10,16 @@
     fill: var(--foreground);
     border: 1px solid transparent;
     background: transparent;
-    transition: 
-        background var(--fast) ease-in-out,
-        color var(--fast) ease-in-out;
+}
+
+@keyframes fade-default {
+    from { background: initial; }
+    to { background: var(--off-b); }
+}
+
+@keyframes fade-primary {
+    from { background: var(--foreground); }
+    to { background: var(--primary-hl); }
 }
 
 .zenin__button:focus {
@@ -39,7 +46,7 @@
     border-color: var(--off-b);
 }
 
-.zenin__button.background {
+.zenin__button:not(.primary).background {
     background-color: var(--off-b);
 }
 
@@ -64,16 +71,20 @@
     fill: var(--dead-a);
 }
 
-.zenin__button:not(.disabled).destructive:hover {
-    color: var(--dead-b);
+.zenin__button:not(.disabled):not(.background).hover.destructive:hover {
+    animation: fade-default var(--fast) ease-in-out forwards !important;
 }
 
-.zenin__button:not(.disabled).hover.primary:hover {
-    background: var(--primary-hl);  
+.zenin__button:not(.disabled):not(.background).hover.primary:hover {
+    animation: fade-primary var(--fast) ease-in-out forwards !important;
 }
 
-.zenin__button:not(.disabled).hover:hover {
-    background: var(--off-b);  
+.zenin__button:not(.disabled):not(.background).hover:hover {
+    animation: fade-default var(--fast) ease-in-out forwards !important;
+}
+
+.zenin__button:not(:hover) {
+    animation: none !important;
 }
 
 .zenin__tooltip {
