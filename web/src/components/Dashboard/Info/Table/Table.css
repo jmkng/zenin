@@ -14,8 +14,16 @@
     margin-bottom: var(--px-b);
 }
 
-.zenin__table_footer {
+.zenin__table_footer.margin {
     margin-top: var(--px-b);
+}
+
+.zenin__table_footer_page_count {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--px-b) var(--px-d);
+    color: var(--off-b);
 }
 
 .zenin__table_head {

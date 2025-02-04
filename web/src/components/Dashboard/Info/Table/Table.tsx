@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
 import { useAccountContext } from '@/internal/account';
 import { Measurement } from '@/internal/measurement';
 import { useDefaultMeasurementService } from '@/internal/measurement/service';
 import { useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
 import { OriginState, ViewPane } from '@/internal/monitor/split';
 import { DataPacket } from '@/internal/server';
+import { useEffect, useRef, useState } from 'react';
 
 import Button from '../../../Button/Button';
 import ClockIcon from '../../../Icon/ClockIcon';
@@ -20,7 +20,6 @@ import Row from './Row/Row';
 import TableDialogContent from './TableDialogContext';
 
 import './Table.css';
-
 
 interface TableProps {
     state: ViewPane
@@ -48,6 +47,7 @@ export default function Table(props: TableProps) {
     const id = measurements.map(n => n.id!);
     const backDisabled = page === 1;
     const forwardDisabled = page === pages;
+    const hasTableFooterMargin = !backDisabled || !forwardDisabled || pages > 1
 
     useEffect(() => {
         setChecked([]);
@@ -174,23 +174,33 @@ export default function Table(props: TableProps) {
                 </tbody>
             </table>
         </div>
-        <div className="zenin__table_footer">
+        <div className={["zenin__table_footer", hasTableFooterMargin ? "margin" : ""].join(" ")}>
             <div className="zenin__table_footer_right">
-                <Button onClick={() => setPage(1)} border={true} disabled={backDisabled}>
-                    <FirstIcon />
-                </Button>
-                <Button onClick={() => setPage(prev => (prev === 1 ? prev : prev - 1))} border={true} disabled={backDisabled}>
-                    <PreviousIcon />
-                </Button>
-                <Button border={true} disabled={true}>
+                {!backDisabled
+                    ? <>
+                        <Button border={true} onClick={() => setPage(1)}>
+                            <FirstIcon />
+                        </Button>
+                        <Button border={true} onClick={() => setPage(prev => (prev === 1 ? prev : prev - 1))}>
+                            <PreviousIcon />
+                        </Button>
+                    </>
+                    : null}
+                {pages > 1
+                    ? <div className="zenin__table_footer_page_count zenin__footer_control_set">
                     {page}/{pages}
-                </Button>
-                <Button onClick={() => setPage(prev => (prev === pages ? prev : prev + 1))} border={true} disabled={forwardDisabled}>
-                    <NextIcon />
-                </Button>
-                <Button onClick={() => setPage(pages)} border={true} disabled={forwardDisabled}>
-                    <LastIcon />
-                </Button>
+                    </div>
+                    : null}
+                {!forwardDisabled
+                    ? <>
+                        <Button border={true} onClick={() => setPage(prev => (prev === pages ? prev : prev + 1))}>
+                            <NextIcon />
+                        </Button>
+                        <Button border={true} onClick={() => setPage(pages)}>
+                            <LastIcon />
+                        </Button>
+                    </>
+                    : null}
             </div>
         </div>
         {state.selected ?
