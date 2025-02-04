@@ -40,7 +40,7 @@
 }
 
 .zenin__detail_stacked_hint > *:not(:last-child) {
-    margin-bottom: var(--px-c);
+    margin-bottom: var(--px-b);
 }
 
 .zenin__detail_add_event_container {
