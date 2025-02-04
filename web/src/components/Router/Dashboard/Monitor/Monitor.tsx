@@ -1,9 +1,9 @@
-import { monitor } from '../../../../internal';
-import { useAccountContext } from '../../../../internal/account';
-import { Measurement } from '../../../../internal/measurement';
-import { useMonitorContext } from '../../../../internal/monitor';
-import { MonitorService } from '../../../../internal/monitor/service';
-import { DataPacket } from '../../../../internal/server';
+import { monitor } from '@/internal';
+import { useAccountContext } from '@/internal/account';
+import { Measurement } from '@/internal/measurement';
+import { useMonitorContext } from '@/internal/monitor';
+import { MonitorService } from '@/internal/monitor/service';
+import { DataPacket } from '@/internal/server';
 
 import Button from '../../Button/Button';
 import VMenuIcon from '../../Icon/VMenuIcon';

@@ -1,4 +1,4 @@
-import { ACTIVE_UI, INACTIVE_UI } from "../../../../../internal/monitor";
+import { ACTIVE_UI, INACTIVE_UI } from "@/internal/monitor";
 
 import EyeIcon from "../../../Icon/EyeIcon";
 
@@ -13,9 +13,7 @@ export default function ActiveWidget(props: ActiveWidgetProps) {
     const { active, onClick } = props;
     const attr = active ? ACTIVE_UI : INACTIVE_UI;
 
-    return (
-        <div className="zenin__widget zenin__active_widget" onClick={onClick} data-active={attr}>
-            <EyeIcon hide={active} />
-        </div>
-    )
+    return <div className="zenin__widget zenin__active_widget" onClick={onClick} data-active={attr}>
+        <EyeIcon hide={active} />
+    </div>
 }

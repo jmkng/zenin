@@ -1,5 +1,5 @@
-import { isMeasurement } from "../internal/measurement";
-import { useMonitorContext } from "../internal/monitor";
+import { isMeasurement } from "@/internal/measurement";
+import { useMonitorContext } from "@/internal/monitor";
 
 export const useFeedDispatch = () => {
     const monitor = useMonitorContext();

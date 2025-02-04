@@ -1,9 +1,9 @@
 import { useLayoutEffect, useState } from "react";
-import { useAccountContext } from "../../../../../internal/account";
-import { formatDate } from "../../../../../internal/layout/graphics";
-import { Certificate, Measurement } from "../../../../../internal/measurement";
-import { useDefaultMeasurementService } from "../../../../../internal/measurement/service";
-import { DataPacket } from "../../../../../internal/server";
+import { useAccountContext } from "@/internal/account";
+import { formatDate } from "@/internal/layout/graphics";
+import { Certificate, Measurement } from "@/internal/measurement";
+import { useDefaultMeasurementService } from "@/internal/measurement/service";
+import { DataPacket } from "@/internal/server";
 
 import ChevronIcon from "../../../Icon/ChevronIcon";
 

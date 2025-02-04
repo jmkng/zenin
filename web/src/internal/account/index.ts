@@ -1,5 +1,5 @@
-import { useContext } from "react"
-import { AccountContext, AccountDispatchContext } from "./context"
+import { useContext } from "react";
+import AccountProvider, { AccountContext, AccountDispatchContext } from "./context";
 
 export interface Account {
     id: number,
@@ -33,3 +33,5 @@ export const useAccountContext = () => {
     if (!state || !dispatch) throw new Error('account context must be used within provider');
     return { state, dispatch }
 }
+
+export { AccountProvider }

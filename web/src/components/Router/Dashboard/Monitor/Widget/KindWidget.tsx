@@ -1,5 +1,5 @@
-import { HTTP_UI, ICMP_UI, TCP_UI, PLUGIN_UI } from "../../../../../internal/monitor";
-import { HTTP_API, ICMP_API, TCP_API, PLUGIN_API } from "../../../../../internal/server";
+import { HTTP_UI, ICMP_UI, TCP_UI, PLUGIN_UI } from "@/internal/monitor";
+import { HTTP_API, ICMP_API, TCP_API, PLUGIN_API } from "@/internal/server";
 
 import "./KindWidget.css";
 

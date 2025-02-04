@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Measurement } from '../../../../internal/measurement';
+import { Measurement } from '@/internal/measurement';
 
 import './MonitorTimeline.css';
 

@@ -1,4 +1,4 @@
-import { FilterKind, NAME_ASC_UI, NAME_DESC_UI, UPDATED_NEW_UI, UPDATED_OLD_UI } from "../../../../internal/monitor";
+import { FilterKind, NAME_ASC_UI, NAME_DESC_UI, UPDATED_NEW_UI, UPDATED_OLD_UI } from "@/internal/monitor";
 
 import Button from "../../Button/Button";
 import CheckIcon from "../../Icon/CheckIcon";

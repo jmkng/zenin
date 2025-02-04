@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 
+import { useMonitorContext } from "@/internal/monitor";
 import ArrayInput from "../ArrayInput/ArrayInput";
 import SelectInput from "../SelectInput/SelectInput";
 
 import "./PluginInput.css";
-import { useMonitorContext } from "../../../../internal/monitor";
 
 interface CommonFields {
     subtext?: string | React.ReactNode

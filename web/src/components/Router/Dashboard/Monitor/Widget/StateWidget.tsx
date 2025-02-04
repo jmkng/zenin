@@ -1,4 +1,4 @@
-import { DEAD_API, OK_API, WARN_API } from "../../../../../internal/server";
+import { DEAD_API, OK_API, WARN_API } from "@/internal/server";
 
 import NoIcon from "../../../Icon/NoIcon";
 import WarnIcon from "../../../Icon/WarnIcon";
@@ -22,12 +22,10 @@ export default function StateWidget(props: StateWidgetProps) {
                     ? <NoIcon />
                     : null
 
-    return (
-        <div
+    return <div
             className="zenin__widget zenin__h_center zenin__state_widget"
             data-state={state}
         >
             {icon}
-        </div >
-    )
+    </div >
 }

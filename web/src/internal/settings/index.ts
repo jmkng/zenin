@@ -1,7 +1,9 @@
 import { useContext } from "react";
-import { SettingsContext, SettingsDispatchContext } from "./context";
-import { SettingsState } from "./reducer";
-import { useDefaultSettingsService } from "./service";
+import SettingsProvider, { SettingsContext, SettingsDispatchContext } from "./context";
+
+export interface Settings {
+    delimiters: string[]
+}
 
 export const useSettingsContext = () => {
     const state = useContext(SettingsContext);
@@ -10,5 +12,6 @@ export const useSettingsContext = () => {
     return { state, dispatch }
 }
 
-export type { SettingsState };
-export { useDefaultSettingsService };
+export type { SettingsState } from "./reducer";
+export { useDefaultSettingsService } from "./service";
+export { SettingsProvider };

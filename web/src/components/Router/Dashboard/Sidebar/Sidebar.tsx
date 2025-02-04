@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useLayoutContext } from '../../../../internal/layout';
+import { useLayoutContext } from '@/internal/layout';
 
 import Button from '../../Button/Button';
 import MenuIcon from '../../Icon/FirstIcon';

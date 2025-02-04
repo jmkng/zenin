@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "../../../../internal/account";
-import { useDefaultAccountService } from "../../../../internal/account/service";
-import { useMonitorContext } from "../../../../internal/monitor";
+import { useAccountContext } from "@/internal/account";
+import { useDefaultAccountService } from "@/internal/account/service";
+import { useMonitorContext } from "@/internal/monitor";
 
 import Button from "../../Button/Button";
 import AccountIcon from "../../Icon/AccountIcon";

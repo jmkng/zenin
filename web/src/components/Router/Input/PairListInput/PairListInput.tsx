@@ -1,4 +1,5 @@
-import { PairListValue } from "../../../../internal/monitor";
+import { PairListValue } from "@/internal/monitor";
+
 import Button from "../../Button/Button";
 import AddIcon from "../../Icon/AddIcon";
 import TextInput from "../TextInput/TextInput";

@@ -1,5 +1,5 @@
-import { DEAD_UI, WARN_UI } from "../../../../internal/monitor";
-import { DEAD_API, WARN_API } from "../../../../internal/server";
+import { DEAD_UI, WARN_UI } from "@/internal/monitor";
+import { DEAD_API, WARN_API } from "@/internal/server";
 
 import Button from "../../Button/Button";
 import PluginInput, { PluginInputProps } from "../PluginInput/PluginInput";

@@ -1,4 +1,4 @@
-import { useDefaultMonitorService, useMonitorContext } from '../../../../internal/monitor';
+import { useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
 
 import Button from '../../Button/Button';
 import AddIcon from '../../Icon/AddIcon';

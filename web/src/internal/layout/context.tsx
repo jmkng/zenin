@@ -12,13 +12,11 @@ const LayoutProvider = (props: LayoutProviderProps) => {
     const { children } = props;
     const [state, dispatch] = useReducer(layoutReducer, layoutDefault);
 
-    return (
-        <LayoutContext.Provider value={state}>
+    return <LayoutContext.Provider value={state}>
             <LayoutDispatchContext.Provider value={dispatch}>
                 {children}
             </LayoutDispatchContext.Provider>
-        </LayoutContext.Provider>
-    )
+    </LayoutContext.Provider>
 }
 
 export default LayoutProvider;

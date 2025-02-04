@@ -1,4 +1,4 @@
-import { OriginState, DetachedState } from "../../../../../internal/monitor/split";
+import { OriginState, DetachedState } from "@/internal/monitor/split";
 
 import Button from "../../../Button/Button";
 

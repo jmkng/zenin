@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { LayoutContext, LayoutDispatchContext } from "./context";
+import LayoutProvider, { LayoutContext, LayoutDispatchContext } from "./context";
 
 export const useLayoutContext = () => {
     const state = useContext(LayoutContext);
@@ -7,3 +7,5 @@ export const useLayoutContext = () => {
     if (!state || !dispatch) throw new Error('layout context must be used within provider');
     return { state, dispatch }
 }
+
+export { LayoutProvider };

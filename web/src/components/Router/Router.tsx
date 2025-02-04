@@ -1,19 +1,19 @@
 import { useEffect } from 'react';
 import { Route, Routes } from "react-router";
 
-import { useFeedDispatch } from '../../hooks/useFlaggedDispatch';
-import { Account, useAccountContext } from '../../internal/account';
-import { useDefaultAccountService } from '../../internal/account/service';
-import { useLayoutContext } from '../../internal/layout';
-import { hideLoadingScreen, showLoadingScreen } from '../../internal/layout/graphics';
-import { Monitor, useDefaultMonitorService, useMonitorContext } from '../../internal/monitor';
-import { SettingsState, useDefaultSettingsService, useSettingsContext } from '../../internal/settings';
-import { DataPacket, FEED, handleConnect, handleDisconnect } from '../../internal/server';
+import { useFeedDispatch } from '@/hooks/useFlaggedDispatch';
+import { Account, useAccountContext } from '@/internal/account';
+import { useDefaultAccountService } from '@/internal/account/service';
+import { useLayoutContext } from '@/internal/layout';
+import { hideLoadingScreen, showLoadingScreen } from '@/internal/layout/graphics';
+import { Monitor, useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
+import { DataPacket, FEED, handleConnect, handleDisconnect } from '@/internal/server';
+import { Settings, useDefaultSettingsService, useSettingsContext } from '@/internal/settings';
 
 import Dashboard from './Dashboard/Dashboard';
-import Private from './Private';
 import Hidden from './Hidden';
 import Login from './Login/Login';
+import Private from './Private';
 
 import './Router.css';
 
@@ -52,7 +52,7 @@ export default function Router() {
                 accountEx
             ] = await Promise.all(queue);
             if (settingsEx.ok()) {
-                const packet: DataPacket<SettingsState> = await settingsEx.json();
+                const packet: DataPacket<Settings> = await settingsEx.json();
                 settings.context.dispatch({ type: 'reset', delimiters: packet.data.delimiters });
             }
             if (pluginEx.ok()) {

@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
 import { POST_API, Service } from "../server";
 import { AuthenticatedRequest } from "../server/request";
-import { Settings } from "./reducer";
+import { Settings } from ".";
 
 class SettingsService extends Service {
     constructor() { super(); }

@@ -2,10 +2,6 @@ export interface SettingsState {
     delimiters: string[]
 }
 
-export interface Settings {
-    delimiters: string[]
-}
-
 export const settingsDefault: SettingsState = {
     delimiters: []
 }

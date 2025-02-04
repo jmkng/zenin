@@ -1,8 +1,7 @@
+import { useAccountContext } from "@/internal/account";
+import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
+import { SettingsState, useDefaultSettingsService, useSettingsContext } from "@/internal/settings";
 import { useMemo, useState } from "react";
-import { useAccountContext } from "../../../../internal/account";
-import { isArrayEqual, useMonitorContext } from "../../../../internal/monitor";
-import { useDefaultSettingsService, useSettingsContext } from "../../../../internal/settings";
-import { Settings as SettingsType } from "../../../../internal/settings/reducer";
 
 import Button from "../../Button/Button";
 import BookIcon from "../../Icon/BookIcon";
@@ -12,14 +11,13 @@ import SelectInput from "../../Input/SelectInput/SelectInput";
 
 import "./Settings.css";
 
-
 const AUTO = "zenin__theme_auto";
 const LIGHT = "zenin__theme_light";
 const DARK = "zenin__theme_dark";
 const KEY = "zenin__theme";
 
-interface SettingsState {
-    settings: SettingsType
+interface EditorState {
+    settings: SettingsState
     theme: string
 }
 
@@ -32,7 +30,7 @@ export default function Settings() {
     const account = { context: useAccountContext() };
     const theme = localStorage.getItem(KEY) || AUTO;
 
-    const [editor, setEditor] = useState<SettingsState>({ settings: settings.context.state, theme });
+    const [editor, setEditor] = useState<EditorState>({ settings: settings.context.state, theme });
 
     const hasValidDelimiters = useMemo(() => isValidDelimiters(editor.settings.delimiters), [editor.settings.delimiters])
     const canSave = useMemo(() =>
@@ -134,7 +132,7 @@ function isValidDelimiters(delimiters: string[]): boolean {
     return false
 }
 
-const isSettingsEqual = (s1: SettingsState, s2: SettingsState) => {
+const isSettingsEqual = (s1: EditorState, s2: EditorState) => {
     if (isArrayEqual(s1.settings.delimiters, s2.settings.delimiters) && s1.theme == s2.theme) return true;
     return false
 }

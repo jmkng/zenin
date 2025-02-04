@@ -1,6 +1,6 @@
-import { useAccountContext } from "../../../../internal/account";
-import { useDefaultMonitorService, useMonitorContext } from "../../../../internal/monitor";
-import { DataPacket } from "../../../../internal/server";
+import { useAccountContext } from "@/internal/account";
+import { useDefaultMonitorService, useMonitorContext } from "@/internal/monitor";
+import { DataPacket } from "@/internal/server";
 
 import Button from "../../Button/Button";
 import DeselectIcon from "../../Icon/DeselectIcon";

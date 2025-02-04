@@ -1,6 +1,6 @@
-import { useAccountContext } from '../../internal/account';
+import { useAccountContext } from '@/internal/account';
+import { useDefaultAccountService } from '@/internal/account/service';
 import { ReactNode, useEffect } from 'react';
-import { useDefaultAccountService } from '../../internal/account/service';
 
 interface InitializeProps {
     children?: ReactNode

@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { MonitorContext, MonitorDispatchContext } from "./context";
 import { Measurement } from "../measurement";
+import MonitorProvider, { MonitorContext, MonitorDispatchContext } from "./context";
 import { MonitorState } from "./reducer";
 import { useDefaultMonitorService } from "./service";
 
@@ -141,5 +141,5 @@ export const useMonitorContext = () => {
     return { state, dispatch }
 }
 
+export { MonitorProvider, useDefaultMonitorService };
 export type { MonitorState };
-export { useDefaultMonitorService };

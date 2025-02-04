@@ -1,5 +1,5 @@
-import { useMonitorContext } from "../../../../internal/monitor";
-import { ViewPane } from "../../../../internal/monitor/split";
+import { useMonitorContext } from "@/internal/monitor";
+import { ViewPane } from "@/internal/monitor/split";
 
 import Button from "../../Button/Button";
 import List from "./List/List";

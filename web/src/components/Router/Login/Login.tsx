@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "../../../internal/account";
-import { useDefaultAccountService } from "../../../internal/account/service";
-import { useLayoutContext } from "../../../internal/layout";
-import { DataPacket, isErrorPacket } from "../../../internal/server";
+import { useAccountContext } from "@/internal/account";
+import { useDefaultAccountService } from "@/internal/account/service";
+import { useLayoutContext } from "@/internal/layout";
+import { DataPacket, isErrorPacket } from "@/internal/server";
 
 import Button from "../Button/Button";
 import LogoIcon from "../Icon/LogoIcon";

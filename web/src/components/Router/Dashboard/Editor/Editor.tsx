@@ -11,8 +11,8 @@ import {
     PLUGIN_UI,
     TCP_UI,
     useMonitorContext
-} from "../../../../internal/monitor";
-import { EditorPane } from "../../../../internal/monitor/split";
+} from "@/internal/monitor";
+import { EditorPane } from "@/internal/monitor/split";
 import {
     CLIENTERROR_API,
     DELETE_API,
@@ -32,7 +32,7 @@ import {
     SUCCESSFUL_API,
     TCP_API,
     UDP_API
-} from "../../../../internal/server";
+} from "@/internal/server";
 
 import Button from "../../Button/Button";
 import EventInput from "../../Input/EventInput/EventInput";
