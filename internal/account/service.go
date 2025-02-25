@@ -27,14 +27,12 @@ func (a AccountService) GetClaimStatus(ctx context.Context) (bool, error) {
 }
 
 // ServerClaimedError means that the server cannot be claimed because it has already been claimed.
-var ServerClaimedError error = env.
-	NewValidation("The server has already been claimed. Try logging in.")
+var ServerClaimedError env.Validation = env.NewValidation("The server has already been claimed. Try logging in.")
 
 // AccountExistsError means that an account cannot be created because an account with that name already exists.
-var AccountExistsError error = env.
-	NewValidation("Username is taken. Try another.")
+var AccountExistsError env.Validation = env.NewValidation("Username is taken. Try another.")
 
-func (a AccountService) AddAccount(ctx context.Context, app Application) (Account, error) {
+func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (Account, error) {
 	// Attempts to claim an already claimed server must be rejected.
 	if app.Root {
 		claimed, err := a.GetClaimStatus(ctx)
@@ -78,6 +76,58 @@ func (a AccountService) AddAccount(ctx context.Context, app Application) (Accoun
 	account.Id = &id
 
 	return account, nil
+}
+
+func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApplication) error {
+	// id is the id of the account we are updating.
+	// app describes the new information to be assigned to that account.
+	validation := env.NewValidation()
+
+	if err := app.Validate(); err != nil {
+		validation.Join(err.(env.Validation))
+	}
+
+	// Check for available username.
+	accounts, err := a.Repository.SelectAccount(ctx, &SelectAccountParams{
+		Username: &app.Username,
+	})
+	if err != nil {
+		return err
+	}
+	// This might return one account because the username is unchanged.
+	// If the ids are not the same, some other account already has this username.
+	if len(accounts) == 1 && *accounts[0].Id != id {
+		validation.Join(AccountExistsError)
+	}
+	if !validation.Empty() {
+		return validation
+	}
+
+	params := UpdateAccountParams{
+		Id:                  id,
+		Username:            app.Username,
+		VersionedSaltedHash: nil,
+	}
+
+	// Handle the new password, if one was provided.
+	if app.PasswordPlainText != nil {
+		salt, err := env.GetRandomBytes(ZeninAccSaltLength)
+		if err != nil {
+			return err
+		}
+		vsh, err := GetCurrentScheme().Hash([]byte(*app.PasswordPlainText), salt)
+		if err != nil {
+			return fmt.Errorf("failed to generate versioned salted hash: %w", err)
+		}
+		params.VersionedSaltedHash = &vsh
+	}
+
+	err = a.Repository.UpdateAccount(ctx, params)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a AccountService) ValidateLogin(password []byte, target VersionedSaltedHash) error {

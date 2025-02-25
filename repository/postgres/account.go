@@ -63,3 +63,23 @@ func (p PostgresRepository) InsertAccount(ctx context.Context, account account.A
 	}
 	return id, nil
 }
+
+// UpdateAccount implements `AccountRepository.UpdateAccount` for `PostgresRepository`.
+func (p PostgresRepository) UpdateAccount(ctx context.Context, params account.UpdateAccountParams) error {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push("UPDATE account SET username = ")
+	builder.BindString(params.Username)
+	if params.VersionedSaltedHash != nil {
+		builder.Push(", versioned_salted_hash = ")
+		builder.BindString(params.VersionedSaltedHash.String())
+	}
+	builder.Push("WHERE id = ")
+	builder.BindInt(params.Id)
+
+	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
+	if err != nil {
+		return fmt.Errorf("failed to update account: %w", err)
+	}
+
+	return nil
+}

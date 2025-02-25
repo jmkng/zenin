@@ -2,7 +2,7 @@ import { useContext } from "react";
 import AccountProvider, { AccountContext, AccountDispatchContext } from "./context";
 
 export const
-    ROOT_ACCOUNT_UI = "Root Account"
+    ROOT_ACCOUNT_UI = "Root"
     ;
 
 export interface Account {
@@ -25,9 +25,10 @@ interface TokenHeader {
 }
 
 interface TokenPayload {
-    sub: string,
+    sub: number,
     iat: number,
     exp: number,
+    username: string,
     root: boolean,
 }
 

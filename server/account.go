@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmkng/zenin/internal/account"
@@ -39,13 +40,14 @@ func (a AccountProvider) Mux() http.Handler {
 	router.Post("/claim", a.HandleCreateClaim)
 	router.Post("/authenticate", a.HandleAuthenticate)
 
-	//// root /////
+	///// root /////
 	router.Group(func(private chi.Router) {
-		private.Use(AuthenticateRoot)
+		private.Use(Authenticate)
 		private.Get("/", a.HandleGetAccounts)
 		private.Post("/", a.HandleCreateAccount)
+		private.Patch("/{id}", a.HandleUpdateAccount)
 	})
-	///////////////
+	//////////////////
 
 	return router
 }
@@ -64,7 +66,7 @@ func (a AccountProvider) HandleGetClaimStatus(w http.ResponseWriter, r *http.Req
 func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	var application account.Application
+	var application account.CreateApplication
 
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
@@ -103,7 +105,7 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	var application account.Application
+	var application account.CreateApplication
 
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
@@ -138,6 +140,12 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
+	token, ok := r.Context().Value("token").(Token)
+	if !ok || !token.Root {
+		responder.Status(http.StatusUnauthorized)
+		return
+	}
+
 	query := r.URL.Query()
 	var params *account.SelectAccountParams
 
@@ -155,10 +163,17 @@ func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Reques
 
 	responder.Data(accounts, http.StatusOK)
 }
+
 func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	var application account.Application
+	token, ok := r.Context().Value("token").(Token)
+	if !ok || !token.Root {
+		responder.Status(http.StatusUnauthorized)
+		return
+	}
+
+	var application account.CreateApplication
 
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
@@ -166,6 +181,7 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 			http.StatusBadRequest)
 		return
 	}
+	// TODO: Validate in service.
 	if err := application.Validate(); err != nil {
 		responder.Error(err, http.StatusBadRequest)
 		return
@@ -183,4 +199,75 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 	}
 
 	responder.Status(http.StatusCreated)
+}
+
+func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+	query := r.URL.Query()
+
+	param := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(param)
+	if err != nil {
+		responder.Error(env.NewValidation("Expected integer url parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	var reissue bool
+	if n := query.Get("reissue"); n != "" {
+		if re, err := strconv.ParseBool(n); err == nil && re {
+			reissue = true
+		}
+	}
+
+	ctx := r.Context()
+
+	// Root accounts can update anyone.
+	// If this isn't a root account, the request must be from the same account that the update is for.
+	token, ok := ctx.Value("token").(Token)
+	if !ok || !token.Root && id != token.Id {
+		responder.Status(http.StatusUnauthorized)
+		return
+	}
+
+	var application account.UpdateApplication
+	err = StrictDecoder(r.Body).Decode(&application)
+	if err != nil {
+		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
+			http.StatusBadRequest)
+		return
+	}
+
+	err = a.Service.UpdateAccount(ctx, id, application)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if _, ok := err.(env.Validation); ok {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
+		return
+	}
+
+	// Issue a new token, if requested.
+	if reissue {
+		accounts, err := a.Service.Repository.SelectAccount(ctx, &account.SelectAccountParams{
+			Username: &application.Username,
+		})
+		if err != nil || len(accounts) != 1 {
+			responder.Error(err, http.StatusInternalServerError)
+			return
+		}
+
+		token, err := accounts[0].Token()
+		if err != nil {
+			responder.Error(err, http.StatusInternalServerError)
+			return
+		}
+
+		responder.Data(token, http.StatusOK)
+		return
+	}
+
+	responder.Status(http.StatusOK)
 }

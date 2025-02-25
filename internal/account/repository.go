@@ -12,10 +12,10 @@ type AccountRepository interface {
 	SelectAccountTotal(ctx context.Context) (int64, error)
 	SelectAccount(ctx context.Context, params *SelectAccountParams) ([]Account, error)
 	InsertAccount(ctx context.Context, account Account) (int, error)
+	UpdateAccount(ctx context.Context, params UpdateAccountParams) error
 }
 
-// SelectAccountParams is a set of parameters used to narrow the scope of the `SelectAccount`
-// repository method.
+// SelectAccountParams is a set of parameters used to narrow the scope of the `SelectAccount` repository method.
 //
 // Implements `Injectable.Inject`, so it can automatically apply suitable SQL to a `sql.Builder`.
 type SelectAccountParams struct {
@@ -28,4 +28,11 @@ func (s SelectAccountParams) Inject(builder *sql.Builder) {
 		builder.Push(fmt.Sprintf("%v username = ", builder.Where()))
 		builder.BindString(*s.Username)
 	}
+}
+
+// UpdateAccountParams is a set of parameters used to narrow the scope of the `UpdateAccount` repository method.
+type UpdateAccountParams struct {
+	Id                  int
+	Username            string
+	VersionedSaltedHash *VersionedSaltedHash
 }

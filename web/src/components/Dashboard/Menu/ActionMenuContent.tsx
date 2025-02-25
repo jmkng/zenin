@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ROOT_ACCOUNT_UI, useAccountContext } from "@/internal/account";
+import { useAccountContext } from "@/internal/account";
 import { useDefaultAccountService } from "@/internal/account/service";
 import { useMonitorContext } from "@/internal/monitor";
 
@@ -21,35 +21,39 @@ export default function ActionMenuContent() {
     const handleLogout = () => {
         account.service.clearLSToken();
         account.context.dispatch({ type: 'logout' });
+        monitor.context.dispatch({ type: 'logout' });
         navigate("/login");
+    }
+
+    const handleAccountPane = () => {
+        monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } });
     }
 
     return <div className="zenin__action_menu_dialog_content zenin__dialog_content">
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             <div className="zenin__action_menu_dialog_name">
+                {account.context.state.token?.payload.username}
+            </div>
+            <div className="zenin__action_menu_dialog_id">
                 {account.context.state.token?.payload.sub}
             </div>
-            {account.context.state.token?.payload.root 
-                ? <div className="zenin__action_menu_dialog_rank">
-                    {ROOT_ACCOUNT_UI}
-                </div>
-                : null}
         </div>
         <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             {account.context.state.token?.payload.root
-                ? <Button
-                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } })}
-                    icon={<AccountIcon />}
-                >
+                ? <Button onClick={handleAccountPane} icon={<AccountIcon />}>
                     Manage Accounts
                 </Button>
-                : null}
+                : <Button onClick={handleAccountPane} icon={<AccountIcon />}>
+                    Edit Account
+                </Button>}
             <Button
                 onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
                 icon={<SettingsIcon />}
             >
                 Settings
             </Button>
+        </div>
+        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
             <Button
                 onClick={handleLogout}
                 kind="destructive"

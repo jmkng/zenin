@@ -19,3 +19,8 @@ func (p MockRepository) SelectAccountByUsername(ctx context.Context, username st
 func (p MockRepository) InsertAccount(ctx context.Context, account account.Account) (int, error) {
 	return -1, nil
 }
+
+// UpdateAccount implements `AccountRepository.UpdateAccount` for `MockRepository`.
+func (p MockRepository) UpdateAccount(ctx context.Context, params account.UpdateAccountParams) error {
+	return nil
+}

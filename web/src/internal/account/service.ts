@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { AccountState } from "./reducer";
-import { POST_API, Service } from "../server";
+import { PATCH_API, POST_API, Service } from "../server";
 import { AuthenticatedRequest, Request } from "../server/request";
 
 class AccountService extends Service {
@@ -36,6 +36,13 @@ class AccountService extends Service {
         const address = '/account'
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request)
+    }
+
+    async updateAccount(token: string, id: number, username: string, password: string | null, reissue: boolean) {
+        const address = `/account/${id}?reissue=${reissue}`;
+        const body = JSON.stringify({ username, password });
+        const request = new AuthenticatedRequest(token, address).body(body).method(PATCH_API);
+        return await this.extract(request);
     }
 
     setLSToken(token: string) {

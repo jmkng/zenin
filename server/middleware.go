@@ -1,9 +1,11 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -42,6 +44,11 @@ func Insecure(next http.Handler) http.Handler {
 	})
 }
 
+type Token struct {
+	Root bool
+	Id   int
+}
+
 // Authenticate will ensure the Request Authorization header is valid.
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -53,41 +60,34 @@ func Authenticate(next http.Handler) http.Handler {
 			responder.Status(http.StatusUnauthorized)
 			return
 		}
-		err := validateBearerToken(token, false)
+
+		claims, err := parseAndValidateToken(token)
 		if err != nil {
 			responder.Status(http.StatusUnauthorized)
 			return
 		}
 
-		next.ServeHTTP(w, r)
-	})
-}
-
-// AuthenticateRoot is similar to Authenticate, but also ensures the account is a root account.
-func AuthenticateRoot(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		responder := NewResponder(w)
-		header := r.Header.Get(Authorization)
-
-		token := extractBearerToken(header)
-		if token == "" {
+		// Add claims to request context.
+		root, err := extractRootClaim(claims)
+		if err != nil {
 			responder.Status(http.StatusUnauthorized)
 			return
 		}
-		err := validateBearerToken(token, true)
+		sub, err := extractSubClaim(claims)
 		if err != nil {
 			responder.Status(http.StatusUnauthorized)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), "token", Token{Root: root, Id: sub})
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// extractBearerToken will extract value of the `Authorization` header,
-// with the "Bearer " prefix removed.
+// extractBearerToken will extract the value of the `Authorization` header,
+// return it with the "Bearer " prefix removed.
 //
-// Returns "" if no header, or an invalid header, is found.
+// Returns an empty string if no header (or an invalid header) is found.
 func extractBearerToken(authorization string) string {
 	const prefix = "Bearer "
 	if authorization == "" || !strings.HasPrefix(authorization, prefix) {
@@ -97,46 +97,63 @@ func extractBearerToken(authorization string) string {
 	return strings.TrimPrefix(authorization, prefix)
 }
 
-// validateBearerToken returns an error if the bearer token is invalid.
-func validateBearerToken(token string, root bool) error {
-	options := []jwt.ParserOption{
-		jwt.WithExpirationRequired(),
-		jwt.WithIssuedAt(),
-	}
+// parseAndValidateToken validates the token and returns the claims.
+func parseAndValidateToken(token string) (jwt.MapClaims, error) {
+	options := []jwt.ParserOption{jwt.WithExpirationRequired(), jwt.WithIssuedAt()}
 
 	parsed, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("invalid signing method: %v", t.Header["Alg"])
+			return nil, fmt.Errorf("invalid signing method: %v", t.Header["alg"])
 		}
-
-		claims, ok := t.Claims.(jwt.MapClaims)
-		if !ok {
-			return nil, errors.New("unable to read claims")
-		}
-
-		if root {
-			v, ok := claims["root"]
-			if !ok {
-				return nil, errors.New("missing root claim")
-			}
-			vb, ok := v.(bool)
-			if !ok {
-				return nil, errors.New("malformed root claim")
-			}
-
-			if !vb {
-				return nil, errors.New("account is not root")
-			}
-		}
-
 		return []byte(env.Runtime.SignSecret), nil
 	}, options...)
-	if err != nil {
-		return err
-	}
-	if !parsed.Valid {
-		return errors.New("token is invalid")
+	if err != nil || !parsed.Valid {
+		return nil, errors.New("invalid token")
 	}
 
-	return nil
+	claims, ok := parsed.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid claims")
+	}
+
+	return claims, nil
+}
+
+// extractRootClaim returns the "root" claim.
+func extractRootClaim(claims jwt.MapClaims) (bool, error) {
+	rootClaim, exists := claims["root"]
+	if !exists {
+		return false, errors.New("missing root claim")
+	}
+
+	root, ok := rootClaim.(bool)
+	if !ok {
+		return false, errors.New("malformed root claim")
+	}
+
+	return root, nil
+}
+
+// extractSubClaim returns the "sub" claim, which contains the unique id of the account.
+func extractSubClaim(claims jwt.MapClaims) (int, error) {
+	subClaim, exists := claims["sub"]
+	if !exists {
+		return -1, errors.New("missing sub claim")
+	}
+
+	var sub int
+	switch v := subClaim.(type) {
+	case string:
+		parsedID, err := strconv.Atoi(v)
+		if err != nil {
+			return -1, fmt.Errorf("invalid sub claim: %v", err)
+		}
+		sub = parsedID
+	case int:
+		sub = v
+	default:
+		return -1, errors.New("malformed sub claim")
+	}
+
+	return sub, nil
 }

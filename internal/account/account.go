@@ -2,6 +2,7 @@ package account
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 	"unicode"
 
@@ -20,7 +21,8 @@ type Account struct {
 }
 
 type AccountClaims struct {
-	Root bool `json:"root"`
+	Username string `json:"username"`
+	Root     bool   `json:"root"`
 	jwt.RegisteredClaims
 }
 
@@ -29,9 +31,10 @@ func (a Account) Token() (string, error) {
 	now := time.Now()
 
 	claims := AccountClaims{
-		Root: a.Root,
+		Username: a.Username,
+		Root:     a.Root,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   a.Username,
+			Subject:   strconv.Itoa(*a.Id),
 			ExpiresAt: jwt.NewNumericDate(now.AddDate(0, 0, 7)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
@@ -44,23 +47,55 @@ func (a Account) Token() (string, error) {
 	return token, err
 }
 
-// Application represents an attempt to create a new `Account`.
-type Application struct {
+// CreateApplication represents an attempt to create a new `Account`.
+type CreateApplication struct {
 	Username          string `json:"username"`
 	PasswordPlainText string `json:"password"`
 	Root              bool   `json:"-"`
 }
 
-// Validate will return an error if the `Application` is in an invalid state.
-func (a Application) Validate() error {
-	len := len(a.PasswordPlainText)
-	if a.Username == "" {
-		return env.NewValidation("Username is required.")
+// Validate will return an error if the `CreateApplication` is in an invalid state.
+func (c CreateApplication) Validate() error {
+	validation := env.NewValidation()
+	if c.Username == "" {
+		validation.Join(usernameRequiredError)
 	}
-	lenCheck := len < ZeninAccPasswordMin || len > ZeninAccPasswordMax
+	if !isValidAccountPassword(c.PasswordPlainText) {
+		validation.Join(invalidPasswordError)
+	}
+	if !validation.Empty() {
+		return validation
+	}
+	return nil
+}
+
+type UpdateApplication struct {
+	Username          string  `json:"username"`
+	PasswordPlainText *string `json:"password"`
+}
+
+// Validate will return an error if the `UpdateApplication` is in an invalid state.
+func (u UpdateApplication) Validate() error {
+	validation := env.NewValidation()
+	if u.Username == "" {
+		validation.Join(env.NewValidation("Username is required."))
+	}
+	if u.PasswordPlainText != nil {
+		if !isValidAccountPassword(*u.PasswordPlainText) {
+			validation.Join(invalidPasswordError)
+		}
+	}
+	if !validation.Empty() {
+		return validation
+	}
+	return nil
+}
+
+func isValidAccountPassword(p string) bool {
+	lenCheck := len(p) < ZeninAccPasswordMin || len(p) > ZeninAccPasswordMax
 	hasLower := false
 	hasUpper := false
-	for _, c := range a.PasswordPlainText {
+	for _, c := range p {
 		if unicode.IsLower(c) {
 			hasLower = true
 		}
@@ -73,7 +108,11 @@ func (a Application) Validate() error {
 	}
 	caseCheck := !hasLower || !hasUpper
 	if lenCheck || caseCheck {
-		return env.NewValidation("Password must be between 8-100 characters, including upper and lowercase letters and at least one number.")
+		return false
 	}
-	return nil
+	return true
 }
+
+var invalidPasswordError env.Validation = env.NewValidation("Password must be between 8-100 characters, including upper and lowercase letters and at least one number.")
+
+var usernameRequiredError env.Validation = env.NewValidation("Username is required.")

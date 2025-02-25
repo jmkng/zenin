@@ -115,6 +115,10 @@ type UpdatePluginAction = {
     plugins: string[]
 }
 
+type LogoutAction = {
+    type: 'logout'
+}
+
 export type MonitorDispatch = (action: MonitorAction) => void;
 
 export type MonitorAction =
@@ -131,6 +135,7 @@ export type MonitorAction =
     | DetailAction
     | AddMeasurementAction
     | UpdatePluginAction
+    | LogoutAction
 
 const removeMonitorAction = (state: MonitorState, action: RemoveMonitorAction) => {
     const monitors = new Map(state.monitors);
@@ -290,6 +295,10 @@ const updatePluginAction = (state: MonitorState, action: UpdatePluginAction) => 
     return { ...state, plugins: action.plugins.sort() };
 }
 
+const logoutAction = () => {
+    return { ...monitorDefault };
+}
+
 export const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorState => {
     switch (action.type) {
         case "remove": return removeMonitorAction(state, action);
@@ -305,5 +314,6 @@ export const monitorReducer = (state: MonitorState, action: MonitorAction): Moni
         case "detail": return detailAction(state, action);
         case "measurement": return addMeasurementAction(state, action);
         case "update": return updatePluginAction(state, action);
+        case "logout": return logoutAction();
     }
 }
