@@ -103,13 +103,10 @@ export default function Editor(props: EditorProps) {
     };
 
     const deleteEvent = (index: number) => {
-        setEditor(prev => ({
-            ...prev,
-            draft: {
-                ...prev.draft,
-                events: prev.draft.events!.filter((_, i) => i !== index)
-            }
-        }));
+        setEditor(prev => {
+            const events = prev.draft.events!.filter((_, i) => i !== index);
+            return { ...prev, draft: { ...prev.draft, events: events.length == 0 ? null : events } }
+        })
     };
 
     const monitorTab = <>
