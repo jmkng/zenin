@@ -44,7 +44,7 @@
 }
 
 .zenin__login_message_container {
-  margin-top: 25px;
+  margin-top: var(--px-b);;
 }
 
 .zenin__login_message_container > * {

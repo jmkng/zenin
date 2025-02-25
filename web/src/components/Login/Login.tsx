@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAccountContext } from "@/internal/account";
 import { useDefaultAccountService } from "@/internal/account/service";
@@ -12,37 +12,42 @@ import TextInput from "../Input/TextInput/TextInput";
 import "./Login.css";
 
 export default function Login() {
-    const [form, setForm] = useState<LoginState>(defaultState);
-    const [errors, setErrors] = useState<string[]>([]);
-    const [claim, setClaim] = useState<boolean | null>(null);
-    const account = { service: useDefaultAccountService(), context: useAccountContext() };
+    const account = {
+        service: useDefaultAccountService(),
+        context: useAccountContext()
+    };
     const layout = useLayoutContext();
     const navigate = useNavigate();
 
+    const [editor, setEditor] = useState<LoginState>(defaults);
+    const [errors, setErrors] = useState<string[]>([]);
+    const [isClaimed, setIsClaimed] = useState<boolean | null>(null);
+
+    const hasValidPasswords = useMemo(() => isClaimed ? true : editor.password == editor.passwordConfirm, [isClaimed, editor.password, editor.passwordConfirm])
+    const canSave: boolean = useMemo(() => hasValidPasswords, [hasValidPasswords])
+
     useEffect(() => {
-        handleInitialize();
+        (async () => {
+            const extract = await account.service.getClaim();
+            if (!extract.ok()) return;
+            const packet: DataPacket<boolean> = await extract.json();
+            setIsClaimed(packet.data);
+        })()
     }, [])
 
     useEffect(() => {
-        if (claim === null) return;
+        if (isClaimed === null) return;
         layout.dispatch({ type: 'load', loading: false })
-    }, [claim])
-
-    const handleInitialize = async () => {
-        const extract = await account.service.getClaim();
-        if (!extract.ok()) return;
-        const packet: DataPacket<boolean> = await extract.json();
-        setClaim(packet.data);
-    }
+    }, [isClaimed])
 
     const handleSubmit = async () => {
-        if (claim === null || !handleFormValidate()) return;
+        if (isClaimed === null || !handleFormValidate()) return;
 
-        const username = form.username || "";
-        const password = form.password || "";
+        const username = editor.username || "";
+        const password = editor.password || "";
         layout.dispatch({ type: 'load', loading: true });
 
-        const extract = claim
+        const extract = isClaimed
             ? await account.service.authenticate(username, password)
             : await account.service.setClaim(username, password)
 
@@ -61,8 +66,8 @@ export default function Login() {
 
     const handleFormValidate = () => {
         let result = true;
-        if (claim === null) return;
-        if (claim === false && (form.password != form.confirm)) {
+        if (isClaimed === null) return;
+        if (isClaimed === false && (editor.password != editor.passwordConfirm)) {
             setErrors(["Passwords do not match."]);
             result = false;
         }
@@ -92,38 +97,40 @@ export default function Login() {
                 <TextInput
                     name="zenin__login_username"
                     label="Username"
-                    value={form.username}
-                    onChange={(username: string | null) => setForm(prev => ({ ...prev, username }))} />
+                    value={editor.username}
+                    onChange={(username: string | null) => setEditor(prev => ({ ...prev, username }))} />
             </div>
             <div className="zenin__login_spaced">
                 <TextInput
                     name="zenin__login_password"
                     label="Password"
                     type="password"
-                    value={form.password}
-                    onChange={(password: string | null) => setForm(prev => ({ ...prev, password }))} />
+                    value={editor.password}
+                    onChange={(password: string | null) => setEditor(prev => ({ ...prev, password }))} />
             </div>
-            {claim !== null && claim === false
+            {isClaimed !== null && isClaimed === false
                 ?
                 <div className="zenin__login_spaced">
                     <TextInput
                         name="zenin__login_password_confirm"
                         label="Confirm Password"
                         type="password"
-                        value={form.confirm}
-                        onChange={(confirm: string | null) => setForm(prev => ({ ...prev, confirm }))} />
+                        value={editor.passwordConfirm}
+                        onChange={(confirm: string | null) => setEditor(prev => ({ ...prev, passwordConfirm: confirm }))} />
                 </div>
                 : null}
             <div className="zenin__login_controls">
                 <Button
                     kind="primary"
-                    onClick={handleSubmit}>{claim !== null && claim === true ? "Submit" : "Claim"}
+                    onClick={handleSubmit}
+                    disabled={!canSave}
+                >{isClaimed !== null && isClaimed === true ? "Submit" : "Claim"}
                 </Button>
             </div>
         </div>
 
         <div className="zenin__login_message_container">
-            {errors.length == 0 && claim !== null && claim === false
+            {errors.length == 0 && isClaimed !== null && isClaimed === false
                 ? warning
                 : null}
             {errors
@@ -132,13 +139,13 @@ export default function Login() {
         </div>
     </div>
 
-    return claim !== null ? login : null
+    return isClaimed !== null ? login : null
 }
 
 interface LoginState {
     username: string | null
     password: string | null
-    confirm: string | null
+    passwordConfirm: string | null
 }
 
-const defaultState = { username: null, password: null, confirm: null };
+const defaults = { username: null, password: null, passwordConfirm: null };
