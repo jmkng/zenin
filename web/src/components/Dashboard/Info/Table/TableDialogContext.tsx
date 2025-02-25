@@ -12,7 +12,7 @@ export default function TableDialogContent(props: TableDialogContentProps) {
     return <div className="zenin__table_dialog_content zenin__dialog_content">
         <div className="zenin__dialog_section">
             <Button onClick={() => onDateChange("HEAD")}>
-                Recent
+                Most Recent
             </Button>
             <Button onClick={() => onDateChange(new DetachedState("DAY"))}>
                 Past Day

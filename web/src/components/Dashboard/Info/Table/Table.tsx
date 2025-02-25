@@ -45,8 +45,8 @@ export default function Table(props: TableProps) {
     const visible = measurements.slice((page - 1) * PAGESIZE, page * PAGESIZE);
     const propertyContainerRef = useRef<HTMLDivElement>(null);
     const id = measurements.map(n => n.id!);
-    const backDisabled = page === 1;
-    const forwardDisabled = page === pages;
+    const backDisabled = pages <= 1 || page === 1;
+    const forwardDisabled = pages <= 1 || (pages > 1 && page === pages);
     const hasTableFooterMargin = !backDisabled || !forwardDisabled || pages > 1
 
     useEffect(() => {
@@ -110,10 +110,16 @@ export default function Table(props: TableProps) {
     const handleDelete = async () => {
         const extract = await measurement.service.deleteMeasurement(account.state.token!.raw, checked);
         if (!extract.ok()) return;
-
         monitor.context.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })
+        if (state.selected && checked.includes(state.selected.id)) {
+            // If we are showing a measurement's properties and it is deleted,
+            // we want to stop showing them.
+            monitor.context.dispatch({ type: 'detail', measurement: null })
+        }
+        const newPages = Math.ceil((measurements.length - checked.length) / PAGESIZE);
         setChecked([]);
         setAllChecked(false);
+        setPage(prev => Math.min(prev, newPages) || 1);
     }
 
     const handleRowClick = (id: number) => {
@@ -128,16 +134,16 @@ export default function Table(props: TableProps) {
             </span>
 
             <div className="zenin__table_controls_container">
-                <Button 
-                    onClick={handleDelete} 
-                    disabled={checked.length == 0} 
-                    border={true} 
-                    icon={<TrashIcon />} 
+                <Button
+                    onClick={handleDelete}
+                    disabled={checked.length == 0}
+                    border={true}
+                    icon={<TrashIcon />}
                 />
 
-                <Dialog dialog={{content: <TableDialogContent onDateChange={handleDateChange}/>}}>
+                <Dialog dialog={{ content: <TableDialogContent onDateChange={handleDateChange} /> }}>
                     <Button border={true} icon={<ClockIcon />} >
-                        {state.origin == "HEAD" ? "Recent" : state.origin.toString()}
+                        {state.origin == "HEAD" ? "Most Recent" : state.origin.toString()}
                     </Button>
                 </Dialog>
             </div>
@@ -188,7 +194,7 @@ export default function Table(props: TableProps) {
                     : null}
                 {pages > 1
                     ? <div className="zenin__table_footer_page_count zenin__footer_control_set">
-                    {page}/{pages}
+                        {page}/{pages}
                     </div>
                     : null}
                 {!forwardDisabled
