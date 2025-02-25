@@ -112,12 +112,14 @@ export default function Settings() {
                 <span>Save</span>
             </Button>
 
-            <Button
-                border={true}
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
-            >
-                <span>Close</span>
-            </Button>
+            <div className="zenin__h_ml-auto">
+                <Button
+                    border={true}
+                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                >
+                    <span>Close</span>
+                </Button>
+            </div>
         </div>
     </div>
 }
