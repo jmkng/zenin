@@ -45,6 +45,7 @@ func (a AccountProvider) Mux() http.Handler {
 		private.Use(Authenticate)
 		private.Get("/", a.HandleGetAccounts)
 		private.Post("/", a.HandleCreateAccount)
+		private.Delete("/", a.HandleDeleteAccount)
 		private.Patch("/{id}", a.HandleUpdateAccount)
 	})
 	//////////////////
@@ -266,6 +267,25 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 		}
 
 		responder.Data(token, http.StatusOK)
+		return
+	}
+
+	responder.Status(http.StatusOK)
+}
+
+func (a AccountProvider) HandleDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	id := scanQueryParameterIds(r.URL.Query())
+	if len(id) == 0 {
+		responder.Error(env.NewValidation("Expected `id` query parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	err := a.Service.Repository.DeleteAccount(r.Context(), id)
+	if err != nil {
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 

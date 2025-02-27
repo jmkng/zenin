@@ -83,3 +83,14 @@ func (p PostgresRepository) UpdateAccount(ctx context.Context, params account.Up
 
 	return nil
 }
+
+// DeleteAccount implements `AccountRepository.DeleteAccount` for `PostgresRepository`.
+func (p PostgresRepository) DeleteAccount(ctx context.Context, id []int) error {
+	builder := zsql.NewBuilder(zsql.Numbered)
+	builder.Push("DELETE FROM account WHERE id IN (")
+	builder.SpreadInt(id...)
+	builder.Push(") AND root = 'f'")
+
+	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
+	return err
+}

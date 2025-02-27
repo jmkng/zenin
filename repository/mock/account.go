@@ -24,3 +24,8 @@ func (p MockRepository) InsertAccount(ctx context.Context, account account.Accou
 func (p MockRepository) UpdateAccount(ctx context.Context, params account.UpdateAccountParams) error {
 	return nil
 }
+
+// DeleteAccount implements `AccountRepository.DeleteAccount` for `MockRepository`.
+func (p MockRepository) DeleteAccount(ctx context.Context, id []int) error {
+	return nil
+}

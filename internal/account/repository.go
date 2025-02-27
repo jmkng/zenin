@@ -13,6 +13,7 @@ type AccountRepository interface {
 	SelectAccount(ctx context.Context, params *SelectAccountParams) ([]Account, error)
 	InsertAccount(ctx context.Context, account Account) (int, error)
 	UpdateAccount(ctx context.Context, params UpdateAccountParams) error
+	DeleteAccount(ctx context.Context, id []int) error
 }
 
 // SelectAccountParams is a set of parameters used to narrow the scope of the `SelectAccount` repository method.
