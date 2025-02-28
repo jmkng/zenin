@@ -130,7 +130,10 @@ export default function Dashboard() {
             title="Confirm"
             visible={monitor.context.state.deleting.length > 0}
             onCancel={() => monitor.context.dispatch({ type: 'delete', monitors: [] })}
-            content={<DeleteDialogContent onConfirm={() => handleRemove(monitor.context.state.deleting)} />}
+            content={<DeleteDialogContent
+                queue={monitor.context.state.deleting}
+                onConfirm={() => handleRemove(monitor.context.state.deleting)}
+            />}
         />
     </div>
 }
