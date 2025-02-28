@@ -10,6 +10,7 @@ import Button from "../../../components/Button/Button";
 import VMenuIcon from "../../Icon/VMenuIcon";
 import Dialog from "../Dialog/Dialog";
 import AccountDialogContent from "./AccountDialogContent";
+import DialogModal from "../Dialog/DialogModal";
 
 import "./Accounts.css";
 
@@ -36,6 +37,7 @@ export default function Accounts() {
     const [editor, setEditor] = useState<EditorState>({ draft: defaults, original: defaults });
     const [isEditing, setIsEditing] = useState<boolean>(payload.root ? false : true);
     const [errors, setErrors] = useState<string[]>([]);
+    const [isDeleting, setIsDeleting] = useState<Account | null>(null);
 
     const hasValidPasswords = useMemo(() =>
         editor.draft.password == editor.draft.passwordConfirm, [editor.draft.password, editor.draft.passwordConfirm]);
@@ -80,6 +82,15 @@ export default function Accounts() {
         })
     }
 
+    async function handleDelete(id: number) {
+        const token = account.context.state.token!.raw;
+        const extract = await account.service.deleteAccount(token, [id]);
+        if (!extract.ok) return;
+
+        setIsDeleting(null);
+        account.context.dispatch({ type: 'remove', id })
+    }
+
     const accountManagerTab = <>
         {account.context.state.accounts.map((n, i) => <div key={i} className="zenin__account">
             <div className="zenin__account_top">
@@ -95,7 +106,13 @@ export default function Accounts() {
                         </div>
                         : null}
 
-                    <Dialog dialog={{ content: <AccountDialogContent onEdit={() => handleManagerEdit(n)} /> }}>
+                    <Dialog dialog={{
+                        content: <AccountDialogContent
+                            allowDelete={!n.root}
+                            onDelete={() => setIsDeleting(n)}
+                            onEdit={() => handleManagerEdit(n)}
+                        />
+                    }}>
                         <Button hover={false} icon={<VMenuIcon />}>
                         </Button>
                     </Dialog>
@@ -177,5 +194,24 @@ export default function Accounts() {
                 </Button>
             </div>
         </div>
-    </div >
+
+        {isDeleting
+            ? <DialogModal
+                title="Confirm"
+                visible={isDeleting != null}
+                onCancel={() => setIsDeleting(null)}
+                content={<div className="zenin__dialog_delete_account_content">
+                    <div className="zenin__dialog_confirm_content_top">
+                        <div>Are you sure you want to delete {isDeleting.username}?</div>
+                        <div>This action cannot be undone.</div>
+                    </div>
+                    <div className="zenin__dialog_confirm_content_bottom">
+                        <Button onClick={() => handleDelete(isDeleting.id)} kind="primary">
+                            <span>Delete</span>
+                        </Button>
+                    </div>
+                </div>}
+            />
+            : null}
+    </div>
 }

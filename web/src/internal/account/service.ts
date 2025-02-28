@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { AccountState } from "./reducer";
-import { PATCH_API, POST_API, Service } from "../server";
+import { DELETE_API, PATCH_API, POST_API, Service } from "../server";
 import { AuthenticatedRequest, Request } from "../server/request";
 
 class AccountService extends Service {
@@ -45,17 +45,21 @@ class AccountService extends Service {
         return await this.extract(request);
     }
 
-    setLSToken(token: string) {
-        localStorage.setItem(this.#token, token);
+    async deleteAccount(token: string, id: number[]) {
+        const joined = id.join(',');
+        const address = `/account?id=${joined}`;
+        const request = new AuthenticatedRequest(token, address).method(DELETE_API);
+        return await this.extract(request);
     }
 
-    readLSToken() {
-        return localStorage.getItem(this.#token);
-    }
+    /** Set the `zenin__auth_tk` key to the provided string in localStorage. */
+    setLSToken = (token: string) => localStorage.setItem(this.#token, token);
 
-    clearLSToken() {
-        localStorage.removeItem(this.#token);
-    }
+    /** Read the `zenin__auth_tk` key from localStorage. */
+    readLSToken = () => localStorage.getItem(this.#token);
+
+    /** Clear the `zenin__auth_tk` key from localStorage. */
+    clearLSToken = () => localStorage.removeItem(this.#token);
 }
 
 export const useDefaultAccountService = () => {

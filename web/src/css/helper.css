@@ -9,6 +9,10 @@
   flex-direction: column;
 }
 
+.zenin__h_c-fg {
+    color: var(--foreground);
+}
+
 .zenin__h_c-warn {
   color: var(--warn);
 }

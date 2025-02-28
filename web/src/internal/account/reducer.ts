@@ -18,12 +18,14 @@ type LoginAction = { type: 'login', token: string };
 type LogoutAction = { type: 'logout' };
 type ResetAction = { type: 'reset', accounts: Account[] };
 type UpdateAction = { type: 'update', id: number, username: string };
+type RemoveAction = { type: 'remove', id: number };
 
 export type AccountAction =
     | LoginAction
     | LogoutAction
     | ResetAction
     | UpdateAction
+    | RemoveAction
 
 const loginAction = (state: AccountState, action: LoginAction): AccountState => {
     const raw = action.token;
@@ -55,12 +57,20 @@ const updateAction = (state: AccountState, action: UpdateAction): AccountState =
     };
 };
 
+const removeAction = (state: AccountState, action: RemoveAction): AccountState => {
+    return {
+        ...state,
+        accounts: state.accounts.filter(n => n.id != action.id)
+    };
+};
+
 const accountReducer = (state: AccountState, action: AccountAction): AccountState => {
     switch (action.type) {
         case "login": return loginAction(state, action);
         case "logout": return logoutAction(state);
         case "reset": return resetAction(state, action);
         case "update": return updateAction(state, action);
+        case "remove": return removeAction(state, action);
     }
 }
 
