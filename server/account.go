@@ -86,7 +86,7 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 	acc, err := a.Service.AddAccount(r.Context(), application)
 	if err != nil {
 		status := http.StatusInternalServerError
-		if errors.Is(err, account.ServerClaimedError) {
+		if errors.As(err, &env.Validation{}) {
 			status = http.StatusBadRequest
 		}
 
@@ -191,7 +191,7 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 	_, err = a.Service.AddAccount(r.Context(), application)
 	if err != nil {
 		status := http.StatusInternalServerError
-		if errors.Is(err, account.AccountExistsError) {
+		if errors.As(err, &env.Validation{}) {
 			status = http.StatusBadRequest
 		}
 
