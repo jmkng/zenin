@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmkng/zenin/pkg/sql"
 )
@@ -34,6 +35,7 @@ func (s SelectAccountParams) Inject(builder *sql.Builder) {
 // UpdateAccountParams is a set of parameters used to narrow the scope of the `UpdateAccount` repository method.
 type UpdateAccountParams struct {
 	Id                  int
+	UpdatedAt           time.Time
 	Username            string
 	VersionedSaltedHash *VersionedSaltedHash
 }

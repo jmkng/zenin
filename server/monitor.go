@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/internal/monitor"
@@ -88,21 +89,21 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	now := time.Now()
-	incoming.CreatedAt = now
-	incoming.UpdatedAt = now
+	time := time.Now()
+	incoming.CreatedAt = time
+	incoming.UpdatedAt = time
 	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 
-	type Response struct {
-		Id   int       `json:"id"`
-		Time time.Time `json:"time"`
-	}
-
-	responder.Data(Response{Id: id, Time: now}, http.StatusCreated)
+	responder.Data(internal.CreateValue{
+		Id: id,
+		TimeValue: internal.TimeValue{
+			Time: time,
+		},
+	}, http.StatusCreated)
 }
 
 func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Request) {
@@ -147,8 +148,8 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	// Make sure `Kind` doesn't interfere with below query.
 	params.Kind = nil
 
-	now := time.Now()
-	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active, now)
+	time := time.Now()
+	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active, time)
 	if *params.Active {
 		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), 0, &params)
 		if err != nil {
@@ -164,11 +165,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	type Response struct {
-		Time time.Time `json:"time"`
-	}
-
-	responder.Data(Response{Time: now}, http.StatusOK)
+	responder.Data(internal.TimeValue{Time: time}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {
@@ -208,19 +205,13 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	now := time.Now()
-	incoming.UpdatedAt = now
-	err = m.Service.UpdateMonitor(r.Context(), incoming)
+	time, err := m.Service.UpdateMonitor(r.Context(), incoming)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 
-	type Response struct {
-		Time time.Time `json:"time"`
-	}
-
-	responder.Data(Response{Time: now}, http.StatusOK)
+	responder.Data(time, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Request) {

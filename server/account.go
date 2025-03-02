@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/account"
 	"github.com/jmkng/zenin/internal/env"
 )
@@ -83,7 +84,7 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 	// Signal intent to claim server by setting `Root`.
 	application.Root = true
 
-	acc, err := a.Service.AddAccount(r.Context(), application)
+	account, err := a.Service.AddAccount(r.Context(), application)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if errors.As(err, &env.Validation{}) {
@@ -94,13 +95,15 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	token, err := acc.Token()
+	token, err := account.Token()
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 
-	responder.Data(token, http.StatusOK)
+	responder.Data(struct {
+		Token string `json:"token"`
+	}{Token: token}, http.StatusOK)
 }
 
 func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
@@ -182,13 +185,8 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 			http.StatusBadRequest)
 		return
 	}
-	// TODO: Validate in service.
-	if err := application.Validate(); err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
 
-	_, err = a.Service.AddAccount(r.Context(), application)
+	account, err := a.Service.AddAccount(r.Context(), application)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if errors.As(err, &env.Validation{}) {
@@ -199,7 +197,12 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	responder.Status(http.StatusCreated)
+	responder.Data(internal.CreateValue{
+		Id: *account.Id,
+		TimeValue: internal.TimeValue{
+			Time: account.CreatedAt,
+		},
+	}, http.StatusCreated)
 }
 
 func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Request) {
@@ -239,7 +242,7 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = a.Service.UpdateAccount(ctx, id, application)
+	time, err := a.Service.UpdateAccount(ctx, id, application)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if _, ok := err.(env.Validation); ok {
@@ -266,11 +269,17 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		responder.Data(token, http.StatusOK)
+		responder.Data(struct {
+			Token string `json:"token"`
+			internal.TimeValue
+		}{
+			Token:     token,
+			TimeValue: time,
+		}, http.StatusOK)
 		return
 	}
 
-	responder.Status(http.StatusOK)
+	responder.Data(time, http.StatusOK)
 }
 
 func (a AccountProvider) HandleDeleteAccount(w http.ResponseWriter, r *http.Request) {

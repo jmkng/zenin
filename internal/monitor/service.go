@@ -4,7 +4,9 @@ import (
 	"context"
 	"io/fs"
 	"path/filepath"
+	"time"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/env"
 )
 
@@ -34,9 +36,12 @@ func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 	return resume, err
 }
 
-func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) error {
+func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (internal.TimeValue, error) {
+	time := time.Now()
+	monitor.UpdatedAt = time
+
 	if err := s.Repository.UpdateMonitor(ctx, monitor); err != nil {
-		return err
+		return internal.TimeValue{}, err
 	}
 
 	s.Distributor <- StopMessage{
@@ -48,7 +53,9 @@ func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) erro
 		}
 	}
 
-	return nil
+	return internal.TimeValue{
+		Time: time,
+	}, nil
 }
 
 func (m MonitorService) GetPlugins() ([]string, error) {

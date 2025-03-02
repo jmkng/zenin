@@ -415,13 +415,13 @@ func (p PostgresRepository) DeleteMonitor(ctx context.Context, id []int) error {
 }
 
 // ToggleMonitor implements `MonitorRepository.ToggleMonitor` for `PostgresRepository`.
-func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active bool, time time.Time) error {
+func (p PostgresRepository) ToggleMonitor(ctx context.Context, id []int, active bool, updatedAt time.Time) error {
 	builder := zsql.NewBuilder(zsql.Numbered)
 
 	builder.Push("UPDATE monitor SET active = ")
 	builder.BindBool(active)
 	builder.Push(", updated_at = ")
-	builder.BindTime(time)
+	builder.BindTime(updatedAt)
 	builder.Push("WHERE id IN (")
 	builder.SpreadInt(id...)
 	builder.Push(")")

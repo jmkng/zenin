@@ -24,9 +24,9 @@ func (p PostgresRepository) SelectAccount(ctx context.Context, params *account.S
 
 	var builder = zsql.NewBuilder(zsql.Numbered)
 	builder.Push(`SELECT
+        id "account_id",
         created_at,
         updated_at,
-        id "account_id",
         username,
         versioned_salted_hash,
         root
@@ -51,7 +51,9 @@ func (p PostgresRepository) InsertAccount(ctx context.Context, account account.A
 	var id int
 
 	builder := zsql.NewBuilder(zsql.Numbered)
-	builder.Push(`INSERT INTO account (username, versioned_salted_hash, root) VALUES (`)
+	builder.Push(`INSERT INTO account (created_at, updated_at, username, versioned_salted_hash, root) VALUES (`)
+	builder.SpreadOpaque(account.CreatedAt, account.UpdatedAt)
+	builder.Push(",")
 	builder.SpreadString(account.Username, account.VersionedSaltedHash.String())
 	builder.Push(",")
 	builder.SpreadBool(account.Root)
@@ -67,7 +69,9 @@ func (p PostgresRepository) InsertAccount(ctx context.Context, account account.A
 // UpdateAccount implements `AccountRepository.UpdateAccount` for `PostgresRepository`.
 func (p PostgresRepository) UpdateAccount(ctx context.Context, params account.UpdateAccountParams) error {
 	builder := zsql.NewBuilder(zsql.Numbered)
-	builder.Push("UPDATE account SET username = ")
+	builder.Push("UPDATE account SET updated_at = ")
+	builder.BindTime(params.UpdatedAt)
+	builder.Push(", username = ")
 	builder.BindString(params.Username)
 	if params.VersionedSaltedHash != nil {
 		builder.Push(", versioned_salted_hash = ")

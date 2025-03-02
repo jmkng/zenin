@@ -3,6 +3,7 @@ package internal
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"time"
 )
 
 type ArrayValue []string
@@ -56,4 +57,15 @@ func (p *PairListValue) Scan(value any) error {
 		err = json.Unmarshal(x, p)
 	}
 	return err
+}
+
+// TimeValue represents a timestamp.
+type TimeValue struct {
+	Time time.Time `json:"time"`
+}
+
+// CreateValue represents a created resource.
+type CreateValue struct {
+	Id int `json:"id"`
+	TimeValue
 }

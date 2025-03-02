@@ -52,6 +52,13 @@ class AccountService extends Service {
         return await this.extract(request);
     }
 
+    async createAccount(token: string, username: string, password: string) {
+        const address = "/account";
+        const body = JSON.stringify({ username, password });
+        const request = new AuthenticatedRequest(token, address).method(POST_API).body(body);
+        return await this.extract(request);
+    }
+
     /** Set the `zenin__auth_tk` key to the provided string in localStorage. */
     setLSToken = (token: string) => localStorage.setItem(this.#token, token);
 

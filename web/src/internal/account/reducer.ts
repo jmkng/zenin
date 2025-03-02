@@ -17,8 +17,9 @@ export const accountDefault: AccountState = {
 type LoginAction = { type: 'login', token: string };
 type LogoutAction = { type: 'logout' };
 type ResetAction = { type: 'reset', accounts: Account[] };
-type UpdateAction = { type: 'update', id: number, username: string };
+type UpdateAction = { type: 'update', id: number, username: string, updatedAt: string };
 type RemoveAction = { type: 'remove', id: number };
+type CreateAction = { type: 'create', account: Account };
 
 export type AccountAction =
     | LoginAction
@@ -26,6 +27,7 @@ export type AccountAction =
     | ResetAction
     | UpdateAction
     | RemoveAction
+    | CreateAction
 
 const loginAction = (state: AccountState, action: LoginAction): AccountState => {
     const raw = action.token;
@@ -49,19 +51,20 @@ const resetAction = (state: AccountState, action: ResetAction): AccountState => 
 }
 
 const updateAction = (state: AccountState, action: UpdateAction): AccountState => {
+    const username = action.username;
+    const updatedAt = action.updatedAt;
     return {
         ...state,
-        accounts: state.accounts.map(acc =>
-            acc.id === action.id ? { ...acc, username: action.username } : acc
-        ),
+        accounts: state.accounts.map(acc => acc.id === action.id ? { ...acc, username, updatedAt } : acc),
     };
 };
 
 const removeAction = (state: AccountState, action: RemoveAction): AccountState => {
-    return {
-        ...state,
-        accounts: state.accounts.filter(n => n.id != action.id)
-    };
+    return { ...state, accounts: state.accounts.filter(n => n.id != action.id) };
+};
+
+const createAction = (state: AccountState, action: CreateAction): AccountState => {
+    return { ...state, accounts: [...state.accounts, action.account] }
 };
 
 const accountReducer = (state: AccountState, action: AccountAction): AccountState => {
@@ -71,6 +74,7 @@ const accountReducer = (state: AccountState, action: AccountAction): AccountStat
         case "reset": return resetAction(state, action);
         case "update": return updateAction(state, action);
         case "remove": return removeAction(state, action);
+        case "create": return createAction(state, action);
     }
 }
 

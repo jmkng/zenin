@@ -92,7 +92,7 @@ export default function Editor(props: EditorProps) {
 
     type eventFields = 'pluginName' | 'pluginArgs' | 'threshold';
 
-    const updateEvent = (index: number, field: eventFields, value: any) => {
+    const handleUpdateEvent = (index: number, field: eventFields, value: any) => {
         setEditor(prev => ({
             ...prev,
             draft: {
@@ -102,7 +102,7 @@ export default function Editor(props: EditorProps) {
         }));
     };
 
-    const deleteEvent = (index: number) => {
+    const handleDeleteEvent = (index: number) => {
         setEditor(prev => {
             const events = prev.draft.events!.filter((_, i) => i !== index);
             return { ...prev, draft: { ...prev.draft, events: events.length == 0 ? null : events } }
@@ -442,17 +442,17 @@ export default function Editor(props: EditorProps) {
                         <EventInput
                             plugin={{
                                 value: event.pluginName,
-                                onChange: value => updateEvent(index, 'pluginName', value)
+                                onChange: value => handleUpdateEvent(index, 'pluginName', value)
                             }}
                             args={{
                                 value: event.pluginArgs,
-                                onChange: value => updateEvent(index, 'pluginArgs', value)
+                                onChange: value => handleUpdateEvent(index, 'pluginArgs', value)
                             }}
                             threshold={{
                                 value: event.threshold,
-                                onChange: value => updateEvent(index, 'threshold', value)
+                                onChange: value => handleUpdateEvent(index, 'threshold', value)
                             }}
-                            onDelete={() => deleteEvent(index)}
+                            onDelete={() => handleDeleteEvent(index)}
                         />
                     </div>
                 </div>)}
@@ -493,22 +493,26 @@ export default function Editor(props: EditorProps) {
             >
                 <span>Save</span>
             </Button>
-            {!isViewingEvents
-                ? <Button border={true} onClick={() => setIsViewingEvents(true)}>
-                    Events
-                </Button>
-                : null}
-            <div className="zenin__h_ml-auto">
-                <Button
+            {isViewingEvents
+                ? <Button
                     border={true}
                     onClick={() => {
                         isViewingEvents
                             ? setIsViewingEvents(false)
                             : monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })
-                    }
-                    }
+                    }}
                 >
-                    {isViewingEvents ? "Back" : "Close"}
+                    Back
+                </Button>
+                : <Button border={true} onClick={() => setIsViewingEvents(true)}>
+                    Events
+                </Button>}
+            <div className="zenin__h_ml-auto">
+                <Button
+                    border={true}
+                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                >
+                    Close
                 </Button>
             </div>
         </div>

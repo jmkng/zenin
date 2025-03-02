@@ -28,15 +28,15 @@ type AccountClaims struct {
 
 // Token returns a base64 encoded JWT from the `Account`.
 func (a Account) Token() (string, error) {
-	now := time.Now()
+	time := time.Now()
 
 	claims := AccountClaims{
 		Username: a.Username,
 		Root:     a.Root,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   strconv.Itoa(*a.Id),
-			ExpiresAt: jwt.NewNumericDate(now.AddDate(0, 0, 7)),
-			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(time.AddDate(0, 0, 7)),
+			IssuedAt:  jwt.NewNumericDate(time),
 		},
 	}
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(env.Runtime.SignSecret))
@@ -55,6 +55,8 @@ type CreateApplication struct {
 }
 
 // Validate will return an error if the `CreateApplication` is in an invalid state.
+//
+// The error will always be `env.Validation`.
 func (c CreateApplication) Validate() error {
 	validation := env.NewValidation()
 	if c.Username == "" {
@@ -75,6 +77,8 @@ type UpdateApplication struct {
 }
 
 // Validate will return an error if the `UpdateApplication` is in an invalid state.
+//
+// The error will always be `env.Validation`.
 func (u UpdateApplication) Validate() error {
 	validation := env.NewValidation()
 	if u.Username == "" {

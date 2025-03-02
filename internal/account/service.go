@@ -3,7 +3,9 @@ package account
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/env"
 )
 
@@ -44,13 +46,21 @@ func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (
 		}
 	}
 
+	validation := env.NewValidation()
+	if err := app.Validate(); err != nil {
+		validation.Join(err.(env.Validation))
+	}
+
 	// Check for existing account.
 	exists, err := a.AccountExists(ctx, app.Username)
 	if err != nil {
 		return Account{}, err
 	}
 	if exists {
-		return Account{}, AccountExistsError
+		validation.Join(AccountExistsError)
+	}
+	if !validation.Empty() {
+		return Account{}, validation
 	}
 
 	salt, err := env.GetRandomBytes(ZeninAccSaltLength)
@@ -62,8 +72,11 @@ func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (
 		return Account{}, fmt.Errorf("failed to generate versioned salted hash: %w", err)
 	}
 
+	time := time.Now()
 	account := Account{
 		Id:                  nil,
+		CreatedAt:           time,
+		UpdatedAt:           time,
 		Username:            app.Username,
 		VersionedSaltedHash: vsh,
 		Root:                app.Root,
@@ -74,11 +87,10 @@ func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (
 	}
 
 	account.Id = &id
-
 	return account, nil
 }
 
-func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApplication) error {
+func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApplication) (internal.TimeValue, error) {
 	// id is the id of the account we are updating.
 	// app describes the new information to be assigned to that account.
 	validation := env.NewValidation()
@@ -92,7 +104,7 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 		Username: &app.Username,
 	})
 	if err != nil {
-		return err
+		return internal.TimeValue{}, err
 	}
 	// This might return one account because the username is unchanged.
 	// If the ids are not the same, some other account already has this username.
@@ -100,11 +112,13 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 		validation.Join(AccountExistsError)
 	}
 	if !validation.Empty() {
-		return validation
+		return internal.TimeValue{}, validation
 	}
 
+	time := time.Now()
 	params := UpdateAccountParams{
 		Id:                  id,
+		UpdatedAt:           time,
 		Username:            app.Username,
 		VersionedSaltedHash: nil,
 	}
@@ -113,21 +127,23 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 	if app.PasswordPlainText != nil {
 		salt, err := env.GetRandomBytes(ZeninAccSaltLength)
 		if err != nil {
-			return err
+			return internal.TimeValue{}, err
 		}
 		vsh, err := GetCurrentScheme().Hash([]byte(*app.PasswordPlainText), salt)
 		if err != nil {
-			return fmt.Errorf("failed to generate versioned salted hash: %w", err)
+			return internal.TimeValue{}, fmt.Errorf("failed to generate versioned salted hash: %w", err)
 		}
 		params.VersionedSaltedHash = &vsh
 	}
 
 	err = a.Repository.UpdateAccount(ctx, params)
 	if err != nil {
-		return err
+		return internal.TimeValue{}, err
 	}
 
-	return nil
+	return internal.TimeValue{
+		Time: time,
+	}, nil
 }
 
 func (a AccountService) ValidateLogin(password []byte, target VersionedSaltedHash) error {
