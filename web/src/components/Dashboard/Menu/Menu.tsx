@@ -39,18 +39,19 @@ export default function Menu() {
             <div className="zenin__menu_left_contextual">
                 <div className="zenin__dashboard_menu">
                     <div className="zenin__menu_margin_right">
-                        <Button tooltip="Add Monitor" icon={<AddIcon />} onClick={handleAdd}>
+                        <Button tooltip="Create Monitor" icon={<AddIcon />} onClick={handleAdd}>
                         </Button>
                     </div>
                     <div className="zenin__menu_margin_right">
                         <Dialog
-                            dialog={{ 
-                                content: <SortDialogContent 
-                                    filter={monitor.context.state.filter} 
+                            dialog={{
+                                content: <SortDialogContent
+                                    filter={monitor.context.state.filter}
                                     onFilterChange={filter => monitor.context.dispatch({ type: 'filter', filter })}
-                                />}}
+                                />
+                            }}
                         >
-                            <Button tooltip="Sort Dashboard" icon={<SortIcon/>} />
+                            <Button tooltip="Sort Dashboard" icon={<SortIcon />} />
                         </Dialog>
                     </div>
                 </div>
@@ -58,9 +59,9 @@ export default function Menu() {
         </div>
 
         <div className='zenin__menu_right'>
-        <Dialog dialog={{content: <ActionMenuContent/>}}>
-            <Button hover={false} icon={<DoubleChevronIcon/>} />
-        </Dialog>
+            <Dialog dialog={{ content: <ActionMenuContent /> }}>
+                <Button hover={false} icon={<DoubleChevronIcon />} />
+            </Dialog>
         </div>
     </div>
 }

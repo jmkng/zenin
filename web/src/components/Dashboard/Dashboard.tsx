@@ -62,9 +62,6 @@ export default function Dashboard() {
         const extract = await monitor.service.updateMonitor(token, value.id, value);
         if (!extract.ok()) return;
         const body: DataPacket<{ time: string }> = await extract.json();
-        if (!body.data) {
-            throw new Error("expected server to respond with `time` field for updated monitor");
-        }
         value.updatedAt = body.data.time;
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
@@ -99,7 +96,7 @@ export default function Dashboard() {
                         <span className="zenin__dashboard_empty_message">No monitors have been created.</span>
                         <Button border={true} onClick={() => monitor.context.dispatch({ type: 'draft' })}>
                             <span className="zenin__h_f-row-center zenin__menu_add">
-                                Add Monitor
+                                Create Monitor
                             </span>
                         </Button>
                     </div>}
