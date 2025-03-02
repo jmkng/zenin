@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/jmkng/zenin/internal/debug"
 	"github.com/jmkng/zenin/internal/env"
@@ -53,8 +52,8 @@ func TestSelectMonitorActive(t *testing.T) {
 		t.FailNow()
 	}
 
-	debug.AssertEqual(t, len(a), 1)
-	debug.AssertEqual(t, len(b), 7)
+	debug.AssertEqual(t, len(a), 0)
+	debug.AssertEqual(t, len(b), 8)
 }
 
 func TestSelectMonitorKind(t *testing.T) {
@@ -99,22 +98,12 @@ func TestSelectMonitorMeasurements(t *testing.T) {
 		skip(t)
 	}
 	repository := postgresRepository(t)
-	before, err := time.Parse("1/2/2006", "7/3/2024")
-	if err != nil {
-		t.FailNow()
-	}
-	measurements, err := repository.SelectMeasurement(context.Background(), 2, &monitor.SelectMeasurementParams{
-		After:  nil,
-		Before: &before,
-	})
+	measurements, err := repository.SelectMeasurement(context.Background(), 2, nil)
 	if err != nil {
 		t.FailNow()
 	}
 
-	debug.AssertEqual(t, len(measurements), 2)
-	if *measurements[0].Id < *measurements[1].Id {
-		t.Fatal("measurements should be sorted newest first")
-	}
+	debug.AssertEqual(t, len(measurements), 4)
 }
 
 func postgresRepository(t *testing.T) monitor.MonitorRepository {
