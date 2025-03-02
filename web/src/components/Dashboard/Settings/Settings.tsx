@@ -4,8 +4,6 @@ import { SettingsState, useDefaultSettingsService, useSettingsContext } from "@/
 import { useMemo, useState } from "react";
 
 import Button from "../../Button/Button";
-import BookIcon from "../../Icon/BookIcon";
-import BugIcon from "../../Icon/BugIcon";
 import PairListInput from "../../Input/PairListInput/PairListInput";
 import SelectInput from "../../Input/SelectInput/SelectInput";
 
