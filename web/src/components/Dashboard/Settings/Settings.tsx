@@ -98,12 +98,12 @@ export default function Settings() {
                     : null}
             </div>
             <div className="zenin__settings_about zenin__h_mt-c">
-                <Button background={true} icon={<BookIcon />} kind={"primary"}>
-                    <a href="#">User Guide</a>
-                </Button>
-                <Button background={true} icon={<BugIcon />}>
-                    <a href="#">Report Issue</a>
-                </Button>
+                <a href="#">
+                    User Guide
+                </a>
+                <a href="#">
+                    Report Issue
+                </a>
             </div>
         </div>
 
@@ -121,7 +121,7 @@ export default function Settings() {
                 </Button>
             </div>
         </div>
-    </div>
+    </div >
 }
 
 function isValidDelimiters(delimiters: string[]): boolean {

@@ -5,24 +5,14 @@
 
 .zenin__settings_about {
     display: flex;
-    color: var(--mid);
     align-items: center;
     justify-content: flex-end;
 }
 
 .zenin__settings_about > *:first-child {
-    margin-right: auto;
+    margin-right: var(--px-c);
 }
 
 .zenin__settings_version {
     border: 1px solid var(--px)
-}
-
-.zenin__settings a {
-    color: inherit;
-    text-decoration: none;
-}
-
-.zenin__settings_about .zenin__button {
-    margin-right: var(--px-b);
 }
