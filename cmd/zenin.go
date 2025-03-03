@@ -41,7 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	repository, err := repository.Builder(env.Database).
+	repository, err := repository.Builder(env.Database, env.Runtime).
 		WithValidate().
 		Build()
 	dd(err)

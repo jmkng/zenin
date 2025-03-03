@@ -8,7 +8,13 @@ import (
 )
 
 // SchemaTables is a list of the tables expected to be found within a Zenin repository.
-var SchemaTables = []string{"account", "monitor", "measurement", "certificate"}
+var SchemaTables = []string{
+	"account",
+	"monitor",
+	"measurement",
+	"certificate",
+	"settings",
+}
 
 type Repository interface {
 	// Validate returns true if the repository schema is valid.

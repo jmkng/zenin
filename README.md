@@ -70,7 +70,7 @@ Supported environment variables are documented below. Values are case sensitive.
 | ZENIN_DB_KIND                  | The database kind.                                           | postgres             | export ZENIN_DB_KIND=postgres               | N/A
 | ZENIN_DB_ADDRESS               | The address of the server that is running the database.      | any x.x.x.x address  | export ZENIN_DB_ADDRESS=0.0.0.0.0           | N/A
 | ZENIN_DB_PORT                  | The port that the database is listening on.                  | any u16              | export ZENIN_DB_PORT=5432                   | N/A
-| ZENIN_DB_NAME                  | The name of the database.                                    | any string           | export ZENIN_DB_NAME=postgres               | N/A
+| ZENIN_DB_NAME                  | The name of the database, or file name for SQLite.           | any string           | export ZENIN_DB_NAME=postgres               | N/A
 | ZENIN_DB_USERNAME              | The username used to sign in to the database.                | any string           | export ZENIN_DB_USERNAME=username           | N/A
 | ZENIN_DB_PASSWORD              | The password used to sign in to the database.                | any string           | export ZENIN_DB_PASSWORD=password           | N/A
 | ZENIN_DB_MAX_CONN              | The maximum number of open database connections.             | any number           | export ZENIN_DB_MAX_CONN=5                  | N/A

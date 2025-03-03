@@ -7,11 +7,13 @@ import (
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/repository"
 	"github.com/jmkng/zenin/repository/postgres"
+	"github.com/jmkng/zenin/repository/sqlite"
 )
 
-func Builder(env *env.DatabaseEnv) *RepositoryBuilder {
+func Builder(db *env.DatabaseEnv, rt *env.RuntimeEnv) *RepositoryBuilder {
 	return &RepositoryBuilder{
-		env:          env,
+		db:           db,
+		rt:           rt,
 		withValidate: false,
 	}
 }
@@ -28,11 +30,13 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 	var repository repository.Repository
 	var err error
 
-	switch b.env.Kind {
+	switch b.db.Kind {
 	case env.Postgres:
-		repository, err = postgres.NewPostgresRepository(b.env)
+		repository, err = postgres.NewPostgresRepository(b.db)
+	case env.SQLite:
+		repository, err = sqlite.NewSQLiteRepository(b.db, b.rt)
 	default:
-		err = errors.New("must specify database kind with `ZENIN_DB_KIND` environment variable")
+		err = errors.New("must specify recognized database kind with `ZENIN_DB_KIND` environment variable")
 	}
 	if err != nil {
 		return repository, err
@@ -61,6 +65,7 @@ func (b RepositoryBuilder) Build() (repository.Repository, error) {
 }
 
 type RepositoryBuilder struct {
-	env          *env.DatabaseEnv
+	db           *env.DatabaseEnv
+	rt           *env.RuntimeEnv
 	withValidate bool
 }

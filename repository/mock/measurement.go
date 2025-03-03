@@ -14,3 +14,8 @@ func (p MockRepository) InsertMeasurement(ctx context.Context, measurement measu
 func (p MockRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
 	return []measurement.Certificate{}, nil
 }
+
+// DeleteMeasurement implements `MeasurementRepository.SelectCertificate` for `MockRepository`.
+func (p MockRepository) DeleteMeasurement(ctx context.Context, id []int) error {
+	return nil
+}
