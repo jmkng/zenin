@@ -90,17 +90,17 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 	}
 
 	time := time.Now()
-	incoming.CreatedAt = time
-	incoming.UpdatedAt = time
+	incoming.CreatedAt = internal.TimeValue(time)
+	incoming.UpdatedAt = internal.TimeValue(time)
 	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 
-	responder.Data(internal.CreateValue{
+	responder.Data(internal.CreatedTimestampValue{
 		Id: id,
-		TimeValue: internal.TimeValue{
+		TimestampValue: internal.TimestampValue{
 			Time: time,
 		},
 	}, http.StatusCreated)
@@ -165,7 +165,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	responder.Data(internal.TimeValue{Time: time}, http.StatusOK)
+	responder.Data(internal.TimestampValue{Time: time}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {

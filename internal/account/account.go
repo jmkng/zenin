@@ -7,14 +7,15 @@ import (
 	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/env"
 )
 
 // Account is the account domain type.
 type Account struct {
 	Id                  *int                `json:"id" db:"account_id"`
-	CreatedAt           time.Time           `json:"createdAt" db:"created_at"`
-	UpdatedAt           time.Time           `json:"updatedAt" db:"updated_at"`
+	CreatedAt           internal.TimeValue  `json:"createdAt" db:"created_at"`
+	UpdatedAt           internal.TimeValue  `json:"updatedAt" db:"updated_at"`
 	Username            string              `json:"username" db:"username"`
 	VersionedSaltedHash VersionedSaltedHash `json:"-" db:"versioned_salted_hash"`
 	Root                bool                `json:"root" db:"root"`

@@ -61,8 +61,8 @@ const (
 // Monitor is the monitor domain type.
 type Monitor struct {
 	Id            *int                  `json:"id" db:"monitor_id"`
-	CreatedAt     time.Time             `json:"createdAt" db:"created_at"`
-	UpdatedAt     time.Time             `json:"updatedAt" db:"updated_at"`
+	CreatedAt     internal.TimeValue    `json:"createdAt" db:"created_at"`
+	UpdatedAt     internal.TimeValue    `json:"updatedAt" db:"updated_at"`
 	Name          string                `json:"name" db:"name"`
 	Kind          measurement.ProbeKind `json:"kind" db:"monitor_kind"`
 	Active        bool                  `json:"active" db:"active"`
@@ -151,8 +151,8 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 	duration := float64(time.Since(start)) / float64(time.Millisecond)
 
 	e.Span = span
-	e.CreatedAt = start
-	e.UpdatedAt = start
+	e.CreatedAt = internal.TimeValue(start)
+	e.UpdatedAt = internal.TimeValue(start)
 	e.Duration = duration
 
 	env.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),

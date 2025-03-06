@@ -75,8 +75,8 @@ func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (
 	time := time.Now()
 	account := Account{
 		Id:                  nil,
-		CreatedAt:           time,
-		UpdatedAt:           time,
+		CreatedAt:           internal.TimeValue(time),
+		UpdatedAt:           internal.TimeValue(time),
 		Username:            app.Username,
 		VersionedSaltedHash: vsh,
 		Root:                app.Root,
@@ -90,7 +90,7 @@ func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (
 	return account, nil
 }
 
-func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApplication) (internal.TimeValue, error) {
+func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApplication) (internal.TimestampValue, error) {
 	// id is the id of the account we are updating.
 	// app describes the new information to be assigned to that account.
 	validation := env.NewValidation()
@@ -104,7 +104,7 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 		Username: &app.Username,
 	})
 	if err != nil {
-		return internal.TimeValue{}, err
+		return internal.TimestampValue{}, err
 	}
 	// This might return one account because the username is unchanged.
 	// If the ids are not the same, some other account already has this username.
@@ -112,7 +112,7 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 		validation.Join(AccountExistsError)
 	}
 	if !validation.Empty() {
-		return internal.TimeValue{}, validation
+		return internal.TimestampValue{}, validation
 	}
 
 	time := time.Now()
@@ -127,21 +127,21 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 	if app.PasswordPlainText != nil {
 		salt, err := env.GetRandomBytes(ZeninAccSaltLength)
 		if err != nil {
-			return internal.TimeValue{}, err
+			return internal.TimestampValue{}, err
 		}
 		vsh, err := GetCurrentScheme().Hash([]byte(*app.PasswordPlainText), salt)
 		if err != nil {
-			return internal.TimeValue{}, fmt.Errorf("failed to generate versioned salted hash: %w", err)
+			return internal.TimestampValue{}, fmt.Errorf("failed to generate versioned salted hash: %w", err)
 		}
 		params.VersionedSaltedHash = &vsh
 	}
 
 	err = a.Repository.UpdateAccount(ctx, params)
 	if err != nil {
-		return internal.TimeValue{}, err
+		return internal.TimestampValue{}, err
 	}
 
-	return internal.TimeValue{
+	return internal.TimestampValue{
 		Time: time,
 	}, nil
 }

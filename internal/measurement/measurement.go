@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/jmkng/zenin/internal"
 )
@@ -20,11 +19,11 @@ const (
 
 // Measurement is the measurement domain type.
 type Measurement struct {
-	Id        *int      `json:"id" db:"measurement_id"`
-	CreatedAt time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
-	MonitorId *int      `json:"monitorId" db:"measurement_monitor_id"`
-	Duration  float64   `json:"duration" db:"duration"`
+	Id        *int               `json:"id" db:"measurement_id"`
+	CreatedAt internal.TimeValue `json:"createdAt" db:"created_at"`
+	UpdatedAt internal.TimeValue `json:"updatedAt" db:"updated_at"`
+	MonitorId *int               `json:"monitorId" db:"measurement_monitor_id"`
+	Duration  float64            `json:"duration" db:"duration"`
 	Span
 }
 
@@ -145,15 +144,15 @@ type PluginFields struct {
 
 // Certificate is an x509 certificate recorded by an HTTP probe.
 type Certificate struct {
-	Id                 *int      `json:"id" db:"certificate_id"`
-	CreatedAt          time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt          time.Time `json:"updatedAt" db:"updated_at"`
-	MeasurementId      *int      `json:"measurementId" db:"certificate_measurement_id"`
-	Version            int       `json:"version" db:"version"`
-	SerialNumber       string    `json:"serialNumber" db:"serial_number"`
-	PublicKeyAlgorithm string    `json:"publicKeyAlgorithm" db:"public_key_algorithm"`
-	IssuerCommonName   string    `json:"issuerCommonName" db:"issuer_common_name"`
-	SubjectCommonName  string    `json:"subjectCommonName" db:"subject_common_name"`
-	NotBefore          time.Time `json:"notBefore" db:"not_before"`
-	NotAfter           time.Time `json:"notAfter" db:"not_after"`
+	Id                 *int               `json:"id" db:"certificate_id"`
+	CreatedAt          internal.TimeValue `json:"createdAt" db:"created_at"`
+	UpdatedAt          internal.TimeValue `json:"updatedAt" db:"updated_at"`
+	MeasurementId      *int               `json:"measurementId" db:"certificate_measurement_id"`
+	Version            int                `json:"version" db:"version"`
+	SerialNumber       string             `json:"serialNumber" db:"serial_number"`
+	PublicKeyAlgorithm string             `json:"publicKeyAlgorithm" db:"public_key_algorithm"`
+	IssuerCommonName   string             `json:"issuerCommonName" db:"issuer_common_name"`
+	SubjectCommonName  string             `json:"subjectCommonName" db:"subject_common_name"`
+	NotBefore          internal.TimeValue `json:"notBefore" db:"not_before"`
+	NotAfter           internal.TimeValue `json:"notAfter" db:"not_after"`
 }

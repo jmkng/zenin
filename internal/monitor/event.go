@@ -1,8 +1,7 @@
 package monitor
 
 import (
-	"time"
-
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/measurement"
 )
 
@@ -97,8 +96,8 @@ type EventCertificate struct {
 	PublicKeyAlgorithm string
 	IssuerCommonName   string
 	SubjectCommonName  string
-	NotBefore          time.Time
-	NotAfter           time.Time
+	NotBefore          internal.TimeValue
+	NotAfter           internal.TimeValue
 }
 
 type EventThreshold string
