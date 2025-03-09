@@ -1,16 +1,18 @@
 package postgres
 
 import (
-	"database/sql"
-	_ "embed"
 	"fmt"
 	"slices"
+	"strings"
 
-	_ "github.com/jackc/pgx/v5"
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/repository"
 	"github.com/jmoiron/sqlx"
+
+	_ "embed"
+
+	_ "github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 // NewPostgresRepository returns a new `PostgresRepository`.
@@ -58,20 +60,28 @@ func (p PostgresRepository) Validate() (bool, error) {
 
 // Migrate implements `Repository.Migrate` for `PostgresRepository`.
 func (p PostgresRepository) Migrate() error {
-	var err error
-	var tx *sql.Tx
-	if tx, err = p.db.Begin(); err != nil {
-		return err
+	if _, err := p.db.Exec(migrate); err != nil {
+		return fmt.Errorf("failed to migrate repository: %w", err)
 	}
-	if _, err := tx.Exec(migration); err != nil {
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
+	return nil
+}
 
+// Fixture implements `Repository.Fixture` for `PostgresRepository`.
+func (p PostgresRepository) Fixture() error {
+	if _, err := p.db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %v", strings.Join(repository.SchemaTables, ", "))); err != nil {
+		return err
+	}
+	if err := p.Migrate(); err != nil {
+		return err
+	}
+	if _, err := p.db.Exec(seed); err != nil {
+		return err
+	}
 	return nil
 }
 
 //go:embed 000_create_tables.sql
-var migration string
+var migrate string
+
+//go:embed 001_seed_tables.sql
+var seed string

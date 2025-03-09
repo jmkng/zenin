@@ -10,6 +10,8 @@ import (
 	"github.com/jmkng/zenin/repository/sqlite"
 )
 
+const SkipKey string = "ZENIN_DB_ENABLE_TEST"
+
 func Builder(db *env.DatabaseEnv, rt *env.RuntimeEnv) *RepositoryBuilder {
 	return &RepositoryBuilder{
 		db:           db,

@@ -1,6 +1,7 @@
 CREATE TABLE settings (
     created_at            TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at            TEXT DEFAULT CURRENT_TIMESTAMP,
+    id                    INTEGER PRIMARY KEY AUTOINCREMENT,
     "key"                 TEXT NOT NULL UNIQUE,
     text_value            TEXT
 );
@@ -47,7 +48,7 @@ CREATE TABLE event (
     created_at            TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at            TEXT DEFAULT CURRENT_TIMESTAMP,
     id                    INTEGER PRIMARY KEY AUTOINCREMENT,
-    monitor_id            INTEGER,
+    monitor_id            INTEGER NOT NULL,
     plugin_name           TEXT NOT NULL,
     plugin_args           TEXT,
     threshold             TEXT CHECK (threshold IN ('WARN', 'DEAD')),
@@ -58,7 +59,7 @@ CREATE TABLE measurement (
     created_at            TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at            TEXT DEFAULT CURRENT_TIMESTAMP,
     id                    INTEGER PRIMARY KEY AUTOINCREMENT,
-    monitor_id            INTEGER,
+    monitor_id            INTEGER NOT NULL,
     state                 TEXT NOT NULL CHECK (state IN ('OK', 'WARN', 'DEAD')),
     state_hint            TEXT,
     kind                  TEXT NOT NULL CHECK (kind IN ('HTTP', 'TCP', 'ICMP', 'PLUGIN')),
@@ -81,7 +82,7 @@ CREATE TABLE certificate (
     created_at           TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at           TEXT DEFAULT CURRENT_TIMESTAMP,
     id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-    measurement_id       INTEGER,
+    measurement_id       INTEGER NOT NULL,
     version              INTEGER, 
     serial_number        TEXT,
     public_key_algorithm TEXT,

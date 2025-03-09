@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"database/sql"
 	"fmt"
 	"path/filepath"
 	"slices"
@@ -25,6 +24,10 @@ func NewSQLiteRepository(db *env.DatabaseEnv, rt *env.RuntimeEnv) (*SQLiteReposi
 		return nil, err
 	}
 
+	_, err = x.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return nil, fmt.Errorf("failed to enable foreign keys: %w", err)
+	}
 	x.SetMaxOpenConns(int(db.MaxConn))
 
 	return &SQLiteRepository{x}, nil
@@ -56,21 +59,31 @@ func (s SQLiteRepository) Validate() (bool, error) {
 }
 
 // Migrate implements `Repository.Migrate` for `SQLiteRepository`.
-func (p SQLiteRepository) Migrate() error {
-	var err error
-	var tx *sql.Tx
-	if tx, err = p.db.Begin(); err != nil {
-		return err
+func (s SQLiteRepository) Migrate() error {
+	if _, err := s.db.Exec(migrate); err != nil {
+		return fmt.Errorf("failed to migrate repository: %w", err)
 	}
-	if _, err := tx.Exec(migration); err != nil {
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
+	return nil
+}
 
+// Fixture implements `Repository.Fixture` for `SQLiteRepository`.
+func (s SQLiteRepository) Fixture() error {
+	for _, v := range repository.SchemaTables {
+		if _, err := s.db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %v", v)); err != nil {
+			return err
+		}
+	}
+	if err := s.Migrate(); err != nil {
+		return err
+	}
+	if _, err := s.db.Exec(seed); err != nil {
+		return err
+	}
 	return nil
 }
 
 //go:embed 000_create_tables.sql
-var migration string
+var migrate string
+
+//go:embed 001_seed_tables.sql
+var seed string

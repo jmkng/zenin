@@ -1,6 +1,7 @@
 CREATE TABLE settings (
     created_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at            TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    id                    SERIAL PRIMARY KEY,
     "key"                 TEXT NOT NULL UNIQUE,
     text_value            TEXT
 );

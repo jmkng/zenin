@@ -4,14 +4,15 @@ import (
 	"errors"
 
 	"github.com/jmkng/zenin/internal/measurement"
-	zsql "github.com/jmkng/zenin/pkg/sql"
+	"github.com/jmkng/zenin/repository/common"
 	"golang.org/x/net/context"
+
+	zsql "github.com/jmkng/zenin/pkg/sql"
 )
 
 // InsertMeasurement implements `MeasurementRepository.InsertMeasurement` for `PostgresRepository`.
 func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement measurement.Measurement) (int, error) {
-	var id int
-	query := `INSERT INTO measurement 
+	query := `INSERT INTO measurement
 		(monitor_id,
 		state,
 		state_hint,
@@ -33,7 +34,7 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
     RETURNING id`
 	tx, err := p.db.BeginTx(ctx, nil)
 	if err != nil {
-		return id, err
+		return -1, err
 	}
 	row := tx.QueryRowContext(
 		ctx,
@@ -55,14 +56,14 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
 		measurement.PluginStdout,
 		measurement.PluginStderr,
 	)
+	var id int
 	err = row.Scan(&id)
 	if err != nil {
-		rberr := tx.Rollback()
-		return id, errors.Join(err, rberr)
+		return -1, errors.Join(err, tx.Rollback())
 	}
 
 	if len(measurement.Certificates) > 0 {
-		builder := zsql.NewBuilder(zsql.Numbered)
+		builder := zsql.NewBuilder(zsql.NumberPositional)
 		builder.Push(`INSERT INTO certificate
 	        (measurement_id, 
 			version, 
@@ -89,53 +90,25 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
 		}
 		_, err = tx.ExecContext(ctx, builder.String(), builder.Args()...)
 		if err != nil {
-			rberr := tx.Rollback()
-			return id, errors.Join(err, rberr)
+			return -1, errors.Join(err, tx.Rollback())
 		}
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		rberr := tx.Rollback()
-		return id, errors.Join(err, rberr)
+	if err := tx.Commit(); err != nil {
+		return id, errors.Join(err, tx.Rollback())
 	}
 
-	return id, err
+	return id, nil
 }
 
 // SelectCertificate implements `MeasurementRepository.SelectCertificate` for `PostgresRepository`.
 func (p PostgresRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
-	query := `SELECT 
-        id "certificate_id", 
-		created_at,
-		updated_at,
-		measurement_id "certificate_measurement_id",  
-		version, 
-		serial_number, 
-        public_key_algorithm, 
-		issuer_common_name, 
-		subject_common_name, 
-		not_before, 
-		not_after
-    FROM certificate
-    WHERE measurement_id = $1`
-
-	var result []measurement.Certificate
-	err := p.db.SelectContext(ctx, &result, query, id)
-	if err != nil {
-		return []measurement.Certificate{}, nil
-	}
-
-	return result, nil
+	builder := zsql.NewBuilder(zsql.NumberPositional)
+	return common.NewCommonRepository(p.db).SelectCertificate(ctx, builder, id)
 }
 
 // DeleteMeasurement implements `MeasurementRepository.DeleteMeasurement` for `PostgresRepository`.
 func (p PostgresRepository) DeleteMeasurement(ctx context.Context, id []int) error {
-	builder := zsql.NewBuilder(zsql.Numbered)
-	builder.Push("DELETE FROM measurement WHERE id in (")
-	builder.SpreadInt(id...)
-	builder.Push(")")
-
-	_, err := p.db.ExecContext(ctx, builder.String(), builder.Args()...)
-	return err
+	builder := zsql.NewBuilder(zsql.NumberPositional)
+	return common.NewCommonRepository(p.db).DeleteMeasurement(ctx, builder, id)
 }

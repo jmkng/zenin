@@ -1,7 +1,8 @@
 INSERT INTO account 
     (username, versioned_salted_hash, root)
 VALUES 
-    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', true);
+    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', true),
+    ('testuser2', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', false);
 
 INSERT INTO monitor 
     (name, 
@@ -388,4 +389,9 @@ VALUES
     (1,
     'helloworld.sh', 
     '["one", "two"]',
-    'DEAD')
+    'DEAD');
+
+INSERT INTO settings
+    ("key", text_value)
+VALUES
+    ('delimiters', '["<<", ">>"]');
