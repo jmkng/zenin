@@ -10,6 +10,7 @@ type DatabaseKind string
 
 const (
 	Postgres DatabaseKind = "postgres"
+	SQLite   DatabaseKind = "sqlite"
 )
 
 // Database is an instance of `DatabaseEnv` initialized at startup.
@@ -20,6 +21,8 @@ func NewDatabaseEnv() *DatabaseEnv {
 	switch key := strings.ToLower(os.Getenv(dbKindKey)); key {
 	case "postgres":
 		kind = Postgres
+	case "sqlite":
+		kind = SQLite
 	}
 	username := os.Getenv(dbUsernameKey)
 	password := os.Getenv(dbPasswordKey)

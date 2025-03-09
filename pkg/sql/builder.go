@@ -70,6 +70,16 @@ type Builder struct {
 	where  *WhereBuilder
 }
 
+// Advance will advance the internal `MarkerBuilder` count by the provided value.
+//
+// This is useful when building a query that combines hardcoded and dynamically appended bind markers.
+func (b *Builder) Advance(value int) {
+	if b.marker.marker != NumberPositional {
+		return
+	}
+	b.marker.count += value
+}
+
 // Reset will reset the `Builder` to the state returned by `NewBuilder`.
 func (b *Builder) Reset() {
 	b.query.Reset()
@@ -104,6 +114,13 @@ func (b *Builder) Push(q string) {
 	} else {
 		b.query.WriteString(q)
 	}
+}
+
+// BindOpaque will push a bind marker to the internal buffer,
+// and add the provided argument to the argument stack.
+func (b *Builder) BindOpaque(arg any) {
+	b.pushMarker()
+	b.pushArg(arg)
 }
 
 // BindBool will push a bind marker to the internal buffer,
@@ -194,7 +211,8 @@ func (b *Builder) Where() *WhereBuilder {
 type BindMarker int
 
 const (
-	Numbered BindMarker = iota
+	NumberPositional BindMarker = iota
+	QuestionPositional
 )
 
 // NewMarkerBuilder returns a new `MarkerBuilder`.
@@ -221,15 +239,21 @@ func (m *MarkerBuilder) Reset() {
 //
 // Has different behavior depending on the `BindMarker` used to create the `MarkerBuilder`.
 //
-// - Numbered
+// - NumberPositional
 //
-// Places numbered markers. ($1)
+// Places numbered positional markers. ($1)
+//
+// - QuestionPositional
+//
+// Places question mark positional markers. (?)
 func (m *MarkerBuilder) String() string {
 	var stamp string
 	switch m.marker {
-	case Numbered:
+	case NumberPositional:
 		stamp = fmt.Sprintf("$%v", m.count)
 		m.count++
+	case QuestionPositional:
+		stamp = "?"
 	default:
 		panic("unsupported marker")
 	}

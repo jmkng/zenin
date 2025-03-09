@@ -36,12 +36,12 @@ func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 	return resume, err
 }
 
-func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (internal.TimeValue, error) {
-	time := time.Now()
+func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (internal.TimestampValue, error) {
+	time := internal.NewTimeValue(time.Now())
 	monitor.UpdatedAt = time
 
 	if err := s.Repository.UpdateMonitor(ctx, monitor); err != nil {
-		return internal.TimeValue{}, err
+		return internal.TimestampValue{}, err
 	}
 
 	s.Distributor <- StopMessage{
@@ -53,7 +53,7 @@ func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (int
 		}
 	}
 
-	return internal.TimeValue{
+	return internal.TimestampValue{
 		Time: time,
 	}, nil
 }

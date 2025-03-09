@@ -3,14 +3,14 @@ package account
 import (
 	"context"
 	"fmt"
-	"time"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/pkg/sql"
 )
 
 // AccountRepository is a type used to interact with the account domain database table.
 type AccountRepository interface {
-	SelectAccountTotal(ctx context.Context) (int64, error)
+	SelectAccountTotal(ctx context.Context) (int, error)
 	SelectAccount(ctx context.Context, params *SelectAccountParams) ([]Account, error)
 	InsertAccount(ctx context.Context, account Account) (int, error)
 	UpdateAccount(ctx context.Context, params UpdateAccountParams) error
@@ -35,7 +35,7 @@ func (s SelectAccountParams) Inject(builder *sql.Builder) {
 // UpdateAccountParams is a set of parameters used to narrow the scope of the `UpdateAccount` repository method.
 type UpdateAccountParams struct {
 	Id                  int
-	UpdatedAt           time.Time
+	UpdatedAt           internal.TimeValue
 	Username            string
 	VersionedSaltedHash *VersionedSaltedHash
 }

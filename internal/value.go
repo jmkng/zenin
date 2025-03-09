@@ -3,6 +3,7 @@ package internal
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -59,13 +60,63 @@ func (p *PairListValue) Scan(value any) error {
 	return err
 }
 
-// TimeValue represents a timestamp.
-type TimeValue struct {
-	Time time.Time `json:"time"`
+// NewTimeValue returns a new `TimeValue` with the location set to UTC.
+func NewTimeValue(t time.Time) TimeValue {
+	return TimeValue{time: t.UTC()}
 }
 
-// CreateValue represents a created resource.
-type CreateValue struct {
+// TimeValue is a wrapper for `time.Time` that allows scanning from all repository implementations.
+type TimeValue struct {
+	time time.Time
+}
+
+// Scan implements `sql.Scanner` for `TimeValue`
+func (t *TimeValue) Scan(value any) error {
+	switch v := value.(type) {
+	// Text storage. (SQLite)
+	case string:
+		var f []string = []string{
+			time.DateTime, // Result of SQLite CUSTOM_TIMESTAMP
+			time.RFC3339,
+		}
+		for _, x := range f {
+			parsed, err := time.Parse(x, v)
+			if err == nil {
+				*t = NewTimeValue(parsed)
+				return nil
+			}
+		}
+	// Timestamp storage. (Postgres)
+	case time.Time:
+		*t = NewTimeValue(v)
+		return nil
+	}
+
+	return fmt.Errorf("unsupported scan type for time: %T", value)
+}
+
+// Time returns the internal `time.Time`.
+func (t TimeValue) Time() time.Time {
+	return t.time
+}
+
+// Value implements `driver.Valuer` for `TimeValue`.
+func (t TimeValue) Value() (driver.Value, error) {
+	return t.time.Format(time.RFC3339), nil
+}
+
+// MarshalJSON implements `json.Marshaler` for `TimeValue`.
+func (t TimeValue) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + t.time.Format(time.RFC3339) + `"`), nil
+}
+
+// TimestampValue represents a timestamp.
+type TimestampValue struct {
+	Time TimeValue `json:"time"`
+}
+
+// CreatedTimestampValue represents a created resource.
+type CreatedTimestampValue struct {
 	Id int `json:"id"`
-	TimeValue
+	TimestampValue
 }

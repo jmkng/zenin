@@ -121,8 +121,8 @@ func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 				PublicKeyAlgorithm: n.PublicKeyAlgorithm.String(),
 				IssuerCommonName:   n.Issuer.CommonName,
 				SubjectCommonName:  n.Subject.CommonName,
-				NotBefore:          n.NotBefore,
-				NotAfter:           n.NotAfter,
+				NotBefore:          internal.NewTimeValue(n.NotBefore),
+				NotAfter:           internal.NewTimeValue(n.NotAfter),
 			}
 			span.Certificates = append(span.Certificates, c)
 		}

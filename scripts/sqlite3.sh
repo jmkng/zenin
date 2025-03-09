@@ -1,0 +1,1 @@
+sqlite3 "${ZENIN_RT_BASE_DIR}/${ZENIN_DB_NAME}"

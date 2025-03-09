@@ -1,4 +1,4 @@
-package postgres
+package sqlite
 
 import (
 	"errors"
@@ -10,8 +10,8 @@ import (
 	zsql "github.com/jmkng/zenin/pkg/sql"
 )
 
-// InsertMeasurement implements `MeasurementRepository.InsertMeasurement` for `PostgresRepository`.
-func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement measurement.Measurement) (int, error) {
+// InsertMeasurement implements `MeasurementRepository.InsertMeasurement` for `SQLiteRepository`.
+func (s SQLiteRepository) InsertMeasurement(ctx context.Context, measurement measurement.Measurement) (int, error) {
 	query := `INSERT INTO measurement
 		(monitor_id,
 		state,
@@ -30,13 +30,12 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
 		plugin_stdout,
 		plugin_stderr)
     VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-    RETURNING id`
-	tx, err := p.db.BeginTx(ctx, nil)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return -1, err
 	}
-	row := tx.QueryRowContext(
+	result, err := tx.ExecContext(
 		ctx,
 		query,
 		measurement.MonitorId,
@@ -56,14 +55,18 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
 		measurement.PluginStdout,
 		measurement.PluginStderr,
 	)
-	var id int
-	err = row.Scan(&id)
 	if err != nil {
 		return -1, errors.Join(err, tx.Rollback())
 	}
 
+	id64, err := result.LastInsertId()
+	if err != nil {
+		return -1, errors.Join(err, tx.Rollback())
+	}
+	id := int(id64)
+
 	if len(measurement.Certificates) > 0 {
-		builder := zsql.NewBuilder(zsql.NumberPositional)
+		builder := zsql.NewBuilder(zsql.QuestionPositional)
 		builder.Push(`INSERT INTO certificate
 	        (measurement_id, 
 			version, 
@@ -101,14 +104,14 @@ func (p PostgresRepository) InsertMeasurement(ctx context.Context, measurement m
 	return id, nil
 }
 
-// SelectCertificate implements `MeasurementRepository.SelectCertificate` for `PostgresRepository`.
-func (p PostgresRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
-	builder := zsql.NewBuilder(zsql.NumberPositional)
-	return common.NewCommonRepository(p.db).SelectCertificate(ctx, builder, id)
+// SelectCertificate implements `MeasurementRepository.SelectCertificate` for `SQLiteRepository`.
+func (s SQLiteRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
+	builder := zsql.NewBuilder(zsql.QuestionPositional)
+	return common.NewCommonRepository(s.db).SelectCertificate(ctx, builder, id)
 }
 
-// DeleteMeasurement implements `MeasurementRepository.DeleteMeasurement` for `PostgresRepository`.
-func (p PostgresRepository) DeleteMeasurement(ctx context.Context, id []int) error {
-	builder := zsql.NewBuilder(zsql.NumberPositional)
-	return common.NewCommonRepository(p.db).DeleteMeasurement(ctx, builder, id)
+// DeleteMeasurement implements `MeasurementRepository.DeleteMeasurement` for `SQLiteRepository`.
+func (s SQLiteRepository) DeleteMeasurement(ctx context.Context, id []int) error {
+	builder := zsql.NewBuilder(zsql.QuestionPositional)
+	return common.NewCommonRepository(s.db).DeleteMeasurement(ctx, builder, id)
 }

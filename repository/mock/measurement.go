@@ -6,11 +6,16 @@ import (
 )
 
 // InsertMeasurement implements `MeasurementRepository.InsertMeasurement` for `MockRepository`.
-func (p MockRepository) InsertMeasurement(ctx context.Context, measurement measurement.Measurement) (int, error) {
+func (m MockRepository) InsertMeasurement(ctx context.Context, measurement measurement.Measurement) (int, error) {
 	return -1, nil
 }
 
 // SelectCertificate implements `MeasurementRepository.SelectCertificate` for `MockRepository`.
-func (p MockRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
+func (m MockRepository) SelectCertificate(ctx context.Context, id int) ([]measurement.Certificate, error) {
 	return []measurement.Certificate{}, nil
+}
+
+// DeleteMeasurement implements `MeasurementRepository.SelectCertificate` for `MockRepository`.
+func (m MockRepository) DeleteMeasurement(ctx context.Context, id []int) error {
+	return nil
 }

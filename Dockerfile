@@ -12,4 +12,9 @@ FROM alpine:latest
 WORKDIR /build
 COPY --from=builder /build/zenin .
 EXPOSE 50010
+
+# Default repository is a local SQLite database.
+ENV ZENIN_DB_KIND="sqlite"
+ENV ZENIN_DB_NAME="zenin.db"
+
 CMD ["./zenin"]

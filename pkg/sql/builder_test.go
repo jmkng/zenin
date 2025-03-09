@@ -6,7 +6,7 @@ import (
 )
 
 func TestBuilder(t *testing.T) {
-	builder := NewBuilder(Numbered)
+	builder := NewBuilder(NumberPositional)
 
 	where := builder.Where()
 	s := fmt.Sprintf("SELECT * FROM PEOPLE %v AGE > 25 %v name <> 'Adamson'", where, where)

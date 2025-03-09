@@ -1,8 +1,8 @@
 INSERT INTO account 
     (username, versioned_salted_hash, root)
 VALUES 
-    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', true),
-    ('testuser2', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', false);
+    ('testuser1', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', 1),
+    ('testuser2', ':1:gyZa14tdPBUsOzbcZG99cQ==:eDdVGqorzEcYL4+arqiSHfMlQsq/+fM9ua2Gq7wrT7g=', 0);
 
 INSERT INTO monitor 
     (name, 
@@ -31,7 +31,7 @@ INSERT INTO monitor
 VALUES
     ('Mercury', 
     'ICMP', 
-    false, 
+    0, 
     30, 
     10, 
     'Mercury Description', 
@@ -54,7 +54,7 @@ VALUES
     25),
     ('Venus', 
     'HTTP', 
-    false, 
+    0, 
     30, 
     10, 
     NULL, 
@@ -77,7 +77,7 @@ VALUES
     NULL),
     ('Earth', 
     'PLUGIN', 
-    false, 
+    0, 
     137, 
     10, 
     'Earth Description', 
@@ -100,7 +100,7 @@ VALUES
     NULL),
     ('Mars', 
     'HTTP', 
-    false, 
+    0, 
     112, 
     10, 
     NULL, 
@@ -123,7 +123,7 @@ VALUES
     NULL),
     ('Jupiter', 
     'HTTP', 
-    false, 
+    0, 
     133, 
     10, 
     NULL, 
@@ -146,7 +146,7 @@ VALUES
     NULL),
     ('Saturn', 
     'HTTP', 
-    false, 
+    0, 
     139, 
     10, 
     NULL, 
@@ -169,7 +169,7 @@ VALUES
     NULL),
     ('Uranus', 
     'HTTP', 
-    false, 
+    0, 
     110, 
     10, 
     NULL, 
@@ -192,7 +192,7 @@ VALUES
     NULL),
     ('Neptune', 
     'HTTP', 
-    false, 
+    0, 
     109, 
     10, 
     NULL, 

@@ -89,7 +89,7 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	time := time.Now()
+	time := internal.NewTimeValue(time.Now())
 	incoming.CreatedAt = time
 	incoming.UpdatedAt = time
 	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
@@ -98,9 +98,9 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	responder.Data(internal.CreateValue{
+	responder.Data(internal.CreatedTimestampValue{
 		Id: id,
-		TimeValue: internal.TimeValue{
+		TimestampValue: internal.TimestampValue{
 			Time: time,
 		},
 	}, http.StatusCreated)
@@ -148,7 +148,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	// Make sure `Kind` doesn't interfere with below query.
 	params.Kind = nil
 
-	time := time.Now()
+	time := internal.NewTimeValue(time.Now())
 	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active, time)
 	if *params.Active {
 		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), 0, &params)
@@ -165,7 +165,7 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	responder.Data(internal.TimeValue{Time: time}, http.StatusOK)
+	responder.Data(internal.TimestampValue{Time: time}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Request) {
@@ -315,12 +315,14 @@ func newSelectMeasurementParamsFromQuery(values url.Values) monitor.SelectMeasur
 	format := "1/2/2006"
 	if braw := values.Get("before"); braw != "" {
 		if bparsed, err := time.Parse(format, braw); err == nil {
-			params.Before = &bparsed
+			before := internal.NewTimeValue(bparsed)
+			params.Before = &before
 		}
 	}
 	if araw := values.Get("after"); araw != "" {
 		if aparsed, err := time.Parse(format, araw); err == nil {
-			params.After = &aparsed
+			after := internal.NewTimeValue(aparsed)
+			params.After = &after
 		}
 	}
 

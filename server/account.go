@@ -197,9 +197,9 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	responder.Data(internal.CreateValue{
+	responder.Data(internal.CreatedTimestampValue{
 		Id: *account.Id,
-		TimeValue: internal.TimeValue{
+		TimestampValue: internal.TimestampValue{
 			Time: account.CreatedAt,
 		},
 	}, http.StatusCreated)
@@ -271,10 +271,10 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 
 		responder.Data(struct {
 			Token string `json:"token"`
-			internal.TimeValue
+			internal.TimestampValue
 		}{
-			Token:     token,
-			TimeValue: time,
+			Token:          token,
+			TimestampValue: time,
 		}, http.StatusOK)
 		return
 	}
