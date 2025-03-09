@@ -151,8 +151,8 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 	duration := float64(time.Since(start)) / float64(time.Millisecond)
 
 	e.Span = span
-	e.CreatedAt = internal.TimeValue(start)
-	e.UpdatedAt = internal.TimeValue(start)
+	e.CreatedAt = internal.NewTimeValue(start)
+	e.UpdatedAt = internal.NewTimeValue(start)
 	e.Duration = duration
 
 	env.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),

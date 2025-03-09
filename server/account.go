@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmkng/zenin/internal"
@@ -201,7 +200,7 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 	responder.Data(internal.CreatedTimestampValue{
 		Id: *account.Id,
 		TimestampValue: internal.TimestampValue{
-			Time: time.Time(account.CreatedAt),
+			Time: account.CreatedAt,
 		},
 	}, http.StatusCreated)
 }

@@ -3,8 +3,8 @@ package monitor
 import (
 	"context"
 	"fmt"
-	"time"
 
+	"github.com/jmkng/zenin/internal"
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/pkg/sql"
 )
@@ -16,7 +16,7 @@ type MonitorRepository interface {
 	SelectMeasurement(ctx context.Context, id int, params *SelectMeasurementParams) ([]measurement.Measurement, error)
 	UpdateMonitor(ctx context.Context, monitor Monitor) error
 	DeleteMonitor(ctx context.Context, id []int) error
-	ToggleMonitor(ctx context.Context, id []int, active bool, time time.Time) error
+	ToggleMonitor(ctx context.Context, id []int, active bool, updatedAt internal.TimeValue) error
 }
 
 // SelectMonitorParams is a set of parameters used to narrow the scope of the `SelectMonitor` repository method.
@@ -65,8 +65,8 @@ func (s SelectMonitorParams) Inject(builder *sql.Builder) {
 // Implements `Injectable.Inject`, so it can automatically apply suitable SQL to
 // a `sql.Builder`.
 type SelectMeasurementParams struct {
-	After  *time.Time
-	Before *time.Time
+	After  *internal.TimeValue
+	Before *internal.TimeValue
 }
 
 // Inject implements `Injectable.Inject` for `SelectMeasurementParams`.
@@ -74,10 +74,10 @@ func (s SelectMeasurementParams) Inject(builder *sql.Builder) {
 	where := builder.Where()
 	if s.After != nil {
 		builder.Push(fmt.Sprintf("%v created_at > ", where))
-		builder.BindString(s.After.Format(time.RFC3339))
+		builder.BindOpaque(s.After)
 	}
 	if s.Before != nil {
 		builder.Push(fmt.Sprintf("%v created_at < ", where))
-		builder.BindString(s.Before.Format(time.RFC3339))
+		builder.BindOpaque(s.Before)
 	}
 }

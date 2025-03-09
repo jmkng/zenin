@@ -75,8 +75,8 @@ func (a AccountService) AddAccount(ctx context.Context, app CreateApplication) (
 	time := time.Now()
 	account := Account{
 		Id:                  nil,
-		CreatedAt:           internal.TimeValue(time),
-		UpdatedAt:           internal.TimeValue(time),
+		CreatedAt:           internal.NewTimeValue(time),
+		UpdatedAt:           internal.NewTimeValue(time),
 		Username:            app.Username,
 		VersionedSaltedHash: vsh,
 		Root:                app.Root,
@@ -115,7 +115,7 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int, app UpdateApp
 		return internal.TimestampValue{}, validation
 	}
 
-	time := time.Now()
+	time := internal.NewTimeValue(time.Now())
 	params := UpdateAccountParams{
 		Id:                  id,
 		UpdatedAt:           time,
