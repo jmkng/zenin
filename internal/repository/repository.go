@@ -14,6 +14,7 @@ var SchemaTables = []string{
 	"measurement",
 	"certificate",
 	"settings",
+	"event",
 }
 
 type Repository interface {
@@ -21,6 +22,9 @@ type Repository interface {
 	Validate() (bool, error)
 	// Migrate will attempt to migrate the repository.
 	Migrate() error
+	// Fixture converts the repository into a test fixture by resetting the schema,
+	// applying migrations, and inserting seed data.
+	Fixture() error
 
 	monitor.MonitorRepository
 	measurement.MeasurementRepository
