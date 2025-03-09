@@ -74,6 +74,7 @@ Supported environment variables are documented below. Values are case sensitive.
 | ZENIN_DB_USERNAME              | The username used to sign in to the database.                | any string           | export ZENIN_DB_USERNAME=username           | N/A
 | ZENIN_DB_PASSWORD              | The password used to sign in to the database.                | any string           | export ZENIN_DB_PASSWORD=password           | N/A
 | ZENIN_DB_MAX_CONN              | The maximum number of open database connections.             | any number           | export ZENIN_DB_MAX_CONN=5                  | N/A
+| ZENIN_DB_ENABLE_TEST           | Enable or disable repository testing.                        | true, false          | export ZENIN_DB_ENABLE_TEST=true            | false
 | ZENIN_RT_LEVEL                 | The process run level. (optional)                            | prod, dev            | export ZENIN_RT_LEVEL=prod                  | prod
 | ZENIN_RT_ADDRESS               | An address for Zenin to bind on.                             | any x.x.x.x address  | export ZENIN_RT_ADDRESS=0.0.0.0.0           | 127.0.0.1
 | ZENIN_RT_PORT                  | A port number for Zenin to run on. (optional)                | any u16              | export ZENIN_RT_PORT=4884                   | 50010
@@ -238,6 +239,18 @@ Linker flags are used to bake in a program version and the most recent commit ha
 
 ## Testing
 
+Database tests are disabled by default. Enable them with the `ZENIN_DB_ENABLE_TEST` environment variable. 
+
+> [!WARNING]
+> Unit tests that interact with a database are not mocked in any way,
+> they use the database that Zenin is pointed at using the typical environment variables.
+>
+> When a database unit test runs, it will acquire a test fixture by deleting all data on the repository,
+> migrating, and inserting seed data. 
+> Do not run these tests when Zenin is pointed to a repository with valuable data.
+
+Use the makefile to run tests.
+
 ```
-make test
+go clean -testcache && make test
 ```
