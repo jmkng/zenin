@@ -17,45 +17,48 @@ import (
 )
 
 func main() {
-	if env.Runtime.Kind == env.Dev {
+	e := env.Env
+	if e.EnableDebug {
 		env.EnableDebug()
 	}
+
 	env.Debug("main starting")
 
-	ctx := context.Background()
-
 	commit := ""
-	if env.Runtime.Kind == env.Dev {
+	if e.EnableDebug {
 		commit = " " + env.Commit
 	}
-	c := env.Runtime.Color
-	fmt.Printf("Zenin %v%v\n", env.Version, g.MagentaC(commit, c))
-	fmt.Printf("Base: %v\n", env.Runtime.BaseDir)
-	fmt.Printf("Plugins: %v\n", env.Runtime.PluginsDir)
 
-	dx := env.Runtime.Diagnose()
-	err := dx.Write(os.Stdout)
-	dd(err)
+	fmt.Printf("Zenin %v%v\n", env.Version, g.MagentaC(commit, e.EnableColor))
+	env.Info("environment", "base", e.BaseDir, "plugins", e.PluginsDir)
 
-	if dx.Fatal() {
+	dx := env.NewDiagnostic()
+	e.Diagnose(&dx)
+
+	if dx.Log() {
 		os.Exit(1)
 	}
 
-	repository, err := repository.Builder(env.Database, env.Runtime).
+	repository, err := repository.
+		Builder(e).
 		WithValidate().
 		Build()
 	dd(err)
 
-	channel := make(chan any, 1)
+	asv := account.NewAccountService(repository)
 
+	ctx := context.Background()
+	claimed, err := asv.GetClaimStatus(ctx)
+	dd(err)
+
+	env.Info("repository", append(repository.Describe(), "claimed", claimed)...)
+
+	channel := make(chan any, 1)
 	mosv := monitor.NewMonitorService(repository, channel)
 	plugins, err := mosv.GetPlugins()
 	dd(err)
 
-	fmt.Printf("Using %v plugins\n", len(plugins))
-	for _, v := range plugins {
-		fmt.Printf("    [%v]\n", v)
-	}
+	env.Info("plugins", "count", len(plugins), "files", plugins)
 
 	ssv := settings.NewSettingsService(repository, channel)
 	settings, err := ssv.GetSettings(ctx)
@@ -65,7 +68,7 @@ func main() {
 	distributor := monitor.NewDistributor(mesv, settings)
 	go distributor.Listen(channel)
 
-	active, err := mosv.GetActive(context.Background())
+	active, err := mosv.GetActive(ctx)
 	dd(err)
 
 	env.Debug("restoring distributor state", "active", len(active))
@@ -73,10 +76,7 @@ func main() {
 		channel <- monitor.StartMessage{Monitor: v}
 	}
 
-	asv := account.NewAccountService(repository)
-
-	// Start server.
-	config, err := server.NewConfig(env.Runtime)
+	config, err := server.NewConfig(e)
 	dd(err)
 
 	server.NewServer(

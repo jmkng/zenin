@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-docker exec -it $ZENIN_DB_CONTAINER bash -c "psql -U $ZENIN_DB_USERNAME -d $ZENIN_DB_NAME"
+docker exec -it $ZENIN_SCRIPT_REPO_CONTAINER bash -c "psql -U $ZENIN_REPO_USERNAME -d $ZENIN_REPO_NAME"

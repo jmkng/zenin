@@ -21,3 +21,8 @@ func (m MockRepository) Migrate() error {
 func (m MockRepository) Fixture() error {
 	return nil
 }
+
+// Describe implements `Repository.Describe` for `MockRepository`.
+func (m MockRepository) Describe() []any {
+	return []any{"kind", "Mock"}
+}

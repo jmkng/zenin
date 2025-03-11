@@ -2,7 +2,6 @@ package sqlite
 
 import (
 	"fmt"
-	"path/filepath"
 	"slices"
 
 	"github.com/jmkng/zenin/internal/env"
@@ -16,10 +15,8 @@ import (
 )
 
 // NewSQLiteRepository returns a new `SQLiteRepository`.
-func NewSQLiteRepository(db *env.DatabaseEnv, rt *env.RuntimeEnv) (*SQLiteRepository, error) {
-	path := filepath.Join(rt.BaseDir, db.Name)
-
-	x, err := sqlx.Open("sqlite", path)
+func NewSQLiteRepository(e env.Environment) (*SQLiteRepository, error) {
+	x, err := sqlx.Open("sqlite", e.GetLocalRepositoryPath())
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +25,7 @@ func NewSQLiteRepository(db *env.DatabaseEnv, rt *env.RuntimeEnv) (*SQLiteReposi
 	if err != nil {
 		return nil, fmt.Errorf("failed to enable foreign keys: %w", err)
 	}
-	x.SetMaxOpenConns(int(db.MaxConn))
+	x.SetMaxOpenConns(int(e.Repository.MaxConn))
 
 	return &SQLiteRepository{x}, nil
 }
@@ -80,6 +77,11 @@ func (s SQLiteRepository) Fixture() error {
 		return err
 	}
 	return nil
+}
+
+// Describe implements `Repository.Describe` for `SQLiteRepository`.
+func (s SQLiteRepository) Describe() []any {
+	return []any{"kind", "SQLite", "path", env.Env.GetLocalRepositoryPath()}
 }
 
 //go:embed 000_create_tables.sql

@@ -14,7 +14,7 @@ import (
 	"github.com/jmkng/zenin/internal/repository"
 )
 
-const SkipKey string = "ZENIN_DB_ENABLE_TEST"
+const SkipKey string = "ZENIN_REPO_ENABLE_TEST"
 
 func TestToggleMonitor(t *testing.T) {
 	if _, set := os.LookupEnv(SkipKey); !set {
@@ -250,7 +250,7 @@ func TestSelectMonitorMeasurements(t *testing.T) {
 }
 
 func fixture(t *testing.T) repository.Repository {
-	repository, err := Builder(env.Database, env.Runtime).Build()
+	repository, err := Builder(env.Env).Build()
 	if err != nil {
 		t.Fatalf("failed to build repository: %v", err)
 	}

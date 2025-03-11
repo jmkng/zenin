@@ -1,7 +1,5 @@
 package env
 
-import "io"
-
 func NewDiagnostic() Diagnostic {
 	return Diagnostic{
 		Warnings: []string{},
@@ -33,23 +31,17 @@ func (d Diagnostic) Empty() bool {
 	return len(d.Warnings) == 0 && len(d.Errors) == 0
 }
 
-// Write will write all messages to a `Writer`.
-// Warnings are written first, errors last. If an error occurs while writing, it is returned.
-func (d Diagnostic) Write(w io.Writer) error {
+// Log will log all messages.
+// Returns true if the Diagnostic contained an error.
+func (d Diagnostic) Log() bool {
 	for _, v := range d.Warnings {
-		_, err := w.Write([]byte(v))
-		if err != nil {
-			return err
-		}
+		Warn(v)
 	}
 	for _, v := range d.Errors {
-		_, err := w.Write([]byte(v))
-		if err != nil {
-			return err
-		}
+		Error(v)
 	}
 
-	return nil
+	return len(d.Errors) > 0
 }
 
 // Fatal returns true if the `Diagnostic` contains any errors.

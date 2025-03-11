@@ -96,7 +96,7 @@ export function isErrorPacket(obj: any): obj is ErrorPacket {
     return obj && obj.errors && Array.isArray(obj.errors)
 }
 
-const PORT = import.meta.env.DEV ? '50010' : window.location.port
+const PORT = import.meta.env.DEV ? '23111' : window.location.port
 const BASE_ENDPOINT = `${window.location.hostname}:${PORT}/api/v1`;
 export const BASE_WINDOW_PROTO_ENDPOINT = `${window.location.protocol}//${BASE_ENDPOINT}`;
 export const FEED_WS_ENDPOINT = `ws://${BASE_ENDPOINT}/feed`;

@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-response=$(curl "http://127.0.0.1:${ZENIN_RT_PORT}/api/v1/account/authenticate" \
+response=$(curl "http://127.0.0.1:${ZENIN_PORT}/api/v1/account/authenticate" \
     -H "Content-Type: application/json" \
-    -d "{ \"username\": \"${ZENIN_API_USER}\", \"password\": \"${ZENIN_API_PASS}\" }" \
+    -d "{ \"username\": \"${ZENIN_SCRIPT_USERNAME}\", \"password\": \"${ZENIN_SCRIPT_PASSWORD}\" }" \
     -s)
 if [ $? -ne 0 ]; then
     echo "curl failed"
@@ -10,4 +10,4 @@ if [ $? -ne 0 ]; then
 fi
 
 token=$(echo "$response" | jq -r '.data')
-export ZENIN_API_TOKEN="$token"
+export ZENIN_SCRIPT_TOKEN="$token"

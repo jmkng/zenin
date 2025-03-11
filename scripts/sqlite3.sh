@@ -1,1 +1,1 @@
-sqlite3 "${ZENIN_RT_BASE_DIR}/${ZENIN_DB_NAME}"
+sqlite3 "${ZENIN_BASE_DIR}/${ZENIN_REPO_NAME}"

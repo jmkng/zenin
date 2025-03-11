@@ -60,7 +60,7 @@ type defaultHandler struct {
 func (d *defaultHandler) Handle(ctx context.Context, r slog.Record) error {
 	level := r.Level.String() + ":"
 
-	c := Runtime.Color
+	c := Env.EnableColor
 	switch r.Level {
 	case slog.LevelDebug:
 		level = graphics.MagentaC(level, c)
@@ -89,4 +89,19 @@ func (d *defaultHandler) Handle(ctx context.Context, r slog.Record) error {
 	d.l.Println(timeStr, level, r.Message, string(b))
 
 	return nil
+}
+func standardOptions() slog.HandlerOptions {
+	return slog.HandlerOptions{
+		AddSource:   false,
+		Level:       slog.LevelInfo,
+		ReplaceAttr: nil,
+	}
+}
+
+func verboseOptions() slog.HandlerOptions {
+	return slog.HandlerOptions{
+		AddSource:   false,
+		Level:       slog.LevelDebug,
+		ReplaceAttr: nil,
+	}
 }

@@ -16,19 +16,19 @@ import (
 )
 
 // NewPostgresRepository returns a new `PostgresRepository`.
-func NewPostgresRepository(env *env.DatabaseEnv) (*PostgresRepository, error) {
+func NewPostgresRepository(e env.Environment) (*PostgresRepository, error) {
 	conns := fmt.Sprintf("postgres://%v:%v@%v:%v/%v",
-		env.Username,
-		env.Password,
-		env.Host,
-		env.Port,
-		env.Name)
+		e.Repository.Username,
+		e.Repository.Password,
+		e.Repository.Host,
+		e.Repository.Port,
+		e.Repository.Name)
 	db, err := sqlx.Open("pgx", conns)
 	if err != nil {
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(int(env.MaxConn))
+	db.SetMaxOpenConns(int(e.Repository.MaxConn))
 
 	return &PostgresRepository{db}, nil
 }
@@ -78,6 +78,11 @@ func (p PostgresRepository) Fixture() error {
 		return err
 	}
 	return nil
+}
+
+// Describe implements `Repository.Describe` for `PostgresRepository`.
+func (p PostgresRepository) Describe() []any {
+	return []any{"kind", "PostgreSQL", "address", env.Env.Repository.Host, "port", env.Env.Repository.Port}
 }
 
 //go:embed 000_create_tables.sql

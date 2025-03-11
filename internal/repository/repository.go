@@ -25,6 +25,8 @@ type Repository interface {
 	// Fixture converts the repository into a test fixture by resetting the schema,
 	// applying migrations, and inserting seed data.
 	Fixture() error
+	// Describe returns a description as key/value pairs.
+	Describe() []any
 
 	monitor.MonitorRepository
 	measurement.MeasurementRepository

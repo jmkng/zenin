@@ -44,7 +44,7 @@ func (f FeedProvider) Mux() http.Handler {
 
 func (f FeedProvider) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{}
-	if env.Runtime.Kind == env.Dev {
+	if env.Env.EnableDebug {
 		// Disable origin check.
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true

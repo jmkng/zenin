@@ -22,6 +22,47 @@ import (
 	"github.com/jmkng/zenin/internal/settings"
 )
 
+func NewConfig(e env.Environment) (Config, error) {
+	ip := net.ParseIP(e.Address)
+	if ip == nil {
+		return Config{}, errors.New("server ip address is invalid")
+	}
+
+	address := net.TCPAddr{
+		IP:   ip,
+		Port: int(e.Port),
+	}
+
+	return Config{Env: e, Address: address, Tls: nil}, nil // TODO: TLS setup will happen here.
+}
+
+// Config controls the behavior of a Zenin Server.
+type Config struct {
+	Env     env.Environment
+	Address net.TCPAddr
+	Tls     *TlsConfig
+}
+
+// TlsConfig contains TLS configuration options for the Zenin Server.
+type TlsConfig struct {
+	Cert []byte
+	Key  []byte
+}
+
+// StrictDecoder returns a `*json.Decoder` with `DisallowUnknownFields` set.
+func StrictDecoder(r io.Reader) *json.Decoder {
+	d := json.NewDecoder(r)
+	d.DisallowUnknownFields()
+	return d
+}
+
+type Services struct {
+	Settings    settings.SettingsService
+	Measurement measurement.MeasurementService
+	Monitor     monitor.MonitorService
+	Account     account.AccountService
+}
+
 // NewServer returns a new `Server`.
 func NewServer(c Config, s Services) *Server {
 	return &Server{config: c, services: s}
@@ -38,7 +79,7 @@ func (s *Server) Serve() error {
 	env.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
 
 	mux := chi.NewRouter()
-	if env.Runtime.Kind == env.Dev {
+	if s.config.Env.EnableDebug {
 		env.Warn("cors checks are disabled")
 		mux.Use(Insecure)
 	}

@@ -105,7 +105,7 @@ func parseAndValidateToken(token string) (jwt.MapClaims, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method: %v", t.Header["alg"])
 		}
-		return []byte(env.Runtime.SignSecret), nil
+		return []byte(env.Env.SignSecret), nil
 	}, options...)
 	if err != nil || !parsed.Valid {
 		return nil, errors.New("invalid token")

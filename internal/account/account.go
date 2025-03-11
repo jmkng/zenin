@@ -40,7 +40,7 @@ func (a Account) Token() (string, error) {
 			IssuedAt:  jwt.NewNumericDate(time),
 		},
 	}
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(env.Runtime.SignSecret))
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(env.Env.SignSecret))
 	if err != nil {
 		return "", fmt.Errorf("failed to sign token: %w", err)
 	}

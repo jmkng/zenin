@@ -60,7 +60,7 @@ func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (int
 
 func (m MonitorService) GetPlugins() ([]string, error) {
 	var plugins []string
-	root := env.Runtime.PluginsDir
+	root := env.Env.PluginsDir
 
 	supported := map[string]struct{}{
 		".exe": {}, ".sh": {}, ".ps1": {}, ".bat": {},
