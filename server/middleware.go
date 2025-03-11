@@ -49,6 +49,13 @@ type Token struct {
 	Id   int
 }
 
+type ContextKey int
+
+const (
+	// A context key used to extract the authentication token.
+	TokenKey ContextKey = iota
+)
+
 // Authenticate will ensure the Request Authorization header is valid.
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +86,7 @@ func Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "token", Token{Root: root, Id: sub})
+		ctx := context.WithValue(r.Context(), TokenKey, Token{Root: root, Id: sub})
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

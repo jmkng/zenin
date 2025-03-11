@@ -228,7 +228,7 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 
 	// Root accounts can update anyone.
 	// If this isn't a root account, the request must be from the same account that the update is for.
-	token, ok := ctx.Value("token").(Token)
+	token, ok := ctx.Value(TokenKey).(Token)
 	if !ok || !token.Root && id != token.Id {
 		responder.Status(http.StatusUnauthorized)
 		return
