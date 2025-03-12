@@ -65,32 +65,38 @@ export ZENIN_REPO_PASSWORD=password
 
 Supported environment variables are documented below. Values are case sensitive.
 
-| Name                             | Explanation                                                  | Accepted Values      | Example                                     | Default
-| :------------------------------- | :----------------------------------------------------------- | :------------------- | :------------------------------------------ | :-------
-| ZENIN_ADDRESS                    | An address for Zenin to bind on.                             | any x.x.x.x address  | export ZENIN_ADDRESS=0.0.0.0.0              | 127.0.0.1
-| ZENIN_PORT                       | A port number for Zenin to run on. [^1]                      | any u16              | export ZENIN_PORT=4884                      | 23111
-| ZENIN_REDIRECT_PORT              | A port number used for HTTP->HTTPS redirection               | any u16              | export ZENIN_REDIRECT_PORT=4884             | 23111
-| ZENIN_SIGN_SECRET                | A sequence used to sign tokens. [^1]                         | any >=16 byte string | export ZENIN_SIGN_SECRET=ab93Be(...)        | random
-| ZENIN_BASE_DIR                   | A base directory used to store files accessible to Zenin.    | absolute path        | export ZENIN_BASE_DIR=/usr/local/x          |
-| ZENIN_BASE_DIR (Windows)         |                                                              |                      |                                             | %AppData%\local\Zenin
-| ZENIN_BASE_DIR (macOS)           |                                                              |                      |                                             | $XDG_CONFIG_HOME/Zenin
-| ZENIN_BASE_DIR (Linux)           |                                                              |                      |                                             | $XDG_CONFIG_HOME/zenin
-| ZENIN_PLUGINS_DIR                | A directory used to store executable plugins.                | absolute path        | export ZENIN_PLUGINS_DIR=/usr/local/p       | See notes
-| ZENIN_PLUGINS_DIR (Windows)      |                                                              |                      |                                             | %AppData%\local\Zenin\plugins
-| ZENIN_PLUGINS_DIR (macOS)        |                                                              |                      |                                             | $XDG_CONFIG_HOME/Zenin/plugins
-| ZENIN_PLUGINS_DIR (Linux)        |                                                              |                      |                                             | $XDG_CONFIG_HOME/zenin/plugins
-| ZENIN_ENABLE_COLOR               | Determines if ANSI escape codes are used in logging.         | true, false          | export ZENIN_ENABLE_COLOR=true              | false
-| ZENIN_ENABLE_DEBUG               | The process run level.                                       | prod, dev            | export ZENIN_ENABLE_DEBUG=prod              | prod
-| ZENIN_REPO_KIND                  | The database kind.                                           | postgres             | export ZENIN_REPO_KIND=postgres             | N/A
-| ZENIN_REPO_USERNAME              | The username used to sign in to the database.                | any string           | export ZENIN_REPO_USERNAME=username         | N/A
-| ZENIN_REPO_PASSWORD              | The password used to sign in to the database.                | any string           | export ZENIN_REPO_PASSWORD=password         | N/A
-| ZENIN_REPO_ADDRESS               | The address of the server that is running the database.      | any x.x.x.x address  | export ZENIN_REPO_ADDRESS=0.0.0.0.0         | N/A
-| ZENIN_REPO_PORT                  | The port that the database is listening on.                  | any u16              | export ZENIN_REPO_PORT=5432                 | N/A
-| ZENIN_REPO_NAME                  | The name of the database, or file name for SQLite.           | any string           | export ZENIN_REPO_NAME=postgres             | N/A
-| ZENIN_REPO_MAX_CONN              | The maximum number of open database connections.             | any number           | export ZENIN_REPO_MAX_CONN=5                | N/A
-| ZENIN_REPO_ENABLE_TEST           | Enable or disable repository testing.                        | true, false          | export ZENIN_REPO_ENABLE_TEST=true          | false
+| Name                        | Explanation                                                                   | Accepted Values                 | Example                                               | Default
+| :-------------------------- | :---------------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------- | :-------
+| ZENIN_ADDRESS               | An address for Zenin to bind on.                                              | any valid IP address            | export ZENIN_ADDRESS="0.0.0.0"                        | 127.0.0.1
+| ZENIN_PORT                  | A port number for Zenin to use. [^1]                                          | any u16                         | export ZENIN_PORT="23111"                             | 23111
+| ZENIN_REDIRECT_PORT         | A port number used to redirect HTTP requests. [^1]                            | any u16                         | export ZENIN_REDIRECT_PORT="80"                       | N/A
+| ZENIN_SIGN_SECRET           | A sequence used to sign tokens. [^2]                                          | any >=16 byte string            | export ZENIN_SIGN_SECRET="ab93Be(...)"                | random
+| ZENIN_STDOUT_FORMAT         | Determines the format of logs sent to standard output.                        | flat, nested, json              | export ZENIN_STDOUT_FORMAT="json"                     | flat
+| ZENIN_STDOUT_TIME_FORMAT    | Determines the timestamp format in logs sent to standard output.              | [^3]                            | export ZENIN_STDOUT_TIME_FORMAT="2006-01-02 15:04:05" | "15:04:05"
+| ZENIN_BASE_DIR              | A base directory used to store files.                                         | absolute path                   | export ZENIN_BASE_DIR="/usr/local/x"                  |
+| ZENIN_BASE_DIR (Windows)    |                                                                               |                                 |                                                       | %AppData%\local\Zenin
+| ZENIN_BASE_DIR (macOS)      |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/Zenin
+| ZENIN_BASE_DIR (Linux)      |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/zenin
+| ZENIN_PLUGINS_DIR           | A directory used to store executable plugins.                                 | absolute path                   | export ZENIN_PLUGINS_DIR="/usr/local/p"               | See notes
+| ZENIN_PLUGINS_DIR (Windows) |                                                                               |                                 |                                                       | %AppData%\local\Zenin\plugins
+| ZENIN_PLUGINS_DIR (macOS)   |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/Zenin/plugins
+| ZENIN_PLUGINS_DIR (Linux)   |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/zenin/plugins
+| ZENIN_ENABLE_COLOR          | Determines if ANSI color codes are included in logs sent to standard output.  | true, false                     | export ZENIN_ENABLE_COLOR="false"                     | true
+| ZENIN_ENABLE_DEBUG          | Allows insecure behavior and enables debug logging.                           | true, false                     | export ZENIN_ENABLE_DEBUG="true"                      | false
+| ZENIN_REPO_KIND             | The database kind.                                                            | postgres                        | export ZENIN_REPO_KIND="postgres"                     | N/A
+| ZENIN_REPO_USERNAME         | The username used to sign in to the database.                                 | any string                      | export ZENIN_REPO_USERNAME="username"                 | N/A
+| ZENIN_REPO_PASSWORD         | The password used to sign in to the database.                                 | any string                      | export ZENIN_REPO_PASSWORD="password"                 | N/A
+| ZENIN_REPO_ADDRESS          | The address of the server that is running the database.                       | any valid IP address            | export ZENIN_REPO_ADDRESS="0.0.0.0"                   | N/A
+| ZENIN_REPO_PORT             | The port that the database is listening on.                                   | any u16                         | export ZENIN_REPO_PORT="5432"                         | N/A
+| ZENIN_REPO_NAME             | The name of the database, or file name for SQLite.                            | any string                      | export ZENIN_REPO_NAME="postgres"                     | N/A
+| ZENIN_REPO_MAX_CONN         | The maximum number of open database connections.                              | any number                      | export ZENIN_REPO_MAX_CONN="5"                        | N/A
+| ZENIN_REPO_ENABLE_TEST      | Enable or disable repository testing.                                         | any value                       | export ZENIN_REPO_ENABLE_TEST="y"                     | N/A
 
-[^1]: If you don't specify this key, Zenin will generate a key for you on startup. If the Zenin server restarts, all tokens will become unrecognized, effectively signing out every user. If you specify a key, Zenin will use the same one when it starts back up, and existing tokens will remain valid (until they expire in one week).
+[^1]: When TLS is enabled, HTTPS connections are accepted on ZENIN_PORT, while ZENIN_REDIRECT_PORT will redirect to ZENIN_PORT. Otherwise, ZENIN_PORT will accept HTTP connections.
+
+[^2]: If you don't specify this key, Zenin will generate one on startup. If the Zenin server restarts, all tokens will become unrecognized, effectively signing out every user. If you specify a key, Zenin will use the same one when it starts back up, and existing tokens will remain valid until expiration.
+
+[^3]: Any value accepted by the [time](https://pkg.go.dev/time#Layout) package can be entered here.
 
 Next, acquire a Zenin binary.
 

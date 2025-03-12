@@ -76,7 +76,7 @@ type Server struct {
 
 // Listen will block and listen for incoming requests.
 func (s *Server) Serve() error {
-	env.Info("server starting", "ip", s.config.Address.IP, "port", s.config.Address.Port)
+	env.Info("server starting", "address", s.config.Address.IP.String(), "port", s.config.Address.Port)
 
 	mux := chi.NewRouter()
 	if s.config.Env.EnableDebug {
@@ -121,39 +121,6 @@ func (s *Server) Serve() error {
 	return nil
 }
 
-func NewConfig(runtime *env.RuntimeEnv) (Config, error) {
-	ip := net.ParseIP(runtime.Address)
-	if ip == nil {
-		return Config{}, errors.New("server ip address is invalid")
-	}
-
-	address := net.TCPAddr{
-		IP:   ip,
-		Port: int(runtime.Port),
-	}
-
-	return Config{Address: address, Tls: nil}, nil // TODO: TLS setup will happen here.
-}
-
-// Config controls the behavior of a Zenin Server.
-type Config struct {
-	Address net.TCPAddr
-	Tls     *TlsConfig
-}
-
-// TlsConfig contains TLS configuration options for the Zenin Server.
-type TlsConfig struct {
-	Cert []byte
-	Key  []byte
-}
-
-// StrictDecoder returns a `*json.Decoder` with `DisallowUnknownFields` set.
-func StrictDecoder(r io.Reader) *json.Decoder {
-	d := json.NewDecoder(r)
-	d.DisallowUnknownFields()
-	return d
-}
-
 // scanQueryParameterIds will return all comma separated ids in the value map.
 func scanQueryParameterIds(values url.Values) []int {
 	id := []int{}
@@ -168,13 +135,6 @@ func scanQueryParameterIds(values url.Values) []int {
 	}
 
 	return id
-}
-
-type Services struct {
-	Settings    settings.SettingsService
-	Measurement measurement.MeasurementService
-	Monitor     monitor.MonitorService
-	Account     account.AccountService
 }
 
 //go:embed build
