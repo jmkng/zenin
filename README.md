@@ -5,16 +5,19 @@ A simple infrastructure monitoring tool.
 ![Zenin](../assets/1.png?raw=true)
 
 > [!Tip]
-> Additional images of the user interface are stored in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. Feel free to provide feedback on the design.
+> Find more images of the user interface in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. Feel free to provide feedback on the design.
 
 ## Summary
 
-> [!WARNING]  
-> The information below may describe how something is *planned* to work, but because the project is young, the implementation may be a work in progress. A note will be left for these cases.
+Zenin is an infrastructure monitoring tool. You set up monitors that perform some kind of job, and Zenin records the outcome. Several probes for checking remote services are included:
 
-Zenin is an infrastructure monitoring tool. It is something you can host on your own hardware (or not) to help you understand which of your services are considered "ok", which are "dead" and which may be in a degraded "warn" state.
+- HTTP
+- ICMP
+- TCP
 
-It is an evolution of other tools like Nagios and Uptime Kuma.
+Plugins are also supported, and Zenin can execute a plugin in response to the measurement that your monitor produces.
+
+Zenin is an evolution of other tools like Nagios and Uptime Kuma. It has no runtime dependencies, everything is included in the binary.
 
 |            | Nagios              | Uptime Kuma        | Zenin                  |
 | ---------- | :-----------------: | :----------------: | :--------------------: |
@@ -22,48 +25,73 @@ It is an evolution of other tools like Nagios and Uptime Kuma.
 | Simple     | :x:                 | :heavy_check_mark: | :heavy_check_mark:     |
 | Versatile  | :heavy_check_mark:  | :warning:          | :heavy_check_mark:     |
 
-:warning: Uptime Kuma is generally quite versatile, but Zenin was originally created to fill in a couple missing pieces.
+:warning: Zenin started out as a fork of Uptime Kuma that added support for plugins.
 
-Zenin exposes an API that can be used to retrieve information, but similar to Uptime Kuma, makes use of WebSocket to actively distribute measurement information to connected clients, known as "feed subscribers".
+Zenin exposes an API that can be used to retrieve information, but similar to Uptime Kuma, makes use of WebSocket to distribute information to connected clients.
 
 > [!Note]
 > The API is not yet documented.
 
-This means that you can connect to the client and be alerted to ongoing issues, see monitor statistics change, and watch messages being passed back and forth between the client and server in real time, without reloading the page.
-
-Performance is also a priority for this project. Zenin will poll each monitor in its own thread, leaving the distribution of information to a separate "distributor" thread. Access to this distributor is serialized by way of a message passing architecture. Zenin should be able to poll thousands of monitors this way, with the performance bottleneck generally being the network, or database.
-
 ## Installation 
 
-Zenin has only one dependency not included in the binary, and that is some kind of database.
+> [!Note]
+> PostgreSQL and SQLite are supported, MySQL support is planned.
+
+### Docker
+
+This example will run an image based on the latest commit, configured to use an SQLite database. No other setup is required. The database and all of your plugins will be stored in the bind mount location you provide, so adjust that as desired.
+
+```
+ docker run -d \
+    -u zenin \
+    -e ZENIN_REPO_KIND="sqlite" \
+    -e ZENIN_REPO_NAME="zenin.db" \
+    -p 23111:23111 \
+    --name zenin \
+    -v ~/.config/zenin:/home/zenin/.config/zenin \
+    zenin:dev
+```
 
 ### Manual
 
-Decide what database you want to use and get it running somewhere that Zenin will be able to access.
-
 > [!Note]
-> Postgres is currently the only supported database. Support for MySQL and SQLite is planned.
+> A binary may eventually be available on the [Releases](https://github.com/jmkng/zenin/releases) page.
 
-Configure your environment variables to point to this new database. 
+If you want to build Zenin from scratch, follow these instructions.
 
-For example, if you created a Postgres database like this:
+#### Prerequisites
+
+1. [Go](https://go.dev/dl/) v1.22.4+
+2. [Node.js](https://nodejs.org/) v20.8.1+
+    + npm v10.1.0+
+
+Clone the project.
 
 ```
-docker run --name zenin-db -p 5432:5432 -e POSTGRES_PASSWORD=password -e POSTGRES_USER=username -d postgres
+git clone https://github.com/jmkng/zenin
 ```
 
-You might export variables like these:
-
 ```
-export ZENIN_REPO_KIND=postgres
-export ZENIN_REPO_ADDRESS=0.0.0.0
-export ZENIN_REPO_PORT=5432
-export ZENIN_REPO_NAME=postgres
-export ZENIN_REPO_USERNAME=username
-export ZENIN_REPO_PASSWORD=password
+make build
 ```
 
-Supported environment variables are documented below. Values are case sensitive.
+You should end up with a zenin binary.
+
+```
+./zenin
+```
+
+## Usage
+
+The first account created on a Zenin server becomes the root account.
+
+When you connect for the first time you will be prompted to claim the server by creating that account. Additional accounts can only be created by the root account. No registrations are allowed, your server is invite only.
+
+After you claim the server, you can create monitors.
+
+## Environment Variables
+
+Supported environment variables are documented here.
 
 | Name                        | Explanation                                                                   | Accepted Values                 | Example                                               | Default
 | :-------------------------- | :---------------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------- | :-------
@@ -98,15 +126,7 @@ Supported environment variables are documented below. Values are case sensitive.
 
 [^3]: Any value accepted by the [time](https://pkg.go.dev/time#Layout) package can be entered here.
 
-Next, acquire a Zenin binary.
-
-A binary may eventually be available on the [Releases](https://github.com/jmkng/zenin/releases) page, but until then, you can get going by following these instructions.
-
-#### Prerequisites
-
-1. [Go](https://go.dev/dl/) v1.22.4+
-2. [Node.js](https://nodejs.org/) v20.8.1+
-    + npm v10.1.0+
+## Hacking
 
 Clone the project.
 
@@ -114,101 +134,44 @@ Clone the project.
 git clone https://github.com/jmkng/zenin
 ```
 
-Build the user interface. This should create a "build" folder inside of "server". This needs to be done first because Zenin will embed these files.
-
-```
-cd zenin/web
-npm install && npm run build
-```
-
-Build the binary.
-
-```
-cd ..
-go build cmd/zenin.go
-```
-
-You can now run the binary.
-
-```
-./zenin
-```
-
-### Docker
-
-> [!Note]
-> A Docker image is not yet available.
-
-## Usage
-
-On first start, you will be prompted to claim the server by entering a username and password. This will create the first account on the server.
-
-After this, additional accounts can only be created by an existing account. The server is invite only.
-
-Once you are signed in, an empty dashboard will be displayed, and you can begin creating monitors.
-
-## Hacking
-
-The scripts in `/scripts` may rely on these external tools:
-
-- [curl](https://curl.se/download.html)
-- [jq](https://github.com/jqlang/jq)
-
-Several of the upcoming steps rely on your environment variables, so update and source the `export` script before you do anything.
+Modify the `export` script as needed, and source it.
 
 ```
 . scripts/export.sh
 ```
 
-First, stand up a Docker container for the development Postgres database.
+Start Zenin.
 
 ```
-scripts/database.sh
+make run
 ```
 
-Zenin will automatically migrate when connecting to a new database. Don't use the `migrate` script to migrate a database that you are planning to actually use, since it will inject insecure test data and prevent the server from being claimed.
-
-You can run migrations manually if needed:
+If you are making changes to the user interface, start the local server for the web project too:
 
 ```
-psql -h 127.0.0.1 -p 5432 -U username -d postgres -f <$MIGRATION>
+cd web && npm run dev
 ```
 
-If you need to get a shell on the database, a script exists for that to save some keystrokes:
+You can use the scripts in `scripts/api` to test the API, or just use them as example requests.
 
-```
-scripts/shell.sh
-```
+You might need these tools to run them:
 
-Zenin should start up normally at this point:
+- [curl](https://curl.se/download.html)
+- [jq](https://github.com/jqlang/jq)
 
-```
-go run cmd/zenin.go
-```
-
-Some scripts exist in `/scripts/api` that can be used to test the API, but they may not have 100% coverage.
-
-Scripts that hit authenticated endpoints will search the environment for a token. You can use the `authenticate` script to sign in as `testuser1` (an account that will exist if you used the `migrate` script to migrate your database) and export this easily:
+Scripts that hit authenticated endpoints will expect a token to be in the `ZENIN_SCRIPT_TOKEN` environment variable. If you used the `migrate` script to insert seed data, you can just source the `authenticate` script to set this up for you.
 
 ```
 . scripts/authenticate.sh
 ```
 
-The following example relies on this external tool to display the output:
-
-- [neovim](https://neovim.io)
-
 Use `get_related` to fetch all the monitors on the server, including the two most recent measurements for each.
 
-Format the output with `jq` and view the result with `neovim`.
-
 ```
-scripts/api/monitor/get_related.sh | jq . | nvim -R
-```
+scripts/api/monitor/get_related.sh
 
-Executing the script without passing the result to `jq` and `neovim` will just display the output from curl:
+...
 
-```
 *   Trying 127.0.0.1:23111...
 * Connected to 127.0.0.1 (127.0.0.1) port 23111
 > GET /api/v1/monitor?measurements=2 HTTP/1.1
@@ -231,15 +194,17 @@ Executing the script without passing the result to `jq` and `neovim` will just d
 {"data":[ ... ]}
 ```
 
-### Release
+Alternatively, use `jq` to format the data. 
 
-Use the makefile to cut a new release.
+```
+scripts/api/monitor/get_related.sh | jq .
+```
+
+Use the makefile to build.
 
 ```
 make
 ```
-
-This will build the user interface, place it in the expected location, and then compile the core. You should end up with a single "zenin" executable file.
 
 Linker flags are used to bake in a program version and the most recent commit hash.
 
