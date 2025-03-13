@@ -11,7 +11,7 @@ all: build
 web:
 	cd web && npm run build
 
-run:
+run: web
 	go run -ldflags="$(LDFLAGS)" cmd/zenin.go
 
 build: web
