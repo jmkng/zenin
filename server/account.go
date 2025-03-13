@@ -138,7 +138,9 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	responder.Data(token, http.StatusOK)
+	responder.Data(struct {
+		Token string `json:"token"`
+	}{Token: token}, http.StatusOK)
 }
 
 func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Request) {

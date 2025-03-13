@@ -51,13 +51,13 @@ export default function Login() {
             ? await account.service.authenticate(username, password)
             : await account.service.setClaim(username, password)
 
-        const packet: DataPacket<string> = await extract.json();
+        const packet: DataPacket<{token: string}> = await extract.json();
         if (!extract.ok()) {
             handleFailure(packet);
             return;
         }
 
-        const token = packet.data;
+        const token = packet.data.token;
         account.service.setLSToken(token);
         account.context.dispatch({ type: 'login', token });
         setErrors([]);
