@@ -79,10 +79,11 @@ func main() {
 	config, err := server.NewConfig(e)
 	dd(err)
 
-	server.NewServer(
+	err = server.NewServer(
 		config,
 		server.Services{Settings: ssv, Measurement: mesv, Monitor: mosv, Account: asv},
 	).Serve()
+	dd(err)
 
 	env.Debug("main stopping")
 }
