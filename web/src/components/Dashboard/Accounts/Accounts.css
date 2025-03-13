@@ -1,3 +1,7 @@
+.zenin__accounts {
+    padding-right: var(--px-a);
+}
+
 .zenin__account {
     padding: var(--px-c);
     border: 1px solid var(--off-b);
