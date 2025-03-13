@@ -144,7 +144,7 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	token, ok := r.Context().Value("token").(Token)
+	token, ok := r.Context().Value(TokenKey).(Token)
 	if !ok || !token.Root {
 		responder.Status(http.StatusUnauthorized)
 		return
@@ -171,7 +171,7 @@ func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Reques
 func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	token, ok := r.Context().Value("token").(Token)
+	token, ok := r.Context().Value(TokenKey).(Token)
 	if !ok || !token.Root {
 		responder.Status(http.StatusUnauthorized)
 		return
