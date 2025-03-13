@@ -27,13 +27,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
         working-directory: web
-      - name: Build web assets
+      - name: Build Web
         run: npm run build
         working-directory: web
-      - name: Verify deps
+      - name: Verify
         run: go mod verify
       - name: Build
         run: go build -v ./...
