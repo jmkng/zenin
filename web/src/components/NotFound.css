@@ -1,0 +1,12 @@
+.zenin__404 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    flex-direction: column;
+}
+
+.zenin__404_message {
+    margin-bottom: var(--px-b);
+    color: var(--mid);
+}

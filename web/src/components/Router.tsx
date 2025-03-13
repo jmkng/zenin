@@ -13,6 +13,7 @@ import { Settings, useDefaultSettingsService, useSettingsContext } from '@/inter
 import Dashboard from './Dashboard/Dashboard';
 import Hidden from './Hidden';
 import Login from './Login/Login';
+import NotFound from './NotFound';
 import Private from './Private';
 
 import './Router.css';
@@ -93,6 +94,8 @@ export default function Router() {
             <Route element={<Private />}>
                 <Route path="/" element={<Dashboard />} />
             </Route>
+
+            <Route path="*" element={<NotFound/>} />
         </Routes>
     </div>
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -92,9 +94,32 @@ func (s *Server) Serve() error {
 	if err != nil {
 		panic("failed to set web embed sub directory")
 	}
-	webHandler := http.FileServerFS(sub)
-	mux.NotFound(webHandler.ServeHTTP)
+	mux.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		// Assume that any request with an extension (except .html) is a request for an embedded resource,
+		// and pass the request to embedded fs.
+		ext := path.Ext(r.URL.Path)
+		if ext != "" && ext != ".html" {
+			http.FileServerFS(sub).ServeHTTP(w, r)
+			return
+		}
 
+		// Defer all requests for html files to the frontend router.
+		index, err := sub.Open("index.html")
+		if err != nil {
+			panic(err)
+		}
+		defer index.Close()
+		d, err := index.Stat()
+		if err != nil {
+			panic(err)
+		}
+		data, err := io.ReadAll(index)
+		if err != nil {
+			panic(err)
+		}
+
+		http.ServeContent(w, r, d.Name(), d.ModTime(), bytes.NewReader(data))
+	})
 	// API ->
 	mux.Route("/api/v1", func(v1 chi.Router) {
 		v1.Use(Default)
