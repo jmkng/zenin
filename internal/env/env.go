@@ -102,6 +102,10 @@ func NewEnvironment() Environment {
 	if err != nil {
 		enableDebug = false
 	}
+	allowInsecure, err := strconv.ParseBool(os.Getenv(allowInsecureKey))
+	if err != nil {
+		allowInsecure = false
+	}
 
 	return Environment{
 		Address:          address,
@@ -114,6 +118,7 @@ func NewEnvironment() Environment {
 		PluginsDir:       pluginsDir,
 		EnableColor:      enableColor,
 		EnableDebug:      enableDebug,
+		AllowInsecure:    allowInsecure,
 		Repository:       NewRepositoryEnvironment(),
 	}
 }
@@ -155,6 +160,8 @@ type Environment struct {
 	// Allows insecure behavior and enables debug logging.
 	EnableDebug bool
 
+	AllowInsecure bool
+
 	Repository RepositoryEnv
 }
 
@@ -164,7 +171,7 @@ func (e Environment) GetLocalRepositoryPath() string {
 }
 
 func (e Environment) Diagnose(dx *Diagnostic) {
-	if !e.EnableDebug && len(e.SignSecret) < 16 {
+	if !e.AllowInsecure && len(e.SignSecret) < 16 {
 		dx.Error("sign secret is weak, expected >= 16 bytes")
 	}
 
@@ -303,6 +310,7 @@ const (
 	pluginsDirKey       = "ZENIN_PLUGINS_DIR"
 	enableColorKey      = "ZENIN_ENABLE_COLOR"
 	enableDebugKey      = "ZENIN_ENABLE_DEBUG"
+	allowInsecureKey    = "ZENIN_ALLOW_INSECURE"
 	repoKindKey         = "ZENIN_REPO_KIND"
 	repoUsernameKey     = "ZENIN_REPO_USERNAME"
 	repoPasswordKey     = "ZENIN_REPO_PASSWORD"

@@ -134,7 +134,8 @@ Supported environment variables are documented here.
 | ZENIN_PLUGINS_DIR (macOS)   |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/Zenin/plugins
 | ZENIN_PLUGINS_DIR (Linux)   |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/zenin/plugins
 | ZENIN_ENABLE_COLOR          | Determines if ANSI color codes are included in logs sent to standard output.  | true, false                     | export ZENIN_ENABLE_COLOR="false"                     | true
-| ZENIN_ENABLE_DEBUG          | Allows insecure behavior and enables debug logging.                           | true, false                     | export ZENIN_ENABLE_DEBUG="true"                      | false
+| ZENIN_ENABLE_DEBUG          | Enables debug logging.                                                        | true, false                     | export ZENIN_ENABLE_DEBUG="true"                      | false
+| ZENIN_ALLOW_INSECURE        | Allows insecure behavior, such as ignoring CORS.                              | true, false                     | export ZENIN_ALLOW_INSECURE="true"                    | false
 | ZENIN_REPO_KIND             | The database kind.                                                            | postgres                        | export ZENIN_REPO_KIND="postgres"                     | N/A
 | ZENIN_REPO_USERNAME         | The username used to sign in to the database.                                 | any string                      | export ZENIN_REPO_USERNAME="username"                 | N/A
 | ZENIN_REPO_PASSWORD         | The password used to sign in to the database.                                 | any string                      | export ZENIN_REPO_PASSWORD="password"                 | N/A

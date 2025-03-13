@@ -44,8 +44,9 @@ func (f FeedProvider) Mux() http.Handler {
 
 func (f FeedProvider) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{}
-	if env.Env.EnableDebug {
+	if env.Env.AllowInsecure {
 		// Disable origin check.
+		env.Warn("origin checks are disabled")
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}

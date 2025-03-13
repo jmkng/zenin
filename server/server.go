@@ -81,7 +81,7 @@ func (s *Server) Serve() error {
 	env.Info("server starting", "address", s.config.Address.IP.String(), "port", s.config.Address.Port)
 
 	mux := chi.NewRouter()
-	if s.config.Env.EnableDebug {
+	if s.config.Env.AllowInsecure {
 		env.Warn("cors checks are disabled")
 		mux.Use(Insecure)
 	}
