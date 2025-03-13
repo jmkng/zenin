@@ -41,9 +41,9 @@ func (s Secret) String() string {
 var Env Environment = NewEnvironment()
 
 func NewEnvironment() Environment {
-	var address = "127.0.0.1"
-	if envAddress := os.Getenv(addressKey); envAddress != "" {
-		address = envAddress
+	var address = "0.0.0.0"
+	if x := os.Getenv(addressKey); x != "" {
+		address = x
 	}
 	var port uint16 = 23111
 	envPort, err := strconv.ParseUint(os.Getenv(portKey), 10, 16)
