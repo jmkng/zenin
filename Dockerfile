@@ -9,11 +9,13 @@ RUN cd web && npm install
 RUN make build
 
 FROM alpine:latest
+RUN adduser -D zenin
+RUN apk add --no-cache bash zsh
 WORKDIR /build
 COPY --from=builder /build/zenin .
 EXPOSE 23111
 
-# Default repository is a local SQLite database.
+ENV SHELL="sh"
 ENV ZENIN_REPO_KIND="sqlite"
 ENV ZENIN_REPO_NAME="zenin.db"
 
