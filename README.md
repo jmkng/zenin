@@ -9,15 +9,11 @@ A simple infrastructure monitoring tool.
 
 ## Summary
 
-Zenin is an infrastructure monitoring tool. You set up monitors that perform some kind of job, and Zenin records the outcome. Several probes for checking remote services are included:
+Zenin is an infrastructure monitoring tool. You set up monitors that perform some kind of action, and Zenin records data. 
 
-- HTTP
-- ICMP
-- TCP
+Several probe types are built-in, and plugins are also supported. You can even arrange for plugins to be executed in response to the data your monitor collects.
 
-Plugins are also supported, and Zenin can execute a plugin in response to the measurement that your monitor produces.
-
-Zenin is an evolution of other tools like Nagios and Uptime Kuma. It has no runtime dependencies, everything is included in the binary.
+Zenin is an evolution of other tools like Nagios and Uptime Kuma. It has no runtime dependencies; everything is included in the binary.
 
 |            | Nagios              | Uptime Kuma        | Zenin                  |
 | ---------- | :-----------------: | :----------------: | :--------------------: |
@@ -27,11 +23,6 @@ Zenin is an evolution of other tools like Nagios and Uptime Kuma. It has no runt
 
 :warning: Zenin started out as a fork of Uptime Kuma that added support for plugins.
 
-Zenin exposes an API that can be used to retrieve information, but similar to Uptime Kuma, makes use of WebSocket to distribute information to connected clients.
-
-> [!Note]
-> The API is not yet documented.
-
 ## Installation 
 
 > [!Note]
@@ -39,25 +30,58 @@ Zenin exposes an API that can be used to retrieve information, but similar to Up
 
 ### Docker
 
-This example will run an image based on the latest commit, configured to use an SQLite database. No other setup is required. The database and all of your plugins will be stored in the bind mount location you provide, so adjust that as desired.
-
 ```
  docker run -d \
     -u zenin \
-    -e ZENIN_REPO_KIND="sqlite" \
-    -e ZENIN_REPO_NAME="zenin.db" \
     -p 23111:23111 \
-    --name zenin \
     -v ~/.config/zenin:/home/zenin/.config/zenin \
-    zenin:dev
+    --name zenin \
+    jmkng/zenin:dev
 ```
+
+This image is configured to use SQLite by default. No database setup is required.
+
+You can configure it to use PostgresSQL by passing in some additional environment variables that tell Zenin how to connect to your database.
+
+```
+...
+
+-e ZENIN_REPO_KIND=postgres
+-e ZENIN_REPO_NAME=postgres
+-e ZENIN_REPO_ADDRESS=0.0.0.0
+-e ZENIN_REPO_PORT=5432
+-e ZENIN_REPO_USERNAME=username
+-e ZENIN_REPO_PASSWORD=password
+
+...
+```
+
+Adjust the remaining flags as needed.
+
+```
+-u zenin
+```
+
+The image includes a non-root user account "zenin" so that you aren't forced to run as root. 
+
+Keep in mind, the built-in ICMP probe requires root access to send ICMP packets. If you aren't running as root, you can still use the ICMP probe to send UDP packets.
+
+Just remove the flag to run as root.
+
+```
+-v ~/.config/zenin:/home/zenin/.config/zenin
+```
+
+[Binds](https://docs.docker.com/engine/storage/bind-mounts/#options-for---volume) the directory `~/.config/zenin` on your host system to `/home/zenin/.config/zenin` inside of the container. This allows you easy access to the database file and plugins from your host system.
+
+You should change `~/.config/zenin` to a path where you are comfortable storing this information.
 
 ### Manual
 
 > [!Note]
 > A binary may eventually be available on the [Releases](https://github.com/jmkng/zenin/releases) page.
 
-If you want to build Zenin from scratch, follow these instructions.
+If you want to build Zenin from source, follow these instructions.
 
 #### Prerequisites
 
