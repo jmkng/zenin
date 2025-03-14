@@ -57,8 +57,8 @@ export default function Router() {
                 settings.context.dispatch({ type: 'reset', delimiters: packet.data.delimiters });
             }
             if (pluginEx.ok()) {
-                const packet: DataPacket<string[]> = await pluginEx.json();
-                monitor.context.dispatch({ type: 'update', plugins: packet.data });
+                const packet: DataPacket<{plugins: string[] | null}> = await pluginEx.json();
+                monitor.context.dispatch({ type: 'update', plugins: packet.data.plugins || [] });
             }
             if (monitorEx.ok()) {
                 const packet: DataPacket<Monitor[]> = await monitorEx.json();

@@ -275,7 +275,10 @@ func (m MonitorProvider) HandleGetPlugins(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	responder.Data(plugins, http.StatusOK)
+	responder.Data(struct {
+		Plugins []string `json:"plugins"`
+	}{Plugins: plugins}, http.StatusOK)
+
 }
 
 // newSelectMonitorParamsFromQuery returns a `SelectMonitorParams` by parsing the values from

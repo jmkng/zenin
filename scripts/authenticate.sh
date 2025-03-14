@@ -9,5 +9,5 @@ if [ $? -ne 0 ]; then
     return 1
 fi
 
-token=$(echo "$response" | jq -r '.data')
+token=$(echo "$response" | jq -r '.data.token')
 export ZENIN_SCRIPT_TOKEN="$token"
