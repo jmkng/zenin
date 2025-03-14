@@ -3,7 +3,7 @@ import { formatDate } from "@/internal/layout/graphics";
 import { useMonitorContext } from "@/internal/monitor";
 import { useMemo, useState } from "react";
 import { useDefaultAccountService } from "@/internal/account/service";
-import { DataPacket, isErrorPacket } from "@/internal/server";
+import { CreatedTimestamp, DataPacket, isErrorPacket } from "@/internal/server";
 
 import TextInput from "@/components/Input/TextInput/TextInput";
 import Button from "../../../components/Button/Button";
@@ -90,7 +90,7 @@ export default function Accounts() {
 
         const extract = await account.service.createAccount(token, username, password);
         if (extract.ok()) {
-            const packet: DataPacket<{ id: number, time: string }> = await extract.json();
+            const packet: DataPacket<CreatedTimestamp> = await extract.json();
             account.context.dispatch({
                 type: 'create',
                 account: {
