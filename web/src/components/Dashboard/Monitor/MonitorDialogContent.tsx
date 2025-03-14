@@ -1,6 +1,6 @@
 import { useAccountContext } from "@/internal/account"
 import { Monitor, useDefaultMonitorService, useMonitorContext } from "@/internal/monitor"
-import { DataPacket } from "@/internal/server"
+import { DataPacket, Timestamp } from "@/internal/server"
 
 import Button from "../../Button/Button"
 import DatabaseIcon from "../../Icon/DatabaseIcon"
@@ -35,7 +35,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
         const token = account.state.token!.raw;
         const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
-        const body: DataPacket<{ time: string }> = await extract.json();
+        const body: DataPacket<Timestamp> = await extract.json();
         monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
     }
 

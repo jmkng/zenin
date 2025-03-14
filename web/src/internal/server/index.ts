@@ -88,8 +88,15 @@ export function isDataPacket(obj: any): obj is DataPacket<any> {
 
 export interface CreatedTimestamp {
     id: number,
-    time: string
+    time: TimestampRFC3339
 }
+
+export interface Timestamp { 
+    time: TimestampRFC3339 
+}
+
+/** An RFC3339 timestamp. (Ex. "2006-01-02T15:04:05Z07:00") */
+export type TimestampRFC3339 = string;
 
 export interface ErrorPacket {
     errors: string[]

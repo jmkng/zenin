@@ -3,7 +3,7 @@ import { useAccountContext } from '@/internal/account';
 import { Measurement } from '@/internal/measurement';
 import { useMonitorContext } from '@/internal/monitor';
 import { MonitorService } from '@/internal/monitor/service';
-import { DataPacket } from '@/internal/server';
+import { DataPacket, Timestamp } from '@/internal/server';
 
 import Button from '../../Button/Button';
 import VMenuIcon from '../../Icon/VMenuIcon';
@@ -42,7 +42,7 @@ export default function Monitor(props: MonitorProps) {
         const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
 
-        const body: DataPacket<{ time: string }> = await extract.json();
+        const body: DataPacket<Timestamp> = await extract.json();
         monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
     }
 

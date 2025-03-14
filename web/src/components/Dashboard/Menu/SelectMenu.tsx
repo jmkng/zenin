@@ -1,6 +1,6 @@
 import { useAccountContext } from "@/internal/account";
 import { useDefaultMonitorService, useMonitorContext } from "@/internal/monitor";
-import { DataPacket } from "@/internal/server";
+import { DataPacket, Timestamp } from "@/internal/server";
 
 import Button from "../../Button/Button";
 import DeselectIcon from "../../Icon/DeselectIcon";
@@ -24,7 +24,7 @@ export default function SelectMenu() {
         const extract = await monitor.service.toggleMonitor(token, monitors, active);
         if (!extract.ok()) return;
 
-        const body: DataPacket<{ time: string }> = await extract.json();
+        const body: DataPacket<Timestamp> = await extract.json();
         monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
     }
 
