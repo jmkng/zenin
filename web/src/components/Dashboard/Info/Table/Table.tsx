@@ -98,9 +98,9 @@ export default function Table(props: TableProps) {
             state.monitor.id, value);
         if (!measurements.ok()) return;
 
-        const packet: DataPacket<Measurement[]> = await measurements.json();
+        const packet: DataPacket<{measurements: Measurement[] | null}> = await measurements.json();
 
-        const mon = { ...state.monitor, measurements: [...packet.data || []].toReversed() };
+        const mon = { ...state.monitor, measurements: [...packet.data.measurements || []].toReversed() };
         monitor.context.dispatch({
             type: 'pane',
             pane: { type: 'view', target: { monitor: mon, measurement: null, disableToggle: true, origin: value } },

@@ -237,7 +237,9 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 		responder.Error(err, http.StatusInternalServerError)
 	}
 
-	responder.Data(measurements, http.StatusOK)
+	responder.Data(struct {
+		Measurements []measurement.Measurement `json:"measurements"`
+	}{Measurements: measurements}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Request) {
