@@ -30,6 +30,8 @@ Zenin is an evolution of other tools like Nagios and Uptime Kuma. It has no runt
 
 ### Docker
 
+See the troubleshooting section below if you have any problems running the container.
+
 ```
  docker run -d \
     -u zenin \
@@ -41,7 +43,7 @@ Zenin is an evolution of other tools like Nagios and Uptime Kuma. It has no runt
 
 This image is configured to use SQLite by default. No database setup is required.
 
-You can configure it to use PostgresSQL by passing in some additional environment variables that tell Zenin how to connect to your database.
+You can configure it to use PostgresSQL by passing in some additional environment variables that tell Zenin how to connect to your database:
 
 ```
 ...
@@ -76,6 +78,24 @@ Just remove the flag to run as root.
 
 You should change `~/.config/zenin` to a path where you are comfortable storing this information.
 
+### Troubleshooting
+
+Error: "make sure plugins directory exists and is accessible"
+
+If the host path of a bind mount does not exist when you pass it to the container, Docker will [create](https://docs.docker.com/engine/storage/bind-mounts/#syntax) it and it may be owned by root. Ensure the directory exists before starting the container.
+
+Create the directory:
+
+```
+mkdir -p ~/.config/zenin
+```
+
+Or, adjust the user and group:
+
+```
+chown $USER:$USER ~/.config/zenin -R
+```
+
 ### Manual
 
 > [!Note]
@@ -89,7 +109,7 @@ If you want to build Zenin from source, follow these instructions.
 2. [Node.js](https://nodejs.org/) v20.8.1+
     + npm v10.1.0+
 
-Clone the project.
+Clone the project:
 
 ```
 git clone https://github.com/jmkng/zenin
@@ -153,19 +173,19 @@ Supported environment variables are documented here.
 
 ## Hacking
 
-Clone the project.
+Clone the project:
 
 ```
 git clone https://github.com/jmkng/zenin
 ```
 
-Modify the `export` script as needed, and source it.
+Modify the `export` script as needed, and source it:
 
 ```
 . scripts/export.sh
 ```
 
-Start Zenin.
+Start Zenin:
 
 ```
 make run
@@ -184,13 +204,13 @@ You might need these tools to run them:
 - [curl](https://curl.se/download.html)
 - [jq](https://github.com/jqlang/jq)
 
-Scripts that hit authenticated endpoints will expect a token to be in the `ZENIN_SCRIPT_TOKEN` environment variable. If you used the `migrate` script to insert seed data, you can just source the `authenticate` script to set this up for you.
+Scripts that hit authenticated endpoints will expect a token to be in the `ZENIN_SCRIPT_TOKEN` environment variable. If you used the `migrate` script to insert seed data, you can just source the `authenticate` script to set this up for you:
 
 ```
 . scripts/authenticate.sh
 ```
 
-Use `get_related` to fetch all the monitors on the server, including the two most recent measurements for each.
+Use `get_related` to fetch all the monitors on the server, including the two most recent measurements for each:
 
 ```
 scripts/api/monitor/get_related.sh
@@ -219,13 +239,13 @@ scripts/api/monitor/get_related.sh
 {"data":[ ... ]}
 ```
 
-Alternatively, use `jq` to format the data. 
+Alternatively, use `jq` to format the data:
 
 ```
 scripts/api/monitor/get_related.sh | jq .
 ```
 
-Use the makefile to build.
+Use the makefile to build:
 
 ```
 make
@@ -245,7 +265,7 @@ Database tests are disabled by default. Enable them with the `ZENIN_REPO_ENABLE_
 > migrating, and inserting seed data. 
 > Do not run these tests when Zenin is pointed to a repository with valuable data.
 
-Use the makefile to run tests.
+Use the makefile to run tests:
 
 ```
 go clean -testcache && make test
