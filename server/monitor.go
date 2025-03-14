@@ -68,7 +68,9 @@ func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	responder.Data(monitors, http.StatusOK)
+	responder.Data(struct {
+		Monitors []monitor.Monitor `json:"monitors"`
+	}{Monitors: monitors}, http.StatusOK)
 }
 
 func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Request) {

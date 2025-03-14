@@ -61,8 +61,8 @@ export default function Router() {
                 monitor.context.dispatch({ type: 'update', plugins: packet.data.plugins || [] });
             }
             if (monitorEx.ok()) {
-                const packet: DataPacket<Monitor[]> = await monitorEx.json();
-                monitor.context.dispatch({ type: 'reset', monitors: packet.data });
+                const packet: DataPacket<{monitors: Monitor[]}> = await monitorEx.json();
+                monitor.context.dispatch({ type: 'reset', monitors: packet.data.monitors });
             }
             if (accountEx !== undefined && accountEx.ok()) {
                 const packet: DataPacket<Account[]> = await accountEx.json();
