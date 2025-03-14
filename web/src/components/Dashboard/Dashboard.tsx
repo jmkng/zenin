@@ -2,7 +2,7 @@ import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
 import { isMonitor, useMonitorContext } from '@/internal/monitor';
 import { useDefaultMonitorService } from '@/internal/monitor/service';
-import { CreatedTimestamp, DataPacket } from '@/internal/server';
+import { CreatedTimestamp, DataPacket, Timestamp } from '@/internal/server';
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';
@@ -58,7 +58,7 @@ export default function Dashboard() {
         const token = account.state.token!.raw;
         const extract = await monitor.service.updateMonitor(token, value.id, value);
         if (!extract.ok()) return;
-        const body: DataPacket<{ time: string }> = await extract.json();
+        const body: DataPacket<Timestamp> = await extract.json();
         value.updatedAt = body.data.time;
         monitor.context.dispatch({ type: 'overwrite', monitor: value })
     }
