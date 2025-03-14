@@ -178,6 +178,10 @@ func (e Environment) Diagnose(dx *Diagnostic) {
 	if e.BaseDir == "" {
 		dx.Error("cannot find base directory, provide a path with the `ZENIN_BASE_DIR` environment variable")
 	} else {
+		if !filepath.IsAbs(e.BaseDir) {
+			dx.Error("base directory should be an absolute path")
+		}
+
 		base, err := os.Stat(e.BaseDir)
 		if err != nil || !base.IsDir() {
 			if errors.Is(err, fs.ErrNotExist) {
@@ -193,6 +197,10 @@ func (e Environment) Diagnose(dx *Diagnostic) {
 	if e.PluginsDir == "" {
 		dx.Error("cannot find plugins directory, provide a path with the `ZENIN_PLUGINS_DIR` environment variable")
 	} else {
+		if !filepath.IsAbs(e.PluginsDir) {
+			dx.Error("plugins directory should be an absolute path")
+		}
+
 		plugins, err := os.Stat(e.PluginsDir)
 		if err != nil || !plugins.IsDir() {
 			if errors.Is(err, fs.ErrNotExist) {
