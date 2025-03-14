@@ -80,7 +80,7 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 	err := StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
 		responder.Error(env.
-			NewValidation("Received unexpected data, only keys `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+			NewValidation("Received unexpected data, only keys `name`, `kind`, `active`, `interval`, `timeout` are required."),
 			http.StatusBadRequest)
 		return
 	}
@@ -196,7 +196,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	var incoming monitor.Monitor
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(env.NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are mandatory."),
+		responder.Error(env.NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are required."),
 			http.StatusBadRequest)
 		return
 	}
