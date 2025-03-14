@@ -103,9 +103,11 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	responder.Data(struct {
-		Token string `json:"token"`
-	}{Token: token}, http.StatusOK)
+	responder.Data(TokenResponse{Token: token}, http.StatusOK)
+}
+
+type TokenResponse struct {
+	Token string `json:"token"`
 }
 
 func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
@@ -140,9 +142,7 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	responder.Data(struct {
-		Token string `json:"token"`
-	}{Token: token}, http.StatusOK)
+	responder.Data(TokenResponse{Token: token}, http.StatusOK)
 }
 
 func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Request) {
