@@ -59,7 +59,9 @@ func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *htt
 		return
 	}
 
-	responder.Data(certificates, http.StatusOK)
+	responder.Data(struct {
+		Certificates []measurement.Certificate `json:"certificates"`
+	}{Certificates: certificates}, http.StatusOK)
 }
 
 func (m MeasurementProvider) HandleDeleteMeasurements(w http.ResponseWriter, r *http.Request) {
