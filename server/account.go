@@ -169,7 +169,9 @@ func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	responder.Data(accounts, http.StatusOK)
+	responder.Data(struct {
+		Accounts []account.Account `json:"accounts"`
+	}{Accounts: accounts}, http.StatusOK)
 }
 
 func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Request) {
