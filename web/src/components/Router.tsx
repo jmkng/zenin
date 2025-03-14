@@ -53,8 +53,8 @@ export default function Router() {
                 accountEx
             ] = await Promise.all(queue);
             if (settingsEx.ok()) {
-                const packet: DataPacket<Settings> = await settingsEx.json();
-                settings.context.dispatch({ type: 'reset', delimiters: packet.data.delimiters });
+                const packet: DataPacket<{settings: Settings}> = await settingsEx.json();
+                settings.context.dispatch({ type: 'reset', delimiters: packet.data.settings.delimiters });
             }
             if (pluginEx.ok()) {
                 const packet: DataPacket<{plugins: string[] | null}> = await pluginEx.json();

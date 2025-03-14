@@ -51,12 +51,15 @@ func (a SettingsProvider) Mux() http.Handler {
 
 func (a SettingsProvider) HandleGetSettings(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
-	settings, err := a.Service.GetSettings(r.Context())
+	s, err := a.Service.GetSettings(r.Context())
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
-	responder.Data(settings, http.StatusOK)
+
+	responder.Data(struct {
+		Settings settings.Settings `json:"settings"`
+	}{Settings: s}, http.StatusOK)
 }
 
 func (a SettingsProvider) HandleUpdateSettings(w http.ResponseWriter, r *http.Request) {
