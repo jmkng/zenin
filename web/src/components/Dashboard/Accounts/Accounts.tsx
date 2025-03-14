@@ -121,7 +121,7 @@ export default function Accounts() {
             const updatedAt = packet.data.time;
             account.context.dispatch({ type: 'update', id, username, updatedAt });
             if (reissue) {
-                // Token will be set when a reissue is requested.
+                // Token will only be set when a reissue is requested.
                 const token = packet.data.token!;
                 account.service.setLSToken(token);
                 account.context.dispatch({ type: 'login', token });

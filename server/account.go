@@ -211,6 +211,25 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 	}, http.StatusCreated)
 }
 
+func (a AccountProvider) HandleDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	id := scanQueryParameterIds(r.URL.Query())
+	if len(id) == 0 {
+		responder.Error(env.NewValidation("Expected `id` query parameter."),
+			http.StatusBadRequest)
+		return
+	}
+
+	err := a.Service.Repository.DeleteAccount(r.Context(), id)
+	if err != nil {
+		responder.Error(err, http.StatusBadRequest)
+		return
+	}
+
+	responder.Status(http.StatusOK)
+}
+
 func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 	query := r.URL.Query()
@@ -286,23 +305,4 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 	}
 
 	responder.Data(time, http.StatusOK)
-}
-
-func (a AccountProvider) HandleDeleteAccount(w http.ResponseWriter, r *http.Request) {
-	responder := NewResponder(w)
-
-	id := scanQueryParameterIds(r.URL.Query())
-	if len(id) == 0 {
-		responder.Error(env.NewValidation("Expected `id` query parameter."),
-			http.StatusBadRequest)
-		return
-	}
-
-	err := a.Service.Repository.DeleteAccount(r.Context(), id)
-	if err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
-
-	responder.Status(http.StatusOK)
 }
