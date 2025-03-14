@@ -28,10 +28,10 @@ export default function Login() {
 
     useEffect(() => {
         (async () => {
-            const extract = await account.service.getClaim();
+            const extract = await account.service.getClaimed();
             if (!extract.ok()) return;
-            const packet: DataPacket<boolean> = await extract.json();
-            setIsClaimed(packet.data);
+            const packet: DataPacket<{claimed: boolean}> = await extract.json();
+            setIsClaimed(packet.data.claimed);
         })()
     }, [])
 
@@ -49,7 +49,7 @@ export default function Login() {
 
         const extract = isClaimed
             ? await account.service.authenticate(username, password)
-            : await account.service.setClaim(username, password)
+            : await account.service.setClaimed(username, password)
 
         const packet: DataPacket<{token: string}> = await extract.json();
         if (!extract.ok()) {

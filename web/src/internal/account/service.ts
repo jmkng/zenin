@@ -19,13 +19,13 @@ class AccountService extends Service {
         return await this.extract(request);
     }
 
-    async getClaim() {
+    async getClaimed() {
         const address = '/account/claim';
         const request = new Request(address);
         return await this.extract(request);
     }
 
-    async setClaim(username: string, password: string) {
+    async setClaimed(username: string, password: string) {
         const address = `/account/claim`;
         const body = JSON.stringify({ username, password });
         const request = new Request(address).body(body).method(POST_API);

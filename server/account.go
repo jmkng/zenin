@@ -62,7 +62,9 @@ func (a AccountProvider) HandleGetClaimStatus(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	responder.Data(claim, http.StatusOK)
+	responder.Data(struct {
+		Claimed bool `json:"claimed"`
+	}{Claimed: claim}, http.StatusOK)
 }
 
 func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Request) {
