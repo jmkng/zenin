@@ -55,7 +55,6 @@ export type Interceptor = (extract: Extract) => void;
 
 export class Extract {
     response: Response;
-    body: unknown;
 
     constructor(response: Response) {
         this.response = response;
