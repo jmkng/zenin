@@ -73,25 +73,25 @@ func NewEnvironment() Environment {
 		stdoutTimeFormat = x
 	}
 
-	var baseDir string
-	var pluginsDir string
-	configDir, err := os.UserConfigDir()
-	if err == nil {
-		baseDir = configDir
-		switch runtime.GOOS {
-		case "darwin", "windows":
-			baseDir = filepath.Join(baseDir, "Zenin")
-		case "linux":
-			baseDir = filepath.Join(baseDir, "zenin")
+	baseDir := os.Getenv(baseDirKey)
+
+	if baseDir == "" {
+		// Set a default base directory.
+		configDir, err := os.UserConfigDir()
+		if err == nil {
+			baseDir = configDir
+			switch runtime.GOOS {
+			case "darwin", "windows":
+				baseDir = filepath.Join(baseDir, "Zenin")
+			case "linux":
+				baseDir = filepath.Join(baseDir, "zenin")
+			}
 		}
+	}
+	pluginsDir := os.Getenv(pluginsDirKey)
+	if pluginsDir == "" && baseDir != "" {
+		// If no specific plugins directory was provided, put it in the base directory.
 		pluginsDir = filepath.Join(baseDir, "plugins")
-	}
-	// Directories provided by the user take precedence.
-	if base := os.Getenv(baseDirKey); base != "" {
-		baseDir = base
-	}
-	if plugins := os.Getenv(pluginsDirKey); plugins != "" {
-		pluginsDir = plugins
 	}
 
 	enableColor := true
