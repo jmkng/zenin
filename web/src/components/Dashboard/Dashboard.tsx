@@ -2,7 +2,7 @@ import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
 import { isMonitor, useMonitorContext } from '@/internal/monitor';
 import { useDefaultMonitorService } from '@/internal/monitor/service';
-import { DataPacket } from '@/internal/server';
+import { CreatedTimestamp, DataPacket } from '@/internal/server';
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';
@@ -43,10 +43,7 @@ export default function Dashboard() {
         const extract = await monitor.service.addMonitor(token, value);
         if (!extract.ok()) return;
 
-        const body: DataPacket<{ id: number, time: string }> = await extract.json();
-        if (!body.data) {
-            throw new Error("expected server to respond with `id` and `time` fields for new monitor")
-        }
+        const body: DataPacket<CreatedTimestamp> = await extract.json();
         value.createdAt = body.data.time;
         value.updatedAt = body.data.time;
         const measurements = null;

@@ -86,6 +86,11 @@ export function isDataPacket(obj: any): obj is DataPacket<any> {
     return obj && typeof obj.data == 'object'
 }
 
+export interface CreatedTimestamp {
+    id: number,
+    time: string
+}
+
 export interface ErrorPacket {
     errors: string[]
 }
