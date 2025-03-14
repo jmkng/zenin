@@ -3,6 +3,7 @@ package internal
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -108,6 +109,34 @@ func (t TimeValue) Value() (driver.Value, error) {
 // MarshalJSON implements `json.Marshaler` for `TimeValue`.
 func (t TimeValue) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + t.time.Format(time.RFC3339) + `"`), nil
+}
+
+// UnmarshalJSON implements `json.Unmarshaler` for `TimeValue`.
+func (t *TimeValue) UnmarshalJSON(data []byte) error {
+	// Taken from https://go.dev/src/time/time.go
+	if string(data) == "null" {
+		return nil
+	}
+	if len(data) < 2 || data[0] != '"' || data[len(data)-1] != '"' {
+		return errors.New("expected a JSON string")
+	}
+	data = data[len(`"`) : len(data)-len(`"`)]
+
+	var v string
+	formats := []string{
+		time.RFC3339,
+		time.DateTime,
+	}
+
+	for _, format := range formats {
+		parsed, err := time.Parse(format, string(data))
+		if err == nil {
+			*t = NewTimeValue(parsed)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("failed to parse time: %v", v)
 }
 
 // TimestampValue represents a timestamp.
