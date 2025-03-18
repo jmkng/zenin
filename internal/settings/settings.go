@@ -8,18 +8,23 @@ import (
 )
 
 const (
-	DefaultOpenDelimiter  string = "{{"
-	DefaultCloseDelimiter string = "}}"
+	DefaultOpenDelimiter  = "{{"
+	DefaultCloseDelimiter = "}}"
+
+	DelimitersKey = "delimiters"
+	ThemeKey      = "theme"
 )
 
 // Settings is the settings domain type.
 type Settings struct {
-	Delimiters internal.ArrayValue `json:"delimiters"`
+	Theme      *string              `json:"theme"`
+	Delimiters *internal.ArrayValue `json:"delimiters"`
 }
 
 func (m Settings) Validate() error {
 	var errors []string
-	if len(m.Delimiters) != 2 || strings.TrimSpace(m.Delimiters[0]) == "" || strings.TrimSpace(m.Delimiters[1]) == "" {
+
+	if m.Delimiters == nil || len(*m.Delimiters) != 2 || strings.TrimSpace((*m.Delimiters)[0]) == "" || strings.TrimSpace((*m.Delimiters)[1]) == "" {
 		errors = append(errors, "value for field `delimiters` is required")
 	}
 

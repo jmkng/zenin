@@ -30,7 +30,7 @@ func main() {
 	}
 
 	fmt.Printf("Zenin %v%v\n", env.Version, g.MagentaC(commit, e.EnableColor))
-	env.Info("environment", "base", e.BaseDir, "plugins", e.PluginsDir)
+	env.Info("environment", "base", e.BaseDir, "plugins", e.PluginsDir, "themes", e.ThemesDir)
 
 	dx := env.NewDiagnostic()
 	e.Diagnose(&dx)

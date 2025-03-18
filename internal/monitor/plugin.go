@@ -84,7 +84,7 @@ func (p PluginExecutor) Run(ctx context.Context, f PluginFields) (int, string, s
 	if f.PluginArgs != nil {
 		for i, v := range *f.PluginArgs {
 			name := fmt.Sprintf("%d", i)
-			t, err := template.New(name).Delims(p.Settings.Delimiters[0], p.Settings.Delimiters[1]).Parse(v)
+			t, err := template.New(name).Delims((*p.Settings.Delimiters)[0], (*p.Settings.Delimiters)[1]).Parse(v)
 			if err != nil {
 				dx.Error("Failed to parse plugin argument.")
 				return code, stdout, stderr, dx
