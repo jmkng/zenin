@@ -40,8 +40,7 @@ func (a AccountProvider) Mux() http.Handler {
 	router.Get("/claim", a.HandleGetClaimStatus)
 	router.Post("/claim", a.HandleCreateClaim)
 	router.Post("/authenticate", a.HandleAuthenticate)
-
-	///// root /////
+	//// private /////
 	router.Group(func(private chi.Router) {
 		private.Use(Authenticate)
 		private.Get("/", a.HandleGetAccounts)

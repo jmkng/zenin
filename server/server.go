@@ -1,12 +1,12 @@
 package server
 
 import (
-	"bytes"
 	"embed"
 	"encoding/json"
 	"errors"
 	"io"
 	"io/fs"
+	"mime"
 	"net"
 	"net/http"
 	"net/url"
@@ -80,6 +80,11 @@ type Server struct {
 func (s *Server) Serve() error {
 	env.Info("server starting", "address", s.config.Address.IP.String(), "port", s.config.Address.Port)
 
+	settings := s.services.Settings
+	account := s.services.Account
+	monitor := s.services.Monitor
+	measurement := s.services.Measurement
+
 	mux := chi.NewRouter()
 	if s.config.Env.AllowInsecure {
 		env.Warn("cors checks are disabled")
@@ -88,56 +93,24 @@ func (s *Server) Serve() error {
 	mux.Use(Log)
 	mux.Use(middleware.Timeout(60 * time.Second))
 
-	// UI ->
-	var webFS = fs.FS(web)
-	sub, err := fs.Sub(webFS, "build")
-	if err != nil {
-		panic("failed to set web embed sub directory")
-	}
-	mux.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		// Assume that any request with an extension (except .html) is a request for an embedded resource,
-		// and pass the request to embedded fs.
-		ext := path.Ext(r.URL.Path)
-		if ext != "" && ext != ".html" {
-			http.FileServerFS(sub).ServeHTTP(w, r)
-			return
-		}
-
-		// Defer all requests for html files to the frontend router.
-		index, err := sub.Open("index.html")
-		if err != nil {
-			panic(err)
-		}
-		defer index.Close()
-		d, err := index.Stat()
-		if err != nil {
-			panic(err)
-		}
-		data, err := io.ReadAll(index)
-		if err != nil {
-			panic(err)
-		}
-
-		http.ServeContent(w, r, d.Name(), d.ModTime(), bytes.NewReader(data))
-	})
-	// API ->
-	mux.Route("/api/v1", func(v1 chi.Router) {
-		v1.Use(Default)
-		v1.Use(middleware.AllowContentType("application/json"))
-		v1.Mount("/settings", NewSettingsHandler(s.services.Settings))
-		v1.Mount("/account", NewAccountHandler(s.services.Account))
-		v1.Mount("/feed", NewFeedHandler(s.services.Monitor))
-
-		//// private /////
-		v1.Group(func(private chi.Router) {
-			private.Use(Authenticate)
-			private.Mount("/monitor", NewMonitorHandler(s.services.Monitor))
-			private.Mount("/measurement", NewMeasurementHandler(s.services.Measurement))
-		})
-		//////////////////
+	v1 := chi.NewRouter()
+	v1.Mount("/settings", NewSettingsHandler(settings))
+	v1.Mount("/account", NewAccountHandler(account))
+	v1.Mount("/feed", NewFeedHandler(monitor))
+	v1.Group(func(private chi.Router) {
+		private.Use(Authenticate)
+		private.Mount("/monitor", NewMonitorHandler(monitor))
+		private.Mount("/measurement", NewMeasurementHandler(measurement))
 	})
 
-	err = http.ListenAndServe(s.config.Address.String(), mux)
+	api := chi.NewRouter()
+	api.Mount("/v1", v1)
+	api.NotFound(notFoundHandler)
+
+	mux.Mount("/api", api)
+	mux.Mount("/", NewEmbed(settings))
+
+	err := http.ListenAndServe(s.config.Address.String(), mux)
 	if err != nil {
 		return err
 	}
@@ -162,5 +135,93 @@ func scanQueryParameterIds(values url.Values) []int {
 	return id
 }
 
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+	responder.Status(http.StatusNotFound)
+}
+
+func NewEmbed(service settings.SettingsService) Embed {
+	sub, err := fs.Sub(build, "build")
+	if err != nil {
+		panic("failed to set embed sub directory")
+	}
+	return Embed{fs: sub, service: service}
+}
+
+// Embed contains the embedded user interface.
+type Embed struct {
+	fs      fs.FS
+	service settings.SettingsService
+}
+
+func (e Embed) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+	if r.Method != "GET" {
+		responder.Status(http.StatusMethodNotAllowed)
+		return
+	}
+	if strings.HasSuffix(r.URL.Path, "/index.html") {
+		localRedirect(w, r, "./")
+		return
+	}
+
+	// "Paths must not start or end with a slash: “/x” and “x/” are invalid.""
+	// https://pkg.go.dev/io/fs#ValidPath
+	name := path.Clean(r.URL.Path)
+	contentType := ""
+	ext := path.Ext(name)
+
+	// Requests for .html (or no extension) receive index.html, routing handled by client.
+	if name == "/" || ext == "" || ext == ".html" {
+		name = "index.html"
+		contentType = ContentTypeTextHtmlUTF8
+	}
+	name = strings.TrimPrefix(name, "/")
+
+	env.Debug("embed file access", "name", name)
+	f, err := e.fs.Open(name)
+	if err != nil {
+		responder.Error(err, toCode(err))
+		return
+	}
+	defer f.Close()
+	d, err := f.Stat()
+	if err != nil {
+		responder.Error(err, toCode(err))
+		return
+	}
+
+	if contentType == "" {
+		// Don't use ext for extension here, name may have changed.
+		contentType = mime.TypeByExtension(path.Ext(name))
+	}
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Length", strconv.FormatInt(d.Size(), 10))
+	w.WriteHeader(http.StatusOK)
+	if _, err = io.Copy(w, f); err != nil {
+		responder.Status(http.StatusInternalServerError)
+	}
+}
+
+func localRedirect(w http.ResponseWriter, r *http.Request, location string) {
+	responder := NewResponder(w)
+	if q := r.URL.RawQuery; q != "" {
+		location += "?" + q
+	}
+	env.Debug("embed local redirect", "location", location)
+	responder.Redirect(location, http.StatusMovedPermanently)
+}
+
+func toCode(err error) int {
+	if errors.Is(err, fs.ErrNotExist) {
+		return http.StatusNotFound
+	}
+	if errors.Is(err, fs.ErrPermission) {
+		return http.StatusForbidden
+	}
+
+	return http.StatusInternalServerError
+}
+
 //go:embed build
-var web embed.FS
+var build embed.FS

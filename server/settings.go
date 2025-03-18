@@ -1,7 +1,9 @@
 package server
 
 import (
+	"errors"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmkng/zenin/internal/env"
@@ -37,11 +39,11 @@ type SettingsProvider struct {
 
 func (a SettingsProvider) Mux() http.Handler {
 	router := chi.NewRouter()
-
 	//// private /////
 	router.Group(func(private chi.Router) {
 		private.Use(Authenticate)
 		router.Get("/", a.HandleGetSettings)
+		router.Get("/theme", a.HandleGetTheme)
 		router.Post("/", a.HandleUpdateSettings)
 	})
 	//////////////////
@@ -74,17 +76,32 @@ func (a SettingsProvider) HandleUpdateSettings(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = incoming.Validate()
-	if err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
-
 	err = a.Service.UpdateSettings(r.Context(), incoming)
 	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.As(err, &env.Validation{}) {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
 		return
 	}
 
 	responder.Status(http.StatusOK)
+}
+
+func (a SettingsProvider) HandleGetTheme(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	theme, err := a.Service.GetTheme(r.Context())
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			responder.Status(http.StatusUnprocessableEntity)
+			return
+		}
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	responder.CSS(theme, http.StatusOK)
 }

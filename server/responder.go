@@ -22,8 +22,9 @@ type Responder struct {
 	writer http.ResponseWriter
 }
 
-// Data will send a status code and a chunk of data.
+// Data will send a [DataPacket] and status code.
 func (r *Responder) Data(data any, status int) {
+	r.writer.Header().Add(ContentType, ContentTypeApplicationJson)
 	r.writer.WriteHeader(status)
 
 	response, err := NewDataPacket(data).JSON()
@@ -34,13 +35,33 @@ func (r *Responder) Data(data any, status int) {
 	r.writer.Write(response)
 }
 
-// Error will send a status code and search the error chain for `Validation` errors.
-//
-// If any are found, the messages are extracted and sent to the client.
-// Other errors are logged.
-func (r *Responder) Error(err error, status int) {
+// HTML will send HTML and a status code.
+func (r *Responder) HTML(data []byte, status int) {
+	r.writer.Header().Add(ContentType, ContentTypeTextHtmlUTF8)
 	r.writer.WriteHeader(status)
 
+	_, err := r.writer.Write(data)
+	if err != nil {
+		env.Error("responder failed to send html response", "error", err)
+		return
+	}
+}
+
+// HTML will send CSS and a status code.
+func (r *Responder) CSS(data []byte, status int) {
+	r.writer.Header().Add(ContentType, ContentTypeCSS)
+	r.writer.WriteHeader(status)
+
+	_, err := r.writer.Write(data)
+	if err != nil {
+		env.Error("responder failed to send css response", "error", err)
+		return
+	}
+}
+
+// Error will send an [ErrorPacket] if the error includes [env.Validation] errors.
+// All other errors are logged.
+func (r *Responder) Error(err error, status int) {
 	var client []string
 	origin := err
 
@@ -56,16 +77,25 @@ func (r *Responder) Error(err error, status int) {
 	}
 
 	if len(client) > 0 {
+		r.writer.Header().Add(ContentType, ContentTypeApplicationJson)
+	}
+	r.writer.WriteHeader(status)
+	if len(client) > 0 {
 		response, err := NewErrorPacket(client...).JSON()
 		if err != nil {
 			env.Error("responder failed to send error response", "error", err)
 			return
 		}
-
 		r.writer.Write(response)
 	}
 
 	env.Error(origin.Error())
+}
+
+// Redirect will set a location header and send a status code.
+func (r *Responder) Redirect(location string, status int) {
+	r.writer.Header().Add(Location, location)
+	r.writer.WriteHeader(http.StatusMovedPermanently)
 }
 
 // Status will send a status code.
