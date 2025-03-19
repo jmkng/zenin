@@ -17,7 +17,7 @@ func (s SQLiteRepository) UpdateSettings(ctx context.Context, se settings.Settin
 		VALUES (?, ?), (?, ?)
 		ON CONFLICT ("key")
 		DO UPDATE SET 
-			text_value = COALESCE(EXCLUDED.text_value, text_value)`
+			text_value = EXCLUDED.text_value`
 
 	_, err := s.db.ExecContext(ctx, query,
 		settings.DelimitersKey, delimiters,

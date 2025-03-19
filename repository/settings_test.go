@@ -33,11 +33,10 @@ func TestUpdateSettings(t *testing.T) {
 	close := "]]"
 	theme := "Test.css"
 	delimiters := internal.ArrayValue([]string{open, close})
-	update := settings.Settings{
+	err = repository.UpdateSettings(ctx, settings.Settings{
 		Delimiters: &delimiters,
 		Theme:      &theme,
-	}
-	err = repository.UpdateSettings(ctx, update)
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,6 +55,22 @@ func TestUpdateSettings(t *testing.T) {
 	debug.AssertEqual(t, (*after.Delimiters)[0], open)
 	debug.AssertEqual(t, (*after.Delimiters)[1], close)
 	debug.AssertEqual(t, *after.Theme, theme)
+
+	err = repository.UpdateSettings(ctx, settings.Settings{
+		Delimiters: nil,
+		Theme:      nil,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	final, err := repository.SelectSettings(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	debug.AssertEqual(t, final.Delimiters, nil)
+	debug.AssertEqual(t, final.Theme, nil)
 }
 
 func TestSelectSettings(t *testing.T) {

@@ -15,7 +15,7 @@ func (p PostgresRepository) UpdateSettings(ctx context.Context, s settings.Setti
 	VALUES ($1, $2), ($3, $4)
 	ON CONFLICT ("key")
 	DO UPDATE SET
-	text_value = COALESCE(excluded.text_value, settings.text_value)`
+		text_value = EXCLUDED.text_value`
 
 	_, err := p.db.ExecContext(ctx, query,
 		settings.DelimitersKey, s.Delimiters,
