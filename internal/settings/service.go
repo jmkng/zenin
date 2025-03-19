@@ -2,6 +2,7 @@ package settings
 
 import (
 	"context"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -25,6 +26,7 @@ func (m SettingsService) GetSettings(ctx context.Context) (Settings, error) {
 	if err != nil {
 		return Settings{}, err
 	}
+
 	// Set defaults where expected.
 	// Theme is allowed to be nil, indicating that the server has no theme preference stored.
 	if settings.Delimiters == nil {
@@ -49,9 +51,9 @@ func (m SettingsService) UpdateSettings(ctx context.Context, s Settings) error {
 	return nil
 }
 
-// GetTheme attempts to read the preferred theme from the themes directory.
+// GetActiveTheme attempts to read the preferred theme from the themes directory.
 // Returns a nil slice if the repository has no theme preference.
-func (m SettingsService) GetTheme(ctx context.Context) ([]byte, error) {
+func (m SettingsService) GetActiveTheme(ctx context.Context) ([]byte, error) {
 	settings, err := m.GetSettings(ctx)
 	if err != nil {
 		return nil, err
@@ -68,4 +70,32 @@ func (m SettingsService) GetTheme(ctx context.Context) ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+func (m SettingsService) GetThemes() ([]string, error) {
+	var themes []string
+	root := env.Env.ThemesDir
+
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		ext := filepath.Ext(d.Name())
+
+		if ext == ".css" {
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			themes = append(themes, rel)
+		}
+
+		return nil
+	})
+
+	return themes, err
 }

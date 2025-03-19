@@ -280,6 +280,8 @@ func (m MonitorProvider) HandleGetPlugins(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// TODO: Check for nil slice before sending.
+
 	responder.Data(struct {
 		Plugins []string `json:"plugins"`
 	}{Plugins: plugins}, http.StatusOK)

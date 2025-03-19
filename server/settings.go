@@ -43,7 +43,8 @@ func (a SettingsProvider) Mux() http.Handler {
 	router.Group(func(private chi.Router) {
 		private.Use(Authenticate)
 		router.Get("/", a.HandleGetSettings)
-		router.Get("/theme", a.HandleGetTheme)
+		router.Get("/themes", a.HandleGetThemes)
+		router.Get("/themes/active", a.HandleGetActiveTheme)
 		router.Post("/", a.HandleUpdateSettings)
 	})
 	//////////////////
@@ -90,10 +91,10 @@ func (a SettingsProvider) HandleUpdateSettings(w http.ResponseWriter, r *http.Re
 	responder.Status(http.StatusOK)
 }
 
-func (a SettingsProvider) HandleGetTheme(w http.ResponseWriter, r *http.Request) {
+func (a SettingsProvider) HandleGetActiveTheme(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	theme, err := a.Service.GetTheme(r.Context())
+	theme, err := a.Service.GetActiveTheme(r.Context())
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			responder.Status(http.StatusUnprocessableEntity)
@@ -104,4 +105,24 @@ func (a SettingsProvider) HandleGetTheme(w http.ResponseWriter, r *http.Request)
 	}
 
 	responder.CSS(theme, http.StatusOK)
+}
+
+func (a SettingsProvider) HandleGetThemes(w http.ResponseWriter, r *http.Request) {
+	responder := NewResponder(w)
+
+	themes, err := a.Service.GetThemes()
+	if err != nil {
+		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: Check serialization.
+	var t []string = nil
+	if len(themes) != 0 {
+		t = themes
+	}
+
+	responder.Data(struct {
+		Themes []string `json:"themes"`
+	}{Themes: t}, http.StatusOK)
 }
