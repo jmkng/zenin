@@ -133,6 +133,10 @@ When you connect for the first time you will be prompted to claim the server by 
 
 After you claim the server, you can create monitors.
 
+## Themes
+
+Themes are CSS files that Zenin reads from the themes directory. You can change your theme from the settings pane in the user interface. The default theme selection is "Auto", which means that the default light or dark theme will be used depending on operating system/user agent preference.
+
 ## Environment Variables
 
 Supported environment variables are documented here.
@@ -149,10 +153,8 @@ Supported environment variables are documented here.
 | ZENIN_BASE_DIR (Windows)    |                                                                               |                                 |                                                       | %AppData%\local\Zenin
 | ZENIN_BASE_DIR (macOS)      |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/Zenin
 | ZENIN_BASE_DIR (Linux)      |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/zenin
-| ZENIN_PLUGINS_DIR           | A directory used to store executable plugins.                                 | absolute path                   | export ZENIN_PLUGINS_DIR="/usr/local/p"               | See notes
-| ZENIN_PLUGINS_DIR (Windows) |                                                                               |                                 |                                                       | %AppData%\local\Zenin\plugins
-| ZENIN_PLUGINS_DIR (macOS)   |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/Zenin/plugins
-| ZENIN_PLUGINS_DIR (Linux)   |                                                                               |                                 |                                                       | $XDG_CONFIG_HOME/zenin/plugins
+| ZENIN_PLUGINS_DIR           | A directory used to store executable plugins.                                 | absolute path                   | export ZENIN_PLUGINS_DIR="/usr/local/zenin/plugins"   | $ZENIN_BASE_DIR/plugins
+| ZENIN_THEMES_DIR            | A directory used to store themes.                                             | absolute path                   | export ZENIN_THEMES_DIR="/usr/local/zenin/themes"     | $ZENIN_BASE_DIR/themes
 | ZENIN_ENABLE_COLOR          | Determines if ANSI color codes are included in logs sent to standard output.  | true, false                     | export ZENIN_ENABLE_COLOR="false"                     | true
 | ZENIN_ENABLE_DEBUG          | Enables debug logging.                                                        | true, false                     | export ZENIN_ENABLE_DEBUG="true"                      | false
 | ZENIN_ALLOW_INSECURE        | Allows insecure behavior, such as ignoring CORS.                              | true, false                     | export ZENIN_ALLOW_INSECURE="true"                    | false
