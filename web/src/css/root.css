@@ -1,19 +1,15 @@
 @font-face {
     font-family: "Geist Mono";
-    src: url("@fonts/geistmono.ttf");
+    src: url("/geistmono.ttf");
 }
 @font-face {
     font-family: "Geist Sans";
-    src: url("@fonts/geistsans.ttf");
+    src: url("/geistsans.ttf");
 }
 
 :root {
-    --white: rgb(255, 255, 255);
-    --black: rgb(18, 18, 18);
-
     --fast: .10s;
     --slow: .30s;
-
     --px-a: 3px;
     --px-b: 6px;
     --px-c: 9px;
@@ -23,12 +19,9 @@
     --px-g: 36px;
     --px-h: 38px;
     --px-i: 57px;
-
     --rounded: 5px;
-
-    /* Theme: Dark */
-    --theme-dark-background: var(--black);
-    --theme-dark-foreground: var(--white);
+    --theme-dark-background: rgb(18, 18, 18);
+    --theme-dark-foreground: rgb(255, 255, 255);
     --theme-dark-primary-hl: rgb(225, 225, 227);
     --theme-dark-subtle: rgb(150, 150, 50);
     --theme-dark-mid: rgb(180, 180, 182);
@@ -42,10 +35,8 @@
     --theme-dark-dead-a: rgb(223, 101, 88);
     --theme-dark-dead-b: rgb(213, 91, 78); 
     --theme-dark-darken: 0.5;
-
-    /* Theme: Light */
-    --theme-light-background: var(--white);
-    --theme-light-foreground: var(--black);
+    --theme-light-background: rgb(255, 255, 255);
+    --theme-light-foreground: rgb(18, 18, 18);
     --theme-light-primary-hl: rgb(47, 45, 45);
     --theme-light-subtle: rgb(150, 150, 50);
     --theme-light-mid: rgb(100, 100, 102);
@@ -59,9 +50,14 @@
     --theme-light-dead-a: rgb(235, 55, 45);
     --theme-light-dead-b: rgb(245, 55, 45);
     --theme-light-darken: 0.25;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 13px;
+    line-height: 1.5;
 }
-
-:root.zenin__theme_dark {
+:root.prefer-dark {
     --background:   var(--theme-dark-background);
     --foreground:   var(--theme-dark-foreground);
     --primary-hl:   var(--theme-dark-primary-hl);
@@ -78,8 +74,7 @@
     --dead-b:       var(--theme-dark-dead-b); 
     --darken:       var(--theme-dark-darken);
 }
-
-:root.zenin__theme_light {
+:root.prefer-light {
     --background:   var(--theme-light-background);
     --foreground:   var(--theme-light-foreground);
     --primary-hl:   var(--theme-light-primary-hl);
@@ -96,9 +91,8 @@
     --dead-b:       var(--theme-light-dead-b);
     --darken:       var(--theme-light-darken);
 }
-
 @media (prefers-color-scheme: dark) {
-    :root.zenin__theme_auto {
+    :root {
         --background:   var(--theme-dark-background);
         --foreground:   var(--theme-dark-foreground);
         --primary-hl:   var(--theme-dark-primary-hl);
@@ -116,9 +110,8 @@
         --darken:       var(--theme-dark-darken);
     }
 }
-
 @media (prefers-color-scheme: light) {
-    :root.zenin__theme_auto {
+    :root {
         --background:   var(--theme-light-background);
         --foreground:   var(--theme-light-foreground);
         --primary-hl:   var(--theme-light-primary-hl);
@@ -135,15 +128,6 @@
         --dead-b:       var(--theme-light-dead-b);
         --darken:       var(--theme-light-darken);
     }
-}
-
-:root {
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-    background: var(--background);
-    color: var(--foreground);
-    font-size: 13px;
-    line-height: 1.5;
 }
 
 :root.ew-resize * {

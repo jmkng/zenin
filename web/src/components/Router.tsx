@@ -40,6 +40,7 @@ export default function Router() {
 
         let queue = [
             settings.service.getSettings(token.raw),
+            settings.service.getThemes(token.raw),
             monitor.service.getPlugins(token.raw),
             monitor.service.getMonitor(token.raw, 35),
         ];
@@ -48,17 +49,23 @@ export default function Router() {
         (async () => {
             const [
                 settingsEx,
+                themesEx,
                 pluginEx,
                 monitorEx,
                 accountEx
             ] = await Promise.all(queue);
             if (settingsEx.ok()) {
                 const packet: DataPacket<{settings: Settings}> = await settingsEx.json();
-                settings.context.dispatch({ type: 'reset', delimiters: packet.data.settings.delimiters });
+                settings.context.dispatch({ type: 'reset', delimiters: packet.data.settings.delimiters, 
+                    active: packet.data.settings.theme });
+            }
+            if (themesEx.ok()) {
+                const packet: DataPacket<{themes: string[] | null}> = await themesEx.json();
+                settings.context.dispatch({ type: 'resetThemes', themes: packet.data.themes || [] });
             }
             if (pluginEx.ok()) {
                 const packet: DataPacket<{plugins: string[] | null}> = await pluginEx.json();
-                monitor.context.dispatch({ type: 'update', plugins: packet.data.plugins || [] });
+                monitor.context.dispatch({ type: 'resetPlugins', plugins: packet.data.plugins || [] });
             }
             if (monitorEx.ok()) {
                 const packet: DataPacket<{monitors: Monitor[]}> = await monitorEx.json();

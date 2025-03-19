@@ -4,14 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="icon" href="/assets/logo/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png" />
-
-    <title>Zenin</title>
     <script>
-      const theme = localStorage.getItem("zenin__theme") 
-      document.documentElement.classList.add(theme ? theme : "zenin__theme_auto")
+      const theme = localStorage.getItem("zenin__theme")
+      if (theme) document.documentElement.classList.add(theme)
     </script>
+
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/api/v1/settings/themes/active">
+    
+    <title>Zenin</title>
   </head>
 
   <body class="zenin__h_f-sans">

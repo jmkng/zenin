@@ -20,7 +20,7 @@ interface SelectGroup {
 
 interface SelectOption {
     text: string;
-    value?: string;
+    value: string;
 }
 
 export default function SelectInput(props: SelectProps) {

@@ -110,8 +110,8 @@ type AddMeasurementAction = {
     monitor: number
 };
 
-type UpdatePluginAction = {
-    type: 'update'
+type ResetPluginAction = {
+    type: 'resetPlugins'
     plugins: string[]
 }
 
@@ -134,7 +134,7 @@ export type MonitorAction =
     | PaneAction
     | DetailAction
     | AddMeasurementAction
-    | UpdatePluginAction
+    | ResetPluginAction
     | LogoutAction
 
 const removeMonitorAction = (state: MonitorState, action: RemoveMonitorAction) => {
@@ -291,7 +291,7 @@ const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction)
     return state;
 }
 
-const updatePluginAction = (state: MonitorState, action: UpdatePluginAction) => {
+const resetPluginAction = (state: MonitorState, action: ResetPluginAction) => {
     return { ...state, plugins: action.plugins.sort() };
 }
 
@@ -313,7 +313,7 @@ export const monitorReducer = (state: MonitorState, action: MonitorAction): Moni
         case "pane": return paneAction(state, action);
         case "detail": return detailAction(state, action);
         case "measurement": return addMeasurementAction(state, action);
-        case "update": return updatePluginAction(state, action);
+        case "resetPlugins": return resetPluginAction(state, action);
         case "logout": return logoutAction();
     }
 }

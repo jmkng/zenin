@@ -266,13 +266,13 @@ export default function Editor(props: EditorProps) {
                         label="Method"
                         name="zenin__detail_monitor_method"
                         options={[
-                            { text: GET_API },
-                            { text: HEAD_API },
-                            { text: POST_API },
-                            { text: PUT_API },
-                            { text: PATCH_API },
-                            { text: DELETE_API },
-                            { text: OPTIONS_API },
+                            { text: GET_API, value: GET_API },
+                            { text: HEAD_API, value: HEAD_API },
+                            { text: POST_API, value: POST_API },
+                            { text: PUT_API, value: PUT_API },
+                            { text: PATCH_API, value: PATCH_API },
+                            { text: DELETE_API, value: DELETE_API },
+                            { text: OPTIONS_API, value: OPTIONS_API },
                         ]}
                         subtext={<span>Set the HTTP <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">method</a> used to make the request.</span>}
                         value={editor.draft.httpMethod!}
@@ -285,11 +285,11 @@ export default function Editor(props: EditorProps) {
                         label="Header Range"
                         name="zenin__detail_monitor_range"
                         options={[
-                            { text: INFORMATIONAL_API },
-                            { text: SUCCESSFUL_API },
-                            { text: REDIRECTION_API },
-                            { text: CLIENTERROR_API },
-                            { text: SERVERERROR_API },
+                            { text: INFORMATIONAL_API, value: INFORMATIONAL_API },
+                            { text: SUCCESSFUL_API, value: SUCCESSFUL_API },
+                            { text: REDIRECTION_API, value: REDIRECTION_API },
+                            { text: CLIENTERROR_API, value: CLIENTERROR_API },
+                            { text: SERVERERROR_API, value: SERVERERROR_API },
                         ]}
                         subtext={<span>Set the range of <a href="https://datatracker.ietf.org/doc/html/rfc2616#section-10">status codes</a> that will indicate a successful probe.</span>}
                         value={editor.draft.httpRange}

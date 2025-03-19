@@ -24,7 +24,7 @@ export default function PluginInput(props: PluginInputProps) {
         || (args.value && args.value.length > 0 && args.value.every(n => n.trim() != "")), [args.value]);
 
     const options = useMemo(() => Array.from(new Set([...monitor.context.state.plugins, plugin.value || ""]))
-        .map(n => ({ text: n }))
+        .map(n => ({ text: n, value: n }))
         .filter(n => n.text.trim() != ""), [monitor.context.state.plugins]);
 
     const selection = useMemo(() => plugin.value || monitor.context.state.plugins[0], 
