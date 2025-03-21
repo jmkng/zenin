@@ -265,7 +265,7 @@ VALUES
     NULL, 
     NULL),
     (2, 
-    'OK', 
+    'WARN', 
     NULL, 
     'HTTP', 
     288.10, 
