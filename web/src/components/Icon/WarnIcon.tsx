@@ -1,6 +1,6 @@
 export default function WarnIcon() {
     return <svg
-            className="zenin__warn_icon zenin__icon"
+            className="warn_icon icon"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"

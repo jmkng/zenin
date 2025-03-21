@@ -1,6 +1,6 @@
 export default function NextIcon() {
     return <svg
-            className="zenin__icon zenin__next_icon"
+            className="icon next_icon"
             xmlns="http://www.w3.org/2000/svg"
             xmlSpace="preserve"
             style={{

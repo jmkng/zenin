@@ -1,6 +1,6 @@
 export default function SortIcon() {
     return <svg
-        className="zenin__icon zenin__sort_icon"
+        className="icon sort_icon"
         xmlns="http://www.w3.org/2000/svg"
         xmlSpace="preserve"
         style={{

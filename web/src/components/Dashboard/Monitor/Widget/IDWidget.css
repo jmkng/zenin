@@ -1,11 +1,13 @@
-.zenin__id_widget {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 500;
-  color: var(--mid);
-}
+@layer components {
+    .id_widget {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 500;
+        color: var(--color-base04);
+    }
 
-.zenin__id_widget::before {
-  content:"#";
+    .id_widget::before {
+        content: "#";
+    }
 }

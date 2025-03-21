@@ -17,7 +17,7 @@ export default function Sidebar() {
     const [narrow, setNarrow] = useState<boolean>(window.matchMedia("(max-width: 700px)").matches);
     const shortcutRef = useRef<HTMLDivElement>(null);
     const initial = useRef(true);
-    const options = { duration: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slow')) * 1000, easing: "ease-in-out" };
+    const options = { duration: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--duration01')) * 1000, easing: "ease-in-out" };
     const width = useMemo(() => narrow ? "100vw" : `${size}px`, [narrow, size]);
 
     const handleReset = async () => {
@@ -89,17 +89,17 @@ export default function Sidebar() {
     }, [resizing])
 
     return render
-        ? <div className='zenin__shortcut'>
-            <div className="zenin__shortcut_content" ref={shortcutRef} style={{ width }}>
-                <div className='zenin__shortcut_top'>
+        ? <div className='shortcut'>
+            <div className="shortcut_content" ref={shortcutRef} style={{ width }}>
+                <div className='shortcut_top'>
                     {narrow
-                        ? <div className='zenin__shortcut_controls_container'>
+                        ? <div className='shortcut_controls_container'>
                             <Button onClick={() => layout.dispatch({ type: 'shortcut', shortcut: false })} icon={<MenuIcon />} />
                         </div>
                         : null}
                 </div>
             </div>
-            <div className="zenin__shortcut_border" onMouseDown={() => setResizing(true)} onDoubleClick={handleReset} />
+            <div className="shortcut_border" onMouseDown={() => setResizing(true)} onDoubleClick={handleReset} />
         </div>
         : null
 }

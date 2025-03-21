@@ -1,6 +1,6 @@
 export default function BookIcon() {
     return <svg
-        className="zenin__book_icon zenin__icon"
+        className="book_icon icon"
         viewBox="0 0 24 24"
     >
         <path

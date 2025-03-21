@@ -3,13 +3,12 @@ import { useMemo, useState } from "react";
 import { useAccountContext } from "@/internal/account";
 import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
 import {
-    ColorPreference,
-    DEFAULT_DARK_THEME_NAME,
-    DEFAULT_LIGHT_THEME_NAME,
+    DEFAULT_DARK,
+    DEFAULT_LIGHT,
     isColorPreference,
     LS_THEME_KEY,
-    PREFER_DARK_CLASS,
-    PREFER_LIGHT_CLASS,
+    PREFER_DARK,
+    PREFER_LIGHT,
     SettingsState,
     useDefaultSettingsService,
     useSettingsContext
@@ -28,11 +27,9 @@ export default function Settings() {
 
     // The options displayed in the theme select input are all of the themes available on the server,
     // plus a few default options for managing the built-in theme.
-    const options = [DEFAULT_DARK_THEME_NAME, DEFAULT_LIGHT_THEME_NAME, ...settings.context.state.themes];
+    const options = [DEFAULT_DARK, DEFAULT_LIGHT, ...settings.context.state.themes];
 
     const [editor, setEditor] = useState<SettingsState>({...settings.context.state });
-
-    console.log(editor);
 
     const hasValidDelimiters = useMemo(() => isValidDelimiters(editor.delimiters), [editor.delimiters])
     const canSave = useMemo(() => 
@@ -42,60 +39,55 @@ export default function Settings() {
 
 
     const handleSave = async () => {
-        handleBrowserUpdate(editor.colorPreference);
-        settings.context.dispatch({ type: 'resetColorPreference', colorPreference: editor.colorPreference });
+        handleBrowserUpdate(editor.active);
+        let theme = editor.active;
+        if (theme != null && isColorPreference(theme)) {
+            settings.context.dispatch({ type: 'resetActive', active: theme })
+            theme = null;
+        }
 
         const token = account.context.state.token!.raw;
-        const extract = await settings.service.updateSettings(token, { delimiters: editor.delimiters, theme: editor.active });
+        const extract = await settings.service.updateSettings(token, { delimiters: editor.delimiters, theme });
         if (!extract.ok()) return;
         
         settings.context.dispatch({ type: 'reset', ...{ delimiters: editor.delimiters, active: editor.active } });
     }
 
-    const handleBrowserUpdate = (value: ColorPreference | null) => {
+    const handleBrowserUpdate = (value: string | null) => {
         const root = document.documentElement;
 
         // Temporarily disable transitions while the theme changes.
         root.classList.add("static");
-
-        root.classList.remove(PREFER_DARK_CLASS)
-        root.classList.remove(PREFER_LIGHT_CLASS)
+        root.classList.remove(PREFER_DARK)
+        root.classList.remove(PREFER_LIGHT)
         localStorage.removeItem(LS_THEME_KEY);
-        if (value == DEFAULT_DARK_THEME_NAME) {
-            root.classList.add(PREFER_DARK_CLASS)
-            localStorage.setItem(LS_THEME_KEY, PREFER_DARK_CLASS)
+        if (value == DEFAULT_DARK) {
+            root.classList.add(PREFER_DARK)
+            localStorage.setItem(LS_THEME_KEY, PREFER_DARK)
         }
-        else if (value == DEFAULT_LIGHT_THEME_NAME) {
-            root.classList.add(PREFER_LIGHT_CLASS)
-            localStorage.setItem(LS_THEME_KEY, PREFER_LIGHT_CLASS)
+        else if (value == DEFAULT_LIGHT) {
+            root.classList.add(PREFER_LIGHT)
+            localStorage.setItem(LS_THEME_KEY, PREFER_LIGHT)
         }
 
         window.requestAnimationFrame(() => root.classList.remove("static"));
     }
-
-    const handleThemeSelectionUpdate = (value: string) => {
-        if (isColorPreference(value)) {
-            setEditor(prev => ({ ...prev, colorPreference: value, active: null }));
-            return;
-        }
-        setEditor(prev => ({...prev, active: value, colorPreference: null}));
-    }
     
-    return <div className="zenin__settings">
-        <div className="zenin__detail_body">
-            <div className="zenin__h_mb-c">
+    return <div className="settings">
+        <div className="detail_body">
+            <div className="h_mb-c">
                 <SelectInput
                     label="Theme"
-                    name={"zenin__settings_theme"}
-                    value={editor.active || editor.colorPreference || NULL_THEME}
+                    name={"settings_theme"}
+                    value={editor.active || NULL_THEME}
                     options={[ {text: "Auto", value: NULL_THEME}, ...options.map(n => ({text: n, value: n})) ]}
-                    onChange={handleThemeSelectionUpdate}
+                    onChange={value => setEditor(prev => ({...prev, active: value == NULL_THEME ? null : value }))}
                 />
             </div>
             <div>
                 <PairListInput
                     label="Template Delimiters"
-                    name="zenin__settings_template_delimiters"
+                    name="settings_template_delimiters"
                     allowMultipleRows={false}
                     value={[{ key: editor.delimiters[0], value: editor.delimiters[1] }]}
                     onChange={delimiters => 
@@ -103,10 +95,10 @@ export default function Settings() {
                     }
                 />
                 {!hasValidDelimiters
-                    ? <span className="zenin__detail_validation zenin__h_c-dead-a">Delimiters are required. They must not contain whitespace.</span>
+                    ? <span className="detail_validation h_c-dead-a">Delimiters are required. They must not contain whitespace.</span>
                     : null}
             </div>
-            <div className="zenin__settings_about zenin__h_mt-c">
+            <div className="settings_about h_mt-c">
                 <a href="#">
                     User Guide
                 </a>
@@ -116,12 +108,12 @@ export default function Settings() {
             </div>
         </div>
 
-        <div className="zenin__detail_controls">
+        <div className="detail_controls">
             <Button kind="primary" onClick={handleSave} disabled={!canSave}>
                 <span>Save</span>
             </Button>
 
-            <div className="zenin__h_ml-auto">
+            <div className="h_ml-auto">
                 <Button
                     border={true}
                     onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
@@ -146,7 +138,6 @@ function isValidDelimiters(delimiters: string[]): boolean {
 const isSettingsEqual = (s1: SettingsState, s2: SettingsState) => {
     if (!isArrayEqual(s1.delimiters, s2.delimiters)) return false;
     if (s1.active != s2.active) return false;
-    if (s1.colorPreference != s2.colorPreference) return false;
     
     return true;
 }

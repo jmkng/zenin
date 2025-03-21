@@ -25,24 +25,24 @@ export default function Menu() {
         monitor.context.dispatch({ type: 'draft' });
     }
 
-    return <div className='zenin__default_menu zenin__menu'>
-        <div className='zenin__menu_left'>
-            {/*<div className="zenin__menu_toggle_container">
+    return <div className='default_menu menu'>
+        <div className='menu_left'>
+            {/*<div className="menu_toggle_container">
                 <Button onClick={handleMenuToggle}>
-                    <span className="zenin__h_f-row-center">
+                    <span className="h_f-row-center">
                         <MenuIcon />
                     </span>
                 </Button>
             </div>
-            <div className="zenin__menu_spacer first"></div>*/}
+            <div className="menu_spacer first"></div>*/}
 
-            <div className="zenin__menu_left_contextual">
-                <div className="zenin__dashboard_menu">
-                    <div className="zenin__menu_margin_right">
+            <div className="menu_left_contextual">
+                <div className="dashboard_menu">
+                    <div className="menu_margin_right">
                         <Button tooltip="Create Monitor" icon={<AddIcon />} onClick={handleAdd}>
                         </Button>
                     </div>
-                    <div className="zenin__menu_margin_right">
+                    <div className="menu_margin_right">
                         <Dialog
                             dialog={{
                                 content: <SortDialogContent
@@ -58,7 +58,7 @@ export default function Menu() {
             </div>
         </div>
 
-        <div className='zenin__menu_right'>
+        <div className='menu_right'>
             <Dialog dialog={{ content: <ActionMenuContent /> }}>
                 <Button hover={false} icon={<DoubleChevronIcon />} />
             </Dialog>

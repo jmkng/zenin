@@ -6,7 +6,7 @@
     bottom: 0;
     height: 100vh;
     z-index: 9999;
-    background: var(--background);
+    background: var(--color-background);
     width: 100vw;
     display: flex;
     justify-content: center;

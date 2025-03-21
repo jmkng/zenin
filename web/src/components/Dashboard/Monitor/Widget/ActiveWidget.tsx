@@ -13,7 +13,7 @@ export default function ActiveWidget(props: ActiveWidgetProps) {
     const { active, onClick } = props;
     const attr = active ? ACTIVE_UI : INACTIVE_UI;
 
-    return <div className="zenin__widget zenin__active_widget" onClick={onClick} data-active={attr}>
+    return <div className="widget active_widget" onClick={onClick} data-active={attr}>
         <EyeIcon hide={active} />
     </div>
 }

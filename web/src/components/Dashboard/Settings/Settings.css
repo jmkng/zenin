@@ -1,19 +1,21 @@
-.zenin__settings {
-    height: 100%;
-    border-radius: var(--rounded);
-    padding-right: var(--px-a);
-}
+@layer components {
+    .settings {
+        height: 100%;
+        border-radius: var(--px00);
+        padding-right: var(--px00);
+    }
 
-.zenin__settings_about {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
+    .settings_about {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
 
-.zenin__settings_about > *:first-child {
-    margin-right: var(--px-c);
-}
+    .settings_about>*:first-child {
+        margin-right: var(--px02);
+    }
 
-.zenin__settings_version {
-    border: 1px solid var(--px)
+    .settings_version {
+        border: 1px solid var(--px)
+    }
 }

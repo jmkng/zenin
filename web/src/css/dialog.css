@@ -1,23 +1,23 @@
-.zenin__dialog_content {
+.dialog_content {
     min-width: 175px;
-    background: var(--background);
-    border: 1px solid var(--off-b);
-    border-radius: var(--rounded);
+    background: var(--color-background);
+    border: 1px solid var(--color-base01);
+    border-radius: var(--px00);
 }
 
-.zenin__dialog_section {
-    padding: var(--px-b);
+.dialog_section {
+    padding: var(--px01);
 }
 
-.zenin__dialog_section .zenin__button:not(:last-of-type) {
-    margin-bottom: var(--px-b);
+.dialog_section .button:not(:last-of-type) {
+    margin-bottom: var(--px01);
 }
 
-.zenin__dialog_section .zenin__button {
+.dialog_section .button {
     width: 100%;
     justify-content: flex-start;
 }
 
-.zenin__dialog_section:not(:last-of-type) {
-    border-bottom: 1px solid var(--off-b);
+.dialog_section:not(:last-of-type) {
+    border-bottom: 1px solid var(--color-base01);
 }

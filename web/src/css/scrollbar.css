@@ -4,13 +4,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--off-b);
-    border-radius: var(--rounded);
+    background-color: var(--color-base01);
+    border-radius: var(--px00);
 }
 
 ::-webkit-scrollbar-track {
-    border-top-right-radius: var(--rounded);
-    border-bottom-right-radius: var(--rounded);
+    border-top-right-radius: var(--px00);
+    border-bottom-right-radius: var(--px00);
 }
 
 ::-webkit-scrollbar-corner {

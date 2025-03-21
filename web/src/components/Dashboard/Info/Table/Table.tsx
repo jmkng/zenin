@@ -127,13 +127,13 @@ export default function Table(props: TableProps) {
         monitor.context.dispatch({ type: 'detail', measurement })
     }
 
-    return <div className="zenin__table_component">
-        <div className="zenin__table_header">
-            <span className="zenin__table_measurement_count">
+    return <div className="table_component">
+        <div className="table_header">
+            <span className="table_measurement_count">
                 {measurements.length} {measurements.length == 1 ? "measurement" : "measurements"}
             </span>
 
-            <div className="zenin__table_controls_container">
+            <div className="table_controls_container">
                 <Button
                     onClick={handleDelete}
                     disabled={checked.length == 0}
@@ -148,7 +148,7 @@ export default function Table(props: TableProps) {
                 </Dialog>
             </div>
         </div>
-        <div className="zenin__table_container">
+        <div className="table_container">
             <table>
                 <colgroup>
                     <col span={1} />
@@ -156,17 +156,17 @@ export default function Table(props: TableProps) {
                     <col width="100%" span={1} />
                     <col span={1} />
                 </colgroup>
-                <thead className='zenin__table_head'>
+                <thead className='table_head'>
                     <tr>
                         <th>
-                            <CheckboxInput checked={allChecked} name={`zenin__table_master`} onChange={handleMasterCheck} />
+                            <CheckboxInput checked={allChecked} name={`table_master`} onChange={handleMasterCheck} />
                         </th>
                         <th>ID</th>
                         <th>Time</th>
                         <th>State</th>
                     </tr>
                 </thead>
-                <tbody className='zenin__table_body'>
+                <tbody className='table_body'>
                     {visible.map((n, index) =>
                         <Row
                             key={index}
@@ -180,8 +180,8 @@ export default function Table(props: TableProps) {
                 </tbody>
             </table>
         </div>
-        <div className={["zenin__table_footer", hasTableFooterMargin ? "margin" : ""].join(" ")}>
-            <div className="zenin__table_footer_right">
+        <div className={["table_footer", hasTableFooterMargin ? "margin" : ""].join(" ")}>
+            <div className="table_footer_right">
                 {!backDisabled
                     ? <>
                         <Button border={true} onClick={() => setPage(1)}>
@@ -193,7 +193,7 @@ export default function Table(props: TableProps) {
                     </>
                     : null}
                 {pages > 1
-                    ? <div className="zenin__table_footer_page_count zenin__footer_control_set">
+                    ? <div className="table_footer_page_count footer_control_set">
                         {page}/{pages}
                     </div>
                     : null}
@@ -210,7 +210,7 @@ export default function Table(props: TableProps) {
             </div>
         </div>
         {state.selected ?
-            <div className="zenin__info_property_container" ref={propertyContainerRef}>
+            <div className="info_property_container" ref={propertyContainerRef}>
                 <Property measurement={state.selected} />
             </div>
             : null}

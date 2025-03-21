@@ -1,71 +1,74 @@
-.zenin__login {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-}
+@layer components {
+    .login {
+        background: var(--login-background, var(--color-background));
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
 
-.zenin__login_header {
-  height: 50px;
-  display: flex;
-  align-items: center;
-  padding: var(--px-b);
-}
+    .login_header {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: var(--px01);
+    }
 
-.zenin__login_logo_container {
-  margin-bottom: var(--px-e);
-}
+    .login_logo_container {
+        margin-bottom: var(--px04);
+    }
 
-.zenin__login_form_container { 
-  width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-}
+    .login_form_container { 
+        width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-.zenin__login_logo_container {
-  width: 125px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-left: auto;
-  margin-right: auto;
-}
+    .login_logo_container {
+        width: 125px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-.zenin__login_spaced {
-  margin-bottom: var(--px-e);
-}
+    .login_spaced {
+        margin-bottom: var(--px04);
+    }
 
-.zenin__login_controls {
-  display: flex;
-}
+    .login_controls {
+        display: flex;
+    }
 
-.zenin__login_controls > * {
-  margin-right: var(--px-c);
-}
+    .login_controls > * {
+        margin-right: var(--px02);
+    }
 
-.zenin__login_message_container {
-  margin-top: var(--px-b);;
-}
+    .login_message_container {
+        margin-top: var(--px01);;
+    }
 
-.zenin__login_message_container > * {
-  max-width: 700px;
-  margin: auto;
-}
+    .login_message_container > * {
+        max-width: 700px;
+        margin: auto;
+    }
 
-.zenin__login_message_container > *:not(:last-of-type) {
-  margin-bottom: 10px;
-}
+    .login_message_container > *:not(:last-of-type) {
+        margin-bottom: 10px;
+    }
 
-.zenin__login_message {
-  border: 1px solid var(--foreground);
-  border-radius: var(--rounded);
-  padding: var(--px-d);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+    .login_message {
+        border: 1px solid var(--color-foreground);
+        border-radius: var(--px00);
+        padding: var(--px03);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.zenin__login_message.error {
-  color: var(--dead-a);
-  border-color: var(--dead-a);
+    .login_message.error {
+        color: var(--color-failure);
+        border-color: var(--color-failure);
+    }
 }

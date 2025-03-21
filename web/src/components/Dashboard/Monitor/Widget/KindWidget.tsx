@@ -29,7 +29,7 @@ export default function KindWidget(props: KindWidgetProps) {
             break;
     }
 
-    return <div className="zenin__widget zenin__h_f-row-center zenin__kind_widget">
+    return <div className="widget h_f-row-center kind_widget">
         {text}
     </div >
 }

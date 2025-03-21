@@ -7,5 +7,5 @@ interface IDWidgetProps {
 export default function IDWidget(props: IDWidgetProps) {
     const { id } = props;
 
-    return <div className="zenin__widget zenin__id_widget">{id}</div>
+    return <div className="widget id_widget">{id}</div>
 }

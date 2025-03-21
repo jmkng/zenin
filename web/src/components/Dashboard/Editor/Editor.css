@@ -1,49 +1,51 @@
-.zenin__detail_component {
-  border-radius: var(--rounded);
-  margin: auto;
-  display: flex;
-  padding-right: var(--px-a);
-  flex-direction: column;
-}
+@layer components {
+    .detail_component {
+        border-radius: var(--px00);
+        margin: auto;
+        display: flex;
+        padding-right: var(--px00);
+        flex-direction: column;
+    }
 
-.zenin__detail_monitor_state {
-  background: var(--off-b);
-  flex: .10;
-  flex-basis: 68px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-left: 1px solid var(--off-b);
-  padding: var(--px-c);
-}
+    .detail_monitor_state {
+        background: var(--color-base01);
+        flex: .10;
+        flex-basis: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid var(--color-base01);
+        padding: var(--px02);
+    }
 
-.zenin__detail_validation {
-  display: block;
-  margin-top: var(--px-c);
-}
+    .detail_validation {
+        display: block;
+        margin-top: var(--px02);
+    }
 
-.zenin__detail_delete_button {
-  margin-left: auto;
-}
+    .detail_delete_button {
+        margin-left: auto;
+    }
 
-.zenin__text_area_input_box {
-  height: 150px;
-}
+    .text_area_input_box {
+        height: 150px;
+    }
 
-.zenin__detail_chain_plugin {
-  margin-bottom: 0;
-}
+    .detail_chain_plugin {
+        margin-bottom: 0;
+    }
 
-.zenin__detail_stacked_hint {
-    display: flex;
-    flex-direction: column;
-}
+    .detail_stacked_hint {
+        display: flex;
+        flex-direction: column;
+    }
 
-.zenin__detail_stacked_hint > *:not(:last-child) {
-    margin-bottom: var(--px-b);
-}
+    .detail_stacked_hint>*:not(:last-child) {
+        margin-bottom: var(--px01);
+    }
 
-.zenin__detail_add_event_container {
-    display: flex;
-    justify-content: flex-end;
+    .detail_add_event_container {
+        display: flex;
+        justify-content: flex-end;
+    }
 }

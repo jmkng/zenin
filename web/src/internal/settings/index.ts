@@ -2,25 +2,31 @@ import { useContext } from "react";
 import SettingsProvider, { SettingsContext, SettingsDispatchContext } from "./context";
 
 /** The expected localstorage key name. */
-export const LS_THEME_KEY = "zenin__theme"; // *** If the value of LS_THEME_KEY changes, update index.html too! ***
+export const LS_THEME_KEY = "color-preference"; // *** If the value of LS_THEME_KEY changes, update index.html too! ***
 
-// Class names to set on the root element depending on user preference.
-export const PREFER_DARK_CLASS = "prefer-dark"
-export const PREFER_LIGHT_CLASS = "prefer-light"
+// Flags that indicate user color preference.
+export const PREFER_DARK = "prefer-dark";
+export const PREFER_LIGHT = "prefer-light";
+
+// Flags that indicate environment color preference.
+// Lower priority than PREFER_* flags.
+export const OS_DARK = "os-dark";
+export const OS_LIGHT = "os-light";
 
 // Default theme names.
-export type ColorPreference = "Zenin Dark" | "Zenin Light";
-export const DEFAULT_DARK_THEME_NAME: ColorPreference = "Zenin Dark";
-export const DEFAULT_LIGHT_THEME_NAME: ColorPreference = "Zenin Light";
+export const DEFAULT_DARK = "Default Dark";
+export const DEFAULT_LIGHT = "Default Light";
+export type ColorPreference = typeof DEFAULT_DARK | typeof DEFAULT_LIGHT;
 
 export function isColorPreference(value: string): value is ColorPreference {
-    return value === DEFAULT_DARK_THEME_NAME || value === DEFAULT_LIGHT_THEME_NAME;
+    return value == DEFAULT_DARK || value == DEFAULT_LIGHT;
 }
 
-export function readColorPreference(): ColorPreference | null {
+/** Return the current user color preference. */
+export const userColorPreference = (): ColorPreference | null => {
     const value = localStorage.getItem(LS_THEME_KEY);
-    if (value == PREFER_DARK_CLASS) return DEFAULT_DARK_THEME_NAME;
-    if (value == PREFER_LIGHT_CLASS) return DEFAULT_LIGHT_THEME_NAME;
+    if (value == PREFER_DARK) return DEFAULT_DARK;
+    if (value == PREFER_LIGHT) return DEFAULT_LIGHT;
     return null;
 }
 

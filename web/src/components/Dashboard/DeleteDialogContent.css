@@ -1,17 +1,19 @@
-.zenin__dialog_confirm_content_top {
-    color: var(--mid);
-}
+@layer components {
+    .dialog_confirm_content_top {
+        color: var(--color-base04);
+    }
 
-.zenin__dialog_confirm_content_top > *:last-child {
-    margin-top: var(--px-b);
-}
+    .dialog_confirm_content_top>*:last-child {
+        margin-top: var(--px01);
+    }
 
-.zenin__dialog_confirm_content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+    .dialog_confirm_content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 
-.zenin__dialog_confirm_content_bottom {
-    margin-top: var(--px-e);
+    .dialog_confirm_content_bottom {
+        margin-top: var(--px04);
+    }
 }

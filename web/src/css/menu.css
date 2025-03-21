@@ -1,22 +1,22 @@
-.zenin__menu {
-    height: var(--px-i);
+.menu {
+    height: var(--px08);
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--off-b);
+    border-bottom: 1px solid var(--color-base01);
     justify-content: space-between;
-    padding: var(--px-c);
+    padding: var(--px02);
 }
 
-.zenin__menu_left, .zenin__menu_right {
+.menu_left, .menu_right {
     display: flex;
 }
-  
-.zenin__menu_margin_right {
-    margin-right: var(--px-b);
+
+.menu_margin_right {
+    margin-right: var(--px01);
 }
 
 @media (max-width: 700px) {
-    .zenin__menu {
-      width: 100vw;
+    .menu {
+        width: 100vw;
     }
 }

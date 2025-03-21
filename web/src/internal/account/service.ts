@@ -4,7 +4,7 @@ import { DELETE_API, PATCH_API, POST_API, Service } from "../server";
 import { AuthenticatedRequest, Request } from "../server/request";
 
 class AccountService extends Service {
-    #token = "zenin__auth_tk"
+    #token = "token"
 
     constructor() { super(); }
 
@@ -59,13 +59,13 @@ class AccountService extends Service {
         return await this.extract(request);
     }
 
-    /** Set the `zenin__auth_tk` key to the provided string in localStorage. */
+    /** Set the `token` key to the provided string in localStorage. */
     setLSToken = (token: string) => localStorage.setItem(this.#token, token);
 
-    /** Read the `zenin__auth_tk` key from localStorage. */
+    /** Read the `token` key from localStorage. */
     readLSToken = () => localStorage.getItem(this.#token);
 
-    /** Clear the `zenin__auth_tk` key from localStorage. */
+    /** Clear the `token` key from localStorage. */
     clearLSToken = () => localStorage.removeItem(this.#token);
 }
 

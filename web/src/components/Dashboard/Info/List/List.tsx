@@ -18,15 +18,15 @@ export default function List(props: ListProps) {
 
     const listRef = useRef<HTMLDivElement>(null);
 
-    return <div className="zenin__list_component" ref={listRef}>
-        <div className={["zenin__list_intro", data.length == 0 ? 'empty' : ''].join(' ')}>
-            <span className="zenin__list_intro_title">{title}</span>
+    return <div className="list_component" ref={listRef}>
+        <div className={["list_intro", data.length == 0 ? 'empty' : ''].join(' ')}>
+            <span className="list_intro_title">{title}</span>
         </div>
 
-        <div className="zenin__list_body">
+        <div className="list_body">
             {data.map((value, index) =>
                 <div
-                    className={["zenin__list_row", isKeyValueItem(value) ? "pair" : "single"].join(" ")}
+                    className={["list_row", isKeyValueItem(value) ? "pair" : "single"].join(" ")}
                     key={index}
                 >
                     {isKeyValueItem(value) ? <Pair item={value} /> : <Single item={value} />}
@@ -36,15 +36,15 @@ export default function List(props: ListProps) {
 }
 
 function Pair({ item }: { item: KeyValueItem }) {
-    return <div className="zenin__list_item_container zenin__list_pair_item_container">
-        <span className="zenin__list_map_item_key">{item.key}</span>
-        <span className="zenin__list_map_item_value">{item.value}</span>
+    return <div className="list_item_container list_pair_item_container">
+        <span className="list_map_item_key">{item.key}</span>
+        <span className="list_map_item_value">{item.value}</span>
     </div>
 }
 
 function Single({ item }: { item: string }) {
-    return <div className="zenin__list_item_container zenin__list_single_item_container">
-        <span className="zenin__list_array_item">{item}</span>
+    return <div className="list_item_container list_single_item_container">
+        <span className="list_array_item">{item}</span>
     </div>
 }
 

@@ -1,3 +1,5 @@
-.zenin__router {
-    height: 100dvh;
+@layer components {
+    .router {
+        height: 100dvh;
+    }
 }

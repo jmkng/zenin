@@ -1,6 +1,6 @@
 export default function DeselectIcon() {
     return <svg
-    className="zenin__deselect_icon zenin__icon"
+    className="deselect_icon icon"
     style={{
       fillRule: "evenodd",
       clipRule: "evenodd",

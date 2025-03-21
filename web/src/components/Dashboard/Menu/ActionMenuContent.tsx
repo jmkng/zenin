@@ -29,16 +29,16 @@ export default function ActionMenuContent() {
         monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } });
     }
 
-    return <div className="zenin__action_menu_dialog_content zenin__dialog_content">
-        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
-            <div className="zenin__action_menu_dialog_name">
+    return <div className="action_menu_dialog_content dialog_content">
+        <div className="action_menu_dialog_section dialog_section">
+            <div className="action_menu_dialog_name">
                 {account.context.state.token?.payload.username}
             </div>
-            <div className="zenin__action_menu_dialog_id">
+            <div className="action_menu_dialog_id">
                 {account.context.state.token?.payload.sub}
             </div>
         </div>
-        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
+        <div className="action_menu_dialog_section dialog_section">
             {account.context.state.token?.payload.root
                 ? <Button onClick={handleAccountPane} icon={<AccountIcon />}>
                     Manage Accounts
@@ -53,11 +53,11 @@ export default function ActionMenuContent() {
                 Settings
             </Button>
         </div>
-        <div className="zenin__action_menu_dialog_section zenin__dialog_section">
+        <div className="action_menu_dialog_section dialog_section">
             <Button
                 onClick={handleLogout}
                 kind="destructive"
-                icon={<span className="zenin__action_menu_log_out_icon">
+                icon={<span className="action_menu_log_out_icon">
                     <AddIcon />
                 </span>}
             >

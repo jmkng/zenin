@@ -12,8 +12,8 @@ interface SortDialogContentProps {
 export default function SortDialogContent(props: SortDialogContentProps) {
     const { filter, onFilterChange } = props;
 
-    return <div className="zenin__sort_dialog_content zenin__dialog_content">
-        <div className="zenin__sort_dialog_section zenin__dialog_section">
+    return <div className="sort_dialog_content dialog_content">
+        <div className="sort_dialog_section dialog_section">
             <Button
                 disabled={filter == 'NAME_ASC'}
                 onClick={() => onFilterChange('NAME_ASC')}
@@ -29,7 +29,7 @@ export default function SortDialogContent(props: SortDialogContentProps) {
                 {NAME_DESC_UI}
             </Button>
         </div>
-        <div className="zenin__sort_dialog_section zenin__dialog_section">
+        <div className="sort_dialog_section dialog_section">
             <Button
                 disabled={filter == 'UPDATED_NEW'}
                 onClick={() => onFilterChange('UPDATED_NEW')}

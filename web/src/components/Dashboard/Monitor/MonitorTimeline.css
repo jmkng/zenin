@@ -1,40 +1,43 @@
-.zenin__measurement_timeline {
-  display: flex;
-  width: 100%;
-  border-bottom-right-radius: var(--rounded);
-  border-bottom-left-radius: var(--rounded);
-  padding: 0 3px;
-}
+@layer components {
+    .measurement_timeline {
+        display: flex;
+        width: 100%;
+        border-bottom-right-radius: var(--px00);
+        border-bottom-left-radius: var(--px00);
+        padding: 0 3px;
+    }
 
-.zenin__measurement_timeline_slot_container {
-  height: 100%;
-  display: flex;
-  flex-direction: column-reverse;
-}
+    .measurement_timeline_slot_container {
+        height: 100%;
+        display: flex;
+        flex-direction: column-reverse;
+    }
 
-.zenin__monitor.selected .zenin__measurement_timeline_slot {
-  height: 25%;
-}
+    .monitor.selected .measurement_timeline_slot {
+        height: 25%;
+    }
 
-.zenin__measurement_timeline_slot_container:hover > .zenin__measurement_timeline_slot {
-  height: 100%;
-}
+    .measurement_timeline_slot_container:hover>.measurement_timeline_slot {
+        height: 100%;
+    }
 
-.zenin__measurement_timeline_slot {
-  transition: height var(--fast) ease-in-out;
-  height: 2px;
-  border-top-right-radius: 1px;
-  border-top-left-radius: 1px;
-}
+    .measurement_timeline_slot {
+        transition: height var(--duration00) ease-in-out;
+        height: 2px;
+        border-top-right-radius: 1px;
+        border-top-left-radius: 1px;
+    }
 
-.zenin__measurement_timeline_slot.OK {
-  background: var(--ok);
-}
+    .measurement_timeline_slot.OK {
+        background: var(--color-success);
+    }
 
-.zenin__measurement_timeline_slot.WARN {
-  background: var(--warn);
-}
+    .measurement_timeline_slot.WARN {
+        background: var(--color-warn);
+    }
 
-.zenin__measurement_timeline_slot.DEAD {
-  background: var(--dead-a);
+    .measurement_timeline_slot.DEAD {
+        background: var(--color-failure);
+    }
+
 }

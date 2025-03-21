@@ -1,92 +1,95 @@
-.zenin__shortcut {
-  height: 100%;
-  display: flex;
-  position: relative;
-  background: var(--background);
-  overflow: hidden;
-}
+@layer components {
+    .shortcut {
+        height: 100%;
+        display: flex;
+        position: relative;
+        background: var(--color-background);
+        overflow: hidden;
+    }
 
-.zenin__shortcut_content {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: space-between;
-}
+    .shortcut_content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 
-.zenin__shortcut_placeholder {
-  height: 100%;
-  width: 100%;
-  background: var(--off-a);
-}
+    .shortcut_placeholder {
+        height: 100%;
+        width: 100%;
+        background: var(---color-base00);
+    }
 
-.zenin__shortcut_border {
-  right: 0;
-  width: 8px;
-  position: absolute;
-  border-right: 1px solid var(--off-b);
-  transition: border var(--fast) ease-out;
-  height: 100%;
-}
+    .shortcut_border {
+        right: 0;
+        width: 8px;
+        position: absolute;
+        border-right: 1px solid var(--color-base01);
+        transition: border var(--duration00) ease-out;
+        height: 100%;
+    }
 
-.zenin__shortcut_border:hover {
-  border-width: 4px;
-}
+    .shortcut_border:hover {
+        border-width: 4px;
+    }
 
-.zenin__shortcut_container {
-  display: flex;
-  margin-top: 18px;
-  flex-direction: column;
-}
+    .shortcut_container {
+        display: flex;
+        margin-top: 18px;
+        flex-direction: column;
+    }
 
-.zenin__shortcut_container > * {
-  margin: var(--px-a) 0;
-}
+    .shortcut_container>* {
+        margin: var(--px00) 0;
+    }
 
-.zenin__shortcut_container .zenin__icon {
-  margin-right: var(--px-c);
-}
+    .shortcut_container .icon {
+        margin-right: var(--px02);
+    }
 
-.zenin__shortcut_container .zenin__button {
-  justify-content: flex-start;
-}
+    .shortcut_container .button {
+        justify-content: flex-start;
+    }
 
-.zenin__shortcut_controls_container {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: var(--px-c);
-}
+    .shortcut_controls_container {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: var(--px02);
+    }
 
-.zenin__shortcut a {
-  color: var(--mid);
-  text-decoration: none;
-}
+    .shortcut a {
+        color: var(--color-base04);
+        text-decoration: none;
+    }
 
-.zenin__shortcut a:hover {
-  color: var(--foreground);
-}
+    .shortcut a:hover {
+        color: var(--color-foreground);
+    }
 
-.zenin__shortcut .zenin__h_f-col {
-  margin-left: auto;
-}
+    .shortcut .h_f-col {
+        margin-left: auto;
+    }
 
-#zenin__shortcut_active_count {
-  margin-left: auto;
-  margin-right: var(--px-b);
-}
+    #shortcut_active_count {
+        margin-left: auto;
+        margin-right: var(--px01);
+    }
 
-.zenin__shortcut_top, .zenin__shortcut_bottom {
-  padding: var(--px-c);
-}
+    .shortcut_top,
+    .shortcut_bottom {
+        padding: var(--px02);
+    }
 
-.zenin__shortcut_top > * {
-  margin-bottom: var(--px-c);
-}
+    .shortcut_top>* {
+        margin-bottom: var(--px02);
+    }
 
-.zenin__shortcut_item {
-  border: 1px solid var(--off-b);
-  padding: var(--px-c);
-  width: 100%;
-  white-space: nowrap;
-  display: flex;
-  border-radius: var(--rounded);
+    .shortcut_item {
+        border: 1px solid var(--color-base01);
+        padding: var(--px02);
+        width: 100%;
+        white-space: nowrap;
+        display: flex;
+        border-radius: var(--px00);
+    }
 }

@@ -1,0 +1,129 @@
+@layer globals, base, helpers, components, theme;
+
+@import './css/cover.css' layer(base);
+@import './css/dialog.css' layer(base);
+@import './css/icon.css' layer(base);
+@import './css/input.css' layer(base);
+@import './css/menu.css' layer(base);
+@import './css/scrollbar.css' layer(base);
+@import './css/spinner.css' layer(base);
+@import './css/state.css' layer(base);
+@import './css/widget.css' layer(base);
+@import './css/helper.css' layer(helpers);
+
+@font-face {
+    font-family: "Geist Mono";
+    src: url("/geistmono.ttf");
+}
+
+@font-face {
+    font-family: "Geist Sans";
+    src: url("/geistsans.ttf");
+}
+
+@layer theme {
+    :root {        
+        --dark-background: rgb(18, 18, 18);
+        --dark-foreground: rgb(255, 255, 255);
+        --dark-link: rgb(60, 100, 255);
+        --dark-color-base00: rgb(32, 32, 34);
+        --dark-color-base01: rgb(36, 36, 39);
+        --dark-color-base02: rgb(55, 55, 57);
+        --dark-color-base03: rgb(65, 65, 67);
+        --dark-color-base04: rgb(180, 180, 182);
+        --dark-success: rgb(148, 166, 127);
+        --dark-warn: rgb(242, 189, 72);
+        --dark-failure: rgb(223, 101, 88);
+        --dark-modal-opacity: 0.5;
+        --light-background: rgb(255, 255, 255);
+        --light-foreground: rgb(18, 18, 18);
+        --light-link: rgb(60, 100, 255);
+        --light-color-base00: rgb(235, 235, 237);
+        --light-color-base01: rgb(220, 220, 222);
+        --light-color-base02: rgb(202, 202, 204);
+        --light-color-base03: rgb(185, 185, 187);
+        --light-color-base04: rgb(100, 100, 102);
+        --light-success: rgb(15, 189, 119);
+        --light-warn: rgb(229, 186, 14);
+        --light-failure: rgb(235, 55, 45);
+        --light-modal-opacity: 0.25;
+        
+        --color-background: var(--light-background);
+        --color-foreground: var(--light-foreground);
+        --color-link: var(--light-link);
+        --color-base00: var(--light-color-base00);
+        --color-base01: var(--light-color-base01);
+        --color-base02: var(--light-color-base02);
+        --color-base03: var(--light-color-base03);
+        --color-base04: var(--light-color-base04);
+        --color-success: var(--light-success);
+        --color-warn: var(--light-warn);
+        --color-failure: var(--light-failure);
+        --modal-backdrop-opacity: var(--light-modal-opacity);
+        --duration00: .10s;
+        --duration01: .30s;
+        --px00: 4px;
+        --px01: 6px;
+        --px02: 9px;
+        --px03: 12px;
+        --px04: 15px;
+        --px05: 28px;
+        --px06: 36px;
+        --px07: 38px;
+        --px08: 57px;
+
+        background: var(--color-background);
+        font-size: 13px;
+    }
+
+    :root.os-dark:not(.prefer-light) {
+        --color-background: var(--dark-background);
+        --color-foreground: var(--dark-foreground);
+        --color-link: var(--dark-link);
+        --color-base00: var(--dark-color-base00);
+        --color-base01: var(--dark-color-base01);
+        --color-base02: var(--dark-color-base02);
+        --color-base03: var(--dark-color-base03);
+        --color-base04: var(--dark-color-base04);
+        --color-success: var(--dark-success);
+        --color-warn: var(--dark-warn);
+        --color-failure: var(--dark-failure);
+        --modal-backdrop-opacity: var(--dark-modal-opacity);
+    }
+}
+
+@layer globals {
+    * {
+        box-sizing: border-box;
+    }
+    
+    body {
+        margin: 0;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        overflow: hidden;
+        background: var(--color-background);
+        color: var(--color-foreground);
+    }
+
+    dialog {
+        border: none;
+        margin: 0;
+    }
+
+    [popover] {
+        background: none;
+        color: inherit;
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+
+    a {
+        color: var(--color-link);
+    }
+
+    input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+}

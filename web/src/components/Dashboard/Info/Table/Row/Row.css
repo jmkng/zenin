@@ -1,11 +1,11 @@
-.zenin__row_component {
-    user-select: none;
-    width: 100%;
-}
+@layer components {
+    .row_component {
+        user-select: none;
+        width: 100%;
+    }
 
-.zenin__row_component:not(.highlight) {
-}
-
-.zenin__row_component:hover, .zenin__row_component.highlight {
-    background: var(--off-a);
+    .row_component:hover,
+    .row_component.highlight {
+        background: var(---color-base00);
+    }
 }

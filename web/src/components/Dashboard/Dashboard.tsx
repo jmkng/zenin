@@ -71,35 +71,35 @@ export default function Dashboard() {
         monitor.context.dispatch({ type: 'remove', monitors: id });
     }
 
-    return <div className={["zenin__dashboard", isSplit ? 'split' : ''].join(' ')}>
-        <div className="zenin__dashboard_side">
+    return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
+        <div className="dashboard_side">
             <Sidebar />
         </div>
 
-        <div className="zenin__dashboard_main">
-            <div className="zenin__dashboard_main_top">
-                <div className={["zenin__dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
+        <div className="dashboard_main">
+            <div className="dashboard_main_top">
+                <div className={["dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
                     <SelectMenu />
                 </div>
                 <Menu />
             </div>
 
-            <div className="zenin__dashboard_main_bottom">
+            <div className="dashboard_main_bottom">
                 {sorted.length > 0
-                    ? <div className="zenin__dashboard_monitors">
+                    ? <div className="dashboard_monitors">
                         {sorted.map((n, i) => <Monitor key={i} monitor={n} service={monitor.service} />)}
                     </div>
-                    : <div className="zenin__dashboard_empty">
-                        <span className="zenin__dashboard_empty_message">No monitors have been created.</span>
+                    : <div className="dashboard_empty">
+                        <span className="dashboard_empty_message">No monitors have been created.</span>
                         <Button kind="primary" border={true} onClick={() => monitor.context.dispatch({ type: 'draft' })}>
-                            <span className="zenin__h_f-row-center zenin__menu_add">
+                            <span className="h_f-row-center menu_add">
                                 Create Monitor
                             </span>
                         </Button>
                     </div>}
 
                 {isSplit
-                    ? <div className={"zenin__dashboard_activity"}>
+                    ? <div className={"dashboard_activity"}>
                         {monitor.context.state.split.isEditorPane()
                             ? <Editor
                                 state={monitor.context.state.split.pane}

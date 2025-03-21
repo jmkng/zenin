@@ -33,16 +33,16 @@ export default function SelectMenu() {
         monitor.context.dispatch({ type: 'delete', monitors });
     }
 
-    return <div className="zenin__select_menu zenin__menu">
-        <div className="zenin__menu_left">
-            <div className="zenin__menu_margin_right">
+    return <div className="select_menu menu">
+        <div className="menu_left">
+            <div className="menu_margin_right">
                 <Button
                     tooltip="Select All"
                     onClick={() => monitor.context.dispatch({ 'type': 'select', monitor: "ALL" })}
                     icon={<SelectIcon />}
                 />
             </div>
-            <div className="zenin__menu_margin_right">
+            <div className="menu_margin_right">
                 <Button
                     tooltip = "Clear Selection"
                     onClick={() => monitor.context.dispatch({ type: 'select', monitor: 'NONE' })}
@@ -50,12 +50,12 @@ export default function SelectMenu() {
                 />
             </div>
             {monitor.context.state.selected.length > 0
-                ? <span className="zenin__select_menu_count">{monitor.context.state.selected.length} Selected</span>
+                ? <span className="select_menu_count">{monitor.context.state.selected.length} Selected</span>
                 : null}
         </div>
 
-        <div className="zenin__menu_right">
-            <div className="zenin__menu_margin_right">
+        <div className="menu_right">
+            <div className="menu_margin_right">
                 <Button
                     tooltip="Resume Selected"
                     disabled={!monitor.context.state.selected.some(n => !n.active)}
@@ -63,7 +63,7 @@ export default function SelectMenu() {
                     onClick={() => handleToggle(true)}
                     />
             </div>
-            <div className="zenin__menu_margin_right">
+            <div className="menu_margin_right">
                 <Button
                     tooltip="Pause Selected"
                     disabled={!monitor.context.state.selected.some(n => n.active)}

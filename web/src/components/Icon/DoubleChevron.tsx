@@ -1,6 +1,6 @@
 export default function DoubleChevronIcon() {
     return <svg
-    className="zenin__double_chevron_icon zenin__icon"
+    className="double_chevron_icon icon"
     style={{
       fillRule: "evenodd",
       clipRule: "evenodd",

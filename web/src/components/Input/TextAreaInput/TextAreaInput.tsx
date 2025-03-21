@@ -22,10 +22,10 @@ export default function TextAreaInput(props: TextAreaProps) {
         placeholder
     } = props;
 
-    return <div className="zenin__text_area_input zenin__input_container zenin__h_f-col">
+    return <div className="text_area_input input_container h_f-col">
         {label ?
             <label
-                className="zenin__text_area_input_label zenin__input_label"
+                className="text_area_input_label input_label"
                 htmlFor={name}
             >
                 {label}
@@ -33,13 +33,13 @@ export default function TextAreaInput(props: TextAreaProps) {
             : null}
 
         {subtext ?
-            <p className="zenin__text_area_input_subtext zenin__input_subtext">
+            <p className="text_area_input_subtext input_subtext">
                 {subtext}
             </p>
             : null}
 
         <textarea
-            className="zenin__text_area_input_box zenin__input"
+            className="text_area_input_box input"
             onChange={((event: ChangeEvent<HTMLTextAreaElement>) => event.target.value == "" ? onChange(null) : onChange(event.target.value))}
             name={name}
             placeholder={placeholder}

@@ -1,26 +1,28 @@
-.zenin__info_component {
-    height: 100%;
-    padding-right: var(--px-a);
-}
+@layer components {
+    .info_component {
+        height: 100%;
+        padding-right: var(--px00);
+    }
 
-.zenin__detail_controls_delete {
-    margin-left: auto;
-}
+    .detail_controls_delete {
+        margin-left: auto;
+    }
 
-.zenin__info_event_container > span{
-    display: block;
-    font-weight: 500;
-}
+    .info_event_container>span {
+        display: block;
+        font-weight: 500;
+    }
 
-.zenin__info_event_list {
-    margin-top: var(--px-c); 
-}
+    .info_event_list {
+        margin-top: var(--px02);
+    }
 
-.zenin__info_event_threshold {
-    background: var(--off-b);
-}
+    .info_event_threshold {
+        background: var(--color-base01);
+    }
 
-.zenin__info_event_title {
-    display: flex;
-    justify-content: space-between;
+    .info_event_title {
+        display: flex;
+        justify-content: space-between;
+    }
 }

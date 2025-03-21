@@ -1,13 +1,15 @@
-.zenin__active_widget {
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-}
+@layer components {
+    .active_widget {
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
 
-.zenin__active_widget[data-active="Inactive"] {
-  color: var(--warn);
-}
+    .active_widget[data-active="Inactive"] {
+        color: var(--color-warn);
+    }
 
-.zenin__active_widget[data-active="Active"] {
-  color: var(--mid);
+    .active_widget[data-active="Active"] {
+        color: var(--color-base04);
+    }
 }

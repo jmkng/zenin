@@ -2,9 +2,7 @@ import { formatDate, formatMilliseconds } from "@/internal/layout/graphics";
 import { ViewPane } from "@/internal/monitor/split";
 import { DEAD_API, OK_API, WARN_API } from "@/internal/server";
 
-import List from "../List/List";
-
-import "./Statistics.css";
+import List from "./List/List";
 
 interface StatisticsProps {
     state: ViewPane,
@@ -22,7 +20,7 @@ export default function Statistics(props: StatisticsProps) {
 
     // The state of the most recent measurement is considered the current state of the monitor.
     const currentState = !empty ? measurementsReversed[0].state : "N/A"
-    pairs.set("State", <span className={!empty ? "zenin__state" : ""} data-state={!empty ? currentState : null}>{currentState}</span>)
+    pairs.set("State", <span className={!empty ? "state" : ""} data-state={!empty ? currentState : null}>{currentState}</span>)
 
     // The last incident is the most recent measurement with a dead state in the measurement set.
     const lastIncident = measurementsReversed.find(n => n.state == DEAD_API);
@@ -48,7 +46,7 @@ export default function Statistics(props: StatisticsProps) {
     const totalWarn = measurements.filter(n => n.state == WARN_API).length;
     if (totalWarn > 0) pairs.set("Total Warn", totalWarn.toString());
 
-    return <div className="zenin__summary_component">
+    return <div className="summary_component">
         <List
             title="Statistics"
             data={Array.from(pairs, ([key, value]) => ({ key, value: value }))}

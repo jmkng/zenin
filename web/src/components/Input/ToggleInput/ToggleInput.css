@@ -1,71 +1,73 @@
-.zenin__toggle_input {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
+@layer components {
+    .toggle_input {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
 
-.zenin__toggle_input_controls {
-    display: flex;
-    width: 100%;
-}
+    .toggle_input_controls {
+        display: flex;
+        width: 100%;
+    }
 
-.zenin__input_label.zenin__toggle_input_label {
-    margin-bottom: 0;
-}
+    .input_label.toggle_input_label {
+        margin-bottom: 0;
+    }
 
-.zenin__toggle_input_label {
-    width: 100%;
-}
+    .toggle_input_label {
+        width: 100%;
+    }
 
-.zenin__toggle_input_slider_wrapper {
-    position: relative;
-    width: 34px;
-    height: 20px;
-}
+    .toggle_input_slider_wrapper {
+        position: relative;
+        width: 34px;
+        height: 20px;
+    }
 
-.zenin__toggle_input input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
+    .toggle_input input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
-.zenin__toggle_input input:focus + .zenin__toggle_input_slider {
-    outline: 1px solid var(--link);
-    transition: none;
-}
+    .toggle_input input:focus + .toggle_input_slider {
+        outline: 1px solid var(--color-link);
+        transition: none;
+    }
 
-.zenin__toggle_input_slider {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--off-d);
-    transition: var(--fast);
-    border-radius: 34px;
-}
+    .toggle_input_slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--color-base03);
+        transition: var(--duration00);
+        border-radius: 34px;
+    }
 
-.zenin__toggle_input_slider::before {
-    position: absolute;
-    content: "";
-    height: 17px;
-    width: 17px;
-    left: 2px;
-    bottom: 1.5px;
-    background-color: var(--background);
-    transition: var(--fast);
-    border-radius: 50%;
-}
+    .toggle_input_slider::before {
+        position: absolute;
+        content: "";
+        height: 17px;
+        width: 17px;
+        left: 2px;
+        bottom: 1.5px;
+        background-color: var(--color-background);
+        transition: var(--duration00);
+        border-radius: 50%;
+    }
 
-input:checked + .zenin__toggle_input_slider {
-    background-color: var(--foreground);
-}
+    input:checked + .toggle_input_slider {
+        background-color: var(--color-foreground);
+    }
 
-input:checked + .zenin__toggle_input_slider::before {
-    transform: translateX(12px);
-}
+    input:checked + .toggle_input_slider::before {
+        transform: translateX(12px);
+    }
 
-.zenin__toggle_input_subtext {
-    margin-top: var(--px-c);
-    color: var(--mid);
+    .toggle_input_subtext {
+        margin-top: var(--px02);
+        color: var(--color-base04);
+    }
 }

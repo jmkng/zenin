@@ -41,10 +41,10 @@ export default function MonitorTimeline(props: MonitorTimelineProps) {
                 <div
                     key={index}
                     onClick={() => onSlotClick(measurement)}
-                    className="zenin__measurement_timeline_slot_container"
+                    className="measurement_timeline_slot_container"
                     style={{ width: slotWidth }}
                 >
-                    <div className={["zenin__measurement_timeline_slot", measurement.state].join(' ')}></div>
+                    <div className={["measurement_timeline_slot", measurement.state].join(' ')}></div>
                 </div>
             );
         }
@@ -52,7 +52,7 @@ export default function MonitorTimeline(props: MonitorTimelineProps) {
     }
 
 
-    return <div className="zenin__measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
+    return <div className="measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
         {renderSlots()}
     </div>
 }

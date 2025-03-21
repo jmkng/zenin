@@ -24,10 +24,10 @@ export default function TextInput(props: TextProps) {
         placeholder
     } = props;
 
-    return <div className="zenin__text_input zenin__input_container zenin__h_f-col">
+    return <div className="text_input input_container h_f-col">
         {label ?
             <label
-                className="zenin__text_input_label zenin__input_label"
+                className="text_input_label input_label"
                 htmlFor={name}
             >
                 {label}
@@ -35,13 +35,13 @@ export default function TextInput(props: TextProps) {
             : null}
 
         {subtext ?
-            <p className="zenin__text_input_subtext zenin__input_subtext">
+            <p className="text_input_subtext input_subtext">
                 {subtext}
             </p>
             : null}
 
         <input
-            className="zenin__text_input_box zenin__input"
+            className="text_input_box input"
             type={type || "text"}
             onChange={((event: ChangeEvent<HTMLInputElement>) => event.target.value == "" ? onChange(null) : onChange(event.target.value))}
             name={name}

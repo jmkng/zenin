@@ -1,25 +1,27 @@
-.zenin__menu_spacer.first {
-  margin-left: var(--px-b);
-  margin-right: var(--px-b);
-}
+@layer components {
+    .menu_spacer.first {
+        margin-left: var(--px01);
+        margin-right: var(--px01);
+    }
 
-.zenin__menu_spacer {
-  background: var(--off-b);
-  width: 1px;
-  border-radius: var(--rounded);
-  margin: var(--px-d) 0 var(--px-d) 0;
-}
+    .menu_spacer {
+        background: var(--color-base01);
+        width: 1px;
+        border-radius: var(--px00);
+        margin: var(--px03) 0 var(--px03) 0;
+    }
 
-.zenin__dashboard_menu {
-  display: flex;
-  align-items: center;
-}
+    .dashboard_menu {
+        display: flex;
+        align-items: center;
+    }
 
-.zenin__menu_monitor_bulk_container {
-  display: flex;
-  align-items: center;
-}
+    .menu_monitor_bulk_container {
+        display: flex;
+        align-items: center;
+    }
 
-.zenin__menu_selected_count {
-  margin: 0 var(--px-b);
+    .menu_selected_count {
+        margin: 0 var(--px01);
+    }
 }

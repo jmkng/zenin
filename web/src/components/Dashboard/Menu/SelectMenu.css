@@ -1,8 +1,10 @@
-.zenin__select_menu .zenin__menu_left {
-    align-items: center;
-}
+@layer components {
+    .select_menu .menu_left {
+        align-items: center;
+    }
 
-.zenin__select_menu_count {
-    color: var(--mid);
-    user-select: none;
+    .select_menu_count {
+        color: var(--color-base04);
+        user-select: none;
+    }
 }

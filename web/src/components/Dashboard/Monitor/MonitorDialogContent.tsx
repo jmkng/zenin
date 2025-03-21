@@ -44,8 +44,8 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
         await monitor.service.pollMonitor(token, monitor.data.id!);
     }
 
-    return <div className="zenin__monitor_dialog_content zenin__dialog_content">
-        <div className="zenin__dialog_section">
+    return <div className="monitor_dialog_content dialog_content">
+        <div className="dialog_section">
             <Button
                 icon={<InfoIcon />}
                 onClick={handleView}
@@ -71,7 +71,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
                 Edit
             </Button>
         </div>
-        <div className="zenin__dialog_section">
+        <div className="dialog_section">
             <Button
                 kind="destructive"
                 icon={<TrashIcon />}

@@ -85,8 +85,8 @@ export default function Button(props: ButtonProps) {
         ref={buttonRef}
         onClick={event => { if (!disabled && !loading) handleClick(event) }}
         className={[
-            'zenin__button',
-            'zenin__input',
+            'button',
+            'input',
             kind,
             border ? 'border' : '',
             hover ? 'hover' : '',
@@ -96,22 +96,22 @@ export default function Button(props: ButtonProps) {
         ].join(' ')}
     >
         {loading ?
-            <div className="zenin__spinner_overlay">
-                <div className="zenin__spinner"></div>
+            <div className="spinner_overlay">
+                <div className="spinner"></div>
             </div>
             : null}
 
         {icon
-            ? <span className={["zenin__button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
+            ? <span className={["button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
             : null}
 
-        <span className="zenin__button_child">{children}</span>
+        <span className="button_child">{children}</span>
     </button>;
 
     return tooltip
-        ? <div ref={rootRef} className="zenin__button_tooltip">
+        ? <div ref={rootRef} className="button_tooltip">
             {button}
-            <div className="zenin__tooltip" ref={tooltipRef}>{tooltip}</div>
+            <div className="tooltip" ref={tooltipRef}>{tooltip}</div>
         </div>
         : button
 }
@@ -119,7 +119,7 @@ export default function Button(props: ButtonProps) {
 // Put the tooltip below the anchor, and try to center it. 
 // Prefer left/right side based on available space.
 const relativeTooltipStrategy: PositionStrategy = (rootRect: DOMRect, portalRect: DOMRect) => {
-    const top = rootRect.height + 6; // Padding equal to var(--px-b);
+    const top = rootRect.height + 6; // Padding equal to var(--px01);
     let left = (rootRect.width - portalRect.width) / 2;
 
     // Check for viewport overflow on wide tooltips.

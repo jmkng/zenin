@@ -8,7 +8,7 @@ import { useLayoutContext } from '@/internal/layout';
 import { hideLoadingScreen, showLoadingScreen } from '@/internal/layout/graphics';
 import { Monitor, useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
 import { DataPacket, FEED, handleConnect, handleDisconnect } from '@/internal/server';
-import { Settings, useDefaultSettingsService, useSettingsContext } from '@/internal/settings';
+import { Settings, useDefaultSettingsService, userColorPreference, useSettingsContext } from '@/internal/settings';
 
 import Dashboard from './Dashboard/Dashboard';
 import Hidden from './Hidden';
@@ -56,8 +56,8 @@ export default function Router() {
             ] = await Promise.all(queue);
             if (settingsEx.ok()) {
                 const packet: DataPacket<{settings: Settings}> = await settingsEx.json();
-                settings.context.dispatch({ type: 'reset', delimiters: packet.data.settings.delimiters, 
-                    active: packet.data.settings.theme });
+                const active = packet.data.settings.theme || userColorPreference();
+                settings.context.dispatch({ type: 'reset', delimiters: packet.data.settings.delimiters, active });
             }
             if (themesEx.ok()) {
                 const packet: DataPacket<{themes: string[] | null}> = await themesEx.json();
@@ -93,7 +93,7 @@ export default function Router() {
         else handleDisconnect();
     }, [account.context.state.token])
 
-    return <div className='zenin__router'>
+    return <div className='router'>
         <Routes>
             <Route element={<Hidden />}>
                 <Route path="/login" element={<Login />} />

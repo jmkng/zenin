@@ -149,16 +149,16 @@ export default function Accounts() {
     }
 
     const accountManagerTab = <>
-        {account.context.state.accounts.map((n, i) => <div key={i} className="zenin__account">
-            <div className="zenin__account_top">
-                <div className="zenin__account_top_left">
-                    <div className="zenin__account_name">
+        {account.context.state.accounts.map((n, i) => <div key={i} className="account">
+            <div className="account_top">
+                <div className="account_top_left">
+                    <div className="account_name">
                         {n.username}
                     </div>
                 </div>
-                <div className="zenin__account_top_right">
+                <div className="account_top_right">
                     {n.root
-                        ? <div className="zenin__account_rank">
+                        ? <div className="account_rank">
                             {ROOT_ACCOUNT_UI}
                         </div>
                         : null}
@@ -176,60 +176,60 @@ export default function Accounts() {
                 </div>
             </div>
 
-            <small className="zenin__account_updated_timestamp">
+            <small className="account_updated_timestamp">
                 {formatDate(n.updatedAt)}
             </small>
         </div>)}
     </>
 
     const accountEditTab = <>
-        <h1 className="zenin__h_m-0 zenin__h_mb-c">{editor.original.username}</h1>
+        <h1 className="h_m-0 h_mb-c">{editor.original.username}</h1>
         <TextInput
-            name={"zenin__account_name"}
+            name={"account_name"}
             label="Username"
             subtext="The account display name."
             value={editor.draft.username}
             onChange={username => setEditor(prev => ({ ...prev, draft: { ...prev.draft, username } }))}
         />
-        <div className="zenin__h_mt-c">
+        <div className="h_mt-c">
             <TextInput
                 type="password"
-                name={"zenin__account_name"}
+                name={"account_name"}
                 label="Password"
                 value={editor?.draft.password || null}
                 onChange={password => setEditor(prev => ({ ...prev, draft: { ...prev.draft, password } }))}
             />
         </div>
         {editor.draft.password != null
-            ? <div className="zenin__h_mt-c">
+            ? <div className="h_mt-c">
                 <TextInput
                     type="password"
-                    name={"zenin__account_password_confirm"}
-                    label={<span className={hasValidPasswords ? "" : "zenin__h_c-dead-a"}>Confirm Password</span>}
+                    name={"account_password_confirm"}
+                    label={<span className={hasValidPasswords ? "" : "h_c-dead-a"}>Confirm Password</span>}
                     value={editor.draft.passwordConfirm}
                     onChange={passwordConfirm =>
                         setEditor(prev => ({ ...prev, draft: { ...prev.draft, passwordConfirm } }))
                     }
                 />
                 {!hasValidPasswords
-                    ? <span className="zenin__detail_validation zenin__h_c-dead-a">Passwords do not match.</span>
+                    ? <span className="detail_validation h_c-dead-a">Passwords do not match.</span>
                     : null}
 
                 {errors
-                    ? <div className="zenin__account_message_container">
-                        {errors.map((error, index) => <div key={index} className="zenin__account_message error">{error}</div>)}
+                    ? <div className="account_message_container">
+                        {errors.map((error, index) => <div key={index} className="account_message error">{error}</div>)}
                     </div>
                     : null}
             </div>
             : null}
     </>
 
-    return <div className="zenin__accounts">
-        <div className="zenin__detail_body">
+    return <div className="accounts">
+        <div className="detail_body">
             {isEditing ? accountEditTab : accountManagerTab}
         </div>
 
-        <div className="zenin__detail_controls">
+        <div className="detail_controls">
             {isEditing
                 ? <Button kind="primary" border={true} disabled={!canSave} onClick={handleSave}>
                     Save
@@ -250,7 +250,7 @@ export default function Accounts() {
                     Create
                 </Button>
                 : null}
-            <div className="zenin__h_ml-auto">
+            <div className="h_ml-auto">
                 <Button border={true} onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } })}>
                     Close
                 </Button>
@@ -262,12 +262,12 @@ export default function Accounts() {
                 title="Confirm"
                 visible={isDeleting != null}
                 onCancel={() => setIsDeleting(null)}
-                content={<div className="zenin__dialog_delete_account_content">
-                    <div className="zenin__dialog_confirm_content_top">
+                content={<div className="dialog_delete_account_content">
+                    <div className="dialog_confirm_content_top">
                         <div>Are you sure you want to delete {isDeleting.username}?</div>
                         <div>This action cannot be undone.</div>
                     </div>
-                    <div className="zenin__dialog_confirm_content_bottom">
+                    <div className="dialog_confirm_content_bottom">
                         <Button onClick={() => handleDelete(isDeleting.id)} kind="primary">
                             <span>Delete</span>
                         </Button>

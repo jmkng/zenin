@@ -1,50 +1,65 @@
-.zenin__h_f-row-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+:root.ew-resize * {
+    cursor: ew-resize !important;
+    user-select: none !important;
+    -webkit-user-select: none !important; 
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
 }
 
-.zenin__h_f-col {
-  display: flex;
-  flex-direction: column;
+:root.static * {
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
 }
 
-.zenin__h_c-fg {
-    color: var(--foreground);
+.h_f-row-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.zenin__h_c-warn {
-  color: var(--warn);
+.h_f-col {
+    display: flex;
+    flex-direction: column;
 }
 
-.zenin__h_c-dead-a {
-  color: var(--dead-a);
+.h_c-fg {
+    color: var(--color-foreground);
 }
 
-.zenin__h_f-mono {
-  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace, "Geist Mono";
+.h_c-warn {
+    color: var(--color-warn);
 }
 
-.zenin__h_f-sans {
-  font-family: system-ui, sans-serif, "Geist Sans";
+.h_c-dead-a {
+    color: var(--color-failure);
 }
 
-.zenin__h_m-0 {
-  margin: 0;
+.h_f-mono {
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace, "Geist Mono";
 }
 
-.zenin__h_mt-c {
-  margin-top: var(--px-c);
+.h_f-sans {
+    font-family: system-ui, sans-serif, "Geist Sans";
 }
 
-.zenin__h_mb-c {
-  margin-bottom: var(--px-c);
+.h_m-0 {
+    margin: 0;
 }
 
-.zenin__h_ml-auto {
-  margin-left: auto;
+.h_mt-c {
+    margin-top: var(--px02);
 }
 
-.zenin__h_mr-auto {
-  margin-right: auto;
+.h_mb-c {
+    margin-bottom: var(--px02);
+}
+
+.h_ml-auto {
+    margin-left: auto;
+}
+
+.h_mr-auto {
+    margin-right: auto;
 }
