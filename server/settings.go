@@ -120,7 +120,6 @@ func (a SettingsProvider) HandleGetActiveTheme(w http.ResponseWriter, r *http.Re
 
 	ctx := r.Context()
 	theme, err := a.Service.GetActiveTheme(ctx)
-
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			if strict || !jsonResponse {
@@ -147,8 +146,8 @@ func (a SettingsProvider) HandleGetActiveTheme(w http.ResponseWriter, r *http.Re
 
 		responder.Data(struct {
 			Name     *string `json:"name"`
-			Contents []byte  `json:"contents"`
-		}{Name: settings.Theme, Contents: theme}, http.StatusOK)
+			Contents string  `json:"contents"`
+		}{Name: settings.Theme, Contents: string(theme)}, http.StatusOK)
 		return
 	}
 
