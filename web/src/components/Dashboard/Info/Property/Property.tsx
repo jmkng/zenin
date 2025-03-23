@@ -1,4 +1,4 @@
-import { formatMilliseconds } from "@/internal/layout/graphics";
+import { formatMS } from "@/internal/layout/graphics";
 import { Measurement } from "@/internal/measurement";
 import { HTTP_API } from "@/internal/server";
 
@@ -14,13 +14,16 @@ export default function Property(props: PropertyProps) {
     const { measurement } = props;
 
     const pairs: Map<string, string> = new Map()
-    pairs.set("Duration", formatMilliseconds(measurement.duration))
+    pairs.set("Duration", formatMS(measurement.duration))
     if (measurement.httpStatusCode != null) pairs.set("Status Code", measurement.httpStatusCode.toString())
     if (measurement.icmpPacketsOut != null) pairs.set("Packets Out", measurement.icmpPacketsOut.toString())
     if (measurement.icmpPacketsIn != null) pairs.set("Packets In", measurement.icmpPacketsIn.toString())
-    if (measurement.icmpMinRtt != null) pairs.set("Min Round Trip", formatMilliseconds(measurement.icmpMinRtt))
-    if (measurement.icmpAvgRtt != null) pairs.set("Average Round Trip", formatMilliseconds(measurement.icmpAvgRtt))
-    if (measurement.icmpMaxRtt != null) pairs.set("Max Round Trip", formatMilliseconds(measurement.icmpMaxRtt))
+
+    const min = measurement.icmpMinRtt;
+    const avg = measurement.icmpAvgRtt;
+    const max = measurement.icmpMaxRtt
+    if (min && avg && max) 
+        pairs.set("Round Trip (Min/Avg/Max)", `${formatMS(min)}/${formatMS(avg)}/${formatMS(max)} (ms)`)
     if (measurement.pluginExitCode != null) pairs.set("Exit Code", measurement.pluginExitCode.toString())
 
     return <div className="property_component h_mt-c">

@@ -140,7 +140,7 @@ export default function Accounts() {
         if (!extract.ok) return;
 
         setIsDeleting(null);
-        account.context.dispatch({ type: 'remove', id })
+        account.context.dispatch({ type: 'delete', id })
     }
 
     function handleEdit() {

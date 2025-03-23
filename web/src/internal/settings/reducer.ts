@@ -1,10 +1,6 @@
-import { ColorPreference } from ".";
-
 export interface SettingsState {
     delimiters: string[],
-    /** The name of the active theme.
-     * May be a custom theme, or the name of a color preference. */
-    active: ColorPreference | string | null,
+    active: string | null,
     themes: string[],
 }
 
@@ -14,25 +10,28 @@ export const settingsDefault: SettingsState = {
     themes: []
 }
 
-type ResetAction = { type: 'reset', delimiters: string[], active: string | null };
+/** Reset the state. */
+type ResetAction = { type: 'reset', state: SettingsState };
 
-type ResetThemesAction = { type: 'resetThemes', themes: string[] };
-
-type ResetActiveAction = { type: 'resetActive', active: ColorPreference | string | null };
+/** Update the active theme. */
+type ChangeActiveThemeAction = { type: 'active', active: string | null };
 
 export type SettingsAction =
     | ResetAction
-    | ResetThemesAction
-    | ResetActiveAction
+    | ChangeActiveThemeAction
 
+const resetAction = (_: SettingsState, action: ResetAction) => {
+    return action.state;
+}
+
+const changeActiveThemeAction = (state: SettingsState, action: ChangeActiveThemeAction) => {
+    return { ...state, active: action.active };
+}
+    
 const settingsReducer = (state: SettingsState, action: SettingsAction): SettingsState => {
     switch (action.type) {
-        case "reset": 
-            return { ...state, delimiters: action.delimiters, active: action.active };
-        case "resetThemes": 
-            return { ...state, themes: action.themes.sort() };
-        case "resetActive":
-            return { ...state, active: action.active };
+        case "reset": return resetAction(state, action)
+        case "active": return changeActiveThemeAction(state, action)
     }
 }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jmkng/zenin/internal/env"
@@ -57,6 +58,23 @@ func (a SettingsProvider) HandleGetSettings(w http.ResponseWriter, r *http.Reque
 	s, err := a.Service.GetSettings(r.Context())
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+
+	includeThemes, _ := strconv.ParseBool(r.URL.Query().Get("themes"))
+	if includeThemes {
+		themes, err := a.Service.GetThemes()
+		if err != nil {
+			responder.Error(err, http.StatusInternalServerError)
+			return
+		}
+		if themes == nil {
+			themes = make([]string, 0)
+		}
+		responder.Data(struct {
+			Settings settings.Settings `json:"settings"`
+			Themes   []string          `json:"themes"`
+		}{Settings: s, Themes: themes}, http.StatusOK)
 		return
 	}
 
@@ -115,14 +133,11 @@ func (a SettingsProvider) HandleGetThemes(w http.ResponseWriter, r *http.Request
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
-
-	// TODO: Check serialization.
-	var t []string = nil
-	if len(themes) != 0 {
-		t = themes
+	if themes == nil {
+		themes = make([]string, 0)
 	}
 
 	responder.Data(struct {
 		Themes []string `json:"themes"`
-	}{Themes: t}, http.StatusOK)
+	}{Themes: themes}, http.StatusOK)
 }

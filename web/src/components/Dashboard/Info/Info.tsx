@@ -34,7 +34,7 @@ export default function Info(props: InfoProps) {
                                     <span className="info_event_name">{event.pluginName}</span>
                                     {event.threshold ? <span className="info_event_threshold state" data-state={event.threshold}>{event.threshold}</span> : null}
                                 </div>}
-                                data={event.pluginArgs || []}
+                                data={event.pluginArgs}
                             />
                         </div>)}
                 </div>
@@ -53,7 +53,7 @@ export default function Info(props: InfoProps) {
             </Button>
             <Button
                 border={true}
-                onClick={() => monitor.context.dispatch({ type: 'delete', monitors: [state.monitor!] })}
+                onClick={() => monitor.context.dispatch({ type: 'queue', monitors: [state.monitor!] })}
                 kind="destructive"
             >
                 Delete

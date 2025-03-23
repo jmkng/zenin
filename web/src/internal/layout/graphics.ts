@@ -26,6 +26,8 @@ export function formatDate(value: string): string {
     return formatter.format(date);
 }
 
-export function formatMilliseconds(value: number): string {
-    return `${value.toFixed(2)} (ms)`
+export function formatMS(value: number, suffix?: boolean): string {
+    let ts = `${value.toFixed(2)}`
+    if (suffix) ts += ` (ms)`
+    return ts;
 }

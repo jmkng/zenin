@@ -1,5 +1,6 @@
 import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
+import { Measurement } from '@/internal/measurement';
 import { isMonitor, useMonitorContext } from '@/internal/monitor';
 import { useDefaultMonitorService } from '@/internal/monitor/service';
 import { CreatedTimestamp, DataPacket, Timestamp } from '@/internal/server';
@@ -46,9 +47,9 @@ export default function Dashboard() {
         const body: DataPacket<CreatedTimestamp> = await extract.json();
         value.createdAt = body.data.time;
         value.updatedAt = body.data.time;
-        const measurements = null;
-        const full: monitor.Monitor = { ...value, id: body.data.id, measurements: measurements }
-        monitor.context.dispatch({ type: 'overwrite', monitor: full })
+        const measurements: Measurement[] = [];
+        const full: monitor.Monitor = { ...value, id: body.data.id, measurements }
+        monitor.context.dispatch({ type: 'update', monitor: full })
     }
 
     const handleUpdate = async (value: monitor.Monitor) => {
@@ -60,7 +61,7 @@ export default function Dashboard() {
         if (!extract.ok()) return;
         const body: DataPacket<Timestamp> = await extract.json();
         value.updatedAt = body.data.time;
-        monitor.context.dispatch({ type: 'overwrite', monitor: value })
+        monitor.context.dispatch({ type: 'update', monitor: value })
     }
 
     const handleRemove = async (monitors: monitor.Monitor[]) => {
@@ -68,7 +69,12 @@ export default function Dashboard() {
         const token = account.state.token!.raw;
         const extract = await monitor.service.deleteMonitor(token, id);
         if (!extract.ok()) return;
-        monitor.context.dispatch({ type: 'remove', monitors: id });
+        monitor.context.dispatch({ type: 'delete', monitors: id });
+    }
+
+    const handleDraft = () => {
+        const pane = { type: 'editor' as const, monitor: null }
+        monitor.context.dispatch({type: 'pane', pane })
     }
 
     return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
@@ -91,7 +97,7 @@ export default function Dashboard() {
                     </div>
                     : <div className="dashboard_empty">
                         <span className="dashboard_empty_message">No monitors have been created.</span>
-                        <Button kind="primary" border={true} onClick={() => monitor.context.dispatch({ type: 'draft' })}>
+                        <Button kind="primary" border={true} onClick={handleDraft}>
                             <span className="h_f-row-center menu_add">
                                 Create Monitor
                             </span>
@@ -123,7 +129,7 @@ export default function Dashboard() {
         <DialogModal
             title="Confirm"
             visible={monitor.context.state.deleting.length > 0}
-            onCancel={() => monitor.context.dispatch({ type: 'delete', monitors: [] })}
+            onCancel={() => monitor.context.dispatch({ type: 'queue', monitors: [] })}
             content={<DeleteDialogContent
                 queue={monitor.context.state.deleting}
                 onConfirm={() => handleRemove(monitor.context.state.deleting)}

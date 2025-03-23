@@ -1,4 +1,4 @@
-import { formatDate, formatMilliseconds } from "@/internal/layout/graphics";
+import { formatDate, formatMS } from "@/internal/layout/graphics";
 import { ViewPane } from "@/internal/monitor/split";
 import { DEAD_API, OK_API, WARN_API } from "@/internal/server";
 
@@ -34,7 +34,7 @@ export default function Statistics(props: StatisticsProps) {
 
     // The average poll duration in milliseconds for the measurement set.
     const avgDur = measurements.length > 0
-        ? formatMilliseconds(measurements.reduce((acc, value) => acc + value.duration, 0) / measurements.length)
+        ? formatMS(measurements.reduce((acc, value) => acc + value.duration, 0) / measurements.length)
         : "N/A";
     pairs.set("Average Poll Duration", avgDur)
 

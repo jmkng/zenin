@@ -167,6 +167,9 @@ func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Reques
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
+	if accounts == nil {
+		accounts = make([]account.Account, 0)
+	}
 
 	responder.Data(struct {
 		Accounts []account.Account `json:"accounts"`

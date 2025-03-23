@@ -55,7 +55,7 @@ func (h HTTPProbe) Poll(ctx context.Context, m Monitor) measurement.Span {
 	}
 
 	if m.HTTPRequestHeaders != nil {
-		for _, pair := range *m.HTTPRequestHeaders {
+		for _, pair := range m.HTTPRequestHeaders {
 			request.Header.Add(pair.Key, pair.Value)
 		}
 	}

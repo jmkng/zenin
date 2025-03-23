@@ -7,8 +7,8 @@ import { Settings } from ".";
 class SettingsService extends Service {
     constructor() { super(); }
 
-    async getSettings(token: string) {
-        const address = '/settings';
+    async getSettings(token: string, themes: boolean) {
+        const address = `/settings?themes=${themes}`;
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }

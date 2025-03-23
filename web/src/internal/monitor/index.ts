@@ -45,10 +45,10 @@ export interface Monitor {
     remoteAddress: string | null,
     remotePort: number | null,
     pluginName: string | null,
-    pluginArgs: string[] | null,
+    pluginArgs: string[],
     httpRange: string | null,
     httpMethod: string | null,
-    httpRequestHeaders: PairListValue | null,
+    httpRequestHeaders: PairListValue,
     httpRequestBody: string | null
     httpExpiredCertMod: string | null,
     httpCaptureHeaders: boolean | null,
@@ -59,13 +59,13 @@ export interface Monitor {
     icmpTtl: number | null,
     icmpProtocol: string | null,
     icmpLossThreshold: number | null,
-    measurements: Measurement[] | null
-    events: Event[] | null
+    measurements: Measurement[]
+    events: Event[]
 }
 
 export interface Event {
     pluginName: string,
-    pluginArgs: string[] | null,
+    pluginArgs: string[],
     threshold: string | null
 }
 

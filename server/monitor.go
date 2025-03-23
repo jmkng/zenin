@@ -45,7 +45,7 @@ func (m MonitorProvider) Mux() http.Handler {
 	router.Delete("/", m.HandleDeleteMonitor)
 	router.Patch("/", m.HandleToggleMonitor)
 	router.Put("/{id}", m.HandleUpdateMonitor)
-	router.Get("/{id}/measurement", m.HandleGetMeasurements)
+	router.Get("/{id}/measurements", m.HandleGetMeasurements)
 	router.Get("/{id}/poll", m.HandlePollMonitor)
 	router.Get("/plugins", m.HandleGetPlugins)
 	return router
@@ -65,6 +65,34 @@ func (m MonitorProvider) HandleGetMonitors(w http.ResponseWriter, r *http.Reques
 		m.Service.Repository.SelectMonitor(r.Context(), measurements, &params)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
+		return
+	}
+	if monitors == nil {
+		monitors = make([]monitor.Monitor, 0)
+	}
+	for i := range monitors {
+		if monitors[i].Measurements == nil {
+			monitors[i].Measurements = make([]measurement.Measurement, 0)
+		}
+		if monitors[i].Events == nil {
+			monitors[i].Events = make([]monitor.Event, 0)
+		}
+	}
+
+	includePlugins, _ := strconv.ParseBool(r.URL.Query().Get("plugins"))
+	if includePlugins {
+		plugins, err := m.Service.GetPlugins()
+		if err != nil {
+			responder.Error(err, http.StatusInternalServerError)
+			return
+		}
+		if plugins == nil {
+			plugins = make([]string, 0)
+		}
+		responder.Data(struct {
+			Monitors []monitor.Monitor `json:"monitors"`
+			Plugins  []string          `json:"plugins"`
+		}{Monitors: monitors, Plugins: plugins}, http.StatusOK)
 		return
 	}
 
@@ -237,6 +265,9 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 	}
+	if measurements == nil {
+		measurements = make([]measurement.Measurement, 0)
+	}
 
 	responder.Data(struct {
 		Measurements []measurement.Measurement `json:"measurements"`
@@ -279,8 +310,9 @@ func (m MonitorProvider) HandleGetPlugins(w http.ResponseWriter, r *http.Request
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
-
-	// TODO: Check for nil slice before sending.
+	if plugins == nil {
+		plugins = make([]string, 0)
+	}
 
 	responder.Data(struct {
 		Plugins []string `json:"plugins"`

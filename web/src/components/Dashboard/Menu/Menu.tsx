@@ -22,7 +22,8 @@ export default function Menu() {
     //}
 
     const handleAdd = () => {
-        monitor.context.dispatch({ type: 'draft' });
+        const pane = { type: 'editor' as const, monitor: null }
+        monitor.context.dispatch({type: 'pane', pane })
     }
 
     return <div className='default_menu menu'>

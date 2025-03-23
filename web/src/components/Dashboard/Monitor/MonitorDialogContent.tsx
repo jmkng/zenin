@@ -75,7 +75,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
             <Button
                 kind="destructive"
                 icon={<TrashIcon />}
-                onClick={() => monitor.context.dispatch({ type: 'delete', monitors: [monitor.data] })}
+                onClick={() => monitor.context.dispatch({ type: 'queue', monitors: [monitor.data] })}
             >
                 Delete
             </Button>

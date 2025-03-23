@@ -82,7 +82,7 @@ func (p PluginExecutor) Run(ctx context.Context, f PluginFields) (int, string, s
 	// Render plugin arguments.
 	var args []string
 	if f.PluginArgs != nil {
-		for i, v := range *f.PluginArgs {
+		for i, v := range f.PluginArgs {
 			name := fmt.Sprintf("%d", i)
 			t, err := template.New(name).Delims((*p.Settings.Delimiters)[0], (*p.Settings.Delimiters)[1]).Parse(v)
 			if err != nil {

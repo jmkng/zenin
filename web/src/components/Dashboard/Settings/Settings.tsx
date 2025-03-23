@@ -37,20 +37,24 @@ export default function Settings() {
         && hasValidDelimiters,
     [editor, settings.context.state])
 
-
     const handleSave = async () => {
-        handleBrowserUpdate(editor.active);
         let theme = editor.active;
+        handleBrowserUpdate(theme);
+        
         if (theme != null && isColorPreference(theme)) {
-            settings.context.dispatch({ type: 'resetActive', active: theme })
+            settings.context.dispatch({ type: 'active', active: theme })
+            // Don't send default theme name to repository.
             theme = null;
         }
 
+        const delimiters = editor.delimiters;
+        const active = editor.active;
         const token = account.context.state.token!.raw;
-        const extract = await settings.service.updateSettings(token, { delimiters: editor.delimiters, theme });
+        const extract = await settings.service.updateSettings(token, { delimiters, theme });
         if (!extract.ok()) return;
         
-        settings.context.dispatch({ type: 'reset', ...{ delimiters: editor.delimiters, active: editor.active } });
+        const themes = settings.context.state.themes;
+        settings.context.dispatch({ type: 'reset', state: { delimiters, active, themes } });
     }
 
     const handleBrowserUpdate = (value: string | null) => {

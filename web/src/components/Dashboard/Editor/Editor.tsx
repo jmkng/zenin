@@ -105,7 +105,7 @@ export default function Editor(props: EditorProps) {
     const handleDeleteEvent = (index: number) => {
         setEditor(prev => {
             const events = prev.draft.events!.filter((_, i) => i !== index);
-            return { ...prev, draft: { ...prev.draft, events: events.length == 0 ? null : events } }
+            return { ...prev, draft: { ...prev.draft, events } }
         })
     };
 
@@ -427,7 +427,7 @@ export default function Editor(props: EditorProps) {
                     args={{
                         subtext: "Arguments passed to the plugin.",
                         value: editor.draft.pluginArgs,
-                        onChange: pluginArgs => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs } }))
+                        onChange: args => setEditor(prev => ({ ...prev, draft: { ...prev.draft, pluginArgs: args || [] } }))
                     }}
                 />
             </div>
@@ -466,10 +466,10 @@ export default function Editor(props: EditorProps) {
                 draft: {
                     ...prev.draft,
                     events: [
-                        ...(prev.draft.events || []),
+                        ...(prev.draft.events),
                         {
                             pluginName: (monitor.context.state.plugins[0] || null),
-                            pluginArgs: null, threshold: null
+                            pluginArgs: [], threshold: null
                         } as Event
                     ]
                 }
@@ -525,7 +525,7 @@ type EditorState = { draft: Draft, original: Draft };
 
 /** Perform a deep clone of the provided `Monitor` and cast it to `Draft`, updating any missing values. */
 function reset(value: Monitor | null, plugins: string[]): Draft {
-    const defaults = {
+    const defaults: Draft = {
         name: null,
         kind: PLUGIN_API,
         active: false,
@@ -535,10 +535,10 @@ function reset(value: Monitor | null, plugins: string[]): Draft {
         remoteAddress: null,
         remotePort: null,
         pluginName: plugins[0] || null,
-        pluginArgs: null,
+        pluginArgs: [],
         httpRange: SUCCESSFUL_API,
         httpMethod: GET_API,
-        httpRequestHeaders: null,
+        httpRequestHeaders: [],
         httpRequestBody: null,
         httpExpiredCertMod: OFF_API,
         httpCaptureHeaders: false,
@@ -549,7 +549,7 @@ function reset(value: Monitor | null, plugins: string[]): Draft {
         icmpTtl: 64,
         icmpProtocol: ICMP_API,
         icmpLossThreshold: 0,
-        events: null
+        events: []
     };
 
     if (value == null) return defaults;
@@ -568,10 +568,8 @@ function split(value: Draft): EditorState {
     const clone = (n: Draft): Draft => {
         return {
             ...n,
-            pluginArgs: n.pluginArgs ? [...n.pluginArgs] : null,
-            httpRequestHeaders: n.httpRequestHeaders
-                ? n.httpRequestHeaders.map(header => ({ ...header }))
-                : null,
+            pluginArgs: [...n.pluginArgs],
+            httpRequestHeaders:  n.httpRequestHeaders.map(header => ({ ...header })),
         };
     };
 
@@ -595,10 +593,10 @@ interface Draft {
     remoteAddress: string | null,
     remotePort: number | null,
     pluginName: string | null,
-    pluginArgs: string[] | null,
+    pluginArgs: string[],
     httpRange: string,
     httpMethod: string | null,
-    httpRequestHeaders: PairListValue | null,
+    httpRequestHeaders: PairListValue,
     httpRequestBody: string | null
     httpExpiredCertMod: string | null,
     httpCaptureHeaders: boolean,
@@ -609,7 +607,7 @@ interface Draft {
     icmpTtl: number | null,
     icmpProtocol: string,
     icmpLossThreshold: number | null,
-    events: Event[] | null
+    events: Event[]
 }
 
 function isValidMonitor(draft: Draft): boolean {
@@ -718,10 +716,10 @@ function sanitize(draft: Draft): Monitor {
             monitor.icmpTtl = null;
             monitor.icmpLossThreshold = null;
             monitor.pluginName = null;
-            monitor.pluginArgs = null;
+            monitor.pluginArgs = [];
             break;
         case TCP_API:
-            monitor.httpRequestHeaders = null;
+            monitor.httpRequestHeaders = [];
             monitor.httpRequestBody = null;
             monitor.httpExpiredCertMod = null;
             monitor.httpCaptureHeaders = null;
@@ -735,11 +733,11 @@ function sanitize(draft: Draft): Monitor {
             monitor.icmpTtl = null;
             monitor.icmpLossThreshold = null;
             monitor.pluginName = null;
-            monitor.pluginArgs = null;
+            monitor.pluginArgs = [];
             break;
         case ICMP_API:
             monitor.remotePort = null;
-            monitor.httpRequestHeaders = null;
+            monitor.httpRequestHeaders = [];
             monitor.httpRequestBody = null;
             monitor.httpExpiredCertMod = null;
             monitor.httpCaptureHeaders = null;
@@ -751,7 +749,7 @@ function sanitize(draft: Draft): Monitor {
         case PLUGIN_API:
             monitor.remoteAddress = null;
             monitor.remotePort = null;
-            monitor.httpRequestHeaders = null;
+            monitor.httpRequestHeaders = [];
             monitor.httpRequestBody = null;
             monitor.httpExpiredCertMod = null;
             monitor.httpCaptureHeaders = null;

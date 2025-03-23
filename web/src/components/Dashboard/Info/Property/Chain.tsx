@@ -33,8 +33,8 @@ export default function Chain(props: ChainProps) {
             const token = account.state.token!.raw;
             const certificates = await measurement.service.getCertificate(token, measurement.data.id);
             if (!certificates.ok()) return;
-            const packet: DataPacket<{certificates: Certificate[] | null}> = await certificates.json();
-            setState({ certificates: packet.data.certificates || [], expanded: true });
+            const packet: DataPacket<{certificates: Certificate[]}> = await certificates.json();
+            setState({ certificates: packet.data.certificates, expanded: true });
             return;
         }
         setState({ ...state, expanded: !state.expanded })

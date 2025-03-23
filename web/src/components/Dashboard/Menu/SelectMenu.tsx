@@ -30,7 +30,7 @@ export default function SelectMenu() {
 
     const handleDelete = () => {
         const monitors = monitor.context.state.selected;
-        monitor.context.dispatch({ type: 'delete', monitors });
+        monitor.context.dispatch({ type: 'queue', monitors });
     }
 
     return <div className="select_menu menu">

@@ -5,10 +5,5 @@ interface Props {
 
 export default function Provider(props: Props) {
     const { providers = [], children } = props
-
-    return <>
-        {providers.reduceRight((acc, Comp) => {
-            return <Comp>{acc}</Comp>
-        }, children)}
-    </>
+    return providers.reduceRight((acc, Comp) => {return <Comp>{acc}</Comp>}, children)
 }
