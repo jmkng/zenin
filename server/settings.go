@@ -111,14 +111,44 @@ func (a SettingsProvider) HandleUpdateSettings(w http.ResponseWriter, r *http.Re
 
 func (a SettingsProvider) HandleGetActiveTheme(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+	jsonResponse := r.Header.Get(Accept) == ContentTypeApplicationJson
 
-	theme, err := a.Service.GetActiveTheme(r.Context())
+	strict := true
+	if s, err := strconv.ParseBool(r.URL.Query().Get("strict")); err == nil {
+		strict = s
+	}
+
+	ctx := r.Context()
+	theme, err := a.Service.GetActiveTheme(ctx)
+
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			responder.Status(http.StatusUnprocessableEntity)
+			if strict || !jsonResponse {
+				responder.Status(http.StatusNotFound)
+				return
+			}
+		} else if errors.Is(err, os.ErrPermission) {
+			if strict || !jsonResponse {
+				responder.Status(http.StatusForbidden)
+				return
+			}
+		} else {
+			responder.Error(err, http.StatusInternalServerError)
 			return
 		}
-		responder.Error(err, http.StatusInternalServerError)
+	}
+
+	if jsonResponse {
+		settings, err := a.Service.GetSettings(ctx)
+		if err != nil {
+			responder.Error(err, http.StatusInternalServerError)
+			return
+		}
+
+		responder.Data(struct {
+			Name     *string `json:"name"`
+			Contents []byte  `json:"contents"`
+		}{Name: settings.Theme, Contents: theme}, http.StatusOK)
 		return
 	}
 

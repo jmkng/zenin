@@ -1,10 +1,13 @@
 package server
 
 const (
-	Authorization              = "Authorization"
+	Accept        = "Accept"
+	Authorization = "Authorization"
+
 	ContentType                = "Content-Type"
 	ContentTypeApplicationJson = "application/json"
-	ContentTypeTextHtmlUTF8    = "text/html; charset=utf-8"
+	ContentTypeTextHtmlUTF8    = "text/html"
 	ContentTypeCSS             = "text/css"
-	Location                   = "Location"
+
+	Location = "Location"
 )
