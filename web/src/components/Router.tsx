@@ -99,9 +99,9 @@ export default function Router() {
             </Route>
             <Route element={<Private />}>
                 <Route path="/" element={<Dashboard />} />
+               <Route path="*" element={<NotFound/>} />
             </Route>
 
-            <Route path="*" element={<NotFound/>} />
         </Routes>
     </div>
 }
