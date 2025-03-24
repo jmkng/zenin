@@ -11,6 +11,10 @@
         justify-content: flex-end;
     }
 
+    .settings_reload_theme {
+        padding-top: var(--px01);
+    }
+
     .settings_about>*:first-child {
         margin-right: var(--px02);
     }

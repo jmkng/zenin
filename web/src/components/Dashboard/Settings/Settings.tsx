@@ -40,41 +40,46 @@ export default function Settings() {
         const delimiters = editor.delimiters;
         let active = editor.active;
 
-        const token = account.context.state.token!.raw;
-        const extract = await settings.service.updateSettings(token, { delimiters, theme: active });
+        const extract = await settings.service.updateSettings(account.context.state.token!.raw, { delimiters, theme: active });
         if (!extract.ok()) return;
 
-        const isDefaultTheme = active == null || active == DEFAULT_DARK || active == DEFAULT_LIGHT;
-        const root = document.documentElement;
-        
-        const ss = document.getElementById(THEME_BLOCK_ID)
-
         // Theme hot-swap
-        root.classList.add("static");
-        if (isDefaultTheme) {
-            // Remove existing theme stylesheet. Update theme attribute.
-            if (active) root.setAttribute(THEME_ATTR, formatTheme(active));
-            else root.removeAttribute(THEME_ATTR);
-
-            if (ss) ss.parentNode?.removeChild(ss);
-        } else {
-            // Request active stylesheet after saving.
-            const extract = await settings.service.getActiveTheme(token);
-            if (!extract.ok()) return;
-            
-            const css = await extract.response.text();
-            const styleSheet = new CSSStyleSheet();
-            await styleSheet.replace(css);
-            document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet]
-
-            if (ss) ss.parentNode?.removeChild(ss);
-        }
-        window.requestAnimationFrame(() => root.classList.remove("static"));
+        await handleReload(active);
         
         const themes = settings.context.state.themes;
         settings.context.dispatch({ type: 'reset', state: { delimiters, active, themes } });
     }
 
+    const handleReload = async (active: string | null) =>{
+        const isDefaultTheme = active == null || active == DEFAULT_DARK || active == DEFAULT_LIGHT;
+        const root = document.documentElement;
+        
+        const ss = document.getElementById(THEME_BLOCK_ID)
+
+        const clean = () => {
+            if (ss) ss.parentNode?.removeChild(ss);
+            document.adoptedStyleSheets = [];
+        };
+        
+        root.classList.add("static");
+        if (active) root.setAttribute(THEME_ATTR, formatTheme(active));
+        else root.removeAttribute(THEME_ATTR);
+        
+        if (isDefaultTheme) {
+            clean();
+        } else {
+            const extract = await settings.service.getActiveTheme(account.context.state.token!.raw);
+            if (!extract.ok()) return;
+            
+            const css = await extract.response.text();
+            const styleSheet = new CSSStyleSheet();
+            await styleSheet.replace(css);
+            clean();
+            document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet]
+        }
+        window.requestAnimationFrame(() => root.classList.remove("static"));
+    }
+    
     return <div className="settings">
         <div className="detail_body">
             <div className="h_mb-c">
@@ -85,6 +90,13 @@ export default function Settings() {
                     options={[ {text: "Auto", value: NULL_THEME}, ...options.map(n => ({text: n, value: n})) ]}
                     onChange={value => setEditor(prev => ({...prev, active: value == NULL_THEME ? null : value }))}
                 />
+                <div className="settings_reload_theme">
+                    <Button 
+                        border={true} 
+                        disabled={settings.context.state.active == null}
+                        onClick={() => handleReload(settings.context.state.active)}
+                    >Reload Theme</Button>
+                </div>
             </div>
             <div>
                 <PairListInput
