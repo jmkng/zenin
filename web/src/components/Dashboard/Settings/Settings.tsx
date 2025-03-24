@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
 
 import { useAccountContext } from "@/internal/account";
+import { formatTheme } from "@/internal/layout/graphics";
 import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
 import {
     DEFAULT_DARK,
     DEFAULT_LIGHT,
     SettingsState,
+    THEME_ATTR,
+    THEME_BLOCK_ID,
     useDefaultSettingsService,
     useSettingsContext
 } from "@/internal/settings";
@@ -33,18 +36,43 @@ export default function Settings() {
         && hasValidDelimiters,
     [editor, settings.context.state])
 
-    const handleSave = async () => {
-        // root.classList.add("static");
+    const handleSave = async () => {        
         const delimiters = editor.delimiters;
         let active = editor.active;
+
         const token = account.context.state.token!.raw;
         const extract = await settings.service.updateSettings(token, { delimiters, theme: active });
         if (!extract.ok()) return;
 
-        // window.requestAnimationFrame(() => root.classList.remove("static"));
+        const isDefaultTheme = active == null || active == DEFAULT_DARK || active == DEFAULT_LIGHT;
+        const root = document.documentElement;
+        
+        const ss = document.getElementById(THEME_BLOCK_ID)
+
+        // Theme hot-swap
+        root.classList.add("static");
+        if (isDefaultTheme) {
+            // Remove existing theme stylesheet. Update theme attribute.
+            if (active) root.setAttribute(THEME_ATTR, formatTheme(active));
+            else root.removeAttribute(THEME_ATTR);
+
+            if (ss) ss.parentNode?.removeChild(ss);
+        } else {
+            // Request active stylesheet after saving.
+            const extract = await settings.service.getActiveTheme(token);
+            if (!extract.ok()) return;
+            
+            const css = await extract.response.text();
+            const styleSheet = new CSSStyleSheet();
+            await styleSheet.replace(css);
+            document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet]
+
+            if (ss) ss.parentNode?.removeChild(ss);
+        }
+        window.requestAnimationFrame(() => root.classList.remove("static"));
+        
         const themes = settings.context.state.themes;
         settings.context.dispatch({ type: 'reset', state: { delimiters, active, themes } });
-        
     }
 
     return <div className="settings">

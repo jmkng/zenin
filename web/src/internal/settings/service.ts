@@ -25,6 +25,13 @@ class SettingsService extends Service {
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }
+
+    async getActiveTheme(token: string, json?: boolean) {
+        const address = '/settings/themes/active';
+        const request = new AuthenticatedRequest(token, address);
+        request.headers({ "Accept": json ? "application/json" : "text/css"});
+        return await this.extract(request);
+    }
 }
 
 export const useDefaultSettingsService = () => {
