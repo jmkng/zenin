@@ -183,7 +183,7 @@ func (e Environment) Diagnose(dx *Diagnostic) {
 
 	vd(dx, e.BaseDir, "ZENIN_BASE_DIR", "base")
 	vd(dx, e.PluginsDir, "ZENIN_PLUGINS_DIR", "plugins")
-	vd(dx, e.PluginsDir, "ZENIN_THEMES_DIR", "themes")
+	vd(dx, e.ThemesDir, "ZENIN_THEMES_DIR", "themes")
 
 	switch runtime.GOOS {
 	case "darwin", "linux":
