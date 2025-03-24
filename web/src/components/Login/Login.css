@@ -1,6 +1,6 @@
 @layer components {
     .login {
-        background: var(--login-background, var(--color-background));
+        background: var(--login-background-color, var(--color-background));
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -59,7 +59,8 @@
     }
 
     .login_message {
-        border: 1px solid var(--color-foreground);
+        color: var(--login-message-text-color, var(--color-foreground));
+        border: 1px solid var(--login-message-border-color, var(--color-foreground));
         border-radius: var(--px00);
         padding: var(--px03);
         display: flex;
@@ -68,7 +69,7 @@
     }
 
     .login_message.error {
-        color: var(--color-failure);
-        border-color: var(--color-failure);
+        color: var(--login-message-text-color-error, var(--color-failure));
+        border-color: var(--login-message-border-color-error, var(--color-failure));
     }
 }

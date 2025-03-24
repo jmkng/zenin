@@ -5,7 +5,7 @@
         align-items: center;
         height: 100%;
         flex-direction: column;
-        background: var(--not-found-background, var(--color-background));
+        background: var(--not-found-background-color, var(--color-background));
     }
 
     .not_found_text {
