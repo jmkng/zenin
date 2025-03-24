@@ -12,7 +12,6 @@ interface ButtonProps {
     background?: boolean;
     disabled?: boolean;
     tooltip?: string;
-    loading?: boolean;
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -26,7 +25,6 @@ export default function Button(props: ButtonProps) {
         background = false,
         disabled = false,
         tooltip = null,
-        loading = false,
         onClick
     } = props;
     const rootRef = useRef<HTMLDivElement>(null);
@@ -83,7 +81,7 @@ export default function Button(props: ButtonProps) {
 
     const button = <button
         ref={buttonRef}
-        onClick={event => { if (!disabled && !loading) handleClick(event) }}
+        onClick={event => { if (!disabled) handleClick(event) }}
         className={[
             'button',
             'input',
@@ -92,15 +90,8 @@ export default function Button(props: ButtonProps) {
             hover ? 'hover' : '',
             background ? 'background' : '',
             disabled ? 'disabled' : '',
-            loading ? 'loading' : '',
         ].join(' ')}
     >
-        {loading ?
-            <div className="spinner_overlay">
-                <div className="spinner"></div>
-            </div>
-            : null}
-
         {icon
             ? <span className={["button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
             : null}
