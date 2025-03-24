@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 // https://vitejs.dev/config/
 const config = defineConfig({
     build: {
+        target: 'es2022',
         outDir: "../server/build",
         assetsDir: ".",
     },
