@@ -1,4 +1,5 @@
 @layer components {
+    /* Tertiary (Default) */
     .button {
         appearance: none;
         white-space: nowrap;
@@ -7,20 +8,10 @@
         align-items: center;
         border-radius: var(--px00);
         font-weight: 500;
-        color: var(--color-foreground);
-        fill: var(--color-foreground);
-        border: 1px solid transparent;
-        background: transparent;
-    }
-
-    @keyframes fade-default {
-        from {
-            background: initial;
-        }
-
-        to {
-            background: var(--color-base01);
-        }
+        color: var(--button-tertiary-text-color, var(--color-foreground));
+        fill: var(--button-tertiary-text-color, var(--color-foreground));
+        background-color: var(--button-tertiary-background-color, var(--input-background-color, var(--color-background)));
+        border: 1px solid var(--button-tertiary-border-color, var(--input-border-color, var(--color-base01)));
     }
 
     .button:focus {
@@ -28,7 +19,7 @@
     }
 
     .button:focus-visible {
-        outline: 1px solid var(--color-link);
+        outline: 1px solid var(--button-focus-outline-color, var(--input-focus-outline-color, var(--color-focus)));
     }
 
     .button_tooltip {
@@ -39,37 +30,44 @@
         display: flex;
     }
 
+    .button:not(.border) {
+        border: 1px solid transparent;
+    }
+
     .button_icon.pair {
         margin-right: var(--px02);
     }
 
-    .button.border {
-        border-color: var(--color-base01);
-    }
-
-    .button:not(.primary).background {
-        background-color: var(--color-base01);
-    }
-
+    /* Disabled styles for primary, secondary and tertiary buttons. */
     .button.disabled {
-        color: var(--color-base03);
-        fill: var(--color-base03);
+        color: var(--button-text-color-disabled, var(--color-base03));
+        fill: var(--button-text-color-disabled, var(--color-base03));
+        background-color: var(--button-background-color-disabled, var(--color-background));
         cursor: not-allowed;
     }
-
-    .button.loading .button_child {
-        opacity: 0;
-    }
-
+    
+    /* Primary */
     .button:not(.disabled).primary {
-        color: var(--color-background);
-        fill: var(--color-background);
-        background: var(--color-foreground);
+        color: var(--button-primary-text-color, var(--color-background));
+        fill: var(--button-primary-text-color, var(--color-background));
+        background-color: var(--button-primary-background-color, var(--color-foreground));
+        border-color: transparent;
     }
-
+    
+    /* Secondary */
+    .button:not(.primary).background {
+        color: var(--button-secondary-text-color, var(--color-foreground));
+        fill: var(--button-secondary-text-color, var(--color-foreground));
+        background-color: var(--button-secondary-background-color, var(--color-base01));
+        border-color: transparent;
+    }
+    
+    /* Destructive */
     .button:not(.disabled).destructive {
-        color: var(--color-failure);
-        fill: var(--color-failure);
+        color: var(--button-destructive-text-color, var(--color-failure));
+        fill: var(--button-destructive-text-color, var(--color-failure));
+        background-color: var(--button-destructive-background-color, var(--color-background));
+        border-color: transparent;
     }
 
     .button:not(.disabled):not(.background).hover.destructive:hover {
@@ -87,16 +85,26 @@
     .tooltip {
         opacity: 0;
         position: absolute;
-        background: var(--color-foreground);
-        color: var(--color-background);
+        background: var(--tooltip-background-color, var(--color-foreground));
+        color: var(--tooltip-text-color, var(--color-background));
         font-size: 1rem;
         padding: var(--px01);
-        border-radius: 4px;
+        border-radius: var(--px00);
         pointer-events: none;
         white-space: nowrap;
     }
 
     .tooltip.visible {
         opacity: 1;
+    }
+
+    @keyframes fade-default {
+        from {
+            background: initial;
+        }
+
+        to {
+            background: var(--button-hover-color, var(--color-base01));
+        }
     }
 }
