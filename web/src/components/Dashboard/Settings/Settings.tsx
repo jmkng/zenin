@@ -5,10 +5,6 @@ import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
 import {
     DEFAULT_DARK,
     DEFAULT_LIGHT,
-    isColorPreference,
-    LS_THEME_KEY,
-    PREFER_DARK,
-    PREFER_LIGHT,
     SettingsState,
     useDefaultSettingsService,
     useSettingsContext
@@ -38,45 +34,19 @@ export default function Settings() {
     [editor, settings.context.state])
 
     const handleSave = async () => {
-        let theme = editor.active;
-        handleBrowserUpdate(theme);
-        
-        if (theme != null && isColorPreference(theme)) {
-            settings.context.dispatch({ type: 'active', active: theme })
-            // Don't send default theme name to repository.
-            theme = null;
-        }
-
+        // root.classList.add("static");
         const delimiters = editor.delimiters;
-        const active = editor.active;
+        let active = editor.active;
         const token = account.context.state.token!.raw;
-        const extract = await settings.service.updateSettings(token, { delimiters, theme });
+        const extract = await settings.service.updateSettings(token, { delimiters, theme: active });
         if (!extract.ok()) return;
-        
+
+        // window.requestAnimationFrame(() => root.classList.remove("static"));
         const themes = settings.context.state.themes;
         settings.context.dispatch({ type: 'reset', state: { delimiters, active, themes } });
+        
     }
 
-    const handleBrowserUpdate = (value: string | null) => {
-        const root = document.documentElement;
-
-        // Temporarily disable transitions while the theme changes.
-        root.classList.add("static");
-        root.classList.remove(PREFER_DARK)
-        root.classList.remove(PREFER_LIGHT)
-        localStorage.removeItem(LS_THEME_KEY);
-        if (value == DEFAULT_DARK) {
-            root.classList.add(PREFER_DARK)
-            localStorage.setItem(LS_THEME_KEY, PREFER_DARK)
-        }
-        else if (value == DEFAULT_LIGHT) {
-            root.classList.add(PREFER_LIGHT)
-            localStorage.setItem(LS_THEME_KEY, PREFER_LIGHT)
-        }
-
-        window.requestAnimationFrame(() => root.classList.remove("static"));
-    }
-    
     return <div className="settings">
         <div className="detail_body">
             <div className="h_mb-c">

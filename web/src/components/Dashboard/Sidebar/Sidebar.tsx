@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLayoutContext } from '@/internal/layout';
 
-import Button from '../../Button/Button';
-import MenuIcon from '../../Icon/FirstIcon';
+// import Button from '../../Button/Button';
+// import MenuIcon from '../../Icon/FirstIcon';
 
 import './Sidebar.css';
 
@@ -92,11 +92,11 @@ export default function Sidebar() {
         ? <div className='shortcut'>
             <div className="shortcut_content" ref={shortcutRef} style={{ width }}>
                 <div className='shortcut_top'>
-                    {narrow
+                    {/* {narrow
                         ? <div className='shortcut_controls_container'>
                             <Button onClick={() => layout.dispatch({ type: 'shortcut', shortcut: false })} icon={<MenuIcon />} />
                         </div>
-                        : null}
+                        : null} */}
                 </div>
             </div>
             <div className="shortcut_border" onMouseDown={() => setResizing(true)} onDoubleClick={handleReset} />

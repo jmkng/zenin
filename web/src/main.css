@@ -22,7 +22,7 @@
 }
 
 @layer theme {
-    :root {        
+    :root {     
         --dark-background: rgb(18, 18, 18);
         --dark-foreground: rgb(255, 255, 255);
         --dark-link: rgb(60, 100, 255);
@@ -76,7 +76,7 @@
         font-size: 13px;
     }
 
-    :root.os-dark:not(.prefer-light) {
+    :root[data-theme*="dark"] {
         --color-background: var(--dark-background);
         --color-foreground: var(--dark-foreground);
         --color-link: var(--dark-link);
@@ -89,6 +89,23 @@
         --color-warn: var(--dark-warn);
         --color-failure: var(--dark-failure);
         --modal-backdrop-opacity: var(--dark-modal-opacity);
+    }
+
+    :root:not([data-theme]) {
+        @media (prefers-color-scheme: dark) {
+            --color-background: var(--dark-background);
+            --color-foreground: var(--dark-foreground);
+            --color-link: var(--dark-link);
+            --color-base00: var(--dark-color-base00);
+            --color-base01: var(--dark-color-base01);
+            --color-base02: var(--dark-color-base02);
+            --color-base03: var(--dark-color-base03);
+            --color-base04: var(--dark-color-base04);
+            --color-success: var(--dark-success);
+            --color-warn: var(--dark-warn);
+            --color-failure: var(--dark-failure);
+            --modal-backdrop-opacity: var(--dark-modal-opacity);
+        }
     }
 }
 

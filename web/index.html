@@ -5,25 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <script>
-        // Restore user color preference.
-        const theme = localStorage.getItem("color-preference");
-        if (theme) document.documentElement.classList.add(theme);
-
-        // Assign os color preference class to root element.
-        const media = "(prefers-color-scheme: dark)";
-        const tcc = () => {
-            const queryDark = window.matchMedia(media);
-            document.documentElement.classList.toggle('os-dark', queryDark.matches);
-            document.documentElement.classList.toggle('os-light', !queryDark.matches);
-        }
-        tcc();
-        window.matchMedia(media).addEventListener('change', tcc);
-    </script>
-
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/api/v1/settings/themes/active">
+    <link rel="stylesheet" href="/api/v1/settings/themes/active" />
 
     <title>Zenin</title>
 </head>

@@ -26,6 +26,10 @@ export function formatDate(value: string): string {
     return formatter.format(date);
 }
 
+export function formatTheme(value: string): string {
+    return value.replace(/\.[^/.]+$/, "").replace(/[\s_]+/g, "-").toLowerCase();
+}
+
 export function formatMS(value: number, suffix?: boolean): string {
     let ts = `${value.toFixed(2)}`
     if (suffix) ts += ` (ms)`

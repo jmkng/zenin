@@ -5,11 +5,11 @@ import { useFeedDispatch } from '@/hooks/useFlaggedDispatch';
 import { Account, useAccountContext } from '@/internal/account';
 import { useDefaultAccountService } from '@/internal/account/service';
 import { useLayoutContext } from '@/internal/layout';
-import { hideLoadingScreen, showLoadingScreen } from '@/internal/layout/graphics';
+import { formatTheme, hideLoadingScreen, showLoadingScreen } from '@/internal/layout/graphics';
 import { Monitor, useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
 import { inventoryBatchSize, monitorDefault } from '@/internal/monitor/reducer';
 import { DataPacket, Extract, FEED, handleConnect, handleDisconnect } from '@/internal/server';
-import { Settings, useDefaultSettingsService, userColorPreference, useSettingsContext } from '@/internal/settings';
+import { Settings, useDefaultSettingsService, useSettingsContext } from '@/internal/settings';
 
 import Dashboard from './Dashboard/Dashboard';
 import Hidden from './Hidden';
@@ -40,15 +40,15 @@ export default function Router() {
         const token = account.context.state.token;
 
         let queue = [
-            settings.service.getSettings(token.raw, true),
             monitor.service.getMonitor(token.raw, inventoryBatchSize, true),
+            settings.service.getSettings(token.raw, true),
         ];
         if (token.payload.root) queue.push(account.service.getAccounts(token.raw));
         
         (async () => {
-            const [settingsEx, monitorEx, accountEx] = await Promise.all(queue);
-            if (settingsEx.ok()) await resetSettings(settingsEx);
+            const [monitorEx, settingsEx, accountEx] = await Promise.all(queue);
             if (monitorEx.ok()) await resetMonitors(monitorEx);
+            if (settingsEx.ok()) await resetSettings(settingsEx);
             if (accountEx?.ok()) await resetAccounts(accountEx); 
 
             const loading = false;
@@ -56,21 +56,22 @@ export default function Router() {
         })();
     }, [account.context.state.token])
 
-    const resetSettings = async (ex: Extract) => {
-        const packet: DataPacket<{settings: Settings, themes: string[]}> = await ex.json();
-        const delimiters = packet.data.settings.delimiters;
-        const active = packet.data.settings.theme || userColorPreference();
-        const themes = packet.data.themes;
-        const state = { delimiters, active, themes };
-        settings.context.dispatch({ type: 'reset', state });
-    }
-
     const resetMonitors = async (ex: Extract) => {
         const packet: DataPacket<{monitors: Monitor[], plugins: string[]}> = await ex.json();
         const monitors = packet.data.monitors;
         const plugins = packet.data.plugins;
         const state = { ...monitorDefault, monitors, plugins };
         monitor.context.dispatch({ type: 'reset', state });
+    }
+    
+    const resetSettings = async (ex: Extract) => {
+        const packet: DataPacket<{settings: Settings, themes: string[]}> = await ex.json();
+        const delimiters = packet.data.settings.delimiters;
+        const active = packet.data.settings.theme;
+        const themes = packet.data.themes;
+        const state = { delimiters, active, themes };
+        if (active) document.documentElement.setAttribute("data-theme", formatTheme(active));
+        settings.context.dispatch({ type: 'reset', state });
     }
 
     const resetAccounts = async (ex: Extract) => {
