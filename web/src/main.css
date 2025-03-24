@@ -22,7 +22,7 @@
 }
 
 @layer theme {
-    :root {     
+    :root {   
         --dark-background: rgb(18, 18, 18);
         --dark-foreground: rgb(255, 255, 255);
         --dark-link: rgb(60, 100, 255);
@@ -51,6 +51,7 @@
         --color-background: var(--light-background);
         --color-foreground: var(--light-foreground);
         --color-link: var(--light-link);
+        --color-focus: var(--light-link);
         --color-base00: var(--light-color-base00);
         --color-base01: var(--light-color-base01);
         --color-base02: var(--light-color-base02);
@@ -80,6 +81,7 @@
         --color-background: var(--dark-background);
         --color-foreground: var(--dark-foreground);
         --color-link: var(--dark-link);
+        --color-focus: var(--dark-link);
         --color-base00: var(--dark-color-base00);
         --color-base01: var(--dark-color-base01);
         --color-base02: var(--dark-color-base02);
