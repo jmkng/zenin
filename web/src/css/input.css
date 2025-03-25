@@ -1,17 +1,17 @@
 .input {
-    min-height: var(--px07);
-    padding: var(--px01) var(--px03);
+    min-height: 38px;
+    padding: 6px 12px;
     font-family: inherit;
     font-size: inherit;
 }
 
 .input_label {
     display: block;
-    margin: 0 0 var(--px01) 0;
+    margin: 0 0 6px 0;
     font-weight: 500;
 }
 
 .input_subtext {
-    color: var(--color-base04);
-    margin: 0 0 var(--px01) 0;
+    color: var(--palette04);
+    margin: 0 0 6px 0;
 }

@@ -2,7 +2,7 @@
     .dashboard {
         height: 100%;
         display: flex;
-        background: var(--color-background);
+        background: var(--background);
     }
 
     .dashboard_select_menu {
@@ -13,7 +13,7 @@
         transition-property: top;
         left: 0;
         right: 0;
-        background: var(--color-background);
+        background: var(--background);
     }
 
     .dashboard_select_menu.selection {
@@ -30,16 +30,16 @@
 
     .dashboard_main_bottom {
         display: flex;
-        padding: var(--px02);
+        padding: 9px;
 
         /* px-i is equal to the height of the menu bar. */
-        height: calc(100% - var(--px08));
+        height: calc(100% - 57px);
     }
 
     .dashboard_activity {
         overflow-y: auto;
         overflow-x: hidden;
-        margin-left: var(--px02);
+        margin-left: 9px;
         flex: 1;
     }
 
@@ -48,35 +48,35 @@
         overflow-x: hidden;
         display: grid;
         flex: 1;
-        gap: var(--px01);
+        gap: 6px;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         grid-auto-rows: 175px;
-        padding-right: var(--px00);
+        padding-right: 4px;
     }
 
     .detail_controls>*:not(:last-of-type) {
-        margin-right: var(--px02);
+        margin-right: 9px;
     }
 
     .detail_body {
-        padding: var(--px02);
-        border-top-right-radius: var(--px00);
-        border-top-left-radius: var(--px00);
-        border: 1px solid var(--color-base01);
+        padding: 9px;
+        border-top-right-radius: 4px;
+        border-top-left-radius: 4px;
+        border: 1px solid var(--palette01);
         border-bottom: none;
     }
 
     .detail_controls {
-        border: 1px solid var(--color-base01);
+        border: 1px solid var(--palette01);
         position: sticky;
         bottom: 0;
         display: flex;
-        border-bottom-left-radius: var(--px00);
-        border-bottom-right-radius: var(--px00);
-        background: var(--color-background);
-        padding: var(--px02);
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        background: var(--background);
+        padding: 9px;
         /* Box shadow hides overlapping scrollbar from sticky element. */
-        box-shadow: 0px 15px 0px 0px var(--color-background);
+        box-shadow: 0px 15px 0px 0px var(--background);
     }
 
     .dashboard_empty {
@@ -88,8 +88,8 @@
     }
 
     .dashboard_empty_message {
-        color: var(--color-base04);
-        margin-bottom: var(--px01);
+        color: var(--palette04);
+        margin-bottom: 6px;
     }
 
     @container dashboard-container (max-width: 800px) {

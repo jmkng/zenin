@@ -3,15 +3,15 @@
         background: none;
         width: 100%;
         appearance: none;
-        color: var(--color-foreground);
+        color: var(--color);
         outline: none;
-        padding: 8px 22px 8px var(--px02) !important;
-        border-radius: var(--px00);
-        border: 1px solid var(--color-base01);
+        padding: 8px 22px 8px 9px !important;
+        border-radius: 4px;
+        border: 1px solid var(--palette01);
     }
 
     .select_input_box:focus {
-        outline: 1px solid var(--color-link);
+        outline: 1px solid var(--link-color);
     }
 
     .select_input_controls_container {
@@ -20,7 +20,7 @@
 
     .select_input_icon_container {
         position: absolute;
-        right: var(--px02);
+        right: 9px;
         top: 50%;
         transform: translateY(-50%);
         display: flex;

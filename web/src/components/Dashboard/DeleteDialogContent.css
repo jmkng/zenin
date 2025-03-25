@@ -1,10 +1,10 @@
 @layer components {
     .dialog_confirm_content_top {
-        color: var(--color-base04);
+        color: var(--palette04);
     }
 
     .dialog_confirm_content_top>*:last-child {
-        margin-top: var(--px01);
+        margin-top: 6px;
     }
 
     .dialog_confirm_content {
@@ -14,6 +14,6 @@
     }
 
     .dialog_confirm_content_bottom {
-        margin-top: var(--px04);
+        margin-top: 15px;
     }
 }

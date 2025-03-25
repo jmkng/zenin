@@ -8,14 +8,14 @@
         position: relative;
         height: 14px;
         width: 14px;
-        border-radius: var(--px00);
+        border-radius: 4px;
         user-select: none;
         font-weight: 500;
-        background: var(--color-background);
-        border: 1px solid var(--color-foreground);
+        background: var(--background);
+        border: 1px solid var(--color);
     }
 
     .checkbox_input.checked {
-        background: var(--color-foreground);
+        background: var(--color);
     }
 }

@@ -35,6 +35,7 @@
         --dark-warn: rgb(242, 189, 72);
         --dark-failure: rgb(223, 101, 88);
         --dark-modal-opacity: 0.5;
+        
         --light-background: rgb(255, 255, 255);
         --light-foreground: rgb(18, 18, 18);
         --light-link: rgb(60, 100, 255);
@@ -48,62 +49,53 @@
         --light-failure: rgb(235, 55, 45);
         --light-modal-opacity: 0.25;
         
-        --color-background: var(--light-background);
-        --color-foreground: var(--light-foreground);
-        --color-link: var(--light-link);
-        --color-focus: var(--light-link);
-        --color-base00: var(--light-color-base00);
-        --color-base01: var(--light-color-base01);
-        --color-base02: var(--light-color-base02);
-        --color-base03: var(--light-color-base03);
-        --color-base04: var(--light-color-base04);
-        --color-success: var(--light-success);
-        --color-warn: var(--light-warn);
-        --color-failure: var(--light-failure);
+        --background: var(--light-background);
+        --color: var(--light-foreground);
+        --link-color: var(--light-link);
+        --focus-outline-color: var(--light-link);
+        --palette00: var(--light-color-base00);
+        --palette01: var(--light-color-base01);
+        --palette02: var(--light-color-base02);
+        --palette03: var(--light-color-base03);
+        --palette04: var(--light-color-base04);
+        --success: var(--light-success);
+        --warn: var(--light-warn);
+        --failure: var(--light-failure);
         --modal-backdrop-opacity: var(--light-modal-opacity);
-        --px00: 4px;
-        --px01: 6px;
-        --px02: 9px;
-        --px03: 12px;
-        --px04: 15px;
-        --px05: 28px;
-        --px06: 36px;
-        --px07: 38px;
-        --px08: 57px;
 
-        background: var(--color-background);
+        background: var(--background);
         font-size: 13px;
     }
 
     :root[data-theme*="dark"] {
-        --color-background: var(--dark-background);
-        --color-foreground: var(--dark-foreground);
-        --color-link: var(--dark-link);
-        --color-focus: var(--dark-link);
-        --color-base00: var(--dark-color-base00);
-        --color-base01: var(--dark-color-base01);
-        --color-base02: var(--dark-color-base02);
-        --color-base03: var(--dark-color-base03);
-        --color-base04: var(--dark-color-base04);
-        --color-success: var(--dark-success);
-        --color-warn: var(--dark-warn);
-        --color-failure: var(--dark-failure);
+        --background: var(--dark-background);
+        --color: var(--dark-foreground);
+        --link-color: var(--dark-link);
+        --focus-outline-color: var(--dark-link);
+        --palette00: var(--dark-color-base00);
+        --palette01: var(--dark-color-base01);
+        --palette02: var(--dark-color-base02);
+        --palette03: var(--dark-color-base03);
+        --palette04: var(--dark-color-base04);
+        --success: var(--dark-success);
+        --warn: var(--dark-warn);
+        --failure: var(--dark-failure);
         --modal-backdrop-opacity: var(--dark-modal-opacity);
     }
 
     :root:not([data-theme]) {
         @media (prefers-color-scheme: dark) {
-            --color-background: var(--dark-background);
-            --color-foreground: var(--dark-foreground);
-            --color-link: var(--dark-link);
-            --color-base00: var(--dark-color-base00);
-            --color-base01: var(--dark-color-base01);
-            --color-base02: var(--dark-color-base02);
-            --color-base03: var(--dark-color-base03);
-            --color-base04: var(--dark-color-base04);
-            --color-success: var(--dark-success);
-            --color-warn: var(--dark-warn);
-            --color-failure: var(--dark-failure);
+            --background: var(--dark-background);
+            --color: var(--dark-foreground);
+            --link-color: var(--dark-link);
+            --palette00: var(--dark-color-base00);
+            --palette01: var(--dark-color-base01);
+            --palette02: var(--dark-color-base02);
+            --palette03: var(--dark-color-base03);
+            --palette04: var(--dark-color-base04);
+            --success: var(--dark-success);
+            --warn: var(--dark-warn);
+            --failure: var(--dark-failure);
             --modal-backdrop-opacity: var(--dark-modal-opacity);
         }
     }
@@ -119,8 +111,8 @@
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
         overflow: hidden;
-        background: var(--color-background);
-        color: var(--color-foreground);
+        background: var(--background);
+        color: var(--color);
     }
 
     dialog {
@@ -137,9 +129,16 @@
     }
 
     a {
-        color: var(--color-link);
+        color: var(--link-color);
+        border-radius: 4px;
+        padding: 0 2px;
+        outline: none;
     }
 
+    a:focus-visible {
+        outline: 1px solid var(--focus-outline-color);
+    } 
+    
     input[type=number]::-webkit-inner-spin-button {
         -webkit-appearance: none;
     }

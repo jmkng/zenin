@@ -6,7 +6,7 @@ export const defaultDialogStrategy: PositionStrategy = (rootRect: DOMRect, porta
         && rootRect.top - portalRect.height > 0;
 
     const top = openAbove
-        ? (rootRect.top - portalRect.height + window.scrollY) - 6  // Padding equal to var(--px01);
+        ? (rootRect.top - portalRect.height + window.scrollY) - 6
         : (rootRect.top + rootRect.height + window.scrollY) + 6;
 
     // Open to the left or right based on available space. Prefers right.

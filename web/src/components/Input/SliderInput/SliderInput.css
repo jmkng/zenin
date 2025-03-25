@@ -3,8 +3,8 @@
         appearance: none;
         width: 100%;
         height: 5px;
-        background: var(--color-base01);
-        border-radius: var(--px00);
+        background: var(--palette01);
+        border-radius: 4px;
         outline: none;
     }
 
@@ -13,19 +13,19 @@
         appearance: none;
         width: 17px;
         height: 17px;
-        background: var(--color-base02);
-        border: 1px solid var(--color-base03);
+        background: var(--palette02);
+        border: 1px solid var(--palette03);
         border-radius: 50%;
     }
 
     .slider_input_box:focus::-webkit-slider-thumb {
-        outline: 1px solid var(--color-link);
+        outline: 1px solid var(--link-color);
     }
 
     .slider_input_subtext {
         display: block;
-        color: var(--color-base04);
-        margin: var(--px02) 0 0 0;
+        color: var(--palette04);
+        margin: 9px 0 0 0;
     }
 
     .slider_input_controls {

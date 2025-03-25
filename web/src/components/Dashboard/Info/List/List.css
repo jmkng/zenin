@@ -1,22 +1,22 @@
 @layer components {
     .list_component {
-        border: 1px solid var(--color-base01);
-        border-radius: var(--px00);
+        border: 1px solid var(--palette01);
+        border-radius: 4px;
     }
     
     .list_row:not(:last-child) {
-        border-bottom: 1px solid var(--color-base01);
+        border-bottom: 1px solid var(--palette01);
     }
     
     .list_intro, .list_item_container {
-        height: var(--px07);
+        height: 38px;
     }
     
     .list_intro {
         display: flex;
         align-items: center;
-        padding: var(--px01) var(--px03);
-        color: var(--color-base04);
+        padding: 6px 12px;
+        color: var(--palette04);
     }
     
     .list_intro_title {
@@ -24,20 +24,20 @@
     }
     
     .list_intro:not(.empty) {
-        border-bottom: 1px solid var(--color-base01);
+        border-bottom: 1px solid var(--palette01);
     }
     
     .list_item_container {
-        height: var(--px07);
+        height: 38px;
         display: flex;
         width: 100%;
         justify-content: space-between !important;
         align-items: center;
-        padding: var(--px01) var(--px03);
+        padding: 6px 12px;
     }
     
     .list_item_container:not(:last-child) {
-        border-bottom: 1px solid var(--color-base01);
+        border-bottom: 1px solid var(--palette01);
     }
     
     .list_map_item_key {

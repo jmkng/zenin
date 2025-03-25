@@ -1,14 +1,14 @@
 @layer components {
     .menu_spacer.first {
-        margin-left: var(--px01);
-        margin-right: var(--px01);
+        margin-left: 6px;
+        margin-right: 6px;
     }
 
     .menu_spacer {
-        background: var(--color-base01);
+        background: var(--palette01);
         width: 1px;
-        border-radius: var(--px00);
-        margin: var(--px03) 0 var(--px03) 0;
+        border-radius: 4px;
+        margin: 12px 0 12px 0;
     }
 
     .dashboard_menu {
@@ -22,6 +22,6 @@
     }
 
     .menu_selected_count {
-        margin: 0 var(--px01);
+        margin: 0 6px;
     }
 }

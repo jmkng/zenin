@@ -4,7 +4,7 @@
     }
 
     .select_menu_count {
-        color: var(--color-base04);
+        color: var(--palette04);
         user-select: none;
     }
 }

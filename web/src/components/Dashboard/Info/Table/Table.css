@@ -1,30 +1,30 @@
 @layer components {
     .table_container {
-        border: 1px solid var(--color-base01);
-        border-radius: var(--px00);
+        border: 1px solid var(--palette01);
+        border-radius: 4px;
         width: 100%;
     }
 
     .table_measurement_count {
-        color: var(--color-base04);
+        color: var(--palette04);
     }
 
     .table_header {
         display: flex;
         align-items: center;
-        margin-bottom: var(--px01);
+        margin-bottom: 6px;
     }
 
     .table_footer.margin {
-        margin-top: var(--px01);
+        margin-top: 6px;
     }
 
     .table_footer_page_count {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: var(--px01) var(--px03);
-        color: var(--color-base01);
+        padding: 6px 12px;
+        color: var(--palette01);
     }
 
     .table_head {
@@ -33,12 +33,12 @@
 
     .table_head th {
         font-weight: 400;
-        color: var(--color-base04);
+        color: var(--palette04);
     }
 
     .table_head,
     .table_component .row_component {
-        height: var(--px07);
+        height: 38px;
         width: 100%;
     }
 
@@ -72,16 +72,16 @@
     }
 
     .row_component:hover {
-        background: var(---color-base00);
+        background: var(--palette00);
     }
 
     .table_component th,
     .table_component td {
-        padding: var(--px01) var(--px03);
+        padding: 6px 12px;
     }
 
     .table_component .row_component {
-        border-top: 1px solid var(--color-base01);
+        border-top: 1px solid var(--palette01);
     }
 
     .table_controls_container {
@@ -90,7 +90,7 @@
     }
 
     .table_controls_container>*:not(:last-child) {
-        margin-right: var(--px01);
+        margin-right: 6px;
     }
 
     .table_footer {
@@ -103,7 +103,7 @@
     }
 
     .table_footer_right>*:not(:first-child) {
-        margin-left: var(--px01);
+        margin-left: 6px;
     }
 
     .table_container th:last-child,

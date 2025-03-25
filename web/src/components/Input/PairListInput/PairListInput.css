@@ -1,13 +1,13 @@
 @layer components {
     .pair_list_row {
         display: flex;
-        margin-bottom: var(--px01);
+        margin-bottom: 6px;
     }
 
     .pair_list_key_input,
     .pair_list_value_input {
         flex: 1;
-        margin-right: var(--px01);
+        margin-right: 6px;
     }
 
     .pair_list_input_delete_icon {

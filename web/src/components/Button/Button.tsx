@@ -110,7 +110,7 @@ export default function Button(props: ButtonProps) {
 // Put the tooltip below the anchor, and try to center it. 
 // Prefer left/right side based on available space.
 const relativeTooltipStrategy: PositionStrategy = (rootRect: DOMRect, portalRect: DOMRect) => {
-    const top = rootRect.height + 6; // Padding equal to var(--px01);
+    const top = rootRect.height + 6; // Padding equal to 6px;
     let left = (rootRect.width - portalRect.width) / 2;
 
     // Check for viewport overflow on wide tooltips.

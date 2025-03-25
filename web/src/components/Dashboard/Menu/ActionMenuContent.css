@@ -1,6 +1,6 @@
 @layer components {
     .action_menu_dialog_name {
-        padding: var(--px01) var(--px03);
+        padding: 6px 12px;
     }
 
     .action_menu_dialog_name .dialog_section {
@@ -10,12 +10,12 @@
     }
 
     .action_menu_dialog_name:not(:only-child) {
-        padding: var(--px01) var(--px03) 0 var(--px03);
+        padding: 6px 12px 0 12px;
     }
 
     .action_menu_dialog_id {
-        color: var(--color-base04);
-        padding: 0 var(--px03) var(--px01) var(--px03);
+        color: var(--palette04);
+        padding: 0 12px 6px 12px;
     }
 
     .action_menu_log_out_icon {

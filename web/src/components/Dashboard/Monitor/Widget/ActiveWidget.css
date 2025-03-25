@@ -6,10 +6,10 @@
     }
 
     .active_widget[data-active="Inactive"] {
-        color: var(--color-warn);
+        color: var(--warn);
     }
 
     .active_widget[data-active="Active"] {
-        color: var(--color-base04);
+        color: var(--palette04);
     }
 }

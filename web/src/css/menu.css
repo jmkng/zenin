@@ -1,10 +1,10 @@
 .menu {
-    height: var(--px08);
+    height: 57px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--color-base01);
+    border-bottom: 1px solid var(--palette01);
     justify-content: space-between;
-    padding: var(--px02);
+    padding: 9px;
 }
 
 .menu_left, .menu_right {
@@ -12,7 +12,7 @@
 }
 
 .menu_margin_right {
-    margin-right: var(--px01);
+    margin-right: 6px;
 }
 
 @media (max-width: 700px) {

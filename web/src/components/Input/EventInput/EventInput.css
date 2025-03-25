@@ -1,26 +1,26 @@
 @layer components {
     .event_input_threshold_container {
-        margin: var(--px04) 0;
+        margin: 15px 0;
     }
 
     .event_input_threshold_description {
         display: block;
-        margin-top: var(--px02);
+        margin-top: 9px;
     }
 
     .detail_event {
-        padding: var(--px02);
-        border: 1px solid var(--color-base01);
-        border-radius: var(--px00);
+        padding: 9px;
+        border: 1px solid var(--palette01);
+        border-radius: 4px;
     }
 
     .detail_event_container {
-        margin-bottom: var(--px02);
+        margin-bottom: 9px;
     }
 
     .detail_event_marker {
         display: block;
-        margin-bottom: var(--px01);
+        margin-bottom: 6px;
         cursor: default;
     }
 }

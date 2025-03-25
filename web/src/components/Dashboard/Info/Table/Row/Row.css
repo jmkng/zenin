@@ -6,6 +6,6 @@
 
     .row_component:hover,
     .row_component.highlight {
-        background: var(---color-base00);
+        background: var(--palette00);
     }
 }

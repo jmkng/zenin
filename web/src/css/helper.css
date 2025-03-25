@@ -25,15 +25,15 @@
 }
 
 .h_c-fg {
-    color: var(--color-foreground);
+    color: var(--color);
 }
 
 .h_c-warn {
-    color: var(--color-warn);
+    color: var(--warn);
 }
 
 .h_c-dead-a {
-    color: var(--color-failure);
+    color: var(--failure);
 }
 
 .h_f-mono {
@@ -49,11 +49,11 @@
 }
 
 .h_mt-c {
-    margin-top: var(--px02);
+    margin-top: 9px;
 }
 
 .h_mb-c {
-    margin-bottom: var(--px02);
+    margin-bottom: 9px;
 }
 
 .h_ml-auto {

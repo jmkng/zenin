@@ -1,5 +1,5 @@
 @layer components {
     .kind_widget {
-        color: var(--color-base04);
+        color: var(--palette04);
     }
 }

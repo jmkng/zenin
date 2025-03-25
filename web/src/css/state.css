@@ -1,24 +1,24 @@
 .state {
-    padding: 0 var(--px00);
-    border-radius: var(--px00);
+    padding: 0 4px;
+    border-radius: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 45px;
-    border: 1px solid var(--color-base01);
+    border: 1px solid var(--palette01);
 }
 
 .state[data-state="OK"] {
-    background: var(--color-base01);
-    color: var(--color-success);
+    background: var(--palette01);
+    color: var(--success);
 }
 
 .state[data-state="WARN"] {
-    background: var(--color-base01);
-    color: var(--color-warn)
+    background: var(--palette01);
+    color: var(--warn)
 }
 
 .state[data-state="DEAD"] {
-    background: var(--color-base01);
-    color: var(--color-failure)
+    background: var(--palette01);
+    color: var(--failure)
 }

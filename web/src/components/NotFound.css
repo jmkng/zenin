@@ -5,11 +5,11 @@
         align-items: center;
         height: 100%;
         flex-direction: column;
-        background: var(--not-found-background-color, var(--color-background));
+        background: var(--not-found-background, var(--background));
     }
 
     .not_found_text {
-        margin-bottom: var(--px01);
-        color: var(--not-found-text-color, var(--color-base04));
+        margin-bottom: 6px;
+        color: var(--not-found-color, var(--palette04));
     }
 }

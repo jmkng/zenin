@@ -1,6 +1,6 @@
 @layer components {
     .login {
-        background: var(--login-background-color, var(--color-background));
+        background: var(--login-background, var(--background));
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -11,11 +11,11 @@
         height: 50px;
         display: flex;
         align-items: center;
-        padding: var(--px01);
+        padding: 6px;
     }
 
     .login_logo_container {
-        margin-bottom: var(--px04);
+        margin-bottom: 15px;
     }
 
     .login_form_container { 
@@ -34,7 +34,7 @@
     }
 
     .login_spaced {
-        margin-bottom: var(--px04);
+        margin-bottom: 15px;
     }
 
     .login_controls {
@@ -42,11 +42,11 @@
     }
 
     .login_controls > * {
-        margin-right: var(--px02);
+        margin-right: 9px;
     }
 
     .login_message_container {
-        margin-top: var(--px01);;
+        margin-top: 6px;;
     }
 
     .login_message_container > * {
@@ -59,17 +59,17 @@
     }
 
     .login_message {
-        color: var(--login-message-text-color, var(--color-foreground));
-        border: 1px solid var(--login-message-border-color, var(--color-foreground));
-        border-radius: var(--px00);
-        padding: var(--px03);
+        color: var(--color);
+        border: 1px solid var(--color);
+        border-radius: 4px;
+        padding: 12px;
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
     .login_message.error {
-        color: var(--login-message-text-color-error, var(--color-failure));
-        border-color: var(--login-message-border-color-error, var(--color-failure));
+        color: var(--failure);
+        border-color: var(--failure);
     }
 }

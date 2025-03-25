@@ -6,11 +6,11 @@
     .array_input_row {
         display: flex;
         width: 100%;
-        margin-bottom: var(--px01);
+        margin-bottom: 6px;
     }
 
     .array_input_row:hover .array_input_grab_handle path {
-        fill: var(--color-foreground);
+        fill: var(--color);
     }
 
     .array_input_text_field {
@@ -21,7 +21,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-left: var(--px01);
+        margin-left: 6px;
     }
 
     .array_input_delete_icon {
@@ -34,6 +34,6 @@
     }
 
     .array_input_label {
-        margin-top: var(--px01) !important;
+        margin-top: 6px !important;
     }
 }

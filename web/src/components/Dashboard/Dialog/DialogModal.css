@@ -1,14 +1,14 @@
 @layer components {
     .dialog_modal {
-        padding: var(--px04);
+        padding: 15px;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
         cursor: default;
-        border: 1px solid var(--color-base01);
-        background: var(--color-background);
-        color: var(--color-foreground);
-        border-radius: var(--px00);
+        border: 1px solid var(--palette01);
+        background: var(--background);
+        color: var(--color);
+        border-radius: 4px;
         width: 50%;
         max-width: 550px;
     }
@@ -50,7 +50,7 @@
 
     .dialog_modal_upper {
         display: flex;
-        margin-bottom: var(--px02);
+        margin-bottom: 9px;
         justify-content: space-between;
         align-items: center;
     }

@@ -3,19 +3,19 @@
         border: none;
         font-family: inherit;
         appearance: none;
-        border-radius: var(--px00);
+        border-radius: 4px;
         background: none;
-        color: var(--color-foreground);
+        color: var(--color);
         transition:
             background .30s ease-in-out;
         width: 100%;
         outline: none;
-        border: 1px solid var(--color-base01);
-        padding: 0 var(--px02);
+        border: 1px solid var(--palette01);
+        padding: 0 9px;
     }
 
     .number_input_box:focus {
-        outline: 1px solid var(--color-link);
+        outline: 1px solid var(--link-color);
     }
 
     .number_input_box::before {

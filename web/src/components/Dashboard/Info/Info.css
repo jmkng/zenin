@@ -1,7 +1,7 @@
 @layer components {
     .info_component {
         height: 100%;
-        padding-right: var(--px00);
+        padding-right: 4px;
     }
 
     .detail_controls_delete {
@@ -14,11 +14,11 @@
     }
 
     .info_event_list {
-        margin-top: var(--px02);
+        margin-top: 9px;
     }
 
     .info_event_threshold {
-        background: var(--color-base01);
+        background: var(--palette01);
     }
 
     .info_event_title {

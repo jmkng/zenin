@@ -3,7 +3,7 @@
         height: 100%;
         display: flex;
         position: relative;
-        background: var(--color-background);
+        background: var(--background);
         overflow: hidden;
     }
 
@@ -17,14 +17,14 @@
     .shortcut_placeholder {
         height: 100%;
         width: 100%;
-        background: var(---color-base00);
+        background: var(--palette00);
     }
 
     .shortcut_border {
         right: 0;
         width: 8px;
         position: absolute;
-        border-right: 1px solid var(--color-base01);
+        border-right: 1px solid var(--palette01);
         transition: border .10s ease-out;
         height: 100%;
     }
@@ -40,11 +40,11 @@
     }
 
     .shortcut_container>* {
-        margin: var(--px00) 0;
+        margin: 4px 0;
     }
 
     .shortcut_container .icon {
-        margin-right: var(--px02);
+        margin-right: 9px;
     }
 
     .shortcut_container .button {
@@ -54,16 +54,16 @@
     .shortcut_controls_container {
         display: flex;
         justify-content: flex-start;
-        margin-bottom: var(--px02);
+        margin-bottom: 9px;
     }
 
     .shortcut a {
-        color: var(--color-base04);
+        color: var(--palette04);
         text-decoration: none;
     }
 
     .shortcut a:hover {
-        color: var(--color-foreground);
+        color: var(--color);
     }
 
     .shortcut .h_f-col {
@@ -72,24 +72,24 @@
 
     #shortcut_active_count {
         margin-left: auto;
-        margin-right: var(--px01);
+        margin-right: 6px;
     }
 
     .shortcut_top,
     .shortcut_bottom {
-        padding: var(--px02);
+        padding: 9px;
     }
 
     .shortcut_top>* {
-        margin-bottom: var(--px02);
+        margin-bottom: 9px;
     }
 
     .shortcut_item {
-        border: 1px solid var(--color-base01);
-        padding: var(--px02);
+        border: 1px solid var(--palette01);
+        padding: 9px;
         width: 100%;
         white-space: nowrap;
         display: flex;
-        border-radius: var(--px00);
+        border-radius: 4px;
     }
 }

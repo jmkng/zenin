@@ -1,26 +1,26 @@
 @layer components {
     .detail_component {
-        border-radius: var(--px00);
+        border-radius: 4px;
         margin: auto;
         display: flex;
-        padding-right: var(--px00);
+        padding-right: 4px;
         flex-direction: column;
     }
 
     .detail_monitor_state {
-        background: var(--color-base01);
+        background: var(--palette01);
         flex: .10;
         flex-basis: 68px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-left: 1px solid var(--color-base01);
-        padding: var(--px02);
+        border-left: 1px solid var(--palette01);
+        padding: 9px;
     }
 
     .detail_validation {
         display: block;
-        margin-top: var(--px02);
+        margin-top: 9px;
     }
 
     .detail_delete_button {
@@ -41,7 +41,7 @@
     }
 
     .detail_stacked_hint>*:not(:last-child) {
-        margin-bottom: var(--px01);
+        margin-bottom: 6px;
     }
 
     .detail_add_event_container {
