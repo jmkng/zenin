@@ -183,8 +183,6 @@ You should prefer to build a theme by overriding CSS variables rather than using
 
 Recognized CSS variables are documented here:
 
-### Base Variables
-
 | Variable                               | Description                                        | Fallback                                               |
 | :------------------------------------- | :------------------------------------------------- | :----------------------------------------------------- |
 | `--background`                         | Background color.                                  | N/A                                                    |
