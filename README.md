@@ -80,7 +80,7 @@ You should change `~/.config/zenin` to a path where you are comfortable storing 
 
 ### Troubleshooting
 
-Error: "make sure plugins directory exists and is accessible"
+Error: "make sure <plugins|themes> directory exists and is accessible"
 
 If the host path of a bind mount does not exist when you pass it to the container, Docker will [create](https://docs.docker.com/engine/storage/bind-mounts/#syntax) it and it may be owned by root. Ensure the directory exists before starting the container.
 
@@ -135,11 +135,92 @@ After you claim the server, you can create monitors.
 
 ## Themes
 
-Themes are CSS files that Zenin reads from the themes directory. You can change your theme from the settings pane in the user interface. The default theme selection is "Auto", which means that the default light or dark theme will be used depending on operating system/user agent preference.
+Themes are CSS files that Zenin reads from the themes directory. 
+
+You can change your theme through the settings pane in the user interface. By default, the theme is set to "Auto", which indicates no theme preference. In this mode, the default light or default dark theme will be used depending on system preference.
+
+> [!Tip]
+> Your theme preference is stored on the server, clearing your browser data will not reset it.
+
+### Layers
+
+When Zenin loads a theme, it layers the theme's styles over either the default light or default dark theme, depending on the theme file's name. If the name contains "dark," it will override the default dark theme; otherwise, it will override the default light theme. This affords more control over how your theme is presented.
+
+Create a theme file named `Snowball.css` with these values, and it will layer over the default light theme:
+
+```
+/* Snowball.css */
+
+:root {
+    --background: rgb(240, 240, 240);
+    --button-primary-background: rgb(150, 150, 150);
+    --link-color: rgb(35, 150, 201);
+    --focus-outline-color: rgb(35, 150, 201);
+}
+```
+
+Create a dark version with the name `Snowball Dark.css` and darker color values:
+
+```
+/*  Snowball Dark.css */
+
+:root {
+    --background: rgb(27, 26, 31);
+    --button-primary-background: rgb(80, 80, 80);
+    --button-primary-color: var(--color);
+    --link-color: rgb(35, 150, 201);
+    --focus-outline-color: rgb(35, 150, 201);
+}
+```
+
+### Variables
+
+Zenin's theming system defines base variables, which serve as high-level defaults. These are the variables without fallback values, like `--background` and `--color`. They establish some general purpose values that other variables may rely on.
+
+More specific variables like `--login-background` also exist, and they allow you to provide styles for specific parts of the user interface. These variables typically have fallback values. If your theme does not explicitly define one, it will inherit from a base variable such as `--background`.
+
+You should prefer to build a theme by overriding CSS variables rather than using element selectors, because it will minimize the chance that your theme will need to be updated to work with future versions of the user interface.
+
+Recognized CSS variables are documented here:
+
+### Base Variables
+
+| Variable                               | Description                                        | Fallback                                               |
+| :------------------------------------- | :------------------------------------------------- | :----------------------------------------------------- |
+| `--background`                         | Background color.                                  | N/A                                                    |
+| `--color`                              | Text color.                                        | N/A                                                    |
+| `--link-color`                         | Text color for `<a>` elements.                     | N/A                                                    |
+| `--focus-outline-color`                | Focus outline color.                               | N/A                                                    |
+| `--palette00` - `--palette04`          | Base theme color palette.                          | N/A                                                    |
+| `--success`                            | Color used to indicate success.                    | N/A                                                    |
+| `--warn`                               | Color used to indicate a warning.                  | N/A                                                    |
+| `--failure`                            | Color used to indicate failure.                    | N/A                                                    |
+| `--modal-backdrop-opacity`             | Opacity value for the modal backdrop.              | N/A                                                    |
+| `--input-border-color`                 | Input border color.                                | `--palette01`                                          |
+| `--input-background`                   | Input background color.                            | `--background`                                         |
+| `--input-focus-outline-color`          | Input border color when focused by keyboard.       | `--focus-outline-color`                                |
+| `--tooltip-color`                      | Tooltip text color.                                | `--background`                                         |
+| `--tooltip-background`                 | Tooltip background color.                          | `--color`                                              |
+| `--not-found-background`               | Background color of the 404 page.                  | `--background`                                         |
+| `--not-found-color`                    | Text color of the 404 page.                        | `--palette04`                                          |
+| `--login-background`                   | Background color of the login page.                | `--background`                                         |
+| `--button-disabled-color`              | Button text color when disabled.                   | `--palette03`                                          |
+| `--button-disabled-background`         | Button background color when disabled.             | `--background`                                         |
+| `--button-focus-outline-color`         | Button border color when focused by keyboard.      | `--input-focus-outline-color`, `--focus-outline-color` |
+| `--button-hover-background`            | Button background color when hovered.              | `--palette01`                                          |
+| `--button-primary-color`               | Primary button text color.                         | `--background`                                         |
+| `--button-primary-background`          | Primary button background color.                   | `--color`                                              |
+| `--button-secondary-color`             | Secondary button text color.                       | `--color`                                              |
+| `--button-secondary-background`        | Secondary button background color.                 | `--palette01`                                          |
+| `--button-tertiary-color`              | Tertiary button text color.                        | `--color`                                              |
+| `--button-tertiary-background`         | Tertiary button background color.                  | `--input-background`, `--background`                   |
+| `--button-tertiary-border-color`       | Tertiary button border color.                      | `--input-border-color`, `--palette01`                  |
+| `--button-destructive-color`           | Destructive button text color.                     | `--failure`                                            |
+| `--button-destructive-background`      | Destructive button background color.               | `--background`                                         |
 
 ## Environment Variables
 
-Supported environment variables are documented here.
+Recognized environment variables are documented here:
 
 | Name                        | Explanation                                                                   | Accepted Values                 | Example                                               | Default
 | :-------------------------- | :---------------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------- | :-------
