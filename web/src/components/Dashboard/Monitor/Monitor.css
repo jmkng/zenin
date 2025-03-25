@@ -5,7 +5,7 @@
         border-radius: var(--px00);
         display: flex;
         flex-direction: column;
-        transition: border-color var(--duration00) ease-in-out;
+        transition: border-color .10s ease-in-out;
     }
 
     .monitor.selected {
@@ -49,7 +49,7 @@
     .monitor_bottom {
         display: flex;
         flex-direction: row-reverse;
-        transition: background var(--duration00) ease-in-out;
+        transition: background .10s ease-in-out;
         max-height: var(--px05);
         min-height: var(--px05);
         border-bottom-left-radius: 4px;

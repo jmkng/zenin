@@ -2,7 +2,7 @@
     .chain_component {
         border-radius: var(--px00);
         border: 1px solid var(--color-base01);
-        transition: background var(--duration00) ease-in-out;
+        transition: background .10s ease-in-out;
     }
 
     .chain_controls {
@@ -23,7 +23,7 @@
 
     .chain_toggle {
         margin-left: auto;
-        transition: transform var(--duration00) ease-in-out;
+        transition: transform .10s ease-in-out;
         transform: rotate(90deg);
         padding: 4px;
     }

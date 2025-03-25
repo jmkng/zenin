@@ -25,7 +25,7 @@
         width: 8px;
         position: absolute;
         border-right: 1px solid var(--color-base01);
-        transition: border var(--duration00) ease-out;
+        transition: border .10s ease-out;
         height: 100%;
     }
 

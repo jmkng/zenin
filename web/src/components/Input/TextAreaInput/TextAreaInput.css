@@ -5,7 +5,7 @@
         background: var(--color-background);
         color: var(--color-foreground);
         transition:
-            background var(--duration01) ease-in-out;
+            background .30s ease-in-out;
         width: 100%;
         outline: none;
         padding: var(--px02);

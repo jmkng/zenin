@@ -71,11 +71,11 @@
     }
 
     .button:not(.disabled):not(.background).hover.destructive:hover {
-        animation: fade-default var(--duration00) ease-in-out forwards !important;
+        animation: fade-default .10s ease-in-out forwards !important;
     }
 
     .button:not(.disabled):not(.background):not(.primary).hover:hover {
-        animation: fade-default var(--duration00) ease-in-out forwards !important;
+        animation: fade-default .10s ease-in-out forwards !important;
     }
 
     .button:not(:hover) {

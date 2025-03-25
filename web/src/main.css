@@ -61,8 +61,6 @@
         --color-warn: var(--light-warn);
         --color-failure: var(--light-failure);
         --modal-backdrop-opacity: var(--light-modal-opacity);
-        --duration00: .10s;
-        --duration01: .30s;
         --px00: 4px;
         --px01: 6px;
         --px02: 9px;

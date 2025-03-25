@@ -8,7 +8,7 @@
     .dashboard_select_menu {
         position: fixed;
         top: -57px;
-        transition: all var(--duration01) ease-in-out;
+        transition: all .30s ease-in-out;
         z-index: 100;
         transition-property: top;
         left: 0;

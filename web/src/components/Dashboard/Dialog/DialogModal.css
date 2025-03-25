@@ -21,11 +21,11 @@
     }
 
     .dialog_modal[open] {
-        animation: modal-fade-in var(--duration00) ease-in-out;
+        animation: modal-fade-in .10s ease-in-out;
     }
 
     .dialog_modal::backdrop {
-        animation: backdrop-fade-in var(--duration00) ease-in-out;
+        animation: backdrop-fade-in .10s ease-in-out;
     }
 
     @keyframes modal-fade-in {

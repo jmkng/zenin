@@ -42,7 +42,7 @@
         right: 0;
         bottom: 0;
         background-color: var(--color-base03);
-        transition: var(--duration00);
+        transition: .10s;
         border-radius: 34px;
     }
 
@@ -54,7 +54,7 @@
         left: 2px;
         bottom: 1.5px;
         background-color: var(--color-background);
-        transition: var(--duration00);
+        transition: .10s;
         border-radius: 50%;
     }
 

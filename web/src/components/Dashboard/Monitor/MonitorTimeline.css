@@ -22,7 +22,7 @@
     }
 
     .measurement_timeline_slot {
-        transition: height var(--duration00) ease-in-out;
+        transition: height .10s ease-in-out;
         height: 2px;
         border-top-right-radius: 1px;
         border-top-left-radius: 1px;
