@@ -159,6 +159,8 @@ Create a theme file named `Snowball.css` with these values, and it will layer ov
 }
 ```
 
+![Snowball](../assets/themes/snowball.png?raw=true)
+
 Create a dark version with the name `Snowball Dark.css` and darker color values:
 
 ```
@@ -172,6 +174,8 @@ Create a dark version with the name `Snowball Dark.css` and darker color values:
     --focus-outline-color: rgb(35, 150, 201);
 }
 ```
+
+![Snowball Dark](../assets/themes/snowball-dark.png?raw=true)
 
 ### Variables
 
