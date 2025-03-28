@@ -168,7 +168,7 @@ func fNestMap(m reflect.Value, indent, increment string) string {
 		mapKey := key.Interface()
 		mapValue := m.MapIndex(key).Interface()
 		sb.WriteString(step)
-		sb.WriteString(fmt.Sprintf("%q: %s,\n", mapKey, fNest(mapValue, step)))
+		sb.WriteString(fmt.Sprintf("%q: %s\n", mapKey, fNest(mapValue, step)))
 	}
 
 	sb.WriteString(indent + "}")
@@ -186,7 +186,7 @@ func fNestSlice(slice reflect.Value, indent, increment string) string {
 	for i := range slice.Len() {
 		item := slice.Index(i).Interface()
 		sb.WriteString(step)
-		sb.WriteString(fmt.Sprintf("[%d]: %s,\n", i+1, fNest(item, step)))
+		sb.WriteString(fmt.Sprintf("[%d]: %s\n", i+1, fNest(item, step)))
 	}
 
 	sb.WriteString(indent + "]")
