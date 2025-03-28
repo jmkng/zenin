@@ -75,7 +75,7 @@ func (p PluginExecutor) Run(ctx context.Context, f PluginFields) (int, string, s
 	path := filepath.Join(env.Env.PluginsDir, *f.PluginName)
 	_, err := os.Stat(path)
 	if err != nil {
-		dx.Error("Plugin was not found.")
+		dx.Error("Plugin file was not found.")
 		return code, stdout, stderr, dx
 	}
 
