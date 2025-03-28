@@ -1,102 +1,143 @@
-@layer globals, base, helpers, components, theme;
+@layer globals, base, helpers, components;
 
+@import './css/spinner.css' layer(base);
 @import './css/cover.css' layer(base);
 @import './css/dialog.css' layer(base);
 @import './css/icon.css' layer(base);
 @import './css/input.css' layer(base);
 @import './css/menu.css' layer(base);
 @import './css/scrollbar.css' layer(base);
-@import './css/spinner.css' layer(base);
-@import './css/state.css' layer(base);
-@import './css/widget.css' layer(base);
+
 @import './css/helper.css' layer(helpers);
 
-@font-face {
-    font-family: "Geist Mono";
-    src: url("/geistmono.ttf");
-}
+@layer base {
+    :root {
+        --color-black: hsl(0, 0%, 0%);
+        --color-white: hsl(0, 0%, 100%);
+        --color-gray-000: hsl(0, 0%, 98%);
+        --color-gray-050: hsl(0, 0%, 94%);
+        --color-gray-100: hsl(0, 0%, 90%);
+        --color-gray-150: hsl(0, 0%, 85%);
+        --color-gray-200: hsl(0, 0%, 80%);
+        --color-gray-250: hsl(0, 0%, 75%);
+        --color-gray-300: hsl(0, 0%, 70%);
+        --color-gray-350: hsl(0, 0%, 65%);
+        --color-gray-400: hsl(0, 0%, 60%);
+        --color-gray-450: hsl(0, 0%, 55%);
+        --color-gray-500: hsl(0, 0%, 50%);
+        --color-gray-550: hsl(0, 0%, 45%);
+        --color-gray-600: hsl(0, 0%, 40%);
+        --color-gray-650: hsl(0, 0%, 35%);
+        --color-gray-700: hsl(0, 0%, 30%);
+        --color-gray-750: hsl(0, 0%, 25%);
+        --color-gray-800: hsl(0, 0%, 20%);
+        --color-gray-850: hsl(0, 0%, 15%);
+        --color-gray-900: hsl(0, 0%, 9%);
+        --color-gray-950: hsl(0, 0%, 7%);
+        --color-green-000: hsl(135, 70%, 70%);
+        --color-green-100: hsl(134, 65%, 65%);
+        --color-green-200: hsl(132, 60%, 60%);
+        --color-green-300: hsl(131, 55%, 55%);
+        --color-green-400: hsl(124, 50%, 50%);
+        --color-green-500: hsl(121, 55%, 45%);
+        --color-green-600: hsl(120, 63%, 40%);
+        --color-green-700: hsl(118, 70%, 35%);
+        --color-green-800: hsl(118, 78%, 30%);
+        --color-green-900: hsl(116, 85%, 25%);
+        --color-yellow-000: hsl(48, 96%, 89%);
+        --color-yellow-100: hsl(46, 97%, 82%);
+        --color-yellow-200: hsl(45, 97%, 80%);
+        --color-yellow-300: hsl(43, 96%, 66%);
+        --color-yellow-400: hsl(41, 94%, 62%);
+        --color-yellow-500: hsl(40, 93%, 61%);
+        --color-yellow-600: hsl(40, 90%, 49%);
+        --color-yellow-700: hsl(38, 87%, 44%);
+        --color-yellow-800: hsl(38, 85%, 42%);
+        --color-yellow-900: hsl(37, 83%, 41%);
+        --color-red-000: hsl(2, 96%, 82%);
+        --color-red-100: hsl(3, 94%, 74%);
+        --color-red-200: hsl(5, 93%, 67%);
+        --color-red-300: hsl(5, 91%, 64%);
+        --color-red-400: hsl(6, 90%, 62%);
+        --color-red-500: hsl(3, 80%, 58%);
+        --color-red-600: hsl(3, 77%, 54%);
+        --color-red-700: hsl(1, 72%, 50%);
+        --color-red-800: hsl(0, 66%, 48%);
+        --color-red-900: hsl(0, 64%, 44%);
+        --color-blue-000: hsl(205, 100%, 85%);
+        --color-blue-100: hsl(213, 98%, 84%);
+        --color-blue-200: hsl(213, 97%, 67%);
+        --color-blue-300: hsl(214, 94%, 57%);
+        --color-blue-400: hsl(214, 92%, 50%);
+        --color-blue-500: hsl(208, 87%, 45%);
+        --color-blue-600: hsl(205, 84%, 40%);
+        --color-blue-700: hsl(205, 80%, 40%);
+        --color-blue-800: hsl(205, 78%, 38%);
+        --color-blue-900: hsl(202, 76%, 37%);
 
-@font-face {
-    font-family: "Geist Sans";
-    src: url("/geistsans.ttf");
-}
+        --background: var(--color-white);
+        --hover-background: var(--color-gray-050);
+        --primary-color: var(--color-gray-950);
+        --secondary-color: var(--color-gray-650);
+        --border-color: var(--color-gray-150);
+        --link-color: var(--color-blue-500);
+        --focus-outline-color: var(--color-blue-500);
+        --success-color: var(--color-green-500);
+        --warning-color: var(--color-yellow-600);
+        --failure-color: var(--color-red-500);
+        --scrollbar-thumb-color: var(--color-gray-300);
+        --disabled-button-color: var(--color-gray-500);
+        --dialog-border-color: var(--color-gray-150);
+        --dialog-background: var(--color-gray-050);
+        --widget-background: var(--color-gray-000);
+        --widget-border-color: var(--color-gray-150);
+        --checkbox-input-border-color: var(--color-gray-150);
+        --checked-checkbox-input-background: var(--primary-color);
+        --tooltip-border-color: transparent;
+        --toggle-input-background: var(--color-gray-150);
+        --slider-input-background: var(--color-gray-150);
+        --tooltip-background: var(--primary-color);
+        --tooltip-color: var(--background);
+        --modal-backdrop-opacity: 0.1;
 
-@layer theme {
-    :root {   
-        --dark-background: rgb(18, 18, 18);
-        --dark-foreground: rgb(255, 255, 255);
-        --dark-link: rgb(60, 100, 255);
-        --dark-color-base00: rgb(32, 32, 34);
-        --dark-color-base01: rgb(36, 36, 39);
-        --dark-color-base02: rgb(55, 55, 57);
-        --dark-color-base03: rgb(65, 65, 67);
-        --dark-color-base04: rgb(180, 180, 182);
-        --dark-success: rgb(148, 166, 127);
-        --dark-warn: rgb(242, 189, 72);
-        --dark-failure: rgb(223, 101, 88);
-        --dark-modal-opacity: 0.5;
-        
-        --light-background: rgb(255, 255, 255);
-        --light-foreground: rgb(18, 18, 18);
-        --light-link: rgb(60, 100, 255);
-        --light-color-base00: rgb(235, 235, 237);
-        --light-color-base01: rgb(220, 220, 222);
-        --light-color-base02: rgb(202, 202, 204);
-        --light-color-base03: rgb(185, 185, 187);
-        --light-color-base04: rgb(100, 100, 102);
-        --light-success: rgb(15, 189, 119);
-        --light-warn: rgb(229, 186, 14);
-        --light-failure: rgb(235, 55, 45);
-        --light-modal-opacity: 0.25;
-        
-        --background: var(--light-background);
-        --color: var(--light-foreground);
-        --link-color: var(--light-link);
-        --focus-outline-color: var(--light-link);
-        --palette00: var(--light-color-base00);
-        --palette01: var(--light-color-base01);
-        --palette02: var(--light-color-base02);
-        --palette03: var(--light-color-base03);
-        --palette04: var(--light-color-base04);
-        --success: var(--light-success);
-        --warn: var(--light-warn);
-        --failure: var(--light-failure);
-        --modal-backdrop-opacity: var(--light-modal-opacity);
+        .dialog_portal {
+            --hover-background: var(--color-gray-150);
+        }
 
         background: var(--background);
         font-size: 13px;
     }
 
-    :root[data-theme*="dark"] {
-        --background: var(--dark-background);
-        --color: var(--dark-foreground);
-        --link-color: var(--dark-link);
-        --focus-outline-color: var(--dark-link);
-        --palette00: var(--dark-color-base00);
-        --palette01: var(--dark-color-base01);
-        --palette02: var(--dark-color-base02);
-        --palette03: var(--dark-color-base03);
-        --palette04: var(--dark-color-base04);
-        --success: var(--dark-success);
-        --warn: var(--dark-warn);
-        --failure: var(--dark-failure);
-        --modal-backdrop-opacity: var(--dark-modal-opacity);
-    }
-
-    :root:not([data-theme]) {
-        @media (prefers-color-scheme: dark) {
-            --background: var(--dark-background);
-            --color: var(--dark-foreground);
-            --link-color: var(--dark-link);
-            --palette00: var(--dark-color-base00);
-            --palette01: var(--dark-color-base01);
-            --palette02: var(--dark-color-base02);
-            --palette03: var(--dark-color-base03);
-            --palette04: var(--dark-color-base04);
-            --success: var(--dark-success);
-            --warn: var(--dark-warn);
-            --failure: var(--dark-failure);
-            --modal-backdrop-opacity: var(--dark-modal-opacity);
+    :root[data-theme*="dark"], 
+    :root:not([data-theme])[prefers-dark] {
+        --background: var(--color-gray-900);
+        --hover-background: var(--color-gray-850);
+        --primary-color: var(--color-gray-000);
+        --secondary-color: var(--color-gray-350);
+        --border-color: var(--color-gray-850);
+        --link-color: var(--color-blue-300);
+        --focus-outline-color: var(--color-blue-300);
+        --success-color: var(--color-green-300);
+        --warning-color: var(--color-yellow-300);
+        --failure-color: var(--color-red-300);
+        --scrollbar-thumb-color: var(--color-gray-550);
+        --disabled-button-color: var(--color-gray-500);
+        --dialog-border-color: var(--color-gray-800);
+        --dialog-background: var(--color-gray-850);
+        --widget-background: var(--color-gray-850);
+        --widget-border-color: var(--color-gray-800);
+        --checkbox-input-border-color: var(--color-gray-800);
+        --checked-checkbox-input-background: var(--primary-color);
+        --tooltip-border-color: transparent;
+        --toggle-input-background: var(--color-gray-800);
+        --slider-input-background: var(--color-gray-800);
+        --tooltip-background: var(--primary-color);
+        --tooltip-color: var(--color-gray-900);
+        --timeline-aid-hover-background: var(--background);
+        --modal-backdrop-opacity: 0.4;
+        
+        .dialog_portal, .dialog_modal {
+            --hover-background: var(--color-gray-800);
         }
     }
 }
@@ -112,11 +153,10 @@
         -webkit-font-smoothing: antialiased;
         overflow: hidden;
         background: var(--background);
-        color: var(--color);
+        color: var(--primary-color);
     }
 
     dialog {
-        border: none;
         margin: 0;
     }
 
@@ -143,3 +183,7 @@
         -webkit-appearance: none;
     }
 }
+
+@font-face { font-family: "Geist Mono"; src: url("/geistmono.ttf"); }
+
+@font-face { font-family: "Geist Sans"; src: url("/geistsans.ttf"); }

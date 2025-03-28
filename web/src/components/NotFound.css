@@ -10,6 +10,6 @@
 
     .not_found_text {
         margin-bottom: 6px;
-        color: var(--not-found-color, var(--palette04));
+        color: var(--not-found-color, var(--primary-color));
     }
 }

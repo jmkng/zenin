@@ -1,11 +1,11 @@
 @layer components {
     .list_component {
-        border: 1px solid var(--palette01);
+        border: 1px solid var(--border-color);
         border-radius: 4px;
     }
     
     .list_row:not(:last-child) {
-        border-bottom: 1px solid var(--palette01);
+        border-bottom: 1px solid var(--border-color);
     }
     
     .list_intro, .list_item_container {
@@ -16,7 +16,7 @@
         display: flex;
         align-items: center;
         padding: 6px 12px;
-        color: var(--palette04);
+        color: var(--secondary-color, var(--primary-color));
     }
     
     .list_intro_title {
@@ -24,7 +24,7 @@
     }
     
     .list_intro:not(.empty) {
-        border-bottom: 1px solid var(--palette01);
+        border-bottom: 1px solid var(--border-color);
     }
     
     .list_item_container {
@@ -34,10 +34,6 @@
         justify-content: space-between !important;
         align-items: center;
         padding: 6px 12px;
-    }
-    
-    .list_item_container:not(:last-child) {
-        border-bottom: 1px solid var(--palette01);
     }
     
     .list_map_item_key {

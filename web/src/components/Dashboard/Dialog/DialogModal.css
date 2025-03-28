@@ -5,12 +5,12 @@
         top: 50%;
         transform: translate(-50%, -50%);
         cursor: default;
-        border: 1px solid var(--palette01);
-        background: var(--background);
+        border: 1px solid var(--modal-border-color, var(--border-color));
+        background: var(--modal-background, var(--background));
         color: var(--color);
         border-radius: 4px;
         width: 50%;
-        max-width: 550px;
+        max-width: 500px;
     }
 
     @media (max-width: 700px) {
@@ -48,7 +48,7 @@
         }
     }
 
-    .dialog_modal_upper {
+    .dialog_modal_top {
         display: flex;
         margin-bottom: 9px;
         justify-content: space-between;
@@ -61,7 +61,7 @@
     }
 
     .dialog_modal::backdrop {
-        background: black;
+        background: var(--color-black);
         opacity: var(--modal-backdrop-opacity);
     }
 

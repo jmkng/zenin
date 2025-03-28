@@ -1,4 +1,4 @@
-export default function MenuIcon() {
+export default function FirstIcon() {
     return <svg
             className="icon first_icon"
             xmlns="http://www.w3.org/2000/svg"

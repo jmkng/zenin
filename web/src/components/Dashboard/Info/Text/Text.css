@@ -1,16 +1,16 @@
 @layer components {
     .text_component {
         border-radius: 4px;
-        border: 1px solid var(--palette01);
+        border: 1px solid var(--border-color);
         display: flex;
         flex-direction: column;
     }
     
     .text_title {
-        color: var(--palette04);
+        color: var(--secondary-color);
         height: 38px;
         padding: 6px 12px;
-        border-bottom: 1px solid var(--palette01);
+        border-bottom: 1px solid var(--border-color);
         display: flex;
         align-items: center;
         flex: 0 0 auto;

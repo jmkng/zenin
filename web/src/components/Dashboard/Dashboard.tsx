@@ -15,7 +15,6 @@ import Menu from './Menu/Menu';
 import SelectMenu from './Menu/SelectMenu';
 import Monitor from './Monitor/Monitor';
 import Settings from './Settings/Settings';
-import Sidebar from './Sidebar/Sidebar';
 
 import './Dashboard.css';
 
@@ -78,10 +77,6 @@ export default function Dashboard() {
     }
 
     return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
-        <div className="dashboard_side">
-            <Sidebar />
-        </div>
-
         <div className="dashboard_main">
             <div className="dashboard_main_top">
                 <div className={["dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>

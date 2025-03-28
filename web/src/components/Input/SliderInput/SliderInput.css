@@ -2,10 +2,11 @@
     .slider_input_box {
         appearance: none;
         width: 100%;
-        height: 5px;
-        background: var(--palette01);
+        height: 6px;
+        background: var(--slider-input-background, var(--input-background));
         border-radius: 4px;
         outline: none;
+        border: 1px solid var(--slider-input-border-color, var(--input-border-color, var(--border-color)));
     }
 
     .slider_input_box::-webkit-slider-thumb {
@@ -13,18 +14,17 @@
         appearance: none;
         width: 17px;
         height: 17px;
-        background: var(--palette02);
-        border: 1px solid var(--palette03);
+        background: var(--slider-input-thumb-color, var(--primary-color));
         border-radius: 50%;
     }
 
     .slider_input_box:focus::-webkit-slider-thumb {
-        outline: 1px solid var(--link-color);
+        outline: 1px solid var(--focus-outline-color);
     }
 
     .slider_input_subtext {
         display: block;
-        color: var(--palette04);
+        color: var(--secondary-color, var(--primary-color));
         margin: 9px 0 0 0;
     }
 

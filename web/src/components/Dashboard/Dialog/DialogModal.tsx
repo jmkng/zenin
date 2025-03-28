@@ -33,14 +33,14 @@ export default function DialogModal(props: DialogModalProps) {
     }, [visible]);
 
     return <dialog ref={modalRef} onCancel={onCancel} className="dialog_modal">
-        <div className="dialog_modal_upper">
+        <div className="dialog_modal_top">
             <span className="dialog_modal_title">{title}</span>
             <Button onClick={handleCancel} icon={<span className="dialog_modal_close_icon">
                 <AddIcon />
             </span>}>
             </Button>
         </div>
-        <div className="dialog_modal_lower">
+        <div className="dialog_modal_bottom">
             {content}
         </div>
     </dialog>

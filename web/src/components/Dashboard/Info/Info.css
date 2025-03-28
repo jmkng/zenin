@@ -17,10 +17,6 @@
         margin-top: 9px;
     }
 
-    .info_event_threshold {
-        background: var(--palette01);
-    }
-
     .info_event_title {
         display: flex;
         justify-content: space-between;

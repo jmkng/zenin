@@ -1,7 +1,7 @@
 .dialog_content {
     min-width: 175px;
-    background: var(--background);
-    border: 1px solid var(--palette01);
+    background: var(--dialog-background, var(--background));
+    border: 1px solid var(--dialog-border-color, var(--border-color));
     border-radius: 4px;
 }
 
@@ -19,5 +19,5 @@
 }
 
 .dialog_section:not(:last-of-type) {
-    border-bottom: 1px solid var(--palette01);
+    border-bottom: 1px solid var(--dialog-border-color, var(--border-color));
 }

@@ -7,17 +7,6 @@
         flex-direction: column;
     }
 
-    .detail_monitor_state {
-        background: var(--palette01);
-        flex: .10;
-        flex-basis: 68px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-left: 1px solid var(--palette01);
-        padding: 9px;
-    }
-
     .detail_validation {
         display: block;
         margin-top: 9px;
@@ -33,15 +22,6 @@
 
     .detail_chain_plugin {
         margin-bottom: 0;
-    }
-
-    .detail_stacked_hint {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .detail_stacked_hint>*:not(:last-child) {
-        margin-bottom: 6px;
     }
 
     .detail_add_event_container {

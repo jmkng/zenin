@@ -84,7 +84,6 @@ export default function Button(props: ButtonProps) {
         onClick={event => { if (!disabled) handleClick(event) }}
         className={[
             'button',
-            'input',
             kind,
             border ? 'border' : '',
             hover ? 'hover' : '',

@@ -1,5 +1,6 @@
 import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
+import { formatUTCDate, MINIMAL_FORMAT } from '@/internal/layout/graphics';
 import { Measurement } from '@/internal/measurement';
 import { useMonitorContext } from '@/internal/monitor';
 import { MonitorService } from '@/internal/monitor/service';
@@ -8,11 +9,9 @@ import { DataPacket, Timestamp } from '@/internal/server';
 import Button from '../../Button/Button';
 import VMenuIcon from '../../Icon/VMenuIcon';
 import Dialog from '../Dialog/Dialog';
+import InactiveWidget from './InactiveWidget/InactiveWidget';
 import MonitorDialogContent from './MonitorDialogContent';
-import MonitorTimeline from './MonitorTimeline';
-import ActiveWidget from './Widget/ActiveWidget';
-import IDWidget from './Widget/IDWidget';
-import KindWidget from './Widget/KindWidget';
+import Timeline from './Timeline/Timeline';
 
 import './Monitor.css';
 
@@ -28,7 +27,7 @@ export default function Monitor(props: MonitorProps) {
         service: props.service
     }
     const account = useAccountContext();
-    const measurements = monitor.data.measurements?.toReversed() || [];
+    const reversed = monitor.data.measurements.toReversed();
     const classes = ['monitor', monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''];
 
     const handleSelect = () => {
@@ -60,41 +59,35 @@ export default function Monitor(props: MonitorProps) {
     return <div className={classes.join(' ')}>
         <div className="monitor_top" onClick={handleSelect}>
             <div className="monitor_top_upper">
-                <div onClick={event => event.stopPropagation()}>
-                    <span className="monitor_name h_mr-auto" onClick={handleView}>
+                <div className="monitor_top_controls" onClick={event => event.stopPropagation()}>
+                    <div className="monitor_name" onClick={handleView}>
                         {monitor.data.name}
-                    </span>
+                    </div>
                 </div>
-
-                <div className="monitor_menu_container" onClick={e => e.stopPropagation()}>
-                    <Dialog dialog={{content: <MonitorDialogContent monitor={monitor.data} />}}>
-                        <Button hover={false} icon={<VMenuIcon />}>
-                        </Button>
+                <div className="monitor_menu_container h_ml-auto" onClick={e => e.stopPropagation()}>
+                    {!monitor.data.active
+                        ? <div onClick={event => event.stopPropagation()} className="monitor_inactive_widget">
+                            <InactiveWidget active={monitor.data.active} onClick={handleToggle} />
+                        </div>
+                        : null}
+                    <Dialog 
+                        dialog={{content: <MonitorDialogContent monitor={monitor.data} />}}>
+                        <div className="monitor_dialog_button_container">
+                            <Button hover={false} icon={<VMenuIcon />}>
+                            </Button>
+                        </div>
                     </Dialog>
                 </div>
             </div>
-            <div className="monitor_top_lower" onClick={e =>{
-                    e.stopPropagation();
-                    handleSelect();
-                }}>
-                <span onClick={event => event.stopPropagation()}>
-                    <IDWidget id={monitor.data.id!} />
-                </span>
-
-                <KindWidget kind={monitor.data.kind} />
-                {!monitor.data.active
-                    ? <div onClick={event => event.stopPropagation()}>
-                        <ActiveWidget active={monitor.data.active} onClick={handleToggle} />
-                    </div>
-                    : null}
+            <div className="monitor_top_lower">
+                <div className="monitor_timestamp">
+                    {reversed[0] ? formatUTCDate(reversed[0].createdAt, MINIMAL_FORMAT) : null}
+                </div> 
             </div>
         </div>
 
-        <div className="monitor_middle" onClick={handleSelect}>
-        </div>
-
         <div className='monitor_bottom'>
-            <MonitorTimeline measurements={measurements} onSlotClick={handleTimelineSlotClick} />
+            <Timeline measurements={reversed} onSlotClick={handleTimelineSlotClick} />
         </div>
     </div>
 }

@@ -12,6 +12,6 @@
 }
 
 .input_subtext {
-    color: var(--palette04);
+    color: var(--secondary-color, var(--primary-color));
     margin: 0 0 6px 0;
 }

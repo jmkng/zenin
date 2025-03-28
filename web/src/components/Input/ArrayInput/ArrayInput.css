@@ -2,15 +2,11 @@
     .array_input {
         width: 100%;
     }
-
+    
     .array_input_row {
         display: flex;
         width: 100%;
         margin-bottom: 6px;
-    }
-
-    .array_input_row:hover .array_input_grab_handle path {
-        fill: var(--color);
     }
 
     .array_input_text_field {

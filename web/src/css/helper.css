@@ -1,18 +1,3 @@
-:root.ew-resize * {
-    cursor: ew-resize !important;
-    user-select: none !important;
-    -webkit-user-select: none !important; 
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-}
-
-:root.static * {
-    transition: none !important;
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -ms-transition: none !important;
-}
-
 .h_f-row-center {
     display: flex;
     justify-content: center;
@@ -25,15 +10,15 @@
 }
 
 .h_c-fg {
-    color: var(--color);
+    color: var(--primary-color);
 }
 
 .h_c-warn {
-    color: var(--warn);
+    color: var(--warning-color);
 }
 
 .h_c-dead-a {
-    color: var(--failure);
+    color: var(--failure-color);
 }
 
 .h_f-mono {

@@ -5,12 +5,12 @@
 
     .account {
         padding: 9px;
-        border: 1px solid var(--palette01);
+        border: 1px solid  var(--border-color);
         border-radius: 4px;
     }
 
     .account_rank {
-        color: var(--palette04);
+        color: var(--secondary-color, var(--primary-color));
     }
 
     .account:not(:last-of-type) {
@@ -19,7 +19,7 @@
 
     .account_updated_timestamp {
         display: block;
-        color: var(--palette04);
+        color: var(--secondary-color, var(--primary-color));
     }
 
     .account_top {
@@ -38,7 +38,7 @@
     }
 
     .account_message {
-        border: 1px solid var(--color);
+        border: 1px solid var(--primary-color);
         border-radius: 4px;
         padding: 12px;
         display: flex;
@@ -47,7 +47,7 @@
     }
 
     .account_message.error {
-        color: var(--failure);
-        border-color: var(--failure);
+        color: var(--failure-color);
+        border-color: var(--failure-color);
     }
 }

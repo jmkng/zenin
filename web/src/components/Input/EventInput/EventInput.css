@@ -10,7 +10,7 @@
 
     .detail_event {
         padding: 9px;
-        border: 1px solid var(--palette01);
+        border: 1px solid var(--border-color);
         border-radius: 4px;
     }
 

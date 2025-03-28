@@ -323,14 +323,8 @@ export default function Editor(props: EditorProps) {
                     <ToggleInput
                         name={"detail_"}
                         label="Use UDP Protocol"
-                        offSubtext={<div className="detail_stacked_hint">
-                            <div>The probe will use ICMP protocol.</div>
-                            <div className="h_c-warn">Requires root on Unix systems.</div>
-                        </div>}
-                        onSubtext={<div className="detail_stacked_hint">
-                            <div>The probe will use UDP protocol.</div>
-                            <div className="h_c-warn">Unsupported on Windows systems.</div>
-                        </div>}
+                        offSubtext="The probe will use ICMP protocol. Requires root on Unix systems."
+                        onSubtext="The probe will use UDP protocol. Unsupported on Windows systems."
                         value={editor.draft.icmpProtocol == UDP_API}
                         onChange={value =>
                             setEditor(prev => ({

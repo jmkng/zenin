@@ -1,5 +1,5 @@
 import { Account, ROOT_ACCOUNT_UI, useAccountContext } from "@/internal/account";
-import { formatDate } from "@/internal/layout/graphics";
+import { formatUTCDate } from "@/internal/layout/graphics";
 import { useMonitorContext } from "@/internal/monitor";
 import { useMemo, useState } from "react";
 import { useDefaultAccountService } from "@/internal/account/service";
@@ -177,7 +177,7 @@ export default function Accounts() {
             </div>
 
             <small className="account_updated_timestamp">
-                {formatDate(n.updatedAt)}
+                {formatUTCDate(n.updatedAt)}
             </small>
         </div>)}
     </>

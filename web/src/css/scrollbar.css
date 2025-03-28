@@ -4,7 +4,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--palette01);
+    background-color: var(--scrollbar-thumb-color, var(--hover-background));
     border-radius: 4px;
 }
 

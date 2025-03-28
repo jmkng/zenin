@@ -4,13 +4,6 @@
         margin-right: 6px;
     }
 
-    .menu_spacer {
-        background: var(--palette01);
-        width: 1px;
-        border-radius: 4px;
-        margin: 12px 0 12px 0;
-    }
-
     .dashboard_menu {
         display: flex;
         align-items: center;

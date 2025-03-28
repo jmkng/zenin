@@ -11,15 +11,10 @@ import SortDialogContent from './SortDialogContent';
 import './Menu.css';
 
 export default function Menu() {
-    //const layout = useLayoutContext();
     const monitor = {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
     }
-
-    //const handleMenuToggle = () => {
-    //    layout.dispatch({ type: 'shortcut', shortcut: !layout.state.shortcut });
-    //}
 
     const handleAdd = () => {
         const pane = { type: 'editor' as const, monitor: null }
@@ -28,18 +23,10 @@ export default function Menu() {
 
     return <div className='default_menu menu'>
         <div className='menu_left'>
-            {/*<div className="menu_toggle_container">
-                <Button onClick={handleMenuToggle}>
-                    <span className="h_f-row-center">
-                        <MenuIcon />
-                    </span>
-                </Button>
-            </div>
-            <div className="menu_spacer first"></div>*/}
 
             <div className="menu_left_contextual">
                 <div className="dashboard_menu">
-                    <div className="menu_margin_right">
+                    <div className="menu_margin_right menu_button_container">
                         <Button tooltip="Create Monitor" icon={<AddIcon />} onClick={handleAdd}>
                         </Button>
                     </div>
@@ -52,7 +39,9 @@ export default function Menu() {
                                 />
                             }}
                         >
-                            <Button tooltip="Sort Dashboard" icon={<SortIcon />} />
+                            <div className="menu_button_container">
+                                <Button tooltip="Sort Dashboard" icon={<SortIcon />} />
+                            </div>
                         </Dialog>
                     </div>
                 </div>

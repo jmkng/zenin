@@ -59,8 +59,8 @@
     }
 
     .login_message {
-        color: var(--color);
-        border: 1px solid var(--color);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
         border-radius: 4px;
         padding: 12px;
         display: flex;
@@ -69,7 +69,7 @@
     }
 
     .login_message.error {
-        color: var(--failure);
-        border-color: var(--failure);
+        color: var(--failure-color);
+        border-color: var(--failure-color);
     }
 }

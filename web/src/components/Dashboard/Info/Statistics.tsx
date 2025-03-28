@@ -1,4 +1,4 @@
-import { formatDate, formatMS } from "@/internal/layout/graphics";
+import { formatUTCDate, formatMS } from "@/internal/layout/graphics";
 import { ViewPane } from "@/internal/monitor/split";
 import { DEAD_API, OK_API, WARN_API } from "@/internal/server";
 
@@ -24,7 +24,7 @@ export default function Statistics(props: StatisticsProps) {
 
     // The last incident is the most recent measurement with a dead state in the measurement set.
     const lastIncident = measurementsReversed.find(n => n.state == DEAD_API);
-    if (lastIncident) pairs.set("Last Incident", formatDate(lastIncident.createdAt!))
+    if (lastIncident) pairs.set("Last Incident", formatUTCDate(lastIncident.createdAt!))
 
     // The uptime percentage for the measurement set.
     const uptime = measurements.length > 0

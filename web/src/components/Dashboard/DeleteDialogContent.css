@@ -1,8 +1,4 @@
 @layer components {
-    .dialog_confirm_content_top {
-        color: var(--palette04);
-    }
-
     .dialog_confirm_content_top>*:last-child {
         margin-top: 6px;
     }
@@ -15,5 +11,13 @@
 
     .dialog_confirm_content_bottom {
         margin-top: 15px;
+    }
+
+    .dialog_modal_top {
+        color: var(--modal-title-color, var(--primary-color));
+    }
+
+    .dialog_modal_bottom {
+        color: var(--modal-color, var(--primary-color));
     }
 }

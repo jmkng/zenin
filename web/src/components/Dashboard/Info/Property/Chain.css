@@ -1,7 +1,7 @@
 @layer components {
     .chain_component {
         border-radius: 4px;
-        border: 1px solid var(--palette01);
+        border: 1px solid var(--border-color);
         transition: background .10s ease-in-out;
     }
 
@@ -10,10 +10,6 @@
         display: flex;
         padding: 6px 12px;
         align-items: center;
-    }
-
-    .chain_component.pending {
-        background: var(--palette01);
     }
 
     .chain_component.pending,
@@ -33,7 +29,7 @@
     }
 
     .chain_title {
-        color: var(--palette04);
+        color: var(--secondary-color, var(--primary-color));
         flex: 0 0 auto;
         margin-right: 28px;
     }
@@ -53,7 +49,7 @@
     }
 
     .chain_popout_certificate:not(:last-of-type) {
-        border-bottom: 1px solid var(--palette01);
+        border-bottom: 1px solid var(--border-color);
     }
 
     .chain_popout_certificate:not(:first-of-type) {

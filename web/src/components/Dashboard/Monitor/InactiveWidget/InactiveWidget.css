@@ -1,0 +1,19 @@
+@layer components {
+    .inactive_widget {
+        height: 100%;
+        padding: 4px;
+        max-height: 23px;
+        max-width: 23px;
+        border-radius: 4px;
+        user-select: none;
+        background: var(--widget-background, transparent);
+        border: 1px solid var(--widget-border-color, transparent);
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .inactive_widget[data-active="false"] {
+        color: var(--warning-color);
+    }
+}

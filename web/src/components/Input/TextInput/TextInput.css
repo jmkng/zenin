@@ -1,9 +1,9 @@
 @layer components {
     .text_input_box {
-        border: 1px solid var(--palette01);
         appearance: none;
-        background: var(--background);
-        color: var(--color);
+        border: 1px solid var(--text-input-border-color, var(--input-border-color, var(--border-color)));
+        background: var(--text-input-background, var(--input-background, transparent));
+        color: var(--text-input-color, var(--input-color, var(--primary-color)));
         transition: background .30s ease-in-out;
         width: 100%;
         outline: none;
@@ -11,10 +11,10 @@
     }
 
     .text_input_box:focus {
-        outline: 1px solid var(--link-color);
+        outline: 1px solid var(--focus-outline-color);
     }
 
     .text_input_label {
-        color: var(--color);
+        color: var(--primary-color);
     }
 }

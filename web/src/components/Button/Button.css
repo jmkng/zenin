@@ -1,6 +1,10 @@
 @layer components {
     /* Tertiary (Default) */
     .button {
+        min-height: 38px;
+        padding: 6px 12px;
+        font-family: inherit;
+        font-size: inherit;
         appearance: none;
         white-space: nowrap;
         display: flex;
@@ -8,10 +12,10 @@
         align-items: center;
         border-radius: 4px;
         font-weight: 500;
-        color: var(--button-tertiary-color, var(--color));
-        fill: var(--button-tertiary-color, var(--color));
-        background-color: var(--button-tertiary-background, var(--input-background, var(--background)));
-        border: 1px solid var(--button-tertiary-border-color, var(--input-border-color, var(--palette01)));
+        color: var(--primary-color);
+        fill: var(--primary-color);
+        background-color: var(--button-background, transparent);
+        border: 1px solid var(--button-border-color, var(--border-color));
     }
 
     .button:focus {
@@ -19,7 +23,7 @@
     }
 
     .button:focus-visible {
-        outline: 1px solid var(--button-focus-outline-color, var(--input-focus-outline-color, var(--focus-outline-color)));
+        outline: 1px solid var(--focus-outline-color);
     }
 
     .button_tooltip {
@@ -40,53 +44,54 @@
 
     /* Disabled styles for primary, secondary and tertiary buttons. */
     .button.disabled {
-        color: var(--button-disabled-color, var(--palette03));
-        fill: var(--button-disabled-color, var(--palette03));
-        background-color: var(--button-disabled-background, var(--background));
+        color: var(--disabled-button-color, var(--primary-color));
+        fill: var(--disabled-button-color, var(--primary-color));
+        background-color: var(--disabled-button-background, transparent);
         cursor: not-allowed;
     }
     
     /* Primary */
     .button:not(.disabled).primary {
-        color: var(--button-primary-color, var(--background));
-        fill: var(--button-primary-color, var(--background));
-        background-color: var(--button-primary-background, var(--color));
+        color: var(--primary-button-color, var(--background));
+        fill: var(--primary-button-color, var(--background));
+        background-color: var(--primary-button-background, var(--primary-color));
         border-color: transparent;
+        outline-color: var(--primary-button-focus-outline-color, var(--focus-outline-color));
     }
     
     /* Secondary */
     .button:not(.primary).background {
-        color: var(--button-secondary-color, var(--color));
-        fill: var(--button-secondary-color, var(--color));
-        background-color: var(--button-secondary-background, var(--palette01));
+        color: var(--secondary-button-color, var(--primary-color));
+        fill: var(--secondary-button-color, var(--primary-color));
+        background-color: var(--secondary-button-background, var(--hover-background));
         border-color: transparent;
     }
     
     /* Destructive */
     .button:not(.disabled).destructive {
-        color: var(--button-destructive-color, var(--failure));
-        fill: var(--button-destructive-color, var(--failure));
-        background-color: var(--button-destructive-background, var(--background));
+        color: var(--destructive-button-color, var(--failure-color));
+        fill: var(--destructive-button-color, var(--failure-color));
+        background-color: var(--button-destructive-background, transparent);
+    }
+    
+    .button:not(.disabled):not(.hover) {
         border-color: transparent;
     }
 
     .button:not(.disabled):not(.background).hover.destructive:hover {
-        animation: fade-default .10s ease-in-out forwards !important;
+        background-color: var(--hover-background);
     }
-
+    
     .button:not(.disabled):not(.background):not(.primary).hover:hover {
-        animation: fade-default .10s ease-in-out forwards !important;
-    }
-
-    .button:not(:hover) {
-        animation: none !important;
+        background-color: var(--hover-background);
     }
 
     .tooltip {
         opacity: 0;
         position: absolute;
-        background: var(--tooltip-background, var(--color));
-        color: var(--tooltip-color, var(--background));
+        background: var(--tooltip-background);
+        color: var(--tooltip-color);
+        border: 1px solid var(--tooltip-border-color);
         font-size: 1rem;
         padding: 6px;
         border-radius: 4px;
@@ -96,15 +101,5 @@
 
     .tooltip.visible {
         opacity: 1;
-    }
-
-    @keyframes fade-default {
-        from {
-            background: initial;
-        }
-
-        to {
-            background: var(--button-hover-background, var(--palette01));
-        }
     }
 }

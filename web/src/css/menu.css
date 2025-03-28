@@ -2,7 +2,8 @@
     height: 57px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--palette01);
+    background: var(--menu-background, transparent);
+    border-bottom: 1px solid var(--menu-border-color, var(--border-color));
     justify-content: space-between;
     padding: 9px;
 }

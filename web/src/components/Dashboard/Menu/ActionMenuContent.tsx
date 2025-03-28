@@ -34,9 +34,6 @@ export default function ActionMenuContent() {
             <div className="action_menu_dialog_name">
                 {account.context.state.token?.payload.username}
             </div>
-            <div className="action_menu_dialog_id">
-                {account.context.state.token?.payload.sub}
-            </div>
         </div>
         <div className="action_menu_dialog_section dialog_section">
             {account.context.state.token?.payload.root
@@ -52,8 +49,6 @@ export default function ActionMenuContent() {
             >
                 Settings
             </Button>
-        </div>
-        <div className="action_menu_dialog_section dialog_section">
             <Button
                 onClick={handleLogout}
                 kind="destructive"

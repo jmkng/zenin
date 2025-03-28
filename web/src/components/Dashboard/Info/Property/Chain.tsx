@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from "react";
 import { useAccountContext } from "@/internal/account";
-import { formatDate } from "@/internal/layout/graphics";
+import { formatUTCDate } from "@/internal/layout/graphics";
 import { Certificate, Measurement } from "@/internal/measurement";
 import { useDefaultMeasurementService } from "@/internal/measurement/service";
 import { DataPacket } from "@/internal/server";
@@ -72,11 +72,11 @@ export default function Chain(props: ChainProps) {
                     <div className="chain_popout_certificate" key={index}>
                         <div className="chain_popout_not_before chain_popout_row">
                             <span className="chain_popout_label">Not Before</span>
-                            <span className="chain_popout_value">{formatDate(certificate.notBefore)}</span>
+                            <span className="chain_popout_value">{formatUTCDate(certificate.notBefore)}</span>
                         </div>
                         <div className="chain_popout_not_after chain_popout_row">
                             <span className="chain_popout_label">Not After</span>
-                            <span className="chain_popout_value">{formatDate(certificate.notAfter)}</span>
+                            <span className="chain_popout_value">{formatUTCDate(certificate.notAfter)}</span>
                         </div>
                         <div className="chain_popout_public_key_algorithm chain_popout_row">
                             <span className="chain_popout_label">Public Key Algorithm</span>

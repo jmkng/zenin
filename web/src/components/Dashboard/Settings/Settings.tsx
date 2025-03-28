@@ -51,9 +51,7 @@ export default function Settings() {
     }
 
     const handleReload = async (active: string | null) =>{
-        const isDefaultTheme = active == null || active == DEFAULT_DARK || active == DEFAULT_LIGHT;
         const root = document.documentElement;
-        
         const ss = document.getElementById(THEME_BLOCK_ID)
 
         const clean = () => {
@@ -61,11 +59,10 @@ export default function Settings() {
             document.adoptedStyleSheets = [];
         };
         
-        root.classList.add("static");
         if (active) root.setAttribute(THEME_ATTR, formatTheme(active));
         else root.removeAttribute(THEME_ATTR);
         
-        if (isDefaultTheme) {
+        if (isDefaultTheme(active)) {
             clean();
         } else {
             const extract = await settings.service.getActiveTheme(account.context.state.token!.raw);
@@ -77,7 +74,6 @@ export default function Settings() {
             clean();
             document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet]
         }
-        window.requestAnimationFrame(() => root.classList.remove("static"));
     }
     
     return <div className="settings">
@@ -93,7 +89,7 @@ export default function Settings() {
                 <div className="settings_reload_theme">
                     <Button 
                         border={true} 
-                        disabled={settings.context.state.active == null}
+                        disabled={isDefaultTheme(settings.context.state.active)}
                         onClick={() => handleReload(settings.context.state.active)}
                     >Reload Theme</Button>
                 </div>
@@ -155,6 +151,8 @@ const isSettingsEqual = (s1: SettingsState, s2: SettingsState) => {
     
     return true;
 }
+
+const isDefaultTheme = (name: string | null) => name == null || name == DEFAULT_DARK || name == DEFAULT_LIGHT;
 
 // Value representing a null theme for <SelectInput>.
 const NULL_THEME = "__NULL_THEME_VALUE"

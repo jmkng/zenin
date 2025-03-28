@@ -11,11 +11,11 @@
         border-radius: 4px;
         user-select: none;
         font-weight: 500;
-        background: var(--background);
-        border: 1px solid var(--color);
+        background: var(--checkbox-input-background, transparent);
+        border: 1px solid var(--checkbox-input-border-color, var(--input-border-color), var(--border-color));
     }
 
     .checkbox_input.checked {
-        background: var(--color);
+        background: var(--checked-checkbox-input-background, var(--primary-color));
     }
 }

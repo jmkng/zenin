@@ -20,8 +20,8 @@
 
     .toggle_input_slider_wrapper {
         position: relative;
-        width: 34px;
-        height: 20px;
+        width: 40px;
+        height: 23px;
     }
 
     .toggle_input input {
@@ -31,8 +31,8 @@
     }
 
     .toggle_input input:focus + .toggle_input_slider {
-        outline: 1px solid var(--link-color);
-        transition: none;
+        outline: 1px solid var(--focus-outline-color);
+        transition: background 0.2s ease-in-out;
     }
 
     .toggle_input_slider {
@@ -41,9 +41,14 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--palette03);
-        transition: .10s;
+        background: var(--toggle-input-background, var(--input-background));
+        transition: .30s;
         border-radius: 34px;
+        border: 1px solid var(--toggle-input-border-color, var(--input-border-color, var(--border-color)));
+    }
+    
+    input:checked + .toggle_input_slider {
+        background: var(--checked-toggle-input-background, var(--success-color));
     }
 
     .toggle_input_slider::before {
@@ -52,22 +57,18 @@
         height: 17px;
         width: 17px;
         left: 2px;
-        bottom: 1.5px;
-        background-color: var(--background);
-        transition: .10s;
+        bottom: 2px;
+        background-color: var(--toggle-input-thumb-color, var(--primary-color));
+        transition: .30s;
         border-radius: 50%;
     }
 
-    input:checked + .toggle_input_slider {
-        background-color: var(--color);
-    }
-
     input:checked + .toggle_input_slider::before {
-        transform: translateX(12px);
+        transform: translateX(15px);
     }
 
     .toggle_input_subtext {
-        margin-top: 9px;
-        color: var(--palette04);
+        margin-top: 6px;
+        color: var(--secondary-color, var(--primary-color));
     }
 }

@@ -14,8 +14,8 @@
     }
 
     .action_menu_dialog_id {
-        color: var(--palette04);
-        padding: 0 12px 6px 12px;
+        color: var(--secondary-color, var(--primary-color));
+        padding: 0 12px 0 12px;
     }
 
     .action_menu_log_out_icon {

@@ -144,7 +144,7 @@ You can change your theme through the settings pane in the user interface. By de
 
 ### Layers
 
-When Zenin loads a theme, it layers the theme's styles over either the default light or default dark theme, depending on the theme file's name. If the name contains "dark," it will override the default dark theme; otherwise, it will override the default light theme. This affords more control over how your theme is presented.
+When Zenin loads a theme, it layers the theme over the default light or default dark theme, depending on the theme file name. If the name contains "dark," it will override the default dark theme; otherwise, it will override the default light theme. This affords more control over how your theme is presented.
 
 Create a theme file named `Snowball.css` with these values, and it will layer over the default light theme:
 
@@ -152,8 +152,8 @@ Create a theme file named `Snowball.css` with these values, and it will layer ov
 /* Snowball.css */
 
 :root {
-    --background: rgb(240, 240, 240);
-    --button-primary-background: rgb(150, 150, 150);
+    --background: rgb(252, 252, 252);
+    --primary-button-background: rgb(150, 150, 150);
     --link-color: rgb(35, 150, 201);
     --focus-outline-color: rgb(35, 150, 201);
 }
@@ -167,9 +167,9 @@ Create a dark version with the name `Snowball Dark.css` and darker color values:
 /*  Snowball Dark.css */
 
 :root {
-    --background: rgb(27, 26, 31);
-    --button-primary-background: rgb(80, 80, 80);
-    --button-primary-color: var(--color);
+    --background: rgb(27, 26, 28);
+    --primary-button-background: rgb(80, 80, 80);
+    --primary-button-color: var(--primary-color);
     --link-color: rgb(35, 150, 201);
     --focus-outline-color: rgb(35, 150, 201);
 }
@@ -179,46 +179,107 @@ Create a dark version with the name `Snowball Dark.css` and darker color values:
 
 ### Variables
 
-Zenin's theming system defines base variables, which serve as high-level defaults. These are the variables without fallback values, like `--background` and `--color`. They establish some general purpose values that other variables may rely on.
+Zenin defines [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables/Using_CSS_custom_properties) that can be modified to change the appearance of many elements in the user interface.
 
-More specific variables like `--login-background` also exist, and they allow you to provide styles for specific parts of the user interface. These variables typically have fallback values. If your theme does not explicitly define one, it will inherit from a base variable such as `--background`.
+Many variables are applied broadly throughout the interface, such as `--background`, which is used as a general background color. However, more specific variables like `--pane-background` also exist for targeting focused areas of the interface.
 
-You should prefer to build a theme by overriding CSS variables rather than using element selectors, because it will minimize the chance that your theme will need to be updated to work with future versions of the user interface.
+You may also redefine a variable only for a small part of the interface:
 
-Recognized CSS variables are documented here:
+```
+:root {
+    --hover-background: rgb(240, 240, 240);
 
-| Variable                               | Description                                        | Fallback                                               |
-| :------------------------------------- | :------------------------------------------------- | :----------------------------------------------------- |
-| `--background`                         | Background color.                                  | N/A                                                    |
-| `--color`                              | Text color.                                        | N/A                                                    |
-| `--link-color`                         | Text color for `<a>` elements.                     | N/A                                                    |
-| `--focus-outline-color`                | Focus outline color.                               | N/A                                                    |
-| `--palette00` - `--palette04`          | Base theme color palette.                          | N/A                                                    |
-| `--success`                            | Color used to indicate success.                    | N/A                                                    |
-| `--warn`                               | Color used to indicate a warning.                  | N/A                                                    |
-| `--failure`                            | Color used to indicate failure.                    | N/A                                                    |
-| `--modal-backdrop-opacity`             | Opacity value for the modal backdrop.              | N/A                                                    |
-| `--input-border-color`                 | Input border color.                                | `--palette01`                                          |
-| `--input-background`                   | Input background color.                            | `--background`                                         |
-| `--input-focus-outline-color`          | Input border color when focused by keyboard.       | `--focus-outline-color`                                |
-| `--tooltip-color`                      | Tooltip text color.                                | `--background`                                         |
-| `--tooltip-background`                 | Tooltip background color.                          | `--color`                                              |
-| `--not-found-background`               | Background color of the 404 page.                  | `--background`                                         |
-| `--not-found-color`                    | Text color of the 404 page.                        | `--palette04`                                          |
-| `--login-background`                   | Background color of the login page.                | `--background`                                         |
-| `--button-disabled-color`              | Button text color when disabled.                   | `--palette03`                                          |
-| `--button-disabled-background`         | Button background color when disabled.             | `--background`                                         |
-| `--button-focus-outline-color`         | Button border color when focused by keyboard.      | `--input-focus-outline-color`, `--focus-outline-color` |
-| `--button-hover-background`            | Button background color when hovered.              | `--palette01`                                          |
-| `--button-primary-color`               | Primary button text color.                         | `--background`                                         |
-| `--button-primary-background`          | Primary button background color.                   | `--color`                                              |
-| `--button-secondary-color`             | Secondary button text color.                       | `--color`                                              |
-| `--button-secondary-background`        | Secondary button background color.                 | `--palette01`                                          |
-| `--button-tertiary-color`              | Tertiary button text color.                        | `--color`                                              |
-| `--button-tertiary-background`         | Tertiary button background color.                  | `--input-background`, `--background`                   |
-| `--button-tertiary-border-color`       | Tertiary button border color.                      | `--input-border-color`, `--palette01`                  |
-| `--button-destructive-color`           | Destructive button text color.                     | `--failure`                                            |
-| `--button-destructive-background`      | Destructive button background color.               | `--background`                                         |
+    .dialog_portal, .dialog_modal {
+        --hover-background: rgb(225, 225, 225);
+    }
+}
+```
+
+The button component uses the `--hover-background` variable to determine what color it should fade to when it is being hovered. This theme has defined `--hover-background` once in the root for all buttons to use, and once again within the `.dialog_portal` and `.dialog_modal` selector. This means that buttons within dialogs and modals will have a slightly darker hover background.
+
+You should prefer adjusting CSS variables over using selectors when possible, because it will minimize the chance that your theme will need to be updated in the future.
+
+You can use your browser's [developer tools](https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools) to discover CSS variables that your theme can use, and a list of recognized variables will also be documented here:
+
+| Variable | Description
+| :- | :- |
+| `--background` | Page background color.
+| `--hover-background` | Hover background color.
+| `--primary-color` | Primary text color.
+| `--secondary-color` | Secondary text color.
+| `--border-color` | Border color.
+| `--link-color` | Link text color.
+| `--success-color` | Success text color. Also represents active input states.
+| `--warning-color` | Warning text color.
+| `--failure-color` | Failure text color.
+| `--focus-outline-color` | Outline color of elements when focused by keyboard.
+| `--scrollbar-thumb-color` | Scrollbar thumb color.
+| `--widget-background` | Widget background color.
+| `--widget-border-color` | Widget border color.
+| `--dialog-border-color` | Dialog border color.
+| `--dialog-background` | Dialog background color.
+| `--modal-title-color` | Modal title text color.
+| `--modal-color` | Modal text color.
+| `--modal-backdrop-opacity` | Modal backdrop opacity.
+| `--modal-border-color` | Modal border color.
+| `--modal-background` | Modal background color.
+| `--input-border-color` | Input border color.
+| `--input-color` | Input text color.
+| `--input-background` | Input background color.
+| `--input-focus-outline-color` | Input border color when focused by keyboard.
+| `--tooltip-color` | Tooltip text color.
+| `--tooltip-border-color` | Tooltip border color.
+| `--tooltip-background` | Tooltip background color.
+| `--not-found-background` | Background color of the 404 page.
+| `--not-found-color` | Text color of the 404 page.
+| `--login-background` | Background color of the login page.
+| `--button-border-color` | Default button border color.
+| `--button-background` | Defualt button background color.
+| `--disabled-button-color` | Button text color when disabled.
+| `--disabled-button-background` | Button background color when disabled.
+| `--primary-button-color` | Primary button text color.
+| `--primary-button-focus-outline-color` | Primary button border color when focused by keyboard.
+| `--primary-button-background` | Primary button background color.
+| `--secondary-button-color` | Secondary button text color.
+| `--secondary-button-background` | Secondary button background color.
+| `--destructive-button-color` | Destructive button text color.
+| `--destructive-button-background` | Destructive button background color.
+| `--toggle-input-background` | Toggle input background color.
+| `--toggle-input-border-color` | Toggle input border color.
+| `--checked-toggle-input-background` | Toggle input background color when checked.
+| `--toggle-input-thumb-color` | Toggle input thumb color.
+| `--slider-input-border-color` | Slider input border color.
+| `--slider-input-background` | Slider input background color.
+| `--slider-input-thumb-color` | Slider input thumb color.
+| `--checkbox-input-background` | Checkbox input background color.
+| `--checkbox-input-border-color` | Checkbox input border color.
+| `--checked-checkbox-input-background` | Checkbox input background color when checked.
+| `--number-input-color` | Number input text color.
+| `--number-input-background` | Number input background color.
+| `--number-input-border-color` | Number input border color.
+| `--select-input-color` | Select input text color.
+| `--select-input-background` | Select input background color.
+| `--select-input-border-color` | Select input border color.
+| `--text-area-input-border-color` | Text area input border color.
+| `--text-area-input-background` | Text area input background color.
+| `--text-area-input-color` | Text area input text color.
+| `--text-input-border-color` | Text input border color.
+| `--text-input-background` | Text input background color.
+| `--text-input-color` | Text input text color.
+| `--menu-background` | Menu background color.
+| `--menu-border-color` | Menu border color.
+| `--monitor-background` | Monitor background color.
+| `--monitor-border-color` | Monitor border color.
+| `--selected-monitor-border-color` | Monitor border color when selected.
+| `--monitor-header-background` | Monitor header background color.
+| `--timeline-background` | Timeline background color.
+| `--timeline-hover-background` | Timeline background color when hovered.
+| `--timeline-aid-hover-background` | Timeline measurement visual aid background color when hovered.
+| `--timeline-border-color` | Timeline border color.
+| `--pane-border-color` | Pane border color.
+| `--pane-background` | Pane background color.
+| `--pane-controls-border-color` | Pane controls window border color.
+| `--pane-controls-background` | Pane controls window background color.
 
 ## Environment Variables
 
