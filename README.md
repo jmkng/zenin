@@ -2,7 +2,7 @@
 
 A simple infrastructure monitoring tool.
 
-![Zenin](../assets/1.png?raw=true)
+![Zenin](../assets/1-dark.png?raw=true)
 
 > [!Tip]
 > Find more images of the user interface in the [Assets](https://github.com/jmkng/zenin/tree/assets) branch. Feel free to provide feedback on the design.
@@ -181,7 +181,7 @@ Create a dark version with the name `Snowball Dark.css` and darker color values:
 
 Zenin defines [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables/Using_CSS_custom_properties) that can be modified to change the appearance of many elements in the user interface.
 
-Many variables are applied broadly throughout the interface, such as `--background`, which is used as a general background color. However, more specific variables like `--pane-background` also exist for targeting focused areas of the interface.
+Many variables are applied broadly throughout the interface, such as `--background`, which is used as a general background color. However, more specific variables like `--pane-background` also exist for targeting specific areas.
 
 You may also redefine a variable only for a small part of the interface:
 
@@ -195,11 +195,11 @@ You may also redefine a variable only for a small part of the interface:
 }
 ```
 
-The button component uses the `--hover-background` variable to determine what color it should fade to when it is being hovered. This theme has defined `--hover-background` once in the root for all buttons to use, and once again within the `.dialog_portal` and `.dialog_modal` selector. This means that buttons within dialogs and modals will have a slightly darker hover background.
+The button component uses the `--hover-background` variable to determine what color it should fade to when it is being hovered. This theme has defined `--hover-background` once in the root for all buttons to use, and once again within the `.dialog_portal` and `.dialog_modal` selectors. This means that buttons within dialogs and modals will have a slightly darker hover background.
 
 You should prefer adjusting CSS variables over using selectors when possible, because it will minimize the chance that your theme will need to be updated in the future.
 
-You can use your browser's [developer tools](https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools) to discover CSS variables that your theme can use, and a list of recognized variables will also be documented here:
+You can use your browser's [developer tools](https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools) to discover CSS variables that your theme can use. A list of recognized variables will also be documented here:
 
 | Variable | Description
 | :- | :- |
