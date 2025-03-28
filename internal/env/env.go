@@ -88,10 +88,14 @@ func NewEnvironment() Environment {
 			}
 		}
 	}
+	// If no specific directory for plugins/themes are provided, put them in the base directory.
 	pluginsDir := os.Getenv(pluginsDirKey)
 	if pluginsDir == "" && baseDir != "" {
-		// If no specific plugins directory was provided, put it in the base directory.
 		pluginsDir = filepath.Join(baseDir, "plugins")
+	}
+	themesDir := os.Getenv(themesDirKey)
+	if themesDir == "" && baseDir != "" {
+		themesDir = filepath.Join(baseDir, "themes")
 	}
 
 	enableColor := true
@@ -116,6 +120,7 @@ func NewEnvironment() Environment {
 		StdoutTimeFormat: stdoutTimeFormat,
 		BaseDir:          baseDir,
 		PluginsDir:       pluginsDir,
+		ThemesDir:        themesDir,
 		EnableColor:      enableColor,
 		EnableDebug:      enableDebug,
 		AllowInsecure:    allowInsecure,
@@ -131,6 +136,8 @@ const (
 	JSON
 )
 
+// Environment contains information about the process environment.
+// Call `Diagnose` to check for problems before use.
 type Environment struct {
 	// An address for Zenin to bind on.
 	Address string
@@ -154,6 +161,9 @@ type Environment struct {
 	// A directory used to store executable plugins.
 	// May be empty if no directory can be resolved.
 	PluginsDir string
+	// A directory used to store themes.
+	// May be empty if no directory can be resolved.
+	ThemesDir string
 
 	// Determines if ANSI escape codes are used in logging.
 	EnableColor bool
@@ -165,53 +175,15 @@ type Environment struct {
 	Repository RepositoryEnv
 }
 
-// GetLocalRepositoryPath returns the expected path of a local database file.
-func (e Environment) GetLocalRepositoryPath() string {
-	return filepath.Join(e.BaseDir, e.Repository.Name)
-}
-
+// Diagnose checks the `Environment` for problems.
 func (e Environment) Diagnose(dx *Diagnostic) {
 	if !e.AllowInsecure && len(e.SignSecret) < 16 {
 		dx.Error("sign secret is weak, expected >= 16 bytes")
 	}
 
-	if e.BaseDir == "" {
-		dx.Error("cannot find base directory, provide a path with the `ZENIN_BASE_DIR` environment variable")
-	} else {
-		if !filepath.IsAbs(e.BaseDir) {
-			dx.Error("base directory should be an absolute path")
-		}
-
-		base, err := os.Stat(e.BaseDir)
-		if err != nil || !base.IsDir() {
-			if errors.Is(err, fs.ErrNotExist) {
-				if err := os.MkdirAll(e.BaseDir, 0755); err != nil {
-					dx.Error(fmt.Sprintf("make sure base directory exists and is accessible: `%v`", e.BaseDir))
-				}
-			} else {
-				dx.Error(fmt.Sprintf("unable to access base directory: `%v`", e.BaseDir))
-			}
-		}
-	}
-
-	if e.PluginsDir == "" {
-		dx.Error("cannot find plugins directory, provide a path with the `ZENIN_PLUGINS_DIR` environment variable")
-	} else {
-		if !filepath.IsAbs(e.PluginsDir) {
-			dx.Error("plugins directory should be an absolute path")
-		}
-
-		plugins, err := os.Stat(e.PluginsDir)
-		if err != nil || !plugins.IsDir() {
-			if errors.Is(err, fs.ErrNotExist) {
-				if err := os.MkdirAll(e.PluginsDir, 0755); err != nil {
-					dx.Error(fmt.Sprintf("make sure plugins directory exists and is accessible: `%v`", e.PluginsDir))
-				}
-			} else {
-				dx.Error(fmt.Sprintf("unable to access plugins directory: `%v`", e.PluginsDir))
-			}
-		}
-	}
+	vd(dx, e.BaseDir, "ZENIN_BASE_DIR", "base")
+	vd(dx, e.PluginsDir, "ZENIN_PLUGINS_DIR", "plugins")
+	vd(dx, e.ThemesDir, "ZENIN_THEMES_DIR", "themes")
 
 	switch runtime.GOOS {
 	case "darwin", "linux":
@@ -220,6 +192,32 @@ func (e Environment) Diagnose(dx *Diagnostic) {
 		}
 		// On Windows, PowerShell is assumed.
 	}
+}
+
+// ReadTheme will attempt to read the named theme from the themes directory.
+// If the theme is empty or not found, an empty string is returned and the error will be nil.
+func (e Environment) ReadTheme(name string) (string, error) {
+	path := filepath.Join(e.ThemesDir, name)
+
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", fmt.Errorf("failed to stat theme file: %w", err)
+	}
+
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to read theme file %v: %w", name, err)
+	}
+
+	return string(bytes), nil
+}
+
+// GetLocalRepositoryPath returns the expected path of a local database file.
+func (e Environment) GetLocalRepositoryPath() string {
+	return filepath.Join(e.BaseDir, e.Repository.Name)
 }
 
 func NewRepositoryEnvironment() RepositoryEnv {
@@ -307,6 +305,27 @@ func getSignSecret() (Secret, error) {
 	return secret, nil
 }
 
+func vd(dx *Diagnostic, path, env, dir string) {
+	if path == "" {
+		dx.Error(fmt.Sprintf("cannot find %s directory, provide a path with the `%s` environment variable", dir, env))
+		return
+	}
+	if !filepath.IsAbs(path) {
+		dx.Error(fmt.Sprintf("%s directory should be an absolute path", dir))
+	}
+
+	info, err := os.Stat(path)
+	if err != nil || !info.IsDir() {
+		if errors.Is(err, fs.ErrNotExist) {
+			if err := os.MkdirAll(path, 0755); err != nil {
+				dx.Error(fmt.Sprintf("make sure %s directory exists and is accessible", dir))
+			}
+		} else {
+			dx.Error(fmt.Sprintf("unable to access %s directory", dir))
+		}
+	}
+}
+
 const (
 	addressKey          = "ZENIN_ADDRESS"
 	portKey             = "ZENIN_PORT"
@@ -316,6 +335,7 @@ const (
 	stdoutTimeFormatKey = "ZENIN_STDOUT_TIME_FORMAT"
 	baseDirKey          = "ZENIN_BASE_DIR"
 	pluginsDirKey       = "ZENIN_PLUGINS_DIR"
+	themesDirKey        = "ZENIN_THEMES_DIR"
 	enableColorKey      = "ZENIN_ENABLE_COLOR"
 	enableDebugKey      = "ZENIN_ENABLE_DEBUG"
 	allowInsecureKey    = "ZENIN_ALLOW_INSECURE"

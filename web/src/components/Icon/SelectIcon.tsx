@@ -1,6 +1,6 @@
 export default function SelectIcon() {
     return <svg
-        className="zenin__select_icon zenin__icon"
+        className="select_icon icon"
         style={{
             fillRule: "evenodd",
             clipRule: "evenodd",

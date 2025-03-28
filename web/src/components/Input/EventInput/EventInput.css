@@ -1,24 +1,26 @@
-.zenin__event_input_threshold_container {
-    margin: var(--px-e) 0;
-}
+@layer components {
+    .event_input_threshold_container {
+        margin: 15px 0;
+    }
 
-.zenin__event_input_threshold_description {
-    display: block;
-    margin-top: var(--px-c);
-}
+    .event_input_threshold_description {
+        display: block;
+        margin-top: 9px;
+    }
 
-.zenin__detail_event {
-    padding: var(--px-c); 
-    border: 1px solid var(--off-b);
-    border-radius: var(--rounded);
-}
+    .detail_event {
+        padding: 9px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
 
-.zenin__detail_event_container {
-    margin-bottom: var(--px-c);
-}
+    .detail_event_container {
+        margin-bottom: 9px;
+    }
 
-.zenin__detail_event_marker {
-    display: block;
-    margin-bottom: var(--px-b);
-    cursor: default;
+    .detail_event_marker {
+        display: block;
+        margin-bottom: 6px;
+        cursor: default;
+    }
 }

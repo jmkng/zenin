@@ -1,60 +1,58 @@
-.zenin__chain_component {
-    border-radius: var(--rounded);
-    border: 1px solid var(--off-b);
-    transition: background var(--fast) ease-in-out;
-}
+@layer components {
+    .chain_component {
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        transition: background .10s ease-in-out;
+    }
 
-.zenin__chain_controls {
-    min-height: var(--px-h);
-    display: flex;
-    padding: var(--px-b) var(--px-d);
-    align-items: center;
-}
+    .chain_controls {
+        min-height: 38px;
+        display: flex;
+        padding: 6px 12px;
+        align-items: center;
+    }
 
-.zenin__chain_component.pending {
-    background: var(--off-b);
-}
+    .chain_component.pending,
+    .chain_component.pending * {
+        cursor: wait;
+    }
 
-.zenin__chain_component.pending,
-.zenin__chain_component.pending * {
-    cursor: wait;
-}
+    .chain_toggle {
+        margin-left: auto;
+        transition: transform .10s ease-in-out;
+        transform: rotate(90deg);
+        padding: 4px;
+    }
 
-.zenin__chain_toggle {
-    margin-left: auto;
-    transition: transform var(--fast) ease-in-out;
-    transform: rotate(90deg);
-    padding: 4px;
-}
+    .chain_component.expanded .chain_toggle {
+        transform: rotate(270deg);
+    }
 
-.zenin__chain_component.expanded .zenin__chain_toggle {
-    transform: rotate(270deg);
-}
+    .chain_title {
+        color: var(--secondary-color, var(--primary-color));
+        flex: 0 0 auto;
+        margin-right: 28px;
+    }
 
-.zenin__chain_title {
-    color: var(--mid);
-    flex: 0 0 auto;
-    margin-right: var(--px-f);
-}
+    .chain_popout_row {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
 
-.zenin__chain_popout_row {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-}
+    .chain_popout_certificate {
+        padding: 6px 12px;
+    }
 
-.zenin__chain_popout_certificate {
-    padding: var(--px-b) var(--px-d);
-}
+    .chain_popout_certificate:first-of-type {
+        padding-top: 0;
+    }
 
-.zenin__chain_popout_certificate:first-of-type {
-    padding-top: 0;
-}
+    .chain_popout_certificate:not(:last-of-type) {
+        border-bottom: 1px solid var(--border-color);
+    }
 
-.zenin__chain_popout_certificate:not(:last-of-type) {
-    border-bottom: 1px solid var(--off-b);
-}
-
-.zenin__chain_popout_certificate:not(:first-of-type) {
-    margin-top: var(--px-a);
+    .chain_popout_certificate:not(:first-of-type) {
+        margin-top: 4px;
+    }
 }

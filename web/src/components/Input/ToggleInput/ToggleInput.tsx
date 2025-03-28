@@ -15,17 +15,17 @@ interface ToggleProps {
 export default function ToggleInput(props: ToggleProps) {
     const { name, value, label, onSubtext, offSubtext, onChange } = props;
 
-    return <div className="zenin__toggle_input">
-        <div className="zenin__toggle_input_controls">
+    return <div className="toggle_input">
+        <div className="toggle_input_controls">
             {label ? (
                 <label
-                    className="zenin__toggle_input_label zenin__input_label"
+                    className="toggle_input_label input_label"
                     htmlFor={name}
                 >
                     {label}
                 </label>
             ) : null}
-            <div className="zenin__toggle_input_slider_wrapper">
+            <div className="toggle_input_slider_wrapper">
                 <input
                     type="checkbox"
                     id={name}
@@ -33,14 +33,14 @@ export default function ToggleInput(props: ToggleProps) {
                     onChange={() => onChange(!value)}
                 />
                 <span
-                    className="zenin__toggle_input_slider"
+                    className="toggle_input_slider"
                     onClick={() => onChange(!value)}
                 />
             </div>
         </div>
 
         {onSubtext || offSubtext
-            ? <div className="zenin__toggle_input_subtext">
+            ? <div className="toggle_input_subtext">
                 {value && onSubtext ? onSubtext : null}
                 {!value && offSubtext ? offSubtext : null}
             </div>

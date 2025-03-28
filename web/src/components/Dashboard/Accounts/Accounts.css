@@ -1,51 +1,53 @@
-.zenin__accounts {
-    padding-right: var(--px-a);
-}
+@layer components {
+    .accounts {
+        padding-right: 4px;
+    }
 
-.zenin__account {
-    padding: var(--px-c);
-    border: 1px solid var(--off-b);
-    border-radius: var(--rounded);
-}
+    .account {
+        padding: 9px;
+        border: 1px solid  var(--border-color);
+        border-radius: 4px;
+    }
 
-.zenin__account_rank{
-    color: var(--mid);
-}
+    .account_rank {
+        color: var(--secondary-color, var(--primary-color));
+    }
 
-.zenin__account:not(:last-of-type) {
-    margin-bottom: var(--px-c);
-}
+    .account:not(:last-of-type) {
+        margin-bottom: 9px;
+    }
 
-.zenin__account_updated_timestamp {
-    display: block;
-    color: var(--mid);
-}
+    .account_updated_timestamp {
+        display: block;
+        color: var(--secondary-color, var(--primary-color));
+    }
 
-.zenin__account_top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .account_top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.zenin__account_top_right {
-    display: flex;
-    align-items: center;
-}
+    .account_top_right {
+        display: flex;
+        align-items: center;
+    }
 
-.zenin__account_message_container {
-    margin-top: var(--px-b);
-}
+    .account_message_container {
+        margin-top: 6px;
+    }
 
-.zenin__account_message {
-    border: 1px solid var(--foreground);
-    border-radius: var(--rounded);
-    padding: var(--px-d);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    .account_message {
+        border: 1px solid var(--primary-color);
+        border-radius: 4px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.zenin__account_message.error {
-    color: var(--dead-a);
-    border-color: var(--dead-a);
+    .account_message.error {
+        color: var(--failure-color);
+        border-color: var(--failure-color);
+    }
 }

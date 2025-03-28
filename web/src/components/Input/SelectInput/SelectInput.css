@@ -1,35 +1,36 @@
-.zenin__select_input_box {
-  background: none;
-  width: 100%;
-  appearance: none;
-  color: var(--foreground);
-  outline: none;
-  padding: 8px 22px 8px var(--px-c) !important;
-  border-radius: var(--rounded);
-  border: 1px solid var(--off-b);
-}
+@layer components {
+    .select_input_box {
+        background: var(--select-input-background, var(--input-background, transparent));
+        width: 100%;
+        appearance: none;
+        color: var(--select-input-color, var(--input-color, var(--primary-color)));
+        outline: none;
+        padding: 8px 22px 8px 9px !important;
+        border-radius: 4px;
+        border: 1px solid var(--select-input-border-color, var(--input-border-color, var(--border-color)));
+    }
 
-.zenin__select_input_box:focus {
-  outline: 1px solid var(--link);
-}
+    .select_input_box:focus {
+        outline: 1px solid var(--focus-outline-color);
+    }
 
-.zenin__select_input_controls_container {
-  position: relative;
-}
+    .select_input_controls_container {
+        position: relative;
+    }
 
-.zenin__select_input_icon_container {
-  position: absolute;
-  right: var(--px-c);
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: -1999;
-}
+    .select_input_icon_container {
+        position: absolute;
+        right: 9px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-.zenin__select.transition select {
-  transition: border-color var(--slow) ease-in-out;
-  position: relative;
-  width: 100%;
+    .select.transition select {
+        transition: border-color .30s ease-in-out;
+        position: relative;
+        width: 100%;
+    }
 }

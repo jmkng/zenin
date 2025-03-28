@@ -81,8 +81,8 @@ type Monitor struct {
 }
 
 type PluginFields struct {
-	PluginName *string              `json:"pluginName" db:"plugin_name"`
-	PluginArgs *internal.ArrayValue `json:"pluginArgs" db:"plugin_args"`
+	PluginName *string             `json:"pluginName" db:"plugin_name"`
+	PluginArgs internal.ArrayValue `json:"pluginArgs" db:"plugin_args"`
 }
 
 type HTTPFields struct {
@@ -93,11 +93,11 @@ type HTTPFields struct {
 	// At the time of request, values for duplicate keys are combined by net/http.
 	//
 	// https://pkg.go.dev/net/http#Header.Add
-	HTTPRequestHeaders *internal.PairListValue `json:"httpRequestHeaders" db:"http_request_headers"`
-	HTTPRequestBody    *string                 `json:"httpRequestBody" db:"http_request_body"`
-	HTTPExpiredCertMod *string                 `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
-	HTTPCaptureHeaders *bool                   `json:"httpCaptureHeaders" db:"http_capture_headers"`
-	HTTPCaptureBody    *bool                   `json:"httpCaptureBody" db:"http_capture_body"`
+	HTTPRequestHeaders internal.PairListValue `json:"httpRequestHeaders" db:"http_request_headers"`
+	HTTPRequestBody    *string                `json:"httpRequestBody" db:"http_request_body"`
+	HTTPExpiredCertMod *string                `json:"httpExpiredCertMod" db:"http_expired_cert_mod"`
+	HTTPCaptureHeaders *bool                  `json:"httpCaptureHeaders" db:"http_capture_headers"`
+	HTTPCaptureBody    *bool                  `json:"httpCaptureBody" db:"http_capture_body"`
 }
 
 type ICMPFields struct {
@@ -109,8 +109,7 @@ type ICMPFields struct {
 	ICMPLossThreshold *int          `json:"icmpLossThreshold" db:"icmp_loss_threshold"`
 }
 
-// Context returns a copy of the parent context with a timeout set according to
-// the monitor `Timeout` field.
+// Context returns a copy of the parent context with a timeout set according to the monitor `Timeout` field.
 func (m Monitor) Context(ctx context.Context) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(ctx, time.Duration(m.Timeout)*time.Second)
 }
@@ -239,12 +238,10 @@ func (m Monitor) Validate() error {
 			}
 		}
 		if !args {
-			if v.PluginArgs != nil {
-				for _, v := range *v.PluginArgs {
-					if strings.TrimSpace(v) == "" {
-						errors = append(errors, "event arguments must not be empty")
-						args = true
-					}
+			for _, v := range v.PluginArgs {
+				if strings.TrimSpace(v) == "" {
+					errors = append(errors, "event arguments must not be empty")
+					args = true
 				}
 			}
 		}

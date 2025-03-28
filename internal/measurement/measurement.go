@@ -1,8 +1,6 @@
 package measurement
 
 import (
-	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"strings"
 
@@ -24,6 +22,7 @@ type Measurement struct {
 	UpdatedAt internal.TimeValue `json:"updatedAt" db:"updated_at"`
 	MonitorId *int               `json:"monitorId" db:"measurement_monitor_id"`
 	Duration  float64            `json:"duration" db:"duration"`
+
 	Span
 }
 
@@ -37,30 +36,6 @@ func NewSpan() Span {
 		ICMPFields:   ICMPFields{},
 		PluginFields: PluginFields{},
 	}
-}
-
-type ArrayValue []string
-
-// Value implements `driver.Valuer` for `ArrayValue`.
-func (h ArrayValue) Value() (driver.Value, error) {
-	return json.Marshal(h)
-}
-
-// Scan implements `sql.Scanner` for `ArrayValue`.
-// This allows storing and fetching the `ArrayValue` as a JSON array.
-func (h *ArrayValue) Scan(value any) error {
-	if value == nil {
-		*h = []string{}
-		return nil
-	}
-	var err error
-	switch x := value.(type) {
-	case string:
-		err = json.Unmarshal([]byte(x), h)
-	case []byte:
-		err = json.Unmarshal(x, h)
-	}
-	return err
 }
 
 type ProbeKind string
@@ -91,11 +66,10 @@ func ProbeKindFromString(value string) (ProbeKind, error) {
 
 // Span is a common set of fields for all `Measurement`.
 type Span struct {
-	State ProbeState `json:"state" db:"state"`
-	// StateHint is a series of user-friendly messages which indicate why a Span was given a state.
-	StateHint    ArrayValue    `json:"stateHint" db:"state_hint"`
-	Kind         ProbeKind     `json:"kind" db:"measurement_kind"`
-	Certificates []Certificate `json:"-"`
+	State        ProbeState          `json:"state" db:"state"`
+	StateHint    internal.ArrayValue `json:"stateHint" db:"state_hint"`
+	Kind         ProbeKind           `json:"kind" db:"measurement_kind"`
+	Certificates []Certificate       `json:"-"`
 
 	HTTPFields
 	ICMPFields

@@ -75,16 +75,16 @@ func (p PluginExecutor) Run(ctx context.Context, f PluginFields) (int, string, s
 	path := filepath.Join(env.Env.PluginsDir, *f.PluginName)
 	_, err := os.Stat(path)
 	if err != nil {
-		dx.Error("Plugin was not found.")
+		dx.Error("Plugin file was not found.")
 		return code, stdout, stderr, dx
 	}
 
 	// Render plugin arguments.
 	var args []string
 	if f.PluginArgs != nil {
-		for i, v := range *f.PluginArgs {
+		for i, v := range f.PluginArgs {
 			name := fmt.Sprintf("%d", i)
-			t, err := template.New(name).Delims(p.Settings.Delimiters[0], p.Settings.Delimiters[1]).Parse(v)
+			t, err := template.New(name).Delims((*p.Settings.Delimiters)[0], (*p.Settings.Delimiters)[1]).Parse(v)
 			if err != nil {
 				dx.Error("Failed to parse plugin argument.")
 				return code, stdout, stderr, dx

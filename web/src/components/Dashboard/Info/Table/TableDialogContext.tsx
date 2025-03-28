@@ -9,8 +9,8 @@ interface TableDialogContentProps {
 export default function TableDialogContent(props: TableDialogContentProps) {
     const { onDateChange } = props;
 
-    return <div className="zenin__table_dialog_content zenin__dialog_content">
-        <div className="zenin__dialog_section">
+    return <div className="table_dialog_content dialog_content">
+        <div className="dialog_section">
             <Button onClick={() => onDateChange("HEAD")}>
                 Most Recent
             </Button>

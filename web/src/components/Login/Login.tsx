@@ -82,27 +82,27 @@ export default function Login() {
     }
 
     // TODO: Documentation
-    const warning = <div className="zenin__login_message">
+    const warning = <div className="login_message">
         <span>You are logging in to an <a href="#">unclaimed</a> Zenin server. This action will create the first account on the server.</span>
     </div>
 
-    const login = <div className="zenin__login">
-        <header className="zenin__login_header">
+    const login = <div className="login">
+        <header className="login_header">
         </header>
-        <div className="zenin__login_logo_container">
+        <div className="login_logo_container">
             <LogoIcon />
         </div>
-        <div className="zenin__login_form_container">
-            <div className="zenin__login_spaced">
+        <div className="login_form_container">
+            <div className="login_spaced">
                 <TextInput
-                    name="zenin__login_username"
+                    name="login_username"
                     label="Username"
                     value={editor.username}
                     onChange={(username: string | null) => setEditor(prev => ({ ...prev, username }))} />
             </div>
-            <div className="zenin__login_spaced">
+            <div className="login_spaced">
                 <TextInput
-                    name="zenin__login_password"
+                    name="login_password"
                     label="Password"
                     type="password"
                     value={editor.password}
@@ -110,16 +110,16 @@ export default function Login() {
             </div>
             {isClaimed !== null && isClaimed === false
                 ?
-                <div className="zenin__login_spaced">
+                <div className="login_spaced">
                     <TextInput
-                        name="zenin__login_password_confirm"
+                        name="login_password_confirm"
                         label="Confirm Password"
                         type="password"
                         value={editor.passwordConfirm}
                         onChange={(confirm: string | null) => setEditor(prev => ({ ...prev, passwordConfirm: confirm }))} />
                 </div>
                 : null}
-            <div className="zenin__login_controls">
+            <div className="login_controls">
                 <Button
                     kind="primary"
                     onClick={handleSubmit}
@@ -129,12 +129,12 @@ export default function Login() {
             </div>
         </div>
 
-        <div className="zenin__login_message_container">
+        <div className="login_message_container">
             {errors.length == 0 && isClaimed !== null && isClaimed === false
                 ? warning
                 : null}
             {errors
-                ? errors.map((error, index) => <div key={index} className="zenin__login_message error">{error}</div>)
+                ? errors.map((error, index) => <div key={index} className="login_message error">{error}</div>)
                 : null}
         </div>
     </div>

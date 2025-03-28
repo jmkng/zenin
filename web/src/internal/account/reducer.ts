@@ -2,7 +2,6 @@ import { Account, Token } from ".";
 
 export interface AccountState {
     initialized: boolean;
-
     /** A token representing the currently authenticated account. Null when unauthenticated. */
     token: Token | null
     accounts: Account[]
@@ -14,11 +13,22 @@ export const accountDefault: AccountState = {
     accounts: []
 }
 
-type LoginAction = { type: 'login', token: string };
-type LogoutAction = { type: 'logout' };
+/** Reset the state. */
 type ResetAction = { type: 'reset', accounts: Account[] };
+
+/** Log in. */
+type LoginAction = { type: 'login', token: string };
+
+/** Log out. */
+type LogoutAction = { type: 'logout' };
+
+/** Update an account. */
 type UpdateAction = { type: 'update', id: number, username: string, updatedAt: string };
-type RemoveAction = { type: 'remove', id: number };
+
+/** Delete an account. */
+type DeleteAction = { type: 'delete', id: number };
+
+/** Add an account. */
 type CreateAction = { type: 'create', account: Account };
 
 export type AccountAction =
@@ -26,7 +36,7 @@ export type AccountAction =
     | LogoutAction
     | ResetAction
     | UpdateAction
-    | RemoveAction
+    | DeleteAction
     | CreateAction
 
 const loginAction = (state: AccountState, action: LoginAction): AccountState => {
@@ -53,13 +63,11 @@ const resetAction = (state: AccountState, action: ResetAction): AccountState => 
 const updateAction = (state: AccountState, action: UpdateAction): AccountState => {
     const username = action.username;
     const updatedAt = action.updatedAt;
-    return {
-        ...state,
-        accounts: state.accounts.map(acc => acc.id === action.id ? { ...acc, username, updatedAt } : acc),
-    };
+    const accounts = state.accounts.map(acc => acc.id === action.id ? { ...acc, username, updatedAt } : acc);
+    return { ...state, accounts };
 };
 
-const removeAction = (state: AccountState, action: RemoveAction): AccountState => {
+const deleteAction = (state: AccountState, action: DeleteAction): AccountState => {
     return { ...state, accounts: state.accounts.filter(n => n.id != action.id) };
 };
 
@@ -73,7 +81,7 @@ const accountReducer = (state: AccountState, action: AccountAction): AccountStat
         case "logout": return logoutAction(state);
         case "reset": return resetAction(state, action);
         case "update": return updateAction(state, action);
-        case "remove": return removeAction(state, action);
+        case "delete": return deleteAction(state, action);
         case "create": return createAction(state, action);
     }
 }

@@ -2,6 +2,12 @@ package settings
 
 import (
 	"context"
+	"io/fs"
+	"os"
+	"path/filepath"
+
+	"github.com/jmkng/zenin/internal"
+	"github.com/jmkng/zenin/internal/env"
 )
 
 // NewSettingsService returns a new `SettingsService`.
@@ -16,37 +22,80 @@ type SettingsService struct {
 }
 
 func (m SettingsService) GetSettings(ctx context.Context) (Settings, error) {
-	delimiters, err := m.GetDelimiters(ctx)
+	settings, err := m.Repository.SelectSettings(ctx)
 	if err != nil {
 		return Settings{}, err
 	}
 
-	return Settings{Delimiters: delimiters}, nil
-}
-
-func (m SettingsService) GetDelimiters(ctx context.Context) ([]string, error) {
-	delimiters, err := m.Repository.SelectDelimiters(ctx)
-	if err != nil {
-		return []string{}, err
-	}
-	if len(delimiters) == 0 {
-		delimiters = []string{DefaultOpenDelimiter, DefaultCloseDelimiter}
+	// Set defaults where expected.
+	// Theme is allowed to be nil, indicating that the server has no theme preference stored.
+	if settings.Delimiters == nil {
+		settings.Delimiters = &internal.ArrayValue{DefaultOpenDelimiter, DefaultCloseDelimiter}
 	}
 
-	return delimiters, nil
+	return settings, nil
 }
 
 func (m SettingsService) UpdateSettings(ctx context.Context, s Settings) error {
-	// Update repository.
-	err := m.Repository.UpdateSettings(ctx, s)
-	if err != nil {
+	if err := s.Validate(); err != nil {
 		return err
 	}
 
-	// Queue distributor settings update.
-	m.Distributor <- SettingsMessage{
-		Settings: s,
+	// Update repository.
+	if err := m.Repository.UpdateSettings(ctx, s); err != nil {
+		return err
 	}
+	// Queue distributor settings update.
+	m.Distributor <- SettingsMessage{Settings: s}
 
 	return nil
+}
+
+// GetActiveTheme attempts to read the preferred theme from the themes directory.
+// Returns a nil slice if the repository has no theme preference.
+func (m SettingsService) GetActiveTheme(ctx context.Context) ([]byte, error) {
+	settings, err := m.GetSettings(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if settings.Theme == nil {
+		return nil, nil
+	}
+	name := *settings.Theme
+	path := filepath.Join(env.Env.ThemesDir, name)
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
+func (m SettingsService) GetThemes() ([]string, error) {
+	var themes []string
+	root := env.Env.ThemesDir
+
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		ext := filepath.Ext(d.Name())
+
+		if ext == ".css" {
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			themes = append(themes, rel)
+		}
+
+		return nil
+	})
+
+	return themes, err
 }

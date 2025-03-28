@@ -1,23 +1,37 @@
 export interface SettingsState {
-    delimiters: string[]
+    delimiters: string[],
+    active: string | null,
+    themes: string[],
 }
 
 export const settingsDefault: SettingsState = {
-    delimiters: []
+    delimiters: [],
+    active: null,
+    themes: []
 }
 
-type ResetAction = { type: 'reset', delimiters: string[] };
+/** Reset the state. */
+type ResetAction = { type: 'reset', state: SettingsState };
+
+/** Update the active theme. */
+type ChangeActiveThemeAction = { type: 'active', active: string | null };
 
 export type SettingsAction =
     | ResetAction
+    | ChangeActiveThemeAction
 
-const resetAction = (state: SettingsState, action: ResetAction) => {
-    return { ...state, delimiters: action.delimiters };
+const resetAction = (_: SettingsState, action: ResetAction) => {
+    return action.state;
 }
 
+const changeActiveThemeAction = (state: SettingsState, action: ChangeActiveThemeAction) => {
+    return { ...state, active: action.active };
+}
+    
 const settingsReducer = (state: SettingsState, action: SettingsAction): SettingsState => {
     switch (action.type) {
-        case "reset": return resetAction(state, action);
+        case "reset": return resetAction(state, action)
+        case "active": return changeActiveThemeAction(state, action)
     }
 }
 

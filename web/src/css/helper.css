@@ -1,50 +1,50 @@
-.zenin__h_f-row-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.h_f-row-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.zenin__h_f-col {
-  display: flex;
-  flex-direction: column;
+.h_f-col {
+    display: flex;
+    flex-direction: column;
 }
 
-.zenin__h_c-fg {
-    color: var(--foreground);
+.h_c-fg {
+    color: var(--primary-color);
 }
 
-.zenin__h_c-warn {
-  color: var(--warn);
+.h_c-warn {
+    color: var(--warning-color);
 }
 
-.zenin__h_c-dead-a {
-  color: var(--dead-a);
+.h_c-dead-a {
+    color: var(--failure-color);
 }
 
-.zenin__h_f-mono {
-  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace, "Geist Mono";
+.h_f-mono {
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace, "Geist Mono";
 }
 
-.zenin__h_f-sans {
-  font-family: system-ui, sans-serif, "Geist Sans";
+.h_f-sans {
+    font-family: system-ui, sans-serif, "Geist Sans";
 }
 
-.zenin__h_m-0 {
-  margin: 0;
+.h_m-0 {
+    margin: 0;
 }
 
-.zenin__h_mt-c {
-  margin-top: var(--px-c);
+.h_mt-c {
+    margin-top: 9px;
 }
 
-.zenin__h_mb-c {
-  margin-bottom: var(--px-c);
+.h_mb-c {
+    margin-bottom: 9px;
 }
 
-.zenin__h_ml-auto {
-  margin-left: auto;
+.h_ml-auto {
+    margin-left: auto;
 }
 
-.zenin__h_mr-auto {
-  margin-right: auto;
+.h_mr-auto {
+    margin-right: auto;
 }

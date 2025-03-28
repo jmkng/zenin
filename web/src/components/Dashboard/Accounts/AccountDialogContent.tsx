@@ -12,8 +12,8 @@ interface AccountDialogContentProps {
 export default function AccountDialogContent(props: AccountDialogContentProps) {
     const { allowDelete, onDelete, onEdit } = props;
 
-    return <div className="zenin__account_dialog_content zenin__dialog_content">
-        <div className="zenin__dialog_section">
+    return <div className="account_dialog_content dialog_content">
+        <div className="dialog_section">
             <Button icon={<EditIcon />} onClick={onEdit}>
                 Edit
             </Button>

@@ -1,106 +1,104 @@
-.zenin__table_container {
-    border: 1px solid var(--off-b);
-    border-radius: var(--rounded);
-    width: 100%;
-}
+@layer components {
+    .table_container {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        width: 100%;
+    }
 
-.zenin__table_measurement_count {
-    color: var(--mid);
-}
+    .table_measurement_count {
+        color: var(--secondary-color, var(--primary-color));
+    }
 
-.zenin__table_header {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--px-b);
-}
+    .table_header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 6px;
+    }
 
-.zenin__table_footer.margin {
-    margin-top: var(--px-b);
-}
+    .table_footer.margin {
+        margin-top: 6px;
+    }
 
-.zenin__table_footer_page_count {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: var(--px-b) var(--px-d);
-    color: var(--off-b);
-}
+    .table_footer_page_count {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 6px 12px;
+        color: var(--secondary-color, var(--primary-color));
+    }
 
-.zenin__table_head {
-    user-select: none;
-}
+    .table_head {
+        user-select: none;
+    }
 
-.zenin__table_head th {
-    font-weight: 400;
-    color: var(--mid);
-}
+    .table_head th {
+        font-weight: 400;
+        color: var(--secondary-color, var(--primary-color));
+    }
 
-.zenin__table_head, .zenin__table_component .zenin__row_component {
-    height: var(--px-h);
-    width: 100%;
-}
+    .table_head {
+        height: 38px;
+        width: 100%;
+    }
 
-.zenin__table_component table {
-    width: 100%;
-    border-collapse: collapse;
-}
+    .table_component table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.zenin__table_component td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    .table_component td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-.zenin__table_head th {
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
+    .table_head th {
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
 
-.zenin__table_head, th:first-of-type {
-    border-top-left-radius: 2px;
-}
+    .table_head,
+    th:first-of-type {
+        border-top-left-radius: 2px;
+    }
 
-.zenin__table_head, th:last-of-type {
-    border-top-right-radius: 2px;
-}
+    .table_head,
+    th:last-of-type {
+        border-top-right-radius: 2px;
+    }
 
-.zenin__row_component:hover {
-    background: var(--off-a);
-}
+    .table_component th,
+    .table_component td {
+        padding: 6px 12px;
+    }
 
-.zenin__table_component th, .zenin__table_component td {
-    padding: var(--px-b) var(--px-d);
-}
+    .table_controls_container {
+        display: flex;
+        margin-left: auto;
+    }
 
-.zenin__table_component .zenin__row_component {
-    border-top: 1px solid var(--off-b);
-}
+    .table_controls_container>*:not(:last-child) {
+        margin-right: 6px;
+    }
 
-.zenin__table_controls_container {
-    display: flex;
-    margin-left: auto;
-}
+    .table_footer {
+        display: flex;
+        justify-content: flex-end;
+    }
 
-.zenin__table_controls_container > *:not(:last-child) {
-    margin-right: var(--px-b);
-}
+    .table_footer_right {
+        display: flex;
+    }
 
-.zenin__table_footer {
-    display: flex;
-    justify-content: flex-end;
-}
+    .table_footer_right>*:not(:first-child) {
+        margin-left: 6px;
+    }
 
-.zenin__table_footer_right {
-    display: flex;
-}
-
-.zenin__table_footer_right > *:not(:first-child) {
-    margin-left: var(--px-b);
-}
-
-.zenin__table_container th:last-child, .zenin__table_container td:last-child {
-    text-align: center;
+    .table_container th:last-child,
+    .table_container td:last-child {
+        text-align: center;
+    }
 }

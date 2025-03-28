@@ -1,6 +1,6 @@
 export default function BugIcon() {
     return <svg
-        className="zenin__bug_icon zenin__icon"
+        className="bug_icon icon"
         viewBox="0 0 24 24"
     >
         <path

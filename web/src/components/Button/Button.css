@@ -1,104 +1,105 @@
-.zenin__button {  
-    appearance: none;
-    white-space: nowrap;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: var(--rounded);
-    font-weight: 500;
-    color: var(--foreground);
-    fill: var(--foreground);
-    border: 1px solid transparent;
-    background: transparent;
-}
+@layer components {
+    /* Tertiary (Default) */
+    .button {
+        min-height: 38px;
+        padding: 6px 12px;
+        font-family: inherit;
+        font-size: inherit;
+        appearance: none;
+        white-space: nowrap;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 4px;
+        font-weight: 500;
+        color: var(--primary-color);
+        fill: var(--primary-color);
+        background-color: var(--button-background, transparent);
+        border: 1px solid var(--button-border-color, var(--border-color));
+    }
 
-@keyframes fade-default {
-    from { background: initial; }
-    to { background: var(--off-b); }
-}
+    .button:focus {
+        outline: none;
+    }
 
-@keyframes fade-primary {
-    from { background: var(--foreground); }
-    to { background: var(--primary-hl); }
-}
+    .button:focus-visible {
+        outline: 1px solid var(--focus-outline-color);
+    }
 
-.zenin__button:focus {
-    outline: none;
-}
+    .button_tooltip {
+        position: relative;
+    }
 
-.zenin__button:focus-visible {
-    outline: 1px solid var(--link);
-}
+    .button_icon {
+        display: flex;
+    }
 
-.zenin__button_tooltip {
-    position: relative;
-}
+    .button:not(.border) {
+        border: 1px solid transparent;
+    }
 
-.zenin__button_icon {
-    display: flex;
-}
+    .button_icon.pair {
+        margin-right: 9px;
+    }
 
-.zenin__button_icon.pair {
-    margin-right: var(--px-c);
-}
+    /* Disabled styles for primary, secondary and tertiary buttons. */
+    .button.disabled {
+        color: var(--disabled-button-color, var(--primary-color));
+        fill: var(--disabled-button-color, var(--primary-color));
+        background-color: var(--disabled-button-background, transparent);
+        cursor: not-allowed;
+    }
+    
+    /* Primary */
+    .button:not(.disabled).primary {
+        color: var(--primary-button-color, var(--background));
+        fill: var(--primary-button-color, var(--background));
+        background-color: var(--primary-button-background, var(--primary-color));
+        border-color: transparent;
+        outline-color: var(--primary-button-focus-outline-color, var(--focus-outline-color));
+    }
+    
+    /* Secondary */
+    .button:not(.primary).background {
+        color: var(--secondary-button-color, var(--primary-color));
+        fill: var(--secondary-button-color, var(--primary-color));
+        background-color: var(--secondary-button-background, var(--hover-background));
+        border-color: transparent;
+    }
+    
+    /* Destructive */
+    .button:not(.disabled).destructive {
+        color: var(--destructive-button-color, var(--failure-color));
+        fill: var(--destructive-button-color, var(--failure-color));
+        background-color: var(--button-destructive-background, transparent);
+    }
+    
+    .button:not(.disabled):not(.hover) {
+        border-color: transparent;
+    }
 
-.zenin__button.border {
-    border-color: var(--off-b);
-}
+    .button:not(.disabled):not(.background).hover.destructive:hover {
+        background-color: var(--hover-background);
+    }
+    
+    .button:not(.disabled):not(.background):not(.primary).hover:hover {
+        background-color: var(--hover-background);
+    }
 
-.zenin__button:not(.primary).background {
-    background-color: var(--off-b);
-}
+    .tooltip {
+        opacity: 0;
+        position: absolute;
+        background: var(--tooltip-background);
+        color: var(--tooltip-color);
+        border: 1px solid var(--tooltip-border-color);
+        font-size: 1rem;
+        padding: 6px;
+        border-radius: 4px;
+        pointer-events: none;
+        white-space: nowrap;
+    }
 
-.zenin__button.disabled {
-    color: var(--off-d);
-    fill: var(--off-d);
-    cursor: not-allowed;
-}
-
-.zenin__button.loading .zenin__button_child {
-    opacity: 0;
-}
-
-.zenin__button:not(.disabled).primary {
-    color: var(--background);
-    fill: var(--background);
-    background: var(--foreground);
-}
-
-.zenin__button:not(.disabled).destructive {
-    color: var(--dead-a);
-    fill: var(--dead-a);
-}
-
-.zenin__button:not(.disabled):not(.background).hover.destructive:hover {
-    animation: fade-default var(--fast) ease-in-out forwards !important;
-}
-
-.zenin__button:not(.disabled):not(.background).hover.primary:hover {
-    animation: fade-primary var(--fast) ease-in-out forwards !important;
-}
-
-.zenin__button:not(.disabled):not(.background).hover:hover {
-    animation: fade-default var(--fast) ease-in-out forwards !important;
-}
-
-.zenin__button:not(:hover) {
-    animation: none !important;
-}
-
-.zenin__tooltip {
-    opacity: 0;
-    position: absolute;
-    background: var(--foreground);
-    color: var(--background);
-    font-size: 1rem;
-    padding: var(--px-b);
-    border-radius: 4px;
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-.zenin__tooltip.visible {
-    opacity: 1;
+    .tooltip.visible {
+        opacity: 1;
+    }
 }

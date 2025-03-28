@@ -1,23 +1,25 @@
-.zenin__action_menu_dialog_name {
-    padding: var(--px-b) var(--px-d);
-}
+@layer components {
+    .action_menu_dialog_name {
+        padding: 6px 12px;
+    }
 
-.zenin__action_menu_dialog_name .zenin__dialog_section {
-    display: flex;
-    align-items: center;
-    min-height: 38px;
-}
+    .action_menu_dialog_name .dialog_section {
+        display: flex;
+        align-items: center;
+        min-height: 38px;
+    }
 
-.zenin__action_menu_dialog_name:not(:only-child) {
-    padding: var(--px-b) var(--px-d) 0 var(--px-d);
-}
+    .action_menu_dialog_name:not(:only-child) {
+        padding: 6px 12px 0 12px;
+    }
 
-.zenin__action_menu_dialog_id {
-    color: var(--mid);
-    padding: 0 var(--px-d) var(--px-b) var(--px-d);
-}
+    .action_menu_dialog_id {
+        color: var(--secondary-color, var(--primary-color));
+        padding: 0 12px 0 12px;
+    }
 
-.zenin__action_menu_log_out_icon {
-    display: flex;
-    transform: rotate(45deg);
+    .action_menu_log_out_icon {
+        display: flex;
+        transform: rotate(45deg);
+    }
 }

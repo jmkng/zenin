@@ -20,14 +20,6 @@ func Log(next http.Handler) http.Handler {
 	})
 }
 
-// Default will set common default headers.
-func Default(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(ContentType, ContentTypeApplicationJson)
-		next.ServeHTTP(w, r)
-	})
-}
-
 // Insecure adds headers that are insecure, but may be necessary in development.
 func Insecure(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

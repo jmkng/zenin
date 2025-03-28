@@ -1,6 +1,6 @@
 export default function VMenuIcon() {
   return <svg
-    className="zenin__vmenu_icon zenin__icon"
+    className="vmenu_icon icon"
     style={{
       fillRule: "evenodd",
       clipRule: "evenodd",

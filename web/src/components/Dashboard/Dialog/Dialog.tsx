@@ -37,7 +37,7 @@ interface DialogProps {
 export default function Dialog(props: DialogProps) {
     const {
         children,
-        dialog: { content, closers = ["zenin__button:not(.disabled)"] },
+        dialog: { content, closers = ["button:not(.disabled)"] },
         strategy = defaultDialogStrategy,
     } = props;
     const [state, setState] = useState<DialogState>(defaultDialogState);
@@ -115,12 +115,12 @@ export default function Dialog(props: DialogProps) {
         };
     }, [state.isPositioned])
 
-    return <div className="zenin__dialog" ref={rootRef}>
-        <div className="zenin__dialog_anchor" onClick={handleToggle}>
+    return <div className="dialog" ref={rootRef}>
+        <div className="dialog_anchor" onClick={handleToggle}>
             {children}
         </div>
         <div
-            className="zenin__dialog_portal"
+            className="dialog_portal"
             popover="auto"
             ref={portalRef}
             style={{ left: `${state.left}px`, top: `${state.top}px` }}

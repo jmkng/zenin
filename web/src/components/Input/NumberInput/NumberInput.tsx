@@ -14,22 +14,22 @@ interface NumberProps {
 export default function NumberInput(props: NumberProps) {
     const { name, value, onChange, label, subtext } = props;
     return (
-        <div className="zenin__number_input zenin__input_container zenin__h_f-col">
+        <div className="number_input input_container h_f-col">
             {label ? (
-                <label className="zenin__number_input_label zenin__input_label" htmlFor={name}>
+                <label className="number_input_label input_label" htmlFor={name}>
                     {label}
                 </label>
             )
                 : null
             }
             {subtext ?
-                <p className="zenin__number_input_subtext zenin__input_subtext">
+                <p className="number_input_subtext input_subtext">
                     {subtext}
                 </p>
                 : null
             }
             <input
-                className="zenin__number_input_box zenin__input"
+                className="number_input_box input"
                 type="number"
                 onChange={(event: ChangeEvent<HTMLInputElement>) => event.target.value == "" ? onChange(null) : onChange(Number(event.target.value))}
                 name={name}

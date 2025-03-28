@@ -98,9 +98,9 @@ export default function Table(props: TableProps) {
             state.monitor.id, value);
         if (!measurements.ok()) return;
 
-        const packet: DataPacket<{measurements: Measurement[] | null}> = await measurements.json();
+        const packet: DataPacket<{measurements: Measurement[]}> = await measurements.json();
 
-        const mon = { ...state.monitor, measurements: [...packet.data.measurements || []].toReversed() };
+        const mon = { ...state.monitor, measurements: [...packet.data.measurements].toReversed() };
         monitor.context.dispatch({
             type: 'pane',
             pane: { type: 'view', target: { monitor: mon, measurement: null, disableToggle: true, origin: value } },
@@ -111,29 +111,33 @@ export default function Table(props: TableProps) {
         const extract = await measurement.service.deleteMeasurement(account.state.token!.raw, checked);
         if (!extract.ok()) return;
         monitor.context.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })
+        // If a measurement's properties are being displayed and that measurement is deleted,
+        // stop showing them.
         if (state.selected && checked.includes(state.selected.id)) {
-            // If we are showing a measurement's properties and it is deleted,
-            // we want to stop showing them.
-            monitor.context.dispatch({ type: 'detail', measurement: null })
+            const target = { monitor: state.monitor, measurement: null, disableToggle: true };
+            const pane = { type: 'view' as const, target }
+            monitor.context.dispatch({ type: 'pane', pane })
         }
         const newPages = Math.ceil((measurements.length - checked.length) / PAGESIZE);
         setChecked([]);
         setAllChecked(false);
         setPage(prev => Math.min(prev, newPages) || 1);
     }
-
+    
     const handleRowClick = (id: number) => {
         const measurement = measurements.find(n => n.id === id) || null;
-        monitor.context.dispatch({ type: 'detail', measurement })
+        const target = { monitor: state.monitor, measurement, disableToggle: true };
+        const pane = { type: 'view' as const, target }
+        monitor.context.dispatch({ type: 'pane', pane })
     }
 
-    return <div className="zenin__table_component">
-        <div className="zenin__table_header">
-            <span className="zenin__table_measurement_count">
+    return <div className="table_component">
+        <div className="table_header">
+            <span className="table_measurement_count">
                 {measurements.length} {measurements.length == 1 ? "measurement" : "measurements"}
             </span>
 
-            <div className="zenin__table_controls_container">
+            <div className="table_controls_container">
                 <Button
                     onClick={handleDelete}
                     disabled={checked.length == 0}
@@ -148,7 +152,7 @@ export default function Table(props: TableProps) {
                 </Dialog>
             </div>
         </div>
-        <div className="zenin__table_container">
+        <div className="table_container">
             <table>
                 <colgroup>
                     <col span={1} />
@@ -156,17 +160,17 @@ export default function Table(props: TableProps) {
                     <col width="100%" span={1} />
                     <col span={1} />
                 </colgroup>
-                <thead className='zenin__table_head'>
+                <thead className='table_head'>
                     <tr>
                         <th>
-                            <CheckboxInput checked={allChecked} name={`zenin__table_master`} onChange={handleMasterCheck} />
+                            <CheckboxInput checked={allChecked} name={`table_master`} onChange={handleMasterCheck} />
                         </th>
                         <th>ID</th>
                         <th>Time</th>
                         <th>State</th>
                     </tr>
                 </thead>
-                <tbody className='zenin__table_body'>
+                <tbody className='table_body'>
                     {visible.map((n, index) =>
                         <Row
                             key={index}
@@ -180,8 +184,8 @@ export default function Table(props: TableProps) {
                 </tbody>
             </table>
         </div>
-        <div className={["zenin__table_footer", hasTableFooterMargin ? "margin" : ""].join(" ")}>
-            <div className="zenin__table_footer_right">
+        <div className={["table_footer", hasTableFooterMargin ? "margin" : ""].join(" ")}>
+            <div className="table_footer_right">
                 {!backDisabled
                     ? <>
                         <Button border={true} onClick={() => setPage(1)}>
@@ -193,7 +197,7 @@ export default function Table(props: TableProps) {
                     </>
                     : null}
                 {pages > 1
-                    ? <div className="zenin__table_footer_page_count zenin__footer_control_set">
+                    ? <div className="table_footer_page_count footer_control_set">
                         {page}/{pages}
                     </div>
                     : null}
@@ -210,7 +214,7 @@ export default function Table(props: TableProps) {
             </div>
         </div>
         {state.selected ?
-            <div className="zenin__info_property_container" ref={propertyContainerRef}>
+            <div className="info_property_container" ref={propertyContainerRef}>
                 <Property measurement={state.selected} />
             </div>
             : null}

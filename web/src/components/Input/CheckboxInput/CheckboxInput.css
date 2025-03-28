@@ -1,19 +1,21 @@
-.zenin__checkbox_input {
-    appearance: none;
-    white-space: nowrap;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    height: 14px;
-    width: 14px;
-    border-radius: var(--rounded);
-    user-select: none;
-    font-weight: 500;
-    background: var(--background);
-    border: 1px solid var(--foreground);
-}
+@layer components {
+    .checkbox_input {
+        appearance: none;
+        white-space: nowrap;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        height: 14px;
+        width: 14px;
+        border-radius: 4px;
+        user-select: none;
+        font-weight: 500;
+        background: var(--checkbox-input-background, transparent);
+        border: 1px solid var(--checkbox-input-border-color, var(--input-border-color), var(--border-color));
+    }
 
-.zenin__checkbox_input.checked {
-    background: var(--foreground);
+    .checkbox_input.checked {
+        background: var(--checked-checkbox-input-background, var(--primary-color));
+    }
 }

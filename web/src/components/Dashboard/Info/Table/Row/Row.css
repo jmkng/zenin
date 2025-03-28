@@ -1,11 +1,36 @@
-.zenin__row_component {
-    user-select: none;
-    width: 100%;
-}
+@layer components {
+    .row_component {
+        user-select: none;
+        width: 100%;
+        height: 38px;
+        border-top: 1px solid var(--border-color);
+    }
 
-.zenin__row_component:not(.highlight) {
-}
+    .row_component:hover,
+    .row_component.highlight {
+        background: var(--hover-background);
+    }
 
-.zenin__row_component:hover, .zenin__row_component.highlight {
-    background: var(--off-a);
+    .state {
+        padding: 0 4px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 45px;
+        border: 1px solid var(--widget-border-color, var(--background));
+        background: var(--widget-background);
+    }
+    
+    .state[data-state="OK"] {
+        color: var(--success-color);
+    }
+    
+    .state[data-state="WARN"] {
+        color: var(--warning-color)
+    }
+    
+    .state[data-state="DEAD"] {
+        color: var(--failure-color)
+    }
 }

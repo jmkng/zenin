@@ -1,37 +1,35 @@
-.zenin__array_input {
-    width: 100%;
-}
+@layer components {
+    .array_input {
+        width: 100%;
+    }
+    
+    .array_input_row {
+        display: flex;
+        width: 100%;
+        margin-bottom: 6px;
+    }
 
-.zenin__array_input_row {
-    display: flex;
-    width: 100%;
-    margin-bottom: var(--px-b);
-}
+    .array_input_text_field {
+        flex: 1;
+    }
 
-.zenin__array_input_row:hover .zenin__array_input_grab_handle path {
-    fill: var(--foreground);
-}
+    .array_input_delete {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 6px;
+    }
 
-.zenin__array_input_text_field {
-    flex: 1;
-}
+    .array_input_delete_icon {
+        display: flex;
+        transform: rotate(45deg);
+    }
 
-.zenin__array_input_delete {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: var(--px-b);
-}
+    .array_input .text_input {
+        width: 100%;
+    }
 
-.zenin__array_input_delete_icon {
-    display: flex;
-    transform: rotate(45deg);
-}
-
-.zenin__array_input .zenin__text_input {
-    width: 100%;
-}
-
-.zenin__array_input_label {
-    margin-top: var(--px-b) !important;
+    .array_input_label {
+        margin-top: 6px !important;
+    }
 }

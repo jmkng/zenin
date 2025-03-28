@@ -1,27 +1,16 @@
-import AccountProvider from './internal/account/context.tsx';
-import LayoutProvider from './internal/layout/context.tsx';
-import MonitorProvider from './internal/monitor/context.tsx';
-import SettingsProvider from './internal/settings/context.tsx';
-
-import Initialize from './components/Initialize.tsx';
-import Provider from './components/Provider.tsx';
-import Router from "./components/Router.tsx";
-
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
-import './css/cover.css';
-import './css/dialog.css';
-import './css/helper.css';
-import './css/icon.css';
-import './css/input.css';
-import './css/menu.css';
-import './css/root.css';
-import './css/scrollbar.css';
-import './css/spinner.css';
-import './css/state.css';
-import './css/widget.css';
+import AccountProvider from './internal/account/context.tsx';
+import LayoutProvider from './internal/layout/context.tsx';
+import MonitorProvider from './internal/monitor/context.tsx';
+import SettingsProvider from './internal/settings/context.tsx';
+import Initialize from './components/Initialize.tsx';
+import Provider from './components/Provider.tsx';
+import Router from "./components/Router.tsx";
+
+import './main.css';
 
 const providers = [
     MonitorProvider,

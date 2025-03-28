@@ -12,7 +12,7 @@ export default function CheckboxInput(props: CheckboxProps) {
     return (
         <button
             name={name}
-            className={["zenin__checkbox_input zenin__input_container", checked ? 'checked' : ''].join(' ')}
+            className={["checkbox_input input_container", checked ? 'checked' : ''].join(' ')}
             onClick={e => onChange(e)}
             role='checkbox'
         />

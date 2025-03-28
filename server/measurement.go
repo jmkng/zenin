@@ -58,6 +58,9 @@ func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *htt
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
+	if certificates == nil {
+		certificates = make([]measurement.Certificate, 0)
+	}
 
 	responder.Data(struct {
 		Certificates []measurement.Certificate `json:"certificates"`

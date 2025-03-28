@@ -4,83 +4,80 @@ import { AccountsPane, EditorPane, OriginState, SettingsPane, SplitState, ViewPa
 
 export interface MonitorState {
     monitors: Map<number, Monitor>,
-    filter: FilterKind,
     selected: Monitor[],
-    split: SplitState,
     deleting: Monitor[],
+    split: SplitState,
+    filter: FilterKind,
     plugins: string[],
 }
 
+// SplitState is owned by the monitor reducer so that it can be modified as monitors are deleted, etc.
+// If the split is related to a monitor that was just deleted, it should close.
+
 export const monitorDefault: MonitorState = {
     monitors: new Map(),
-    filter: "NAME_ASC",
     selected: [],
-    split: new SplitState(null),
     deleting: [],
+    split: new SplitState(null),
+    filter: "NAME_ASC",
     plugins: []
 }
 
+// The batch size is used to populate the inventory. (Router.tsx)
+// Chunk size should generally be the difference between max measurements and batch size.
 const inventoryMaxMeasurements = 40;
-const inventoryChunkSize = 5;
+export const inventoryBatchSize = 35;
+const inventoryChunkSize = Math.max(1, inventoryMaxMeasurements - inventoryBatchSize);
 
-type ResetAction = {
-    type: 'reset',
-    monitors: Monitor[]
-};
+interface MonitorResetData {
+    monitors: Monitor[],
+    selected: Monitor[],
+    deleting: Monitor[],
+    split: SplitState,
+    filter: FilterKind,
+    plugins: string[]
+}
 
-type RemoveMonitorAction = {
-    type: 'remove',
-    monitors: number[]
-};
+/** Reset the state. */
+type ResetAction = { type: 'reset', state: MonitorResetData };
 
-type ToggleMonitorAction = {
-    type: 'toggle',
-    monitors: number[],
-    active: boolean,
-    time: string
-};
+/** Queue monitors for deletion. */
+type QueueDeleteMonitorAction = { type: 'queue', monitors: Monitor[] };
 
-type DeleteMonitorAction = {
-    type: 'delete',
-    monitors: Monitor[]
-};
+/** Delete monitors. */
+type DeleteMonitorAction = { type: 'delete', monitors: number[] };
 
-type OverwriteMonitorAction = {
-    type: 'overwrite',
-    monitor: Monitor
-};
+/** Toggle the active state of monitors. */
+type ToggleMonitorAction = { type: 'toggle', monitors: number[], time: string, active: boolean };
 
-type DraftAction = {
-    type: 'draft'
-};
+/** Overwrite a monitor. */
+type UpdateMonitorAction = { type: 'update', monitor: Monitor };
 
-type FilterAction = {
-    type: 'filter',
-    filter: FilterKind
-};
+/** Add a measurement. */
+type PollAction = { type: 'poll', measurement: Measurement };
 
-type SelectKind = Monitor | "ALL" | "NONE";
+/** Change the dashboard filter. */
+type FilterAction = { type: 'filter', filter: FilterKind };
 
-type SelectAction = {
-    type: 'select',
-    monitor: SelectKind
-};
+const ALL_SELECT = "ALL";
+const NONE_SELECT = "NONE";
 
-type PollAction = {
-    type: 'poll',
-    measurement: Measurement
-};
+type SelectKind = Monitor | typeof ALL_SELECT | typeof NONE_SELECT;
 
-type DetailAction = {
-    type: 'detail',
-    measurement: Measurement | null
-};
+/** Select monitors. */
+type SelectAction = { type: 'select', monitor: SelectKind };
+
+/** Add a new measurement to a monitor. */
+type AddMeasurementAction = { type: 'measurement', id: number[], monitor: number };
+
+export type PaneKind = ViewPaneAction | EditorPaneAction | DraftPaneAction | SettingsPaneAction | AccountsPaneAction;
 
 type PaneAction = {
     type: 'pane',
-    pane: ViewPaneAction | EditorPaneAction | SettingsPaneAction | AccountsPaneAction
+    pane: PaneKind
 }
 
+/** View monitor details. */
 type ViewPaneAction = {
     type: 'view',
     target: {
@@ -91,53 +88,63 @@ type ViewPaneAction = {
     } | null
 };
 
+/** Edit a monitor. */
 type EditorPaneAction = {
     type: 'editor',
     monitor: Monitor | null
 };
 
+/** Draft a new monitor. */
+type DraftPaneAction = {
+    type: 'draft',
+}
+
+/** View settings. */
 type SettingsPaneAction = {
     type: 'settings'
 };
 
+/** View accounts. */
 type AccountsPaneAction = {
     type: 'accounts'
 }
 
-type AddMeasurementAction = {
-    type: 'measurement',
-    id: number[],
-    monitor: number
-};
-
-type UpdatePluginAction = {
-    type: 'update'
-    plugins: string[]
-}
-
-type LogoutAction = {
-    type: 'logout'
-}
+/** Log out. */
+type LogoutAction = { type: 'logout' }
 
 export type MonitorDispatch = (action: MonitorAction) => void;
 
 export type MonitorAction =
-    | RemoveMonitorAction
-    | ToggleMonitorAction
-    | DraftAction
-    | FilterAction
-    | DeleteMonitorAction
-    | SelectAction
-    | OverwriteMonitorAction
-    | PollAction
     | ResetAction
-    | PaneAction
-    | DetailAction
+    | QueueDeleteMonitorAction
+    | DeleteMonitorAction
+    | ToggleMonitorAction
+    | UpdateMonitorAction
+    | PollAction
+    | FilterAction
+    | SelectAction
     | AddMeasurementAction
-    | UpdatePluginAction
+    | PaneAction
     | LogoutAction
 
-const removeMonitorAction = (state: MonitorState, action: RemoveMonitorAction) => {
+const resetAction = (_: MonitorState, action: ResetAction) => {
+    const monitors = new Map<number, Monitor>();
+    for (const monitor of action.state.monitors) {
+        const duplicate: Monitor = { ...monitor };
+        // By default, measurement information has the newest at the front.
+        // Reverse array here so new measurements can be pushed to the back, since that is most common operation.
+        if (monitor.measurements) duplicate.measurements = [...monitor.measurements].reverse();
+        monitors.set(duplicate.id, duplicate);
+    }
+    return { ...action.state, monitors }
+}    
+
+const queueMonitorDeleteAction = (state: MonitorState, action: QueueDeleteMonitorAction) => {
+    const deleting = action.monitors;
+    return { ...state, deleting }
+}
+
+const deleteMonitorAction = (state: MonitorState, action: DeleteMonitorAction) => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) monitors.delete(n);
 
@@ -163,36 +170,7 @@ const toggleMonitorAction = (state: MonitorState, action: ToggleMonitorAction) =
     return { ...state, monitors, selected: [], deleting: [] };
 }
 
-const draftAction = (state: MonitorState) => {
-    const editor = new EditorPane(null);
-    const split = new SplitState(editor);
-    return { ...state, split }
-}
-
-const filterAction = (state: MonitorState, action: FilterAction) => {
-    const filter = action.filter;
-    return { ...state, filter }
-}
-
-const deleteMonitorAction = (state: MonitorState, action: DeleteMonitorAction) => {
-    const deleting = action.monitors;
-    return { ...state, deleting }
-}
-
-const selectAction = (state: MonitorState, action: SelectAction) => {
-    if (action.monitor == "ALL") {
-        return { ...state, selected: [...state.monitors.values()] }
-    }
-    if (action.monitor == "NONE") {
-        return { ...state, selected: [] }
-    }
-    const selected = state.selected.includes(action.monitor)
-        ? state.selected.filter(n => n != action.monitor)
-        : [...state.selected, action.monitor];
-    return { ...state, selected }
-}
-
-const overwriteMonitorAction = (state: MonitorState, action: OverwriteMonitorAction) => {
+const overwriteMonitorAction = (state: MonitorState, action: UpdateMonitorAction) => {
     const monitors = new Map(state.monitors);
     const target = monitors.get(action.monitor.id);
 
@@ -215,30 +193,43 @@ const pollAction = (state: MonitorState, action: PollAction) => {
     if (monitor.measurements.length >= inventoryMaxMeasurements) {
         const before = monitor.measurements.length;
         monitor.measurements = monitor.measurements.slice(inventoryChunkSize);
-        console.log(`trimming measurements: id=${monitor.id}, chunk=${inventoryChunkSize}, before=${before}, after=${monitor.measurements.length}`)
+        console.log(`trimming measurements: monitor(id)=${monitor.id}, chunk=${inventoryChunkSize}, before=${before}, after=${monitor.measurements.length}`)
     }
     if (!monitor.measurements.some(n => n.id == action.measurement.id)) monitor.measurements.push(action.measurement);
     return { ...state, monitors }
 }
 
+const filterAction = (state: MonitorState, action: FilterAction) => {
+    const filter = action.filter;
+    return { ...state, filter }
+}
 
-const resetAction = (state: MonitorState, action: ResetAction) => {
-    const monitors = new Map<number, Monitor>();
-    for (const monitor of action.monitors) {
-        const duplicate: Monitor = { ...monitor };
-        // By default, measurement information has the newest at the front.
-        // Reverse array here so new measurements can be pushed to the back, since that is most common operation.
-        if (monitor.measurements) duplicate.measurements = [...monitor.measurements].reverse();
-        monitors.set(duplicate.id, duplicate);
+const selectAction = (state: MonitorState, action: SelectAction) => {
+    if (action.monitor == "ALL") {
+        return { ...state, selected: [...state.monitors.values()] }
     }
+    if (action.monitor == "NONE") {
+        return { ...state, selected: [] }
+    }
+    const selected = state.selected.includes(action.monitor)
+        ? state.selected.filter(n => n != action.monitor)
+        : [...state.selected, action.monitor];
+    return { ...state, selected }
+}
 
-    return { ...state, monitors }
+const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction) => {
+    const monitor = state.monitors.get(action.monitor);
+    if (!monitor) return state;
+
+    if (monitor.measurements) monitor.measurements = monitor.measurements.filter(n => !action.id.includes(n.id))
+    return state;
 }
 
 const paneAction = (state: MonitorState, action: PaneAction) => {
     switch (action.pane.type) {
         case "view": return viewPaneAction(state, action.pane);
         case "editor": return editorPaneAction(state, action.pane);
+        case "draft": return draftPaneAction(state, action.pane);
         case "settings": return settingsPaneAction(state);
         case "accounts": return accountsPaneAction(state);
     }
@@ -261,6 +252,11 @@ const editorPaneAction = (state: MonitorState, action: EditorPaneAction) => {
     return { ...state, split }
 }
 
+const draftPaneAction = (state: MonitorState, _: DraftPaneAction) => {
+    const split = new SplitState(new EditorPane(null))
+    return { ...state, split }
+}
+
 const settingsPaneAction = (state: MonitorState) => {
     let split: SplitState;
     if (state.split.pane != null && state.split.isSettingsPane()) split = new SplitState(null);
@@ -275,45 +271,22 @@ const accountsPaneAction = (state: MonitorState) => {
     return { ...state, split }
 }
 
-const detailAction = (state: MonitorState, action: DetailAction) => {
-    if (state.split.isViewPane()) {
-        const view = new ViewPane(state.split.pane.monitor, action.measurement)
-        return { ...state, split: new SplitState(view) }
-    }
-    return state;
-}
-
-const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction) => {
-    const monitor = state.monitors.get(action.monitor);
-    if (!monitor) return state;
-
-    if (monitor.measurements) monitor.measurements = monitor.measurements.filter(n => !action.id.includes(n.id))
-    return state;
-}
-
-const updatePluginAction = (state: MonitorState, action: UpdatePluginAction) => {
-    return { ...state, plugins: action.plugins.sort() };
-}
-
 const logoutAction = () => {
     return { ...monitorDefault };
 }
 
 export const monitorReducer = (state: MonitorState, action: MonitorAction): MonitorState => {
     switch (action.type) {
-        case "remove": return removeMonitorAction(state, action);
-        case "toggle": return toggleMonitorAction(state, action);
-        case "overwrite": return overwriteMonitorAction(state, action);
-        case "poll": return pollAction(state, action);
         case "reset": return resetAction(state, action);
-        case "draft": return draftAction(state);
-        case "filter": return filterAction(state, action);
+        case "queue": return queueMonitorDeleteAction(state, action);
         case "delete": return deleteMonitorAction(state, action);
+        case "toggle": return toggleMonitorAction(state, action);
+        case "update": return overwriteMonitorAction(state, action);
+        case "poll": return pollAction(state, action);
+        case "filter": return filterAction(state, action);
         case "select": return selectAction(state, action);
-        case "pane": return paneAction(state, action);
-        case "detail": return detailAction(state, action);
         case "measurement": return addMeasurementAction(state, action);
-        case "update": return updatePluginAction(state, action);
+        case "pane": return paneAction(state, action);
         case "logout": return logoutAction();
     }
 }

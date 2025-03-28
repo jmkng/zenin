@@ -1,26 +1,35 @@
 <!doctype html>
-<html lang="en">
-  <head>
+<html>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="icon" href="/assets/logo/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png" />
+    <script>
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const update = () => {
+            if (mq.matches) document.documentElement.setAttribute('prefers-dark', '');
+            else document.documentElement.removeAttribute('prefers-dark');
+        };
+        update();
+        mq.addEventListener('change', update);
+    </script>
+
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" id="theme-link" href="/api/v1/settings/themes/active" />
 
     <title>Zenin</title>
-    <script>
-      const theme = localStorage.getItem("zenin__theme") 
-      document.documentElement.classList.add(theme ? theme : "zenin__theme_auto")
-    </script>
-  </head>
+</head>
 
-  <body class="zenin__h_f-sans">
+<body class="h_f-sans">
     <div id="cover">
-      <div class="zenin__spinner"></div>
+        <div class="spinner"></div>
     </div>
 
     <div id="root"></div>
-    
+
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
+
 </html>

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from "react";
 import { useAccountContext } from "@/internal/account";
-import { formatDate } from "@/internal/layout/graphics";
+import { formatUTCDate } from "@/internal/layout/graphics";
 import { Certificate, Measurement } from "@/internal/measurement";
 import { useDefaultMeasurementService } from "@/internal/measurement/service";
 import { DataPacket } from "@/internal/server";
@@ -33,8 +33,8 @@ export default function Chain(props: ChainProps) {
             const token = account.state.token!.raw;
             const certificates = await measurement.service.getCertificate(token, measurement.data.id);
             if (!certificates.ok()) return;
-            const packet: DataPacket<{certificates: Certificate[] | null}> = await certificates.json();
-            setState({ certificates: packet.data.certificates || [], expanded: true });
+            const packet: DataPacket<{certificates: Certificate[]}> = await certificates.json();
+            setState({ certificates: packet.data.certificates, expanded: true });
             return;
         }
         setState({ ...state, expanded: !state.expanded })
@@ -42,7 +42,7 @@ export default function Chain(props: ChainProps) {
 
     return <div
         className={
-            ["zenin__chain_component",
+            ["chain_component",
                 state == "PENDING" ? "pending" : "",
                 isReadyState(state) && state.expanded
                     ? state.certificates.length > 0
@@ -50,16 +50,16 @@ export default function Chain(props: ChainProps) {
                         : "disabled"
                     : "",
             ].join(" ")}>
-        <div className="zenin__chain_controls">
+        <div className="chain_controls">
             <div
-                className="zenin__chain_title"
+                className="chain_title"
                 onClick={handleExpand}
             >
                 {isReadyState(state) && state.certificates.length == 0 ? "No Certificates Available" : "Certificates"}
             </div>
 
             <div
-                className={["zenin__chain_toggle zenin__h_f-row-center"].join(' ')}
+                className={["chain_toggle h_f-row-center"].join(' ')}
                 onClick={handleExpand}
             >
                 <ChevronIcon />
@@ -67,36 +67,36 @@ export default function Chain(props: ChainProps) {
         </div>
 
         {isReadyState(state) && state.expanded ?
-            <div className={"zenin__chain_popout"}>
+            <div className={"chain_popout"}>
                 {state.certificates.map((certificate, index) =>
-                    <div className="zenin__chain_popout_certificate" key={index}>
-                        <div className="zenin__chain_popout_not_before zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Not Before</span>
-                            <span className="zenin__chain_popout_value">{formatDate(certificate.notBefore)}</span>
+                    <div className="chain_popout_certificate" key={index}>
+                        <div className="chain_popout_not_before chain_popout_row">
+                            <span className="chain_popout_label">Not Before</span>
+                            <span className="chain_popout_value">{formatUTCDate(certificate.notBefore)}</span>
                         </div>
-                        <div className="zenin__chain_popout_not_after zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Not After</span>
-                            <span className="zenin__chain_popout_value">{formatDate(certificate.notAfter)}</span>
+                        <div className="chain_popout_not_after chain_popout_row">
+                            <span className="chain_popout_label">Not After</span>
+                            <span className="chain_popout_value">{formatUTCDate(certificate.notAfter)}</span>
                         </div>
-                        <div className="zenin__chain_popout_public_key_algorithm zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Public Key Algorithm</span>
-                            <span className="zenin__chain_popout_value">{certificate.publicKeyAlgorithm}</span>
+                        <div className="chain_popout_public_key_algorithm chain_popout_row">
+                            <span className="chain_popout_label">Public Key Algorithm</span>
+                            <span className="chain_popout_value">{certificate.publicKeyAlgorithm}</span>
                         </div>
-                        <div className="zenin__chain_popout_serial_number zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Serial</span>
-                            <span className="zenin__chain_popout_value">{certificate.serialNumber}</span>
+                        <div className="chain_popout_serial_number chain_popout_row">
+                            <span className="chain_popout_label">Serial</span>
+                            <span className="chain_popout_value">{certificate.serialNumber}</span>
                         </div>
-                        <div className="zenin__chain_popout_version zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Version</span>
-                            <span className="zenin__chain_popout_value">{certificate.version}</span>
+                        <div className="chain_popout_version chain_popout_row">
+                            <span className="chain_popout_label">Version</span>
+                            <span className="chain_popout_value">{certificate.version}</span>
                         </div>
-                        <div className="zenin__chain_popout_subject_common_name zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Subject Common Name</span>
-                            <span className="zenin__chain_popout_value">{certificate.subjectCommonName}</span>
+                        <div className="chain_popout_subject_common_name chain_popout_row">
+                            <span className="chain_popout_label">Subject Common Name</span>
+                            <span className="chain_popout_value">{certificate.subjectCommonName}</span>
                         </div>
-                        <div className="zenin__chain_popout_issuer_common_name zenin__chain_popout_row">
-                            <span className="zenin__chain_popout_label">Issuer Common Name</span>
-                            <span className="zenin__chain_popout_value">{certificate.issuerCommonName}</span>
+                        <div className="chain_popout_issuer_common_name chain_popout_row">
+                            <span className="chain_popout_label">Issuer Common Name</span>
+                            <span className="chain_popout_value">{certificate.issuerCommonName}</span>
                         </div>
                     </div>)
                 }

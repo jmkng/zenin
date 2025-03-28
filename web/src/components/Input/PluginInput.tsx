@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 
 import { useMonitorContext } from "@/internal/monitor";
-import ArrayInput from "../ArrayInput/ArrayInput";
-import SelectInput from "../SelectInput/SelectInput";
-
-import "./PluginInput.css";
+import ArrayInput from "./ArrayInput/ArrayInput";
+import SelectInput from "./SelectInput/SelectInput";
 
 interface CommonFields {
     subtext?: string | React.ReactNode
@@ -24,17 +22,17 @@ export default function PluginInput(props: PluginInputProps) {
         || (args.value && args.value.length > 0 && args.value.every(n => n.trim() != "")), [args.value]);
 
     const options = useMemo(() => Array.from(new Set([...monitor.context.state.plugins, plugin.value || ""]))
-        .map(n => ({ text: n }))
+        .map(n => ({ text: n, value: n }))
         .filter(n => n.text.trim() != ""), [monitor.context.state.plugins]);
 
     const selection = useMemo(() => plugin.value || monitor.context.state.plugins[0], 
     [plugin.value, monitor.context.state.plugins]);
 
-    return <div className="zenin__plugin_spec">
-        <div className="zenin__plugin_spec_control">
+    return <div className="plugin_spec">
+        <div className="plugin_spec_control">
             <SelectInput
-                name={plugin.name || "zenin__plugin_input_name"}
-                label={<span className={selection ? "" : "zenin__h_c-dead-a"}>Plugin</span>}
+                name={plugin.name || "plugin_input_name"}
+                label={<span className={selection ? "" : "h_c-dead-a"}>Plugin</span>}
                 subtext={plugin.subtext}
                 value={selection}
                 onChange={value => plugin.onChange ? plugin.onChange(value) : {}}
@@ -42,20 +40,20 @@ export default function PluginInput(props: PluginInputProps) {
                 options={options}
             />
             {!selection ?
-                <span className="zenin__detail_validation zenin__h_c-dead-a">Plugin selection is required.</span>
+                <span className="detail_validation h_c-dead-a">Plugin selection is required.</span>
                 :
                 null}
         </div>
 
-        <div className="zenin__plugin_spec_control">
+        <div className="plugin_spec_control">
             <ArrayInput
-                name={args.name || "zenin__plugin_input_arguments"}
-                label={<span className={hasValidArguments ? "" : "zenin__h_c-dead-a"}>Arguments</span>}
+                name={args.name || "plugin_input_arguments"}
+                label={<span className={hasValidArguments ? "" : "h_c-dead-a"}>Arguments</span>}
                 value={args.value ?? []}
                 onChange={value => args.onChange(value.length == 0 ? null : value)}
             />
             {!hasValidArguments ?
-                <span className="zenin__detail_validation zenin__h_c-dead-a">Plugin arguments must not be empty.</span>
+                <span className="detail_validation h_c-dead-a">Plugin arguments must not be empty.</span>
                 :
                 null}
         </div>

@@ -1,60 +1,88 @@
-.zenin__monitor {
-    background: var(--background);
-    border: 1px solid var(--off-b);
-    border-radius: var(--rounded);
-    display: flex;
-    flex-direction: column;
-    transition: border-color var(--fast) ease-in-out;
-}
+@layer components {
+    .monitor {
+        background: var(--monitor-background, transparent);
+        border: 1px solid var(--monitor-border-color, var(--border-color));
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        transition: border-color .10s ease-in-out;
+    }
 
-.zenin__monitor.selected {
-    border-color: var(--foreground);
-}
+    .monitor.selected {
+        border-color: var(--selected-monitor-border-color, var(--primary-color));
+    }
 
-.zenin__monitor_top_upper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--px-c) var(--px-c) 0 var(--px-c);
-}
+    .monitor_top {
+        display: flex;
+        flex-direction: column;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        background: var(--monitor-header-background, transparent);
+        justify-content: space-between;
+        padding: 4px 9px;
+        flex: 1;
+    }
 
-.zenin__monitor_top_lower {
-    display: flex;
-    padding: var(--px-b) var(--px-c) var(--px-c) var(--px-c);
-}
+    .monitor_inactive_widget {
+        margin-right: 4px;
+    }
+    
+    .monitor_top_controls {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
 
-.zenin__monitor_top_lower > * {
-    margin-right: var(--px-a);
-}
+    .monitor_dialog_button_container .button {
+        padding-right: 0;
+    }
 
-.zenin__monitor_name {
-    font-weight: 500;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: 100%;
-    padding-right: var(--px-g);
-    white-space: nowrap;
-    cursor: default;
-}
+    .monitor_top_upper {
+        max-height: 38px;
+        display: flex;
+        flex: 1;
+        align-items: center;
+    }
 
-.zenin__monitor_name:hover {
-    text-decoration: underline;
-}
+    .monitor_name {
+        font-weight: 500;
+        text-overflow: ellipsis;
+        margin-right: 9px;
+        overflow: hidden;
+        max-width: 100%;
+        white-space: nowrap;
+        cursor: default;
+    }
 
-.zenin__monitor_middle {
-    flex: 1;
-}
- 
-.zenin__monitor_bottom {
-    display: flex;
-    flex-direction: row-reverse;
-    transition: background var(--fast) ease-in-out;
-    max-height: var(--px-f);
-    min-height: var(--px-f);
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-}
+    .monitor_menu_container {
+        display: flex;
+        align-items: center;
+    }
 
-.zenin__monitor_bottom:hover {
-    background: var(--off-a);
+    .monitor_name:hover {
+        text-decoration: underline;
+    }
+
+    .monitor_timestamp {
+        color: var(--secondary-color, var(--primary-color));
+        cursor: default;
+        display: flex;
+        align-items: center;
+    }
+
+    .monitor_bottom {
+        margin-top: auto;
+        border-top: 1px solid var(--timeline-border-color, transparent);
+        background: var(--timeline-background, transparent);
+        display: flex;
+        flex-direction: row-reverse;
+        transition: background .10s ease-in-out;
+        height: 30px;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+
+    .monitor_bottom:hover {
+        background: var(--timeline-hover-background, var(--hover-background));
+    }
 }

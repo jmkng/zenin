@@ -1,5 +1,6 @@
 import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
+import { Measurement } from '@/internal/measurement';
 import { isMonitor, useMonitorContext } from '@/internal/monitor';
 import { useDefaultMonitorService } from '@/internal/monitor/service';
 import { CreatedTimestamp, DataPacket, Timestamp } from '@/internal/server';
@@ -14,7 +15,6 @@ import Menu from './Menu/Menu';
 import SelectMenu from './Menu/SelectMenu';
 import Monitor from './Monitor/Monitor';
 import Settings from './Settings/Settings';
-import Sidebar from './Sidebar/Sidebar';
 
 import './Dashboard.css';
 
@@ -46,9 +46,9 @@ export default function Dashboard() {
         const body: DataPacket<CreatedTimestamp> = await extract.json();
         value.createdAt = body.data.time;
         value.updatedAt = body.data.time;
-        const measurements = null;
-        const full: monitor.Monitor = { ...value, id: body.data.id, measurements: measurements }
-        monitor.context.dispatch({ type: 'overwrite', monitor: full })
+        const measurements: Measurement[] = [];
+        const full: monitor.Monitor = { ...value, id: body.data.id, measurements }
+        monitor.context.dispatch({ type: 'update', monitor: full })
     }
 
     const handleUpdate = async (value: monitor.Monitor) => {
@@ -60,7 +60,7 @@ export default function Dashboard() {
         if (!extract.ok()) return;
         const body: DataPacket<Timestamp> = await extract.json();
         value.updatedAt = body.data.time;
-        monitor.context.dispatch({ type: 'overwrite', monitor: value })
+        monitor.context.dispatch({ type: 'update', monitor: value })
     }
 
     const handleRemove = async (monitors: monitor.Monitor[]) => {
@@ -68,38 +68,39 @@ export default function Dashboard() {
         const token = account.state.token!.raw;
         const extract = await monitor.service.deleteMonitor(token, id);
         if (!extract.ok()) return;
-        monitor.context.dispatch({ type: 'remove', monitors: id });
+        monitor.context.dispatch({ type: 'delete', monitors: id });
     }
 
-    return <div className={["zenin__dashboard", isSplit ? 'split' : ''].join(' ')}>
-        <div className="zenin__dashboard_side">
-            <Sidebar />
-        </div>
+    const handleDraft = () => {
+        const pane = { type: 'draft' as const }
+        monitor.context.dispatch({type: 'pane', pane })
+    }
 
-        <div className="zenin__dashboard_main">
-            <div className="zenin__dashboard_main_top">
-                <div className={["zenin__dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
+    return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
+        <div className="dashboard_main">
+            <div className="dashboard_main_top">
+                <div className={["dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
                     <SelectMenu />
                 </div>
                 <Menu />
             </div>
 
-            <div className="zenin__dashboard_main_bottom">
+            <div className="dashboard_main_bottom">
                 {sorted.length > 0
-                    ? <div className="zenin__dashboard_monitors">
+                    ? <div className="dashboard_monitors">
                         {sorted.map((n, i) => <Monitor key={i} monitor={n} service={monitor.service} />)}
                     </div>
-                    : <div className="zenin__dashboard_empty">
-                        <span className="zenin__dashboard_empty_message">No monitors have been created.</span>
-                        <Button kind="primary" border={true} onClick={() => monitor.context.dispatch({ type: 'draft' })}>
-                            <span className="zenin__h_f-row-center zenin__menu_add">
+                    : <div className="dashboard_empty">
+                        <span className="dashboard_empty_message">No monitors have been created.</span>
+                        <Button kind="primary" border={true} onClick={handleDraft}>
+                            <span className="h_f-row-center menu_add">
                                 Create Monitor
                             </span>
                         </Button>
                     </div>}
 
                 {isSplit
-                    ? <div className={"zenin__dashboard_activity"}>
+                    ? <div className={"dashboard_activity"}>
                         {monitor.context.state.split.isEditorPane()
                             ? <Editor
                                 state={monitor.context.state.split.pane}
@@ -123,7 +124,7 @@ export default function Dashboard() {
         <DialogModal
             title="Confirm"
             visible={monitor.context.state.deleting.length > 0}
-            onCancel={() => monitor.context.dispatch({ type: 'delete', monitors: [] })}
+            onCancel={() => monitor.context.dispatch({ type: 'queue', monitors: [] })}
             content={<DeleteDialogContent
                 queue={monitor.context.state.deleting}
                 onConfirm={() => handleRemove(monitor.context.state.deleting)}

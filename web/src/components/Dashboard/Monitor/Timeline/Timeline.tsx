@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
 import { Measurement } from '@/internal/measurement';
+import { DEAD_API, WARN_API } from '@/internal/server';
+import { useEffect, useRef, useState } from 'react';
 
-import './MonitorTimeline.css';
+import FailureIcon from '@/components/Icon/FailureIcon';
+import WarningIcon from '@/components/Icon/WarningIcon';
 
-interface MonitorTimelineProps {
+import './Timeline.css';
+
+interface TimelineProps {
     measurements: Measurement[]
 
     onSlotClick: (measurement: Measurement) => void;
@@ -12,7 +16,7 @@ interface MonitorTimelineProps {
 const slotWidth = 22.5;
 const slotGap = 2;
 
-export default function MonitorTimeline(props: MonitorTimelineProps) {
+export default function Timeline(props: TimelineProps) {
     const { measurements, onSlotClick } = props;
     const [slots, setSlots] = useState<number>(0);
     const containerRef = useRef(null);
@@ -37,14 +41,18 @@ export default function MonitorTimeline(props: MonitorTimelineProps) {
         const cache = [];
         for (const [index, measurement] of measurements.entries()) {
             if (cache.length == slots) break;
+            const classes = ["measurement_timeline_slot_container", measurement.state].join(" ");
             cache.push(
                 <div
-                    key={index}
+                    key={`measurement-${measurement.state}-${index}`}
                     onClick={() => onSlotClick(measurement)}
-                    className="zenin__measurement_timeline_slot_container"
+                    className={classes}
                     style={{ width: slotWidth }}
                 >
-                    <div className={["zenin__measurement_timeline_slot", measurement.state].join(' ')}></div>
+                    <div className={"measurement_timeline_slot"}></div>
+                    <div className={"timeline_visual_aid_container"}>
+                        {measurement.state == DEAD_API ? <FailureIcon/> : measurement.state == WARN_API ? <WarningIcon/> : null}
+                    </div>
                 </div>
             );
         }
@@ -52,7 +60,7 @@ export default function MonitorTimeline(props: MonitorTimelineProps) {
     }
 
 
-    return <div className="zenin__measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
+    return <div className="measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
         {renderSlots()}
     </div>
 }

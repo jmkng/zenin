@@ -6,6 +6,6 @@ import (
 
 // SettingsRepository is a type used to interact with the settings domain database table.
 type SettingsRepository interface {
-	SelectDelimiters(ctx context.Context) ([]string, error)
+	SelectSettings(ctx context.Context) (Settings, error)
 	UpdateSettings(ctx context.Context, settings Settings) error
 }

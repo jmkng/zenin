@@ -12,6 +12,10 @@ type ArrayValue []string
 
 // Value implements `driver.Valuer` for `ArrayValue`.
 func (h ArrayValue) Value() (driver.Value, error) {
+	if len(h) == 0 {
+		return nil, nil
+	}
+
 	return json.Marshal(h)
 }
 
@@ -32,6 +36,14 @@ func (h *ArrayValue) Scan(value any) error {
 	return err
 }
 
+// MarshalJSON implements `json.Marshaler` for `ArrayValue`.
+func (h ArrayValue) MarshalJSON() ([]byte, error) {
+	if h == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]string(h))
+}
+
 type PairValue struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
@@ -41,11 +53,15 @@ type PairListValue []PairValue
 
 // Value implements `driver.Valuer` for `PairListValue`.
 func (p PairListValue) Value() (driver.Value, error) {
+	if len(p) == 0 {
+		return nil, nil
+	}
+
 	return json.Marshal(p)
 }
 
 // Scan implements `sql.Scanner` for `PairListValue`.
-// This allows storing and fetching the `ArrayValue` as a JSON array.
+// This allows storing and fetching the `PairListValue` as a JSON array.
 func (p *PairListValue) Scan(value any) error {
 	if value == nil {
 		*p = []PairValue{}
@@ -59,6 +75,14 @@ func (p *PairListValue) Scan(value any) error {
 		err = json.Unmarshal(x, p)
 	}
 	return err
+}
+
+// MarshalJSON implements `json.Marshaler` for `PairListValue`.
+func (p PairListValue) MarshalJSON() ([]byte, error) {
+	if p == nil {
+		return []byte("[]"), nil
+	}
+	return json.Marshal([]PairValue(p))
 }
 
 // NewTimeValue returns a new `TimeValue` with the location set to UTC.

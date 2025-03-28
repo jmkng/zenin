@@ -25,29 +25,29 @@ export default function ArrayInput(props: ArrayInputProps) {
         onChange(state);
     };
 
-    return <div className="zenin__array_input zenin__input_container">
+    return <div className="array_input input_container">
         {label
             ? <label
-                className="zenin__array_input_label zenin__input_label"
+                className="array_input_label input_label"
                 htmlFor={name}
             >
                 {label}
             </label>
             : null}
 
-        {value.map((value, index) => <div className="zenin__array_input_row" key={index}>
+        {value.map((value, index) => <div className="array_input_row" key={index}>
             <TextInput
                 name={name}
                 value={value}
                 onChange={value => handleInputChange(index, value ?? "")}
             />
-            <div onDragOver={e => e.preventDefault()} className="zenin__array_input_delete">
+            <div onDragOver={e => e.preventDefault()} className="array_input_delete">
                 <Button
                     onClick={() => handleDelete(index)}
                     border={true}
                     kind="destructive"
                 >
-                    <span className="zenin__array_input_delete_icon">
+                    <span className="array_input_delete_icon">
                         <AddIcon />
                     </span>
                 </Button>

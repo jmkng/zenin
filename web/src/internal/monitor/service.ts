@@ -8,9 +8,16 @@ import { DetachedState } from "./split";
 class MonitorService extends Service {
     constructor() { super(); }
 
-    async getMonitor(token: string, measurement?: number) {
-        let address = `/monitor`
-        if (measurement) address += `?measurements=${measurement}`;
+    async getMonitor(token: string, measurement: number, plugins: boolean) {
+        let address = `/monitor`;
+    
+        const params = [];
+        if (measurement > 0) params.push(`measurements=${measurement}`);
+        if (plugins) params.push(`plugins=${plugins}`);
+        if (params.length > 0) {
+            address += `?${params.join('&')}`;
+        }
+        
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }
@@ -36,7 +43,7 @@ class MonitorService extends Service {
     }
 
     async updateMonitor(token: string, id: number, monitor: Monitor) {
-        monitor.measurements = null;
+        monitor.measurements = [];
         const body = JSON.stringify(monitor);
         const address = `/monitor/${id}`;
         const request = new AuthenticatedRequest(token, address).method(PUT_API).body(body)
@@ -51,7 +58,7 @@ class MonitorService extends Service {
     }
 
     async getMeasurement(token: string, id: number, after?: DetachedState) {
-        let address = `/monitor/${id}/measurement`
+        let address = `/monitor/${id}/measurements`
         if (after) address += `?after=${after.toAfterDate()}`
         const request = new AuthenticatedRequest(token, address).method(GET_API)
         return await this.extract(request);

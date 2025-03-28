@@ -1,5 +1,5 @@
 export default function MenuIcon() {
-    return <svg className="zenin__icon zenin__menu_icon" width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ fillRule: "evenodd", clipRule: "evenodd", strokeLinejoin: "round", strokeMiterlimit: 2 }}>
+    return <svg className="icon menu_icon" width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" style={{ fillRule: "evenodd", clipRule: "evenodd", strokeLinejoin: "round", strokeMiterlimit: 2 }}>
             <g transform="matrix(0.333333,0,0,0.333333,1.33333,1)">
                 <path d="M60,18C61.105,18 62,17.105 62,16C62,14.895 61.105,14 60,14L4,14C2.895,14 2,14.895 2,16C2,17.105 2.895,18 4,18L60,18Z" style={{ fillRule: "nonzero", stroke: "currentcolor", strokeWidth: 2 }} />
             </g>

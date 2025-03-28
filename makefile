@@ -1,4 +1,4 @@
-.PHONY: all web run build test
+.PHONY: all web run build build-armv7 test
 
 VERSION := 0.1.0
 COMMIT := $(shell git rev-parse HEAD)
@@ -16,6 +16,9 @@ run: web
 
 build: web
 	go build -ldflags="$(LDFLAGS)" -o zenin cmd/zenin.go
+
+build-armv7: web
+	GOOS=linux GOARCH=arm GOARM=7 $(MAKE) build
 
 test:
 	go test ./...

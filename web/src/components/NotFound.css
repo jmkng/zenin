@@ -1,12 +1,15 @@
-.zenin__404 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    flex-direction: column;
-}
+@layer components {
+    .not_found {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        flex-direction: column;
+        background: var(--not-found-background, var(--background));
+    }
 
-.zenin__404_message {
-    margin-bottom: var(--px-b);
-    color: var(--mid);
+    .not_found_text {
+        margin-bottom: 6px;
+        color: var(--not-found-color, var(--primary-color));
+    }
 }

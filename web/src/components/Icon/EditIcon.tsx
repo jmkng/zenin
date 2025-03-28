@@ -1,6 +1,6 @@
 export default function EditIcon() {
     return <svg
-            className="zenin__icon zenin__edit_icon"
+            className="icon edit_icon"
             style={{
                 fillRule: "evenodd",
                 clipRule: "evenodd",

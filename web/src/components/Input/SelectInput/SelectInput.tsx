@@ -20,7 +20,7 @@ interface SelectGroup {
 
 interface SelectOption {
     text: string;
-    value?: string;
+    value: string;
 }
 
 export default function SelectInput(props: SelectProps) {
@@ -35,10 +35,13 @@ export default function SelectInput(props: SelectProps) {
                 </optgroup>)
             : options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
 
-    return <div className={["zenin__select", "zenin__input_container", "zenin__h_f-col"].join(' ')}>
+    // NOTE:
+    // showPicker() is used below, but not full supported on Safari yet.
+            
+    return <div className={["select", "input_container", "h_f-col"].join(' ')}>
         {label
             ? <label
-                className="zenin__text_input_label zenin__input_label"
+                className="text_input_label input_label"
                 htmlFor={name}
             >
                 {label}
@@ -46,14 +49,14 @@ export default function SelectInput(props: SelectProps) {
             : null}
 
         {subtext
-            ? <p className="zenin__select_input_subtext zenin__input_subtext">
+            ? <p className="select_input_subtext input_subtext">
                 {subtext}
             </p>
             : null}
 
-        <div className="zenin__select_input_controls_container">
+        <div className="select_input_controls_container">
             <select
-                className="zenin__input zenin__select_input_box"
+                className="input select_input_box"
                 name={name}
                 id={name}
                 disabled={options.length == 0 ? true : false}
@@ -62,7 +65,7 @@ export default function SelectInput(props: SelectProps) {
             >
                 {list}
             </select>
-            <div className="zenin__select_input_icon_container">
+            <div className="select_input_icon_container" onClick={() => (document.getElementById(name) as HTMLSelectElement | null)?.showPicker()}>
                 <UpDownIcon />
             </div>
         </div>

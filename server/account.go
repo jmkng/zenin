@@ -40,8 +40,7 @@ func (a AccountProvider) Mux() http.Handler {
 	router.Get("/claim", a.HandleGetClaimStatus)
 	router.Post("/claim", a.HandleCreateClaim)
 	router.Post("/authenticate", a.HandleAuthenticate)
-
-	///// root /////
+	//// private /////
 	router.Group(func(private chi.Router) {
 		private.Use(Authenticate)
 		private.Get("/", a.HandleGetAccounts)
@@ -167,6 +166,9 @@ func (a AccountProvider) HandleGetAccounts(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
+	}
+	if accounts == nil {
+		accounts = make([]account.Account, 0)
 	}
 
 	responder.Data(struct {

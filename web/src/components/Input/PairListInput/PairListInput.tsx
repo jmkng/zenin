@@ -31,39 +31,39 @@ export default function PairListInput(props: PairListInputProps) {
         onChange(state);
     };
 
-    return <div className="zenin__pair_list_input zenin__input_container">
+    return <div className="pair_list_input input_container">
         {label
             ? <label
-                className="zenin__pair_list_input_label zenin__input_label"
-                htmlFor={name}
+                className="pair_list_input_label input_label"
+                htmlFor={`${name}_key_0`}
             >
                 {label}
             </label>
             : null}
 
-        {value.map(({ key, value }, index) => <div className="zenin__pair_list_row" key={index}>
-            <div className="zenin__pair_list_key_input">
+        {value.map(({ key, value }, index) => <div className="pair_list_row" key={index}>
+            <div className="pair_list_key_input">
                 <TextInput
-                    name={name}
+                    name={`${name}_key_${index}`}
                     value={key}
                     onChange={value => handleUpdate(index, "key", value ?? "")}
                 />
             </div>
-            <div className="zenin__pair_list_value_input">
+            <div className="pair_list_value_input">
                 <TextInput
-                    name={name}
+                    name={`${name}_value_${index}`}
                     value={value}
                     onChange={value => handleUpdate(index, "value", value ?? "")}
                 />
             </div>
             {allowMultipleRows
-                ? <div className="zenin__pair_list_input_delete">
+                ? <div className="pair_list_input_delete">
                     <Button
                         onClick={() => handleDelete(index)}
                         border={true}
                         kind="destructive"
                     >
-                        <span className="zenin__pair_list_input_delete_icon">
+                        <span className="pair_list_input_delete_icon">
                             <AddIcon />
                         </span>
                     </Button>

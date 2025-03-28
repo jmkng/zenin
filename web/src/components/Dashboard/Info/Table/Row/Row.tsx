@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatDate } from '@/internal/layout/graphics';
+import { formatUTCDate } from '@/internal/layout/graphics';
 import { Measurement } from '@/internal/measurement';
 
 import CheckboxInput from '../../../../Input/CheckboxInput/CheckboxInput';
@@ -22,15 +22,15 @@ export default function Row(props: RowProps) {
     }, [checked, measurement])
 
     return <tr onClick={() => onClick(measurement.id!)}
-        className={['zenin__row_component', highlight ? 'highlight' : ''].join(' ')}>
+        className={['row_component', highlight ? 'highlight' : ''].join(' ')}>
         <td onClick={event => event.stopPropagation()}>
             <CheckboxInput onChange={() => onCheck(measurement.id)}
-                checked={isChecked} name={`zenin__row_${measurement.id}`} />
+                checked={isChecked} name={`row_${measurement.id}`} />
         </td>
-        <td><span className="zenin__id">{measurement.id}</span></td>
-        <td>{formatDate(measurement.createdAt)}</td>
+        <td><span className="id">{measurement.id}</span></td>
+        <td>{formatUTCDate(measurement.createdAt)}</td>
         <td>
-            <span className="zenin__state" data-state={measurement.state}>{measurement.state}</span>
+            <span className="state" data-state={measurement.state}>{measurement.state}</span>
         </td>
     </tr >
 }

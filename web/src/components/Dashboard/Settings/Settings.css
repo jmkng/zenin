@@ -1,19 +1,21 @@
-.zenin__settings {
-    height: 100%;
-    border-radius: var(--rounded);
-    padding-right: var(--px-a);
-}
+@layer components {
+    .settings {
+        height: 100%;
+        border-radius: 4px;
+        padding-right: 4px;
+    }
 
-.zenin__settings_about {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
+    .settings_about {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
 
-.zenin__settings_about > *:first-child {
-    margin-right: var(--px-c);
-}
+    .settings_reload_theme {
+        padding-top: 6px;
+    }
 
-.zenin__settings_version {
-    border: 1px solid var(--px)
+    .settings_about>*:first-child {
+        margin-right: 9px;
+    }
 }

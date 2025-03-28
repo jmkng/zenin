@@ -12,7 +12,6 @@ interface ButtonProps {
     background?: boolean;
     disabled?: boolean;
     tooltip?: string;
-    loading?: boolean;
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -26,7 +25,6 @@ export default function Button(props: ButtonProps) {
         background = false,
         disabled = false,
         tooltip = null,
-        loading = false,
         onClick
     } = props;
     const rootRef = useRef<HTMLDivElement>(null);
@@ -83,35 +81,27 @@ export default function Button(props: ButtonProps) {
 
     const button = <button
         ref={buttonRef}
-        onClick={event => { if (!disabled && !loading) handleClick(event) }}
+        onClick={event => { if (!disabled) handleClick(event) }}
         className={[
-            'zenin__button',
-            'zenin__input',
+            'button',
             kind,
             border ? 'border' : '',
             hover ? 'hover' : '',
             background ? 'background' : '',
             disabled ? 'disabled' : '',
-            loading ? 'loading' : '',
         ].join(' ')}
     >
-        {loading ?
-            <div className="zenin__spinner_overlay">
-                <div className="zenin__spinner"></div>
-            </div>
-            : null}
-
         {icon
-            ? <span className={["zenin__button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
+            ? <span className={["button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
             : null}
 
-        <span className="zenin__button_child">{children}</span>
+        <span className="button_child">{children}</span>
     </button>;
 
     return tooltip
-        ? <div ref={rootRef} className="zenin__button_tooltip">
+        ? <div ref={rootRef} className="button_tooltip">
             {button}
-            <div className="zenin__tooltip" ref={tooltipRef}>{tooltip}</div>
+            <div className="tooltip" ref={tooltipRef}>{tooltip}</div>
         </div>
         : button
 }
@@ -119,7 +109,7 @@ export default function Button(props: ButtonProps) {
 // Put the tooltip below the anchor, and try to center it. 
 // Prefer left/right side based on available space.
 const relativeTooltipStrategy: PositionStrategy = (rootRect: DOMRect, portalRect: DOMRect) => {
-    const top = rootRect.height + 6; // Padding equal to var(--px-b);
+    const top = rootRect.height + 6; // Padding equal to 6px;
     let left = (rootRect.width - portalRect.width) / 2;
 
     // Check for viewport overflow on wide tooltips.

@@ -1,6 +1,6 @@
 export default function AccountIcon() {
     return <svg
-        className="zenin__account_icon zenin__icon"
+        className="account_icon icon"
         style={{
             fillRule: "evenodd",
             clipRule: "evenodd",

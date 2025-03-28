@@ -32,15 +32,15 @@ export default function DialogModal(props: DialogModalProps) {
         else modal.close();
     }, [visible]);
 
-    return <dialog ref={modalRef} onCancel={onCancel} className="zenin__dialog_modal">
-        <div className="zenin__dialog_modal_upper">
-            <span className="zenin__dialog_modal_title">{title}</span>
-            <Button onClick={handleCancel} icon={<span className="zenin__dialog_modal_close_icon">
+    return <dialog ref={modalRef} onCancel={onCancel} className="dialog_modal">
+        <div className="dialog_modal_top">
+            <span className="dialog_modal_title">{title}</span>
+            <Button onClick={handleCancel} icon={<span className="dialog_modal_close_icon">
                 <AddIcon />
             </span>}>
             </Button>
         </div>
-        <div className="zenin__dialog_modal_lower">
+        <div className="dialog_modal_bottom">
             {content}
         </div>
     </dialog>
