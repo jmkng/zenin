@@ -5,6 +5,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <script>
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const update = () => {
+            if (mq.matches) document.documentElement.setAttribute('prefers-dark', '');
+            else document.documentElement.removeAttribute('prefers-dark');
+        };
+        update();
+        mq.addEventListener('change', update);
+    </script>
+
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="stylesheet" id="theme-link" href="/api/v1/settings/themes/active" />
