@@ -35,6 +35,9 @@ export default function SelectInput(props: SelectProps) {
                 </optgroup>)
             : options.map((n, i) => <option key={i} value={n.value}>{n.text}</option>)
 
+    // NOTE:
+    // showPicker() is used below, but not full supported on Safari yet.
+            
     return <div className={["select", "input_container", "h_f-col"].join(' ')}>
         {label
             ? <label
@@ -62,7 +65,7 @@ export default function SelectInput(props: SelectProps) {
             >
                 {list}
             </select>
-            <div className="select_input_icon_container">
+            <div className="select_input_icon_container" onClick={() => (document.getElementById(name) as HTMLSelectElement | null)?.showPicker()}>
                 <UpDownIcon />
             </div>
         </div>
