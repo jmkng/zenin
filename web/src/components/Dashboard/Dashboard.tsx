@@ -72,7 +72,7 @@ export default function Dashboard() {
     }
 
     const handleDraft = () => {
-        const pane = { type: 'editor' as const, monitor: null }
+        const pane = { type: 'draft' as const }
         monitor.context.dispatch({type: 'pane', pane })
     }
 

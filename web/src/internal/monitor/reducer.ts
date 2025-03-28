@@ -70,7 +70,7 @@ type SelectAction = { type: 'select', monitor: SelectKind };
 /** Add a new measurement to a monitor. */
 type AddMeasurementAction = { type: 'measurement', id: number[], monitor: number };
 
-export type PaneKind = ViewPaneAction | EditorPaneAction | SettingsPaneAction | AccountsPaneAction;
+export type PaneKind = ViewPaneAction | EditorPaneAction | DraftPaneAction | SettingsPaneAction | AccountsPaneAction;
 
 type PaneAction = {
     type: 'pane',
@@ -93,6 +93,11 @@ type EditorPaneAction = {
     type: 'editor',
     monitor: Monitor | null
 };
+
+/** Draft a new monitor. */
+type DraftPaneAction = {
+    type: 'draft',
+}
 
 /** View settings. */
 type SettingsPaneAction = {
@@ -224,6 +229,7 @@ const paneAction = (state: MonitorState, action: PaneAction) => {
     switch (action.pane.type) {
         case "view": return viewPaneAction(state, action.pane);
         case "editor": return editorPaneAction(state, action.pane);
+        case "draft": return draftPaneAction(state, action.pane);
         case "settings": return settingsPaneAction(state);
         case "accounts": return accountsPaneAction(state);
     }
@@ -243,6 +249,11 @@ const editorPaneAction = (state: MonitorState, action: EditorPaneAction) => {
     if (!action.monitor || state.split.isEditorPane() && state.split.pane.monitor == action.monitor)
         split = new SplitState(null)
     else split = new SplitState(new EditorPane(action.monitor))
+    return { ...state, split }
+}
+
+const draftPaneAction = (state: MonitorState, _: DraftPaneAction) => {
+    const split = new SplitState(new EditorPane(null))
     return { ...state, split }
 }
 
