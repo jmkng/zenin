@@ -43,7 +43,7 @@ export default function EventInput(props: EventInputProps) {
                     { value: DEAD_API, text: DEAD_UI },
                     { value: "NONE", text: "None" }, // No threshold, converted to null.
                 ]}
-                subtext={<span>Define a probe <a href="#">threshold</a>.</span>}/* TODO: Add documentation link. */
+                subtext={<span>Define an event activation <a href="#">threshold</a>.</span>} /* TODO: Add documentation link. */
                 onChange={value => threshold.onChange(value == "NONE" ? null : value)}
             />
             {<span className="event_input_threshold_description">
