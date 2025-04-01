@@ -48,7 +48,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async addMonitor(token: string, value: Monitor) {
+    async createMonitor(token: string, value: Monitor) {
         const body = JSON.stringify(value)
         const address = `/monitor`;
         const request = new AuthenticatedRequest(token, address).method(POST_API).body(body)
