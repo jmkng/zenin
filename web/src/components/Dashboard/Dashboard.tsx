@@ -1,7 +1,9 @@
 import { useDefaultMonitorService } from '@/hooks/useMonitorService';
+import { useNotify } from '@/hooks/useNotify';
 import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
 import { useMonitorContext } from '@/internal/monitor';
+import { isErrorPacket } from '@/internal/server';
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';
@@ -16,12 +18,14 @@ import Settings from './Settings/Settings';
 
 import './Dashboard.css';
 
+
 export default function Dashboard() {
     const monitor = {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
     }
     const account = useAccountContext();
+    const notify = useNotify();
     const sorted = [...monitor.context.state.monitors.values()]
         .sort((a, b) => {
             switch (monitor.context.state.filter) {
@@ -41,8 +45,16 @@ export default function Dashboard() {
         const id = monitors.map(n => n.id!);
         const token = account.state.token!.raw;
         const extract = await monitor.service.deleteMonitor(token, id);
-        if (!extract.ok()) return;
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) notify(false, ...body.errors)
+            return;
+        }
+
         monitor.context.dispatch({ type: 'delete', monitors: id });
+        const length = id.length;
+        const message = length > 1 ? `Deleted ${length} monitors.` : "Monitor deleted.";
+        notify(true, message);
     }
 
     const handleDraft = () => {
