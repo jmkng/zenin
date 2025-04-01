@@ -8,10 +8,6 @@ class AccountService extends Service {
 
     constructor() { super(); }
 
-    isAuthenticated(state: AccountState) {
-        return state.initialized && (state.token !== null)
-    }
-
     async authenticate(username: string, password: string) {
         const address = `/account/authenticate`;
         const body = JSON.stringify({ username, password });
