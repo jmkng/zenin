@@ -27,12 +27,6 @@
         margin-right: 4px;
     }
     
-    .monitor_top_controls {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-    }
-
     .monitor_dialog_button_container .button {
         padding-right: 0;
     }
@@ -44,12 +38,19 @@
         align-items: center;
     }
 
+    .monitor_top_controls {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
     .monitor_name {
         font-weight: 500;
         text-overflow: ellipsis;
         margin-right: 9px;
         overflow: hidden;
-        max-width: 100%;
         white-space: nowrap;
         cursor: default;
     }
