@@ -13,6 +13,7 @@ interface ButtonProps {
     disabled?: boolean;
     tooltip?: string;
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    ariaLabel?: string
 }
 
 export default function Button(props: ButtonProps) {
@@ -25,7 +26,8 @@ export default function Button(props: ButtonProps) {
         background = false,
         disabled = false,
         tooltip = null,
-        onClick
+        onClick,
+        ariaLabel
     } = props;
     const rootRef = useRef<HTMLDivElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
@@ -82,6 +84,7 @@ export default function Button(props: ButtonProps) {
     const button = <button
         ref={buttonRef}
         onClick={event => { if (!disabled) handleClick(event) }}
+        aria-label={ariaLabel}
         className={[
             'button',
             kind,
