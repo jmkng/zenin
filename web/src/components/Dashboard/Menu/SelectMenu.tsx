@@ -1,7 +1,5 @@
-import { useAccountContext } from "@/internal/account";
-import { useMonitorContext } from "@/internal/monitor";
 import { useDefaultMonitorService } from "@/hooks/useMonitorService";
-import { DataPacket, Timestamp } from "@/internal/server";
+import { useMonitorContext } from "@/internal/monitor";
 
 import Button from "../../Button/Button";
 import DeselectIcon from "../../Icon/DeselectIcon";
@@ -12,26 +10,15 @@ import TrashIcon from "../../Icon/TrashIcon";
 
 import "./SelectMenu.css";
 
-export default function SelectMenu() {
+interface SelectProps {
+    onToggle: (active: boolean, id: number[]) => void;
+}
+
+export default function SelectMenu(props: SelectProps) {
+    const { onToggle } = props;
     const monitor = {
         context: useMonitorContext(),
         service: useDefaultMonitorService()
-    }
-    const account = useAccountContext();
-
-    const handleToggle = async (active: boolean) => {
-        const monitors = [...monitor.context.state.selected.map(n => n.id!)];
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.toggleMonitor(token, monitors, active);
-        if (!extract.ok()) return;
-
-        const body: DataPacket<Timestamp> = await extract.json();
-        monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
-    }
-
-    const handleDelete = () => {
-        const monitors = monitor.context.state.selected;
-        monitor.context.dispatch({ type: 'queue', monitors });
     }
 
     return <div className="select_menu menu">
@@ -61,7 +48,7 @@ export default function SelectMenu() {
                     tooltip="Resume Selected"
                     disabled={!monitor.context.state.selected.some(n => !n.active)}
                     icon={<PlayIcon />}
-                    onClick={() => handleToggle(true)}
+                    onClick={() => onToggle(true, monitor.context.state.selected.map(n => n.id))}
                     />
             </div>
             <div className="menu_margin_right">
@@ -69,14 +56,14 @@ export default function SelectMenu() {
                     tooltip="Pause Selected"
                     disabled={!monitor.context.state.selected.some(n => n.active)}
                     icon={<PauseIcon />}
-                    onClick={() => handleToggle(false)}
+                    onClick={() => onToggle(false, monitor.context.state.selected.map(n => n.id))}
                 />
             </div>
             <div onClick={(event) => event.stopPropagation()}>
                 <Button
                     tooltip="Delete Selected"
                     icon={<TrashIcon />}
-                    onClick={handleDelete}
+                    onClick={() =>  monitor.context.dispatch({ type: 'queue', monitors: monitor.context.state.selected })}
                 />
             </div>
         </div>
