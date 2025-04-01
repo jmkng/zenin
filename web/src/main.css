@@ -1,5 +1,3 @@
-@layer globals, base, helpers, components;
-
 @import './css/spinner.css' layer(base);
 @import './css/cover.css' layer(base);
 @import './css/dialog.css' layer(base);
