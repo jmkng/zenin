@@ -46,7 +46,7 @@
     }
 
     .login_message_container {
-        margin-top: 6px;;
+        margin-top: 20px;
     }
 
     .login_message_container > * {
@@ -60,8 +60,6 @@
 
     .login_message {
         color: var(--primary-color);
-        border: 1px solid var(--primary-color);
-        border-radius: 4px;
         padding: 12px;
         display: flex;
         flex-direction: column;
@@ -70,6 +68,5 @@
 
     .login_message.error {
         color: var(--failure-color);
-        border-color: var(--failure-color);
     }
 }

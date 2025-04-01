@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "@/internal/account";
-import { useDefaultAccountService } from "@/internal/account/service";
+import { useDefaultAccountService } from "@/hooks/useAccountService";
+import { setLSToken, useAccountContext } from "@/internal/account";
 import { useLayoutContext } from "@/internal/layout";
 import { DataPacket, isErrorPacket } from "@/internal/server";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Button from "../Button/Button";
 import LogoIcon from "../Icon/LogoIcon";
@@ -12,9 +12,9 @@ import TextInput from "../Input/TextInput/TextInput";
 import "./Login.css";
 
 export default function Login() {
-    const account = {
-        service: useDefaultAccountService(),
-        context: useAccountContext()
+    const account = { 
+        service: useDefaultAccountService(), 
+        context: useAccountContext() 
     };
     const layout = useLayoutContext();
     const navigate = useNavigate();
@@ -24,6 +24,7 @@ export default function Login() {
     const [isClaimed, setIsClaimed] = useState<boolean | null>(null);
 
     const hasValidPasswords = useMemo(() => isClaimed ? true : editor.password == editor.passwordConfirm, [isClaimed, editor.password, editor.passwordConfirm])
+    const hasValidPasswordConfirm = useMemo(() => editor.password == editor.passwordConfirm, [editor.password, editor.passwordConfirm])
     const canSave: boolean = useMemo(() => hasValidPasswords, [hasValidPasswords])
 
     useEffect(() => {
@@ -40,8 +41,22 @@ export default function Login() {
         layout.dispatch({ type: 'load', loading: false })
     }, [isClaimed])
 
-    const handleSubmit = async () => {
-        if (isClaimed === null || !handleFormValidate()) return;
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                handleSubmit();
+            }
+        };
+    
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [handleSubmit]);
+
+    async function handleSubmit() {
+    if (isClaimed === null || !handleFormValidate()) return;
 
         const username = editor.username || "";
         const password = editor.password || "";
@@ -58,13 +73,13 @@ export default function Login() {
         }
 
         const token = packet.data.token;
-        account.service.setLSToken(token);
+        setLSToken(token);
         account.context.dispatch({ type: 'login', token });
         setErrors([]);
         navigate("/login");
     }
 
-    const handleFormValidate = () => {
+    function handleFormValidate() {
         let result = true;
         if (isClaimed === null) return;
         if (isClaimed === false && (editor.password != editor.passwordConfirm)) {
@@ -75,7 +90,7 @@ export default function Login() {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleFailure = (packet: any) => {
+    function handleFailure(packet: any) {
         if (isErrorPacket(packet)) setErrors(packet.errors);
         else setErrors(["An internal server error has occurred. Try again."]);
         layout.dispatch({ type: 'load', loading: false });
@@ -92,6 +107,7 @@ export default function Login() {
         <div className="login_logo_container">
             <LogoIcon />
         </div>
+
         <div className="login_form_container">
             <div className="login_spaced">
                 <TextInput
@@ -113,10 +129,14 @@ export default function Login() {
                 <div className="login_spaced">
                     <TextInput
                         name="login_password_confirm"
-                        label="Confirm Password"
+                        label={<span className={hasValidPasswords ? "" : "h_c-dead-a"}>Confirm Password</span>}
                         type="password"
                         value={editor.passwordConfirm}
-                        onChange={(confirm: string | null) => setEditor(prev => ({ ...prev, passwordConfirm: confirm }))} />
+                        onChange={(confirm: string | null) => setEditor(prev => ({ ...prev, passwordConfirm: confirm }))} 
+                    />
+                    {!hasValidPasswordConfirm
+                    ? <span className="detail_validation h_c-dead-a">Passwords do not match.</span>
+                    : null}
                 </div>
                 : null}
             <div className="login_controls">
