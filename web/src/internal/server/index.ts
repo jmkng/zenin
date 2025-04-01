@@ -86,6 +86,8 @@ export class Extract {
 
     ok = () => this.response.ok
 
+    status = () => this.response.status;
+
     unauthorized = () => this.response.status === 401
 
     json = async () => {
