@@ -194,7 +194,7 @@ export default function Accounts() {
         <div className="h_mt-c">
             <TextInput
                 type="password"
-                name={"account_name"}
+                name={"account_password"}
                 label="Password"
                 value={editor?.draft.password || null}
                 onChange={password => setEditor(prev => ({ ...prev, draft: { ...prev.draft, password } }))}
