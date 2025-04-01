@@ -18,13 +18,12 @@ export default function Menu() {
     }
 
     const handleAdd = () => {
-        const pane = { type: 'editor' as const, monitor: null }
+        const pane = { type: 'draft' as const }
         monitor.context.dispatch({type: 'pane', pane })
     }
 
     return <div className='default_menu menu'>
         <div className='menu_left'>
-
             <div className="menu_left_contextual">
                 <div className="dashboard_menu">
                     <div className="menu_margin_right menu_button_container">
