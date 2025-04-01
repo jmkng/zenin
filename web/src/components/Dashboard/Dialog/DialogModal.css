@@ -64,9 +64,4 @@
         background: var(--color-black);
         opacity: var(--modal-backdrop-opacity);
     }
-
-    .dialog_modal_close_icon {
-        display: flex;
-        transform: rotate(45deg);
-    }
 }
