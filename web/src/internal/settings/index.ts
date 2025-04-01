@@ -21,5 +21,5 @@ export const useSettingsContext = () => {
 }
 
 export type { SettingsState } from "./reducer";
-export { useDefaultSettingsService } from "./service";
 export { SettingsProvider };
+

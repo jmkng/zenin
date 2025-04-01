@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { Measurement } from "../measurement";
 import MonitorProvider, { MonitorContext, MonitorDispatchContext } from "./context";
 import { MonitorState } from "./reducer";
-import { useDefaultMonitorService } from "./service";
 
 export const
     HTTP_UI = 'HTTP',
@@ -141,5 +140,6 @@ export const useMonitorContext = () => {
     return { state, dispatch }
 }
 
-export { MonitorProvider, useDefaultMonitorService };
+export { MonitorProvider };
 export type { MonitorState };
+

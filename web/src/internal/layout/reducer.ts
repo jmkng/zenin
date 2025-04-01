@@ -1,4 +1,4 @@
-type Notification = { message: string };
+type Notification = { id: number, message: string, autoDismiss: boolean };
 
 export interface LayoutState {
     loading: boolean,
@@ -11,11 +11,13 @@ export const layoutDefault: LayoutState = {
 }
 
 /** Enable or disable the loading screen. */
-type LoadAction = { type: 'load', loading: boolean };
+type LoadAction = { type: "load", loading: boolean };
 
-type SendNotificationAction = { type: 'send', message: string };
+/** Send a notification. */
+type SendNotificationAction = { type: "send", messages: string[], autoDismiss: boolean };
 
-type DismissNotification = { type: "dismiss", index: number };
+/** Dismiss a notification. */
+type DismissNotification = { type: "dismiss", id: number };
 
 export type LayoutAction =
     | LoadAction
@@ -27,14 +29,16 @@ const loadAction = (state: LayoutState, action: LoadAction): LayoutState => {
     return { ...state, loading };
 }
 
-const sendNotificationAction = (state: LayoutState, action: SendNotificationAction) => {
-    const n: Notification = { message: action.message };
-    const notifications = [...state.notifications, n];
+const sendNotificationAction = (state: LayoutState, action: SendNotificationAction): LayoutState => {
+    const mapped: Notification[] = action.messages
+        .map(n => ({ id: (Date.now() + Math.random()), message: n, autoDismiss: action.autoDismiss }));
+
+    const notifications = [...state.notifications, ...mapped];
     return { ...state, notifications };
 }
 
-const dismissNotificationAction = (state: LayoutState, action: DismissNotification) => {
-    const notifications = state.notifications.filter((_, i) => i != action.index);
+const dismissNotificationAction = (state: LayoutState, action: DismissNotification): LayoutState => {
+    const notifications = state.notifications.filter(n => n.id != action.id);
     return { ...state, notifications };
 }
 

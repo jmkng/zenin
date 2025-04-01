@@ -1,11 +1,7 @@
-import { useRef } from "react";
-import { AccountState } from "./reducer";
 import { DELETE_API, PATCH_API, POST_API, Service } from "../server";
 import { AuthenticatedRequest, Request } from "../server/request";
 
 class AccountService extends Service {
-    #token = "token"
-
     constructor() { super(); }
 
     async authenticate(username: string, password: string) {
@@ -54,24 +50,6 @@ class AccountService extends Service {
         const request = new AuthenticatedRequest(token, address).body(body).method(PATCH_API);
         return await this.extract(request);
     }
-
-    /** Set the `token` key to the provided string in localStorage. */
-    setLSToken = (token: string) => localStorage.setItem(this.#token, token);
-
-    /** Read the `token` key from localStorage. */
-    readLSToken = () => localStorage.getItem(this.#token);
-
-    /** Clear the `token` key from localStorage. */
-    clearLSToken = () => localStorage.removeItem(this.#token);
-}
-
-export const useDefaultAccountService = () => {
-    const ref = useRef<AccountService | null>(null);
-    if (ref.current === null) {
-        const service = new AccountService();
-        ref.current = service;
-    }
-    return ref.current;
 }
 
 export { AccountService };

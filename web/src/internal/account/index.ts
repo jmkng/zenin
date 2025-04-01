@@ -32,6 +32,17 @@ interface TokenPayload {
     root: boolean,
 }
 
+const TOKEN_KEY: string = "token";
+
+/** Set the `token` key to the provided string in localStorage. */
+export const setLSToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
+
+/** Read the `token` key from localStorage. */
+export const readLSToken = () => localStorage.getItem(TOKEN_KEY);
+
+/** Clear the `token` key from localStorage. */
+export const clearLSToken = () => localStorage.removeItem(TOKEN_KEY);
+
 export const useAccountContext = () => {
     const state = useContext(AccountContext);
     const dispatch = useContext(AccountDispatchContext);

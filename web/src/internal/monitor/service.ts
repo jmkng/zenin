@@ -1,6 +1,4 @@
-import { useRef } from "react";
 import { Monitor } from ".";
-import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
 import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../server";
 import { AuthenticatedRequest } from "../server/request";
 import { DetachedState } from "./split";
@@ -69,16 +67,6 @@ class MonitorService extends Service {
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }
-}
-
-export const useDefaultMonitorService = () => {
-    const interceptors = useDefaultInterceptors();
-    const ref = useRef<MonitorService | null>(null);
-    if (ref.current === null) {
-        const service = new MonitorService().interceptor(...interceptors);
-        ref.current = service;
-    }
-    return ref.current;
 }
 
 export { MonitorService };

@@ -1,5 +1,3 @@
-import { useRef } from "react";
-import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
 import { POST_API, Service } from "../server";
 import { AuthenticatedRequest } from "../server/request";
 import { Settings } from ".";
@@ -32,17 +30,6 @@ class SettingsService extends Service {
         request.headers({ "Accept": json ? "application/json" : "text/css"});
         return await this.extract(request);
     }
-}
-
-export const useDefaultSettingsService = () => {
-    const interceptors = useDefaultInterceptors();
-
-    const ref = useRef<SettingsService | null>(null);
-    if (ref.current === null) {
-        const service = new SettingsService().interceptor(...interceptors);
-        ref.current = service;
-    }
-    return ref.current;
 }
 
 export { SettingsService };
