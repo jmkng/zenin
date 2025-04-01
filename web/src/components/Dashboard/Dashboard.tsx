@@ -1,9 +1,7 @@
+import { useDefaultMonitorService } from '@/hooks/useMonitorService';
 import { monitor } from '@/internal';
 import { useAccountContext } from '@/internal/account';
-import { Measurement } from '@/internal/measurement';
-import { isMonitor, useMonitorContext } from '@/internal/monitor';
-import { useDefaultMonitorService } from '@/internal/monitor/service';
-import { CreatedTimestamp, DataPacket, Timestamp } from '@/internal/server';
+import { useMonitorContext } from '@/internal/monitor';
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';
@@ -24,44 +22,20 @@ export default function Dashboard() {
         service: useDefaultMonitorService()
     }
     const account = useAccountContext();
-    const sorted = [...monitor.context.state.monitors.values()].sort((a, b) => {
-        switch (monitor.context.state.filter) {
-            case "NAME_ASC":
-                return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
-            case "NAME_DESC":
-                return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
-            case "UPDATED_NEW":
-                return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
-            case "UPDATED_OLD":
-                return Date.parse(a.updatedAt) - Date.parse(b.updatedAt);
-        }
-    })
+    const sorted = [...monitor.context.state.monitors.values()]
+        .sort((a, b) => {
+            switch (monitor.context.state.filter) {
+                case "NAME_ASC": 
+                    return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
+                case "NAME_DESC": 
+                    return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
+                case "UPDATED_NEW": 
+                    return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
+                case "UPDATED_OLD": 
+                    return Date.parse(a.updatedAt) - Date.parse(b.updatedAt);
+            }
+        })
     const isSplit = monitor.context.state.split.pane != null;
-
-    const handleAdd = async (value: monitor.Monitor) => {
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.addMonitor(token, value);
-        if (!extract.ok()) return;
-
-        const body: DataPacket<CreatedTimestamp> = await extract.json();
-        value.createdAt = body.data.time;
-        value.updatedAt = body.data.time;
-        const measurements: Measurement[] = [];
-        const full: monitor.Monitor = { ...value, id: body.data.id, measurements }
-        monitor.context.dispatch({ type: 'update', monitor: full })
-    }
-
-    const handleUpdate = async (value: monitor.Monitor) => {
-        if (!value.id) {
-            throw new Error("monitor is missing id in dashboard update");
-        }
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.updateMonitor(token, value.id, value);
-        if (!extract.ok()) return;
-        const body: DataPacket<Timestamp> = await extract.json();
-        value.updatedAt = body.data.time;
-        monitor.context.dispatch({ type: 'update', monitor: value })
-    }
 
     const handleRemove = async (monitors: monitor.Monitor[]) => {
         const id = monitors.map(n => n.id!);
@@ -102,9 +76,7 @@ export default function Dashboard() {
                 {isSplit
                     ? <div className={"dashboard_activity"}>
                         {monitor.context.state.split.isEditorPane()
-                            ? <Editor
-                                state={monitor.context.state.split.pane}
-                                onChange={n => (n.id != null && isMonitor(n)) ? handleUpdate(n) : handleAdd(n)}
+                            ? <Editor state={monitor.context.state.split.pane}
                             />
                             : null}
                         {monitor.context.state.split.isViewPane()

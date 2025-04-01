@@ -49,14 +49,16 @@ import "./Editor.css";
 
 interface EditorProps {
     state: EditorPane
-    onChange: (target: Monitor) => void;
 }
 
 export default function Editor(props: EditorProps) {
-    const { state, onChange } = props;
+    const { state } = props;
     const monitor = {
         context: useMonitorContext(),
+        service: useMonitorService(),
     }
+    const account = useAccountContext();
+    const notify = useNotify();
 
     const base = useMemo(() => reset(state.monitor, monitor.context.state.plugins), [state.monitor]);
     const [editor, setEditor] = useState<EditorState>(split(base))
@@ -80,6 +82,43 @@ export default function Editor(props: EditorProps) {
     const hasValidIcmpCount = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
     const hasValidIcmpTtl = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
     const canSave = useMemo(() => !isMonitorEqual(editor.draft as Monitor, editor.original as Monitor) && isValidMonitor(editor.draft), [editor])
+    
+    function save() {
+        const sanitized: Monitor = sanitize(editor.draft);
+        sanitized.id != null && isMonitor(sanitized) ? update(sanitized) : add(sanitized)
+    }
+    
+    async function add(value:Monitor) {
+        const token = account.state.token!.raw;
+        const extract = await monitor.service.addMonitor(token, value);
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) setErrors(body.errors);
+            return
+        };
+
+        const body: DataPacket<CreatedTimestamp> = await extract.json();
+        value.createdAt = body.data.time;
+        value.updatedAt = body.data.time;
+        const measurements: Measurement[] = [];
+        const full: Monitor = { ...value, id: body.data.id, measurements }
+        monitor.context.dispatch({ type: 'update', monitor: full })
+    }
+
+    async function update(value: Monitor) {
+        const token = account.state.token!.raw;
+        const extract = await monitor.service.updateMonitor(token, value.id, value);
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) setErrors(body.errors);
+            return
+        };
+
+        const body: DataPacket<Timestamp> = await extract.json();
+        value.updatedAt = body.data.time;
+        monitor.context.dispatch({ type: 'update', monitor: value })
+        notify(true, "Monitor updated.");
+    }
 
     // Check if the ICMP probe values might cause the operation to exceed the timeout.
     const hasValidIcmpTime = useMemo(() => {
@@ -483,7 +522,7 @@ export default function Editor(props: EditorProps) {
             <Button
                 kind="primary"
                 disabled={!canSave}
-                onClick={() => onChange(sanitize(editor.draft))}
+                onClick={save}
             >
                 <span>Save</span>
             </Button>
