@@ -149,48 +149,53 @@ export default function Accounts() {
     }
 
     const accountManagerTab = <>
-        {account.context.state.accounts.map((n, i) => <div key={i} className="account">
-            <div className="account_top">
-                <div className="account_top_left">
-                    <div className="account_name">
-                        {n.username}
+        <h1 className="h_m-0">Accounts</h1>
+        <div className="h_mt-c">
+            {account.context.state.accounts.map((n, i) => <div key={i} className="account">
+                <div className="account_top">
+                    <div className="account_top_left">
+                        <div className="account_name">
+                            {n.username}
+                        </div>
+                    </div>
+                    <div className="account_top_right">
+                        {n.root
+                            ? <div className="account_rank">
+                                {ROOT_ACCOUNT_UI}
+                            </div>
+                            : null}
+
+                        <Dialog dialog={{
+                            content: <AccountDialogContent
+                                allowDelete={!n.root}
+                                onDelete={() => setIsDeleting(n)}
+                                onEdit={() => handleManagerEdit(n)}
+                            />
+                        }}>
+                            <Button hover={false} icon={<VMenuIcon />}>
+                            </Button>
+                        </Dialog>
                     </div>
                 </div>
-                <div className="account_top_right">
-                    {n.root
-                        ? <div className="account_rank">
-                            {ROOT_ACCOUNT_UI}
-                        </div>
-                        : null}
 
-                    <Dialog dialog={{
-                        content: <AccountDialogContent
-                            allowDelete={!n.root}
-                            onDelete={() => setIsDeleting(n)}
-                            onEdit={() => handleManagerEdit(n)}
-                        />
-                    }}>
-                        <Button hover={false} icon={<VMenuIcon />}>
-                        </Button>
-                    </Dialog>
-                </div>
-            </div>
-
-            <small className="account_updated_timestamp">
-                {formatUTCDate(n.updatedAt)}
-            </small>
-        </div>)}
+                <small className="account_updated_timestamp">
+                    {formatUTCDate(n.updatedAt)}
+                </small>
+            </div>)}
+        </div>
     </>
 
     const accountEditTab = <>
-        <h1 className="h_m-0 h_mb-c">{editor.original.username}</h1>
-        <TextInput
-            name={"account_name"}
-            label="Username"
-            subtext="The account display name."
-            value={editor.draft.username}
-            onChange={username => setEditor(prev => ({ ...prev, draft: { ...prev.draft, username } }))}
-        />
+        <h1 className="h_m-0">{editor.original.username}</h1>
+        <div className="h_mt-c">
+            <TextInput
+                name={"account_name"}
+                label="Username"
+                subtext="The account display name."
+                value={editor.draft.username}
+                onChange={username => setEditor(prev => ({ ...prev, draft: { ...prev.draft, username } }))}
+            />
+        </div>
         <div className="h_mt-c">
             <TextInput
                 type="password"
