@@ -1,5 +1,4 @@
-import { useAccountContext } from '@/internal/account';
-import { useDefaultAccountService } from '@/internal/account/service';
+import { readLSToken, useAccountContext } from '@/internal/account';
 import { ReactNode, useEffect } from 'react';
 
 interface InitializeProps {
@@ -8,17 +7,17 @@ interface InitializeProps {
 
 export default function Initialize(props: InitializeProps) {
     const { children } = props;
-    const account = {
-        service: useDefaultAccountService(),
-        context: useAccountContext()
-    }
+    const account = { 
+        context: useAccountContext(),
+    };
 
     useEffect(() => {
         if (account.context.state.initialized) return;
-        const token = account.service.readLSToken();
+        const token = readLSToken();
+        
         if (token) account.context.dispatch({ type: 'login', token });
         else account.context.dispatch({ type: 'logout' });
-    }, [account.context, account.service])
+    }, [account.context])
 
     return account.context.state.initialized ? children : null
 }
