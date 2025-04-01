@@ -50,11 +50,11 @@ import TextInput from "../../Input/TextInput/TextInput";
 import ToggleInput from "../../Input/ToggleInput/ToggleInput";
 
 import { useMonitorService } from "@/hooks/useMonitorService";
+import { useNotify } from "@/hooks/useNotify";
 import { useAccountContext } from "@/internal/account";
 import { Measurement } from "@/internal/measurement";
 
 import "./Editor.css";
-import { useNotify } from "@/hooks/useNotify";
 
 interface EditorProps {
     state: EditorPane
