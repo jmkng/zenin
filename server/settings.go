@@ -45,10 +45,10 @@ func (a SettingsProvider) Mux() http.Handler {
 		private.Use(Authenticate)
 		private.Get("/", a.HandleGetSettings)
 		private.Get("/themes", a.HandleGetThemes)
-		private.Get("/themes/active", a.HandleGetActiveTheme)
 		private.Post("/", a.HandleUpdateSettings)
 	})
 	//////////////////
+	router.Get("/themes/active", a.HandleGetActiveTheme)
 
 	return router
 }
