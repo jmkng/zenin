@@ -25,29 +25,53 @@ export const
     SERVERERROR_API = "500-599"
     ;
 
+type ErrorHandler = (error: unknown) => void;
+    
 export class Service {
     #interceptors: Interceptor[] = [];
+    
+    #networkErrorHandler?: ErrorHandler;
+    #interceptorErrorHandler?: ErrorHandler;
 
     constructor() { }
 
-    interceptor = (...interceptors: Interceptor[]) => {
+    interceptor = (...interceptors: Interceptor[]): this => {
         for (const n of interceptors) {
             this.#interceptors.push(n);
         }
         return this;
     }
 
-    extract = async (request: Request) => {
-        const response = await request.response();
-        const extract = new Extract(response);
-        for (const interceptor of this.#interceptors) {
-            try {
-                interceptor(extract);
-            } catch {
-                console.error(`failed to run interceptor task on response`);
-            }
+    /** Set a network error handler. */
+    onNetworkError = (fn: ErrorHandler): this => {
+        this.#networkErrorHandler = fn;
+        return this;
+    };
+    
+    /** Set an interceptor error handler. */
+    onInterceptorError = (fn: ErrorHandler): this => {
+        this.#interceptorErrorHandler = fn;
+        return this;
+    };
+
+    extract = async (request: Request): Promise<Extract> => {
+        let response;
+        try {
+            response = await request.response();
+        } catch(err) {
+            this.#networkErrorHandler?.(err);
+            throw err;
         }
-        return extract;
+        try {
+            const extract = new Extract(response);
+            for (const interceptor of this.#interceptors) {
+                interceptor(extract);
+            }
+            return extract;
+        } catch(err) {
+            this.#interceptorErrorHandler?.(err);
+            throw err;
+        }
     }
 }
 
@@ -68,8 +92,8 @@ export class Extract {
         try {
             const json = await this.response.json();
             return json;
-        } catch {
-            console.error('failed to extract response body')
+        } catch(err) {
+            console.error('failed to extract JSON response body:', err)
             return null;
         }
     }
