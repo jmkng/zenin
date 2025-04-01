@@ -7,10 +7,15 @@
     flex-direction: column;
     gap: 10px;
     align-items: flex-end;
+    pointer-events: none;
 }
 
 .dashboard.split ~ .notifications {
     bottom: 75px;
+}
+
+.notification, .notification * {
+    pointer-events: auto;
 }
 
 .notification {

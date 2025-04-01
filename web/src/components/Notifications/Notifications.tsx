@@ -25,27 +25,27 @@ export default function Notifications() {
         layout.dispatch({ type: 'dismiss', id });
     };
 
-    return <div className="notifications">
+    return <div className="notifications" role="region" aria-live="polite" aria-label="Notifications">
         {layout.state.notifications.map(n => 
-            <div key={n.id} className="notification">
+            <div key={n.id} tabIndex={0} className="notification">
                 <div className="notification_message">
                     {n.message}
                 </div>
             
                 <div className="notification_controls">
-                    <Button onClick={() => dismiss(n.id)} icon={
-                        <span className="dialog_close_icon">
-                            <AddIcon />
-                        </span>
-                    }>
+                    <Button 
+                        ariaLabel="Dismiss Notification"
+                        onClick={() => dismiss(n.id)} 
+                        icon={<span aria-hidden="true" className="dialog_close_icon"><AddIcon /></span>}
+                    >
                     </Button>
                 </div>
             
-                {n.autoDismiss && (
-                    <div className="notification_progress_container">
+                {n.autoDismiss
+                    ? <div className="notification_progress_container">
                         <div className="notification_progress" style={{ animationDuration: `${TIME_DELAY_MS+150}ms` }} />
                     </div>
-                )}
+                    : null}
             </div>
         )}
     </div>
