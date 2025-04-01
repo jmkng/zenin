@@ -156,10 +156,7 @@ export default function Settings() {
             </div>
 
             <div className="settings_message_container" ref={errorsContainerRef}>
-                {errors.map((n, index) => 
-                    <div key={index} className="settings_message error h_mt-c">
-                        {n}
-                    </div>)}
+                {errors.map((n, index) => <div key={index} className="settings_message error h_mt-c">{n}</div>)}
             </div>
         </div>
 

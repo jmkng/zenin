@@ -539,10 +539,7 @@ export default function Editor(props: EditorProps) {
             {isViewingEvents ? eventTab : monitorTab}
 
             <div className="editor_message_container" ref={errorsContainerRef}>
-                {errors.map((n, index) => 
-                    <div key={index} className="editor_message error h_mt-c">
-                        {n}
-                    </div>)}
+                {errors.map((n, index) => <div key={index} className="editor_message error h_mt-c">{n}</div>)}
             </div>
         </div>
 

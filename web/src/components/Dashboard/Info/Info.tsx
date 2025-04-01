@@ -53,7 +53,7 @@ export default function Info(props: InfoProps) {
             </Button>
             <Button
                 border={true}
-                onClick={() => monitor.context.dispatch({ type: 'queue', monitors: [state.monitor!] })}
+                onClick={() => monitor.context.dispatch({ type: 'queue', monitors: [state.monitor] })}
                 kind="destructive"
             >
                 Delete

@@ -1,4 +1,5 @@
 import { useDefaultAccountService } from "@/hooks/useAccountService";
+import { useNotify } from "@/hooks/useNotify";
 import { Account, ROOT_ACCOUNT_UI, setLSToken, useAccountContext } from "@/internal/account";
 import { formatUTCDate } from "@/internal/layout/graphics";
 import { useMonitorContext } from "@/internal/monitor";
@@ -23,6 +24,13 @@ interface Draft {
 
 type EditorState = { draft: Draft, original: Draft };
 
+const defaults: Draft = {
+    id: null,
+    username: null,
+    password: null,
+    passwordConfirm: null
+};
+
 export default function Accounts() {
     const account = {
         context: useAccountContext(),
@@ -31,13 +39,8 @@ export default function Accounts() {
     const monitor = {
         context: useMonitorContext(),
     }
+    const notify = useNotify();
     const payload = account.context.state.token!.payload;
-    const defaults: Draft = {
-        id: null,
-        username: null,
-        password: null,
-        passwordConfirm: null
-    };
 
     const [editor, setEditor] = useState<EditorState>({ draft: defaults, original: defaults });
     const [isEditing, setIsEditing] = useState<boolean>(payload.root ? false : true);
@@ -57,24 +60,76 @@ export default function Accounts() {
 
     const canSave: boolean = useMemo(() => isDraftValid && isDraftChanged, [isDraftValid, isDraftChanged])
 
-    const handleManagerEdit = (account: Account) => {
+    function editAccount(account: Account) {
         setIsEditing(true);
         const draft: Draft = { ...defaults, id: account.id, username: account.username };
         setEditor({ draft, original: draft });
     }
 
-    const handleSave = async () => {
+    async function save() {
         // Validations prevent saving before we have good username/password values.
         const username: string = editor.draft.username!;
         const password: string = editor.draft.password!;
 
         // When id is set we will update that account, otherwise create a new account.
-        if (editor.draft.id)
-            handleUpdate(editor.draft.id, username, password);
-        else handleCreate(username, password);
+        if (editor.draft.id) updateAccount(editor.draft.id, username, password);
+        else createAccount(username, password);
     }
 
-    const handleReset = () => {
+    async function createAccount(username: string, password: string) {
+        const token = account.context.state.token!.raw;
+
+        const extract = await account.service.createAccount(token, username, password);
+        if (!extract.ok()) {
+            const packet = await extract.json();
+            if (isErrorPacket(packet)) setErrors(packet.errors);
+            return;
+        }
+        
+        const packet: DataPacket<CreatedTimestamp> = await extract.json();
+        account.context.dispatch({
+            type: 'create',
+            account: {
+                createdAt: packet.data.time,
+                updatedAt: packet.data.time,
+                id: packet.data.id,
+                username,
+                root: false
+            }
+        });
+        reset();
+        setErrors([]);
+        notify(true, "Account created.");
+    }
+
+    async function updateAccount(id: number, username: string, password: string) {
+        const token = account.context.state.token!.raw;
+
+        // Request a new token when updating the active account.
+        const reissue: boolean = id == account.context.state.token!.payload.sub;
+
+        const extract = await account.service.updateAccount(token, id, username, password, reissue);
+        if (!extract.ok()) {
+            const packet = await extract.json();
+            if (isErrorPacket(packet)) setErrors(packet.errors);
+            return;
+        }
+        
+        const packet: DataPacket<{ time: string, token?: string }> = await extract.json();
+        const updatedAt = packet.data.time;
+        account.context.dispatch({ type: 'update', id, username, updatedAt });
+        if (reissue) {
+            // Token will only be set when a reissue is requested.
+            const newToken = packet.data.token!;
+            setLSToken(newToken);
+            account.context.dispatch({ type: 'login', token: newToken });
+        }
+        reset();
+        setErrors([]);
+        notify(true, "Account updated.");
+    }
+
+    function reset() {
         setEditor(prev => {
             const state = {
                 ...prev.draft,
@@ -85,65 +140,21 @@ export default function Accounts() {
         })
     }
 
-    const handleCreate = async (username: string, password: string) => {
-        const token = account.context.state.token!.raw;
-
-        const extract = await account.service.createAccount(token, username, password);
-        if (extract.ok()) {
-            const packet: DataPacket<CreatedTimestamp> = await extract.json();
-            account.context.dispatch({
-                type: 'create',
-                account: {
-                    createdAt: packet.data.time,
-                    updatedAt: packet.data.time,
-                    id: packet.data.id,
-                    username,
-                    root: false
-                }
-            });
-            handleReset();
-            setErrors([]);
-        } else {
-            const packet = await extract.json();
-            if (isErrorPacket(packet)) setErrors(packet.errors);
-        }
-    }
-
-    const handleUpdate = async (id: number, username: string, password: string) => {
-        const token = account.context.state.token!.raw;
-
-        // Request a new token when updating the active account.
-        const reissue: boolean = id == account.context.state.token!.payload.sub;
-
-        const extract = await account.service.updateAccount(token, id, username, password, reissue);
-        if (extract.ok()) {
-            const packet: DataPacket<{ time: string, token?: string }> = await extract.json();
-            const updatedAt = packet.data.time;
-            account.context.dispatch({ type: 'update', id, username, updatedAt });
-            if (reissue) {
-                // Token will only be set when a reissue is requested.
-                const token = packet.data.token!;
-                setLSToken(token);
-                account.context.dispatch({ type: 'login', token });
-            }
-            handleReset();
-            setErrors([]);
-        } else {
-            const packet = await extract.json();
-            if (isErrorPacket(packet)) setErrors(packet.errors);
-        }
-    }
-
-    async function handleDelete(id: number) {
+    async function deleteAccount(id: number) {
         const token = account.context.state.token!.raw;
         const extract = await account.service.deleteAccount(token, [id]);
-        if (!extract.ok) return;
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) setErrors(body.errors);
+            return
+        };
 
         setIsDeleting(null);
         account.context.dispatch({ type: 'delete', id })
+        notify(true, "Account deleted.");
     }
 
-    function handleEdit() {
+    function draftAccount() {
         setEditor({ draft: defaults, original: defaults });
         setIsEditing(true);
     }
@@ -169,7 +180,7 @@ export default function Accounts() {
                             content: <AccountDialogContent
                                 allowDelete={!n.root}
                                 onDelete={() => setIsDeleting(n)}
-                                onEdit={() => handleManagerEdit(n)}
+                                onEdit={() => editAccount(n)}
                             />
                         }}>
                             <Button hover={false} icon={<VMenuIcon />}>
@@ -220,13 +231,13 @@ export default function Accounts() {
                     ? <span className="detail_validation h_c-dead-a">Passwords do not match.</span>
                     : null}
 
-                {errors
-                    ? <div className="account_message_container">
-                        {errors.map((error, index) => <div key={index} className="account_message error">{error}</div>)}
-                    </div>
-                    : null}
+   
             </div>
             : null}
+
+            <div className="accounts_message_container">
+                {errors.map((n, index) => <div key={index} className="accounts_message error h_mt-c">{n}</div>)}
+            </div>
     </>
 
     return <div className="accounts">
@@ -236,7 +247,7 @@ export default function Accounts() {
 
         <div className="detail_controls">
             {isEditing
-                ? <Button kind="primary" border={true} disabled={!canSave} onClick={handleSave}>
+                ? <Button kind="primary" border={true} disabled={!canSave} onClick={save}>
                     Save
                 </Button>
                 : null}
@@ -251,7 +262,7 @@ export default function Accounts() {
                 : null}
 
             {payload.root && !isEditing
-                ? <Button kind="primary" border={true} onClick={handleEdit}>
+                ? <Button kind="primary" border={true} onClick={draftAccount}>
                     Create
                 </Button>
                 : null}
@@ -273,7 +284,7 @@ export default function Accounts() {
                         <div>This action cannot be undone.</div>
                     </div>
                     <div className="dialog_confirm_content_bottom">
-                        <Button onClick={() => handleDelete(isDeleting.id)} kind="primary">
+                        <Button onClick={() => deleteAccount(isDeleting.id)} kind="primary">
                             <span>Delete</span>
                         </Button>
                     </div>
