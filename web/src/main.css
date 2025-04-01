@@ -1,6 +1,5 @@
 @import './css/spinner.css' layer(base);
 @import './css/cover.css' layer(base);
-@import './css/dialog.css' layer(base);
 @import './css/icon.css' layer(base);
 @import './css/input.css' layer(base);
 @import './css/menu.css' layer(base);
@@ -96,9 +95,13 @@
         --slider-input-background: var(--color-gray-150);
         --tooltip-background: var(--primary-color);
         --tooltip-color: var(--background);
+        --notification-background: var(--dialog-background);
+        --notification-border-color: var(--dialog-border-color);
+        --notification-progress-color: var(--primary-color);
+        --notification-progress-border-color: var(--color-gray-750);
         --modal-backdrop-opacity: 0.1;
 
-        .dialog_portal {
+        .dialog_portal, .notification {
             --hover-background: var(--color-gray-150);
         }
 
@@ -132,17 +135,21 @@
         --tooltip-background: var(--primary-color);
         --tooltip-color: var(--color-gray-900);
         --timeline-aid-hover-background: var(--background);
+        --notification-progress-border-color: var(--color-gray-200);
         --modal-backdrop-opacity: 0.4;
         
-        .dialog_portal, .dialog_modal {
+        .dialog_portal, .dialog_modal, .notification {
             --hover-background: var(--color-gray-800);
         }
     }
 }
 
 @layer globals {
-    * {
+    html {
         box-sizing: border-box;
+    }
+    *, *:before, *:after {
+        box-sizing: inherit;
     }
     
     body {
