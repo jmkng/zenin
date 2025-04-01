@@ -1,15 +1,17 @@
-import { useEffect } from 'react';
-import { Route, Routes } from "react-router";
-
+import { useDefaultAccountService } from '@/hooks/useAccountService';
 import { useFeedDispatch } from '@/hooks/useFlaggedDispatch';
+import { useDefaultMonitorService } from '@/hooks/useMonitorService';
+import { useNetworkErrorHandler } from '@/hooks/useNetworkErrorHandler';
+import { useDefaultSettingsService } from '@/hooks/useSettingsService';
 import { Account, useAccountContext } from '@/internal/account';
-import { useDefaultAccountService } from '@/internal/account/service';
 import { useLayoutContext } from '@/internal/layout';
 import { formatTheme, hideLoadingScreen, showLoadingScreen } from '@/internal/layout/graphics';
-import { Monitor, useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
+import { Monitor, useMonitorContext } from '@/internal/monitor';
 import { inventoryBatchSize, monitorDefault } from '@/internal/monitor/reducer';
 import { DataPacket, Extract, FEED, handleConnect, handleDisconnect } from '@/internal/server';
-import { Settings, useDefaultSettingsService, useSettingsContext } from '@/internal/settings';
+import { Settings, useSettingsContext } from '@/internal/settings';
+import { useEffect } from 'react';
+import { Route, Routes } from "react-router";
 
 import Dashboard from './Dashboard/Dashboard';
 import Hidden from './Hidden';
@@ -35,6 +37,7 @@ export default function Router() {
     };
     const layout = useLayoutContext();
     const dispatch = useFeedDispatch();
+    const onNetworkError = useNetworkErrorHandler();
 
     useEffect(() => {
         if (!account.context.state.token) return;
@@ -47,10 +50,14 @@ export default function Router() {
         if (token.payload.root) queue.push(account.service.getAccounts(token.raw));
         
         (async () => {
-            const [monitorEx, settingsEx, accountEx] = await Promise.all(queue);
-            if (monitorEx.ok()) await resetMonitors(monitorEx);
-            if (settingsEx.ok()) await resetSettings(settingsEx);
-            if (accountEx?.ok()) await resetAccounts(accountEx); 
+            try {
+                const [monitorEx, settingsEx, accountEx] = await Promise.all(queue);
+                if (monitorEx.ok()) await resetMonitors(monitorEx);
+                if (settingsEx.ok()) await resetSettings(settingsEx);
+                if (accountEx?.ok()) await resetAccounts(accountEx); 
+            } catch(err) {
+                onNetworkError(err);
+            }
 
             const loading = false;
             layout.dispatch({ type: 'load', loading })
@@ -103,7 +110,6 @@ export default function Router() {
                 <Route path="/" element={<Dashboard />} />
                <Route path="*" element={<NotFound/>} />
             </Route>
-
         </Routes>
 
         <Notifications/>
