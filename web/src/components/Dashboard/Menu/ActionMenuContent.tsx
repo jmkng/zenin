@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "@/internal/account";
-import { useDefaultAccountService } from "@/internal/account/service";
+import { useDefaultAccountService } from "@/hooks/useAccountService";
+import { clearLSToken, useAccountContext } from "@/internal/account";
 import { useMonitorContext } from "@/internal/monitor";
+import { useNavigate } from "react-router-dom";
 
 import Button from "../../Button/Button";
 import AccountIcon from "../../Icon/AccountIcon";
@@ -19,7 +19,7 @@ export default function ActionMenuContent() {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        account.service.clearLSToken();
+        clearLSToken();
         account.context.dispatch({ type: 'logout' });
         monitor.context.dispatch({ type: 'logout' });
         navigate("/login");

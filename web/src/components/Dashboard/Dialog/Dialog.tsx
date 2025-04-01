@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import { useEffect, useRef, useState } from "react";
 import { defaultDialogStrategy, PositionStrategy } from "./position";
 
+import "./Dialog.css";
+
 interface DialogState {
     rootRect: DOMRect | null
     portalRect: DOMRect | null

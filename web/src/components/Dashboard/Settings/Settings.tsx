@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import { useAccountContext } from "@/internal/account";
 import { formatTheme } from "@/internal/layout/graphics";
+import { useDefaultSettingsService } from "@/hooks/useSettingsService";
 import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
 import {
     DEFAULT_DARK,
@@ -9,7 +10,6 @@ import {
     SettingsState,
     THEME_ATTR,
     THEME_BLOCK_ID,
-    useDefaultSettingsService,
     useSettingsContext
 } from "@/internal/settings";
     
@@ -18,6 +18,7 @@ import PairListInput from "../../Input/PairListInput/PairListInput";
 import SelectInput from "../../Input/SelectInput/SelectInput";
 
 import "./Settings.css";
+
 
 export default function Settings() {
     const monitor = { context: useMonitorContext() };

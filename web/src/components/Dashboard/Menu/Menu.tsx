@@ -1,4 +1,5 @@
-import { useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
+import { useMonitorContext } from '@/internal/monitor';
+import { useDefaultMonitorService } from '@/hooks/useMonitorService';
 
 import Button from '../../Button/Button';
 import AddIcon from '../../Icon/AddIcon';

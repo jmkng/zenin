@@ -1,9 +1,9 @@
-import { useLayoutEffect, useState } from "react";
+import { useDefaultMeasurementService } from "@/hooks/useMeasurementService";
 import { useAccountContext } from "@/internal/account";
 import { formatUTCDate } from "@/internal/layout/graphics";
 import { Certificate, Measurement } from "@/internal/measurement";
-import { useDefaultMeasurementService } from "@/internal/measurement/service";
 import { DataPacket } from "@/internal/server";
+import { useLayoutEffect, useState } from "react";
 
 import ChevronIcon from "../../../Icon/ChevronIcon";
 

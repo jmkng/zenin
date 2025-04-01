@@ -1,16 +1,16 @@
-import { Account, ROOT_ACCOUNT_UI, useAccountContext } from "@/internal/account";
+import { useDefaultAccountService } from "@/hooks/useAccountService";
+import { Account, ROOT_ACCOUNT_UI, setLSToken, useAccountContext } from "@/internal/account";
 import { formatUTCDate } from "@/internal/layout/graphics";
 import { useMonitorContext } from "@/internal/monitor";
-import { useMemo, useState } from "react";
-import { useDefaultAccountService } from "@/internal/account/service";
 import { CreatedTimestamp, DataPacket, isErrorPacket } from "@/internal/server";
+import { useMemo, useState } from "react";
 
 import TextInput from "@/components/Input/TextInput/TextInput";
 import Button from "../../../components/Button/Button";
 import VMenuIcon from "../../Icon/VMenuIcon";
 import Dialog from "../Dialog/Dialog";
-import AccountDialogContent from "./AccountDialogContent";
 import DialogModal from "../Dialog/DialogModal";
+import AccountDialogContent from "./AccountDialogContent";
 
 import "./Accounts.css";
 
@@ -123,7 +123,7 @@ export default function Accounts() {
             if (reissue) {
                 // Token will only be set when a reissue is requested.
                 const token = packet.data.token!;
-                account.service.setLSToken(token);
+                setLSToken(token);
                 account.context.dispatch({ type: 'login', token });
             }
             handleReset();

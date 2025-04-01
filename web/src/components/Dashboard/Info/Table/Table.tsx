@@ -1,7 +1,8 @@
+import { useDefaultMeasurementService } from '@/hooks/useMeasurementService';
+import { useDefaultMonitorService } from '@/hooks/useMonitorService';
 import { useAccountContext } from '@/internal/account';
 import { Measurement } from '@/internal/measurement';
-import { useDefaultMeasurementService } from '@/internal/measurement/service';
-import { useDefaultMonitorService, useMonitorContext } from '@/internal/monitor';
+import { useMonitorContext } from '@/internal/monitor';
 import { OriginState, ViewPane } from '@/internal/monitor/split';
 import { DataPacket } from '@/internal/server';
 import { useEffect, useRef, useState } from 'react';

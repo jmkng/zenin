@@ -1,5 +1,6 @@
 import { useAccountContext } from "@/internal/account"
-import { Monitor, useDefaultMonitorService, useMonitorContext } from "@/internal/monitor"
+import { Monitor, useMonitorContext } from "@/internal/monitor"
+import { useDefaultMonitorService } from "@/hooks/useMonitorService"
 import { DataPacket, Timestamp } from "@/internal/server"
 
 import Button from "../../Button/Button"
