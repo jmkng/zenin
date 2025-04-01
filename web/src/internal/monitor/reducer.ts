@@ -127,7 +127,7 @@ export type MonitorAction =
     | PaneAction
     | LogoutAction
 
-const resetAction = (_: MonitorState, action: ResetAction) => {
+const resetAction = (_: MonitorState, action: ResetAction): MonitorState => {
     const monitors = new Map<number, Monitor>();
     for (const monitor of action.state.monitors) {
         const duplicate: Monitor = { ...monitor };
@@ -139,24 +139,24 @@ const resetAction = (_: MonitorState, action: ResetAction) => {
     return { ...action.state, monitors }
 }    
 
-const queueMonitorDeleteAction = (state: MonitorState, action: QueueDeleteMonitorAction) => {
+const queueMonitorDeleteAction = (state: MonitorState, action: QueueDeleteMonitorAction): MonitorState => {
     const deleting = action.monitors;
     return { ...state, deleting }
 }
 
-const deleteMonitorAction = (state: MonitorState, action: DeleteMonitorAction) => {
+const deleteMonitorAction = (state: MonitorState, action: DeleteMonitorAction): MonitorState => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) monitors.delete(n);
 
     const selected: Monitor[] = [];
     const deleting: Monitor[] = [];
-    const split = state.split.overlaps(action.monitors)
-        ? null
+    const split: SplitState = state.split.overlaps(action.monitors)
+        ? new SplitState(null)
         : state.split;
-    return { ...state, monitors, selected, deleting, split } as MonitorState
+    return { ...state, monitors, selected, deleting, split }
 }
 
-const toggleMonitorAction = (state: MonitorState, action: ToggleMonitorAction) => {
+const toggleMonitorAction = (state: MonitorState, action: ToggleMonitorAction): MonitorState => {
     const monitors = new Map(state.monitors);
     for (const n of action.monitors) {
         const found = monitors.get(n);
@@ -170,7 +170,7 @@ const toggleMonitorAction = (state: MonitorState, action: ToggleMonitorAction) =
     return { ...state, monitors, selected: [], deleting: [] };
 }
 
-const overwriteMonitorAction = (state: MonitorState, action: UpdateMonitorAction) => {
+const overwriteMonitorAction = (state: MonitorState, action: UpdateMonitorAction): MonitorState => {
     const monitors = new Map(state.monitors);
     const target = monitors.get(action.monitor.id);
 
@@ -178,11 +178,11 @@ const overwriteMonitorAction = (state: MonitorState, action: UpdateMonitorAction
     if (target) action.monitor.measurements = target.measurements;
 
     monitors.set(action.monitor.id, action.monitor);
-    const split = new SplitState(new EditorPane(action.monitor))
+    const split: SplitState = new SplitState(new EditorPane(action.monitor))
     return { ...state, monitors, split }
 }
 
-const pollAction = (state: MonitorState, action: PollAction) => {
+const pollAction = (state: MonitorState, action: PollAction): MonitorState => {
     const monitors = new Map(state.monitors);
     const monitor = monitors.get(action.measurement.monitorId);
     if (!monitor) {
@@ -199,12 +199,12 @@ const pollAction = (state: MonitorState, action: PollAction) => {
     return { ...state, monitors }
 }
 
-const filterAction = (state: MonitorState, action: FilterAction) => {
+const filterAction = (state: MonitorState, action: FilterAction): MonitorState => {
     const filter = action.filter;
     return { ...state, filter }
 }
 
-const selectAction = (state: MonitorState, action: SelectAction) => {
+const selectAction = (state: MonitorState, action: SelectAction): MonitorState => {
     if (action.monitor == "ALL") {
         return { ...state, selected: [...state.monitors.values()] }
     }
@@ -217,7 +217,7 @@ const selectAction = (state: MonitorState, action: SelectAction) => {
     return { ...state, selected }
 }
 
-const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction) => {
+const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction): MonitorState => {
     const monitor = state.monitors.get(action.monitor);
     if (!monitor) return state;
 
@@ -225,7 +225,7 @@ const addMeasurementAction = (state: MonitorState, action: AddMeasurementAction)
     return state;
 }
 
-const paneAction = (state: MonitorState, action: PaneAction) => {
+const paneAction = (state: MonitorState, action: PaneAction): MonitorState => {
     switch (action.pane.type) {
         case "view": return viewPaneAction(state, action.pane);
         case "editor": return editorPaneAction(state, action.pane);
@@ -235,39 +235,43 @@ const paneAction = (state: MonitorState, action: PaneAction) => {
     }
 }
 
-const viewPaneAction = (state: MonitorState, action: ViewPaneAction) => {
-    if (!action.target || (state.split.equals(action.target.monitor) && !action.target.disableToggle))
-        return { ...state, split: new SplitState(null) };
+const resetPaneAction = (state: MonitorState): MonitorState => {
+    return { ...state, split: new SplitState(null) };
+}
 
-    const view = new ViewPane(action.target.monitor, action.target.measurement, action.target.origin);
-    const split = new SplitState(view)
+const viewPaneAction = (state: MonitorState, action: ViewPaneAction): MonitorState => {
+    if (!action.target) return resetPaneAction(state);
+    if (!action.target.disableToggle && state.split.isViewPane() && state.split.equals(action.target.monitor)) return resetPaneAction(state);
+    
+    const view = new ViewPane(action.target.monitor, action.target.measurement, action.target!.origin);
+    const split: SplitState = new SplitState(view)
     return { ...state, split }
 }
 
-const editorPaneAction = (state: MonitorState, action: EditorPaneAction) => {
-    let split: SplitState;
-    if (!action.monitor || state.split.isEditorPane() && state.split.pane.monitor == action.monitor)
-        split = new SplitState(null)
-    else split = new SplitState(new EditorPane(action.monitor))
+const editorPaneAction = (state: MonitorState, action: EditorPaneAction): MonitorState => {
+    if (!action.monitor) return resetPaneAction(state);
+    if (state.split.isEditorPane() && state.split.pane.monitor == action.monitor) return resetPaneAction(state);
+
+    const split = new SplitState(new EditorPane(action.monitor))
     return { ...state, split }
 }
 
-const draftPaneAction = (state: MonitorState, _: DraftPaneAction) => {
-    const split = new SplitState(new EditorPane(null))
+const draftPaneAction = (state: MonitorState, _: DraftPaneAction): MonitorState => {
+    const split: SplitState = new SplitState(new EditorPane(null))
     return { ...state, split }
 }
 
 const settingsPaneAction = (state: MonitorState) => {
-    let split: SplitState;
-    if (state.split.pane != null && state.split.isSettingsPane()) split = new SplitState(null);
-    else split = new SplitState(new SettingsPane())
+    if (state.split.pane != null && state.split.isSettingsPane()) return resetPaneAction(state);
+    
+    const split = new SplitState(new SettingsPane())
     return { ...state, split }
 }
 
 const accountsPaneAction = (state: MonitorState) => {
-    let split: SplitState;
-    if (state.split.pane != null && state.split.isAccountsPane()) split = new SplitState(null);
-    else split = new SplitState(new AccountsPane())
+    if (state.split.pane != null && state.split.isAccountsPane()) return resetPaneAction(state);
+
+    const split = new SplitState(new AccountsPane())
     return { ...state, split }
 }
 
