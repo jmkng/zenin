@@ -9,15 +9,18 @@ import Private from './Private';
 
 import './Router.css';
 
+const ROOT_PATH = "/";
+const LOGIN_PATH = "/login";
+
 export default function Router() {    
     return <div className="router">
         <Routes>
-            <Route element={<Hidden />}>
+            <Route element={<Hidden redirectPath={ROOT_PATH} />}>
                 <Route path="/login" element={<Login />} />
             </Route>
             
-            <Route element={<Private />}>
-                <Route path="/" element={<Dashboard />} />
+            <Route element={<Private redirectPath={LOGIN_PATH} />}>
+                <Route path={ROOT_PATH} element={<Dashboard />} />
                <Route path="*" element={<NotFound/>} />
             </Route>
         </Routes>

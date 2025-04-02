@@ -26,23 +26,24 @@ export default function Login() {
 
     useEffect(() => {
         (async () => {
+            let claimed = true;
+            
             const extract = await accountService.getClaimed();
-            if (!extract.ok()) return;
-            const packet: DataPacket<{claimed: boolean}> = await extract.json();
-            setIsClaimed(packet.data.claimed);
+            if (extract.ok()) {
+                const packet: DataPacket<{claimed: boolean}> = await extract.json();
+                claimed = packet.data.claimed;
+            };
+            
+            setIsClaimed(claimed);
+            layoutContext.dispatch({ type: 'load', loading: false })
         })()
     }, [])
-
-    useEffect(() => {
-        if (isClaimed === null) return;
-        layoutContext.dispatch({ type: 'load', loading: false })
-    }, [isClaimed])
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Enter") {
                 event.preventDefault();
-                handleSubmit();
+                submit();
             }
         };
     
@@ -50,10 +51,10 @@ export default function Login() {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [handleSubmit]);
+    }, [submit]);
 
-    async function handleSubmit() {
-        if (isClaimed === null || !handleFormValidate()) return;
+    async function submit() {
+        if (isClaimed === null || !validateForm()) return;
 
         const username = editor.username || "";
         const password = editor.password || "";
@@ -73,11 +74,12 @@ export default function Login() {
         const token = packet.data.token;
         setLSToken(token);
         accountContext.dispatch({ type: 'login', token });
+
         setErrors([]);
         navigate("/");
     }
 
-    function handleFormValidate() {
+    function validateForm() {
         let result = true;
         if (isClaimed === null) return;
         if (isClaimed === false && (editor.password != editor.passwordConfirm)) {
@@ -133,7 +135,7 @@ export default function Login() {
             <div className="login_controls">
                 <Button
                     kind="primary"
-                    onClick={handleSubmit}
+                    onClick={submit}
                     disabled={!canSave}
                 >{isClaimed !== null && isClaimed === true ? "Submit" : "Claim"}
                 </Button>
