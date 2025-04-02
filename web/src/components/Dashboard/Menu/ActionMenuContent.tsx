@@ -1,7 +1,6 @@
 import { useAccountContext } from "@/hooks/useAccount";
+import { useLogout } from "@/hooks/useLogout";
 import { useMonitorContext } from "@/hooks/useMonitor";
-import { clearLSToken } from "@/internal/account";
-import { useNavigate } from "react-router-dom";
 
 import Button from "../../Button/Button";
 import AccountIcon from "../../Icon/AccountIcon";
@@ -13,14 +12,8 @@ import "./ActionMenuContent.css";
 export default function ActionMenuContent() {
     const accountContext = useAccountContext();
     const monitorContext = useMonitorContext();
-    const navigate = useNavigate();
 
-    const handleLogout = () => {
-        clearLSToken();
-        accountContext.dispatch({ type: 'logout' });
-        monitorContext.dispatch({ type: 'logout' });
-        navigate("/login");
-    }
+    const logout = useLogout();
 
     const handleAccountPane = () => {
         monitorContext.dispatch({ type: 'pane', pane: { type: 'accounts' } });
@@ -47,7 +40,7 @@ export default function ActionMenuContent() {
                 Settings
             </Button>
             <Button
-                onClick={handleLogout}
+                onClick={logout}
                 kind="destructive"
                 icon={<span className="action_menu_log_out_icon">
                     <AddIcon />
