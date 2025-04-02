@@ -1,3 +1,5 @@
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMonitor } from "@/hooks/useMonitor";
 import {
     ACTIVE_UI,
     Event,
@@ -10,7 +12,6 @@ import {
     PairListValue,
     PLUGIN_UI,
     TCP_UI,
-    useMonitorContext
 } from "@/internal/monitor";
 import { EditorPane } from "@/internal/monitor/split";
 import {
@@ -49,9 +50,7 @@ import TextAreaInput from "../../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../../Input/TextInput/TextInput";
 import ToggleInput from "../../Input/ToggleInput/ToggleInput";
 
-import { useMonitorService } from "@/hooks/useMonitorService";
 import { useNotify } from "@/hooks/useNotify";
-import { useAccountContext } from "@/internal/account";
 import { Measurement } from "@/internal/measurement";
 
 import "./Editor.css";
@@ -62,14 +61,11 @@ interface EditorProps {
 
 export default function Editor(props: EditorProps) {
     const { state } = props;
-    const monitor = {
-        context: useMonitorContext(),
-        service: useMonitorService(),
-    }
-    const account = useAccountContext();
+    const { service: monitorService, context: monitorContext } = useMonitor();
+    const accountContext = useAccountContext();
     const notify = useNotify();
 
-    const base = useMemo(() => reset(state.monitor, monitor.context.state.plugins), [state.monitor]);
+    const base = useMemo(() => reset(state.monitor, monitorContext.state.plugins), [state.monitor]);
     const [editor, setEditor] = useState<EditorState>(split(base))
     const [isViewingEvents, setIsViewingEvents] = useState<boolean>(false);
     const [errors, setErrors] = useState<string[]>([]);
@@ -107,8 +103,8 @@ export default function Editor(props: EditorProps) {
     }
     
     async function create(value:Monitor) {
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.createMonitor(token, value);
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.createMonitor(token, value);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) setErrors(body.errors);
@@ -120,13 +116,13 @@ export default function Editor(props: EditorProps) {
         value.updatedAt = body.data.time;
         const measurements: Measurement[] = [];
         const full: Monitor = { ...value, id: body.data.id, measurements }
-        monitor.context.dispatch({ type: 'update', monitor: full })
+        monitorContext.dispatch({ type: 'update', monitor: full })
         notify(true, "Monitor created.");
     }
 
     async function update(value: Monitor) {
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.updateMonitor(token, value.id, value);
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.updateMonitor(token, value.id, value);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) setErrors(body.errors);
@@ -135,7 +131,7 @@ export default function Editor(props: EditorProps) {
 
         const body: DataPacket<Timestamp> = await extract.json();
         value.updatedAt = body.data.time;
-        monitor.context.dispatch({ type: 'update', monitor: value })
+        monitorContext.dispatch({ type: 'update', monitor: value })
         notify(true, "Monitor updated.");
     }
 
@@ -256,7 +252,7 @@ export default function Editor(props: EditorProps) {
                 onChange={kind => setEditor(prev => ({
                     ...prev, draft: {
                         ...prev.draft, kind,
-                        pluginName: kind == PLUGIN_API ? prev.draft.pluginName || monitor.context.state.plugins[0] : null
+                        pluginName: kind == PLUGIN_API ? prev.draft.pluginName || monitorContext.state.plugins[0] : null
                     }
                 }))}
             />
@@ -521,7 +517,7 @@ export default function Editor(props: EditorProps) {
                         events: [
                             ...(prev.draft.events),
                             {
-                                pluginName: (monitor.context.state.plugins[0] || null),
+                                pluginName: (monitorContext.state.plugins[0] || null),
                                 pluginArgs: [], threshold: null
                             } as Event
                         ]
@@ -557,7 +553,7 @@ export default function Editor(props: EditorProps) {
                     onClick={() => {
                         isViewingEvents
                             ? setIsViewingEvents(false)
-                            : monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })
+                            : monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })
                     }}
                 >
                     Back
@@ -568,7 +564,7 @@ export default function Editor(props: EditorProps) {
             <div className="h_ml-auto">
                 <Button
                     border={true}
-                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                    onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
                 >
                     Close
                 </Button>

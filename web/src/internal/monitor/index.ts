@@ -1,6 +1,5 @@
-import { useContext } from "react";
 import { Measurement } from "../measurement";
-import MonitorProvider, { MonitorContext, MonitorDispatchContext } from "./context";
+import MonitorProvider from "./context";
 import { MonitorState } from "./reducer";
 
 export const
@@ -131,13 +130,6 @@ export function isMonitorEqual(a: Monitor, b: Monitor): boolean {
         && a.icmpProtocol == b.icmpProtocol
         && a.icmpLossThreshold == b.icmpLossThreshold
         && eveq(a.events, b.events)
-}
-
-export const useMonitorContext = () => {
-    const state = useContext(MonitorContext);
-    const dispatch = useContext(MonitorDispatchContext);
-    if (!state || !dispatch) throw new Error('monitor context must be used within provider');
-    return { state, dispatch }
 }
 
 export { MonitorProvider };

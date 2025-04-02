@@ -1,5 +1,5 @@
 import { POST_API, Service } from "../server";
-import { AuthenticatedRequest } from "../server/request";
+import { AuthenticatedRequest, Request } from "../server/request";
 import { Settings } from ".";
 
 class SettingsService extends Service {
@@ -24,9 +24,10 @@ class SettingsService extends Service {
         return await this.extract(request);
     }
 
-    async getActiveTheme(token: string, json?: boolean) {
-        const address = '/settings/themes/active';
-        const request = new AuthenticatedRequest(token, address);
+    async getActiveTheme(strict: boolean, json?: boolean) {
+        let address = '/settings/themes/active';
+        if (!strict) address += "?strict=false";
+        const request = new Request(address);
         request.headers({ "Accept": json ? "application/json" : "text/css"});
         return await this.extract(request);
     }

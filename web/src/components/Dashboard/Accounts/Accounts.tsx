@@ -1,10 +1,11 @@
-import { useDefaultAccountService } from "@/hooks/useAccountService";
-import { useNotify } from "@/hooks/useNotify";
-import { Account, ROOT_ACCOUNT_UI, setLSToken, useAccountContext } from "@/internal/account";
-import { formatUTCDate } from "@/internal/layout/graphics";
-import { useMonitorContext } from "@/internal/monitor";
-import { CreatedTimestamp, DataPacket, isErrorPacket } from "@/internal/server";
 import { useMemo, useState } from "react";
+
+import { useAccount } from "@/hooks/useAccount";
+import { useMonitorContext } from "@/hooks/useMonitor";
+import { useNotify } from "@/hooks/useNotify";
+import { Account, ROOT_ACCOUNT_UI, setLSToken } from "@/internal/account";
+import { formatUTCDate } from "@/internal/layout/graphics";
+import { CreatedTimestamp, DataPacket, isErrorPacket } from "@/internal/server";
 
 import TextInput from "@/components/Input/TextInput/TextInput";
 import Button from "../../../components/Button/Button";
@@ -32,15 +33,10 @@ const defaults: Draft = {
 };
 
 export default function Accounts() {
-    const account = {
-        context: useAccountContext(),
-        service: useDefaultAccountService()
-    }
-    const monitor = {
-        context: useMonitorContext(),
-    }
+    const { service: accountService, context: accountContext } = useAccount();
+    const monitorContext = useMonitorContext();
     const notify = useNotify();
-    const payload = account.context.state.token!.payload;
+    const payload = accountContext.state.token!.payload;
 
     const [editor, setEditor] = useState<EditorState>({ draft: defaults, original: defaults });
     const [isEditing, setIsEditing] = useState<boolean>(payload.root ? false : true);
@@ -77,9 +73,9 @@ export default function Accounts() {
     }
 
     async function createAccount(username: string, password: string) {
-        const token = account.context.state.token!.raw;
+        const token = accountContext.state.token!.raw;
 
-        const extract = await account.service.createAccount(token, username, password);
+        const extract = await accountService.createAccount(token, username, password);
         if (!extract.ok()) {
             const packet = await extract.json();
             if (isErrorPacket(packet)) setErrors(packet.errors);
@@ -87,7 +83,7 @@ export default function Accounts() {
         }
         
         const packet: DataPacket<CreatedTimestamp> = await extract.json();
-        account.context.dispatch({
+        accountContext.dispatch({
             type: 'create',
             account: {
                 createdAt: packet.data.time,
@@ -103,12 +99,12 @@ export default function Accounts() {
     }
 
     async function updateAccount(id: number, username: string, password: string) {
-        const token = account.context.state.token!.raw;
+        const token = accountContext.state.token!.raw;
 
         // Request a new token when updating the active account.
-        const reissue: boolean = id == account.context.state.token!.payload.sub;
+        const reissue: boolean = id == accountContext.state.token!.payload.sub;
 
-        const extract = await account.service.updateAccount(token, id, username, password, reissue);
+        const extract = await accountService.updateAccount(token, id, username, password, reissue);
         if (!extract.ok()) {
             const packet = await extract.json();
             if (isErrorPacket(packet)) setErrors(packet.errors);
@@ -117,12 +113,12 @@ export default function Accounts() {
         
         const packet: DataPacket<{ time: string, token?: string }> = await extract.json();
         const updatedAt = packet.data.time;
-        account.context.dispatch({ type: 'update', id, username, updatedAt });
+        accountContext.dispatch({ type: 'update', id, username, updatedAt });
         if (reissue) {
             // Token will only be set when a reissue is requested.
             const newToken = packet.data.token!;
             setLSToken(newToken);
-            account.context.dispatch({ type: 'login', token: newToken });
+            accountContext.dispatch({ type: 'login', token: newToken });
         }
         reset();
         setErrors([]);
@@ -141,8 +137,8 @@ export default function Accounts() {
     }
 
     async function deleteAccount(id: number) {
-        const token = account.context.state.token!.raw;
-        const extract = await account.service.deleteAccount(token, [id]);
+        const token = accountContext.state.token!.raw;
+        const extract = await accountService.deleteAccount(token, [id]);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) setErrors(body.errors);
@@ -150,7 +146,7 @@ export default function Accounts() {
         };
 
         setIsDeleting(null);
-        account.context.dispatch({ type: 'delete', id })
+        accountContext.dispatch({ type: 'delete', id })
         notify(true, "Account deleted.");
     }
 
@@ -162,7 +158,7 @@ export default function Accounts() {
     const accountManagerTab = <>
         <h1 className="h_m-0">Accounts</h1>
         <div className="h_mt-c">
-            {account.context.state.accounts.map((n, i) => <div key={i} className="account">
+            {accountContext.state.accounts.map((n, i) => <div key={i} className="account">
                 <div className="account_top">
                     <div className="account_top_left">
                         <div className="account_name">
@@ -267,7 +263,7 @@ export default function Accounts() {
                 </Button>
                 : null}
             <div className="h_ml-auto">
-                <Button border={true} onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } })}>
+                <Button border={true} onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'accounts' } })}>
                     Close
                 </Button>
             </div>

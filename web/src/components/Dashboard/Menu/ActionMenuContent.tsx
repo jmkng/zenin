@@ -1,6 +1,6 @@
-import { useDefaultAccountService } from "@/hooks/useAccountService";
-import { clearLSToken, useAccountContext } from "@/internal/account";
-import { useMonitorContext } from "@/internal/monitor";
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMonitorContext } from "@/hooks/useMonitor";
+import { clearLSToken } from "@/internal/account";
 import { useNavigate } from "react-router-dom";
 
 import Button from "../../Button/Button";
@@ -11,32 +11,29 @@ import SettingsIcon from "../../Icon/SettingsIcon";
 import "./ActionMenuContent.css";
 
 export default function ActionMenuContent() {
-    const account = {
-        context: useAccountContext(),
-        service: useDefaultAccountService()
-    }
-    const monitor = { context: useMonitorContext() };
+    const accountContext = useAccountContext();
+    const monitorContext = useMonitorContext();
     const navigate = useNavigate();
 
     const handleLogout = () => {
         clearLSToken();
-        account.context.dispatch({ type: 'logout' });
-        monitor.context.dispatch({ type: 'logout' });
+        accountContext.dispatch({ type: 'logout' });
+        monitorContext.dispatch({ type: 'logout' });
         navigate("/login");
     }
 
     const handleAccountPane = () => {
-        monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } });
+        monitorContext.dispatch({ type: 'pane', pane: { type: 'accounts' } });
     }
 
     return <div className="action_menu_dialog_content dialog_content">
         <div className="action_menu_dialog_section dialog_section">
             <div className="action_menu_dialog_name">
-                {account.context.state.token?.payload.username}
+                {accountContext.state.token?.payload.username}
             </div>
         </div>
         <div className="action_menu_dialog_section dialog_section">
-            {account.context.state.token?.payload.root
+            {accountContext.state.token?.payload.root
                 ? <Button onClick={handleAccountPane} icon={<AccountIcon />}>
                     Manage Accounts
                 </Button>
@@ -44,7 +41,7 @@ export default function ActionMenuContent() {
                     Edit Account
                 </Button>}
             <Button
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
+                onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'settings' } })}
                 icon={<SettingsIcon />}
             >
                 Settings

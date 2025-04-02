@@ -1,14 +1,12 @@
 import { Account, Token } from ".";
 
 export interface AccountState {
-    initialized: boolean;
     /** A token representing the currently authenticated account. Null when unauthenticated. */
     token: Token | null
     accounts: Account[]
 }
 
 export const accountDefault: AccountState = {
-    initialized: false,
     token: null,
     accounts: []
 }
@@ -44,15 +42,13 @@ const loginAction = (state: AccountState, action: LoginAction): AccountState => 
     const header = JSON.parse(window.atob(raw.split('.')[0]));
     const payload = JSON.parse(window.atob(raw.split('.')[1]));
     const token: Token = { raw, header, payload };
-    const initialized = true;
-    return { ...state, initialized, token };
+    return { ...state, token };
 }
 
 const logoutAction = (state: AccountState): AccountState => {
-    const initialized = true;
     const token = null;
     const accounts: Array<Account> = [];
-    return { ...state, initialized, token, accounts };
+    return { ...state, token, accounts };
 }
 
 const resetAction = (state: AccountState, action: ResetAction): AccountState => {

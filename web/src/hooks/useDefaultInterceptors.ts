@@ -1,6 +1,7 @@
-import { clearLSToken, useAccountContext } from "@/internal/account";
+import { clearLSToken } from "@/internal/account";
 import { Extract, Interceptor } from "@/internal/server";
 import { useNavigate } from "react-router-dom";
+import { useAccountContext } from "./useAccount";
 
 export const useDefaultInterceptors = () => {
     const context = useAccountContext();

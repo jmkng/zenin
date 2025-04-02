@@ -1,8 +1,7 @@
-import { useDefaultMeasurementService } from '@/hooks/useMeasurementService';
-import { useDefaultMonitorService } from '@/hooks/useMonitorService';
-import { useAccountContext } from '@/internal/account';
+import { useAccountContext } from '@/hooks/useAccount';
+import { useMeasurementService } from '@/hooks/useMeasurement';
+import { useMonitor } from '@/hooks/useMonitor';
 import { Measurement } from '@/internal/measurement';
-import { useMonitorContext } from '@/internal/monitor';
 import { OriginState, ViewPane } from '@/internal/monitor/split';
 import { DataPacket } from '@/internal/server';
 import { useEffect, useRef, useState } from 'react';
@@ -28,18 +27,14 @@ interface TableProps {
 
 export default function Table(props: TableProps) {
     const { state } = props;
-    const monitor = {
-        context: useMonitorContext(),
-        service: useDefaultMonitorService()
-    }
-    const measurement = {
-        service: useDefaultMeasurementService()
-    }
-    const account = useAccountContext();
+    
+    const { service: monitorService, context: monitorContext } = useMonitor();
+    const measurementService = useMeasurementService();
+    const accountContext = useAccountContext();
+    
     const measurements = (state.monitor.measurements || []).toReversed();
     const pages = Math.ceil(measurements.length / PAGESIZE);
     const [page, setPage] = useState(1);
-
     const [checked, setChecked] = useState<number[]>([]);
     const [allChecked, setAllChecked] = useState(false);
 
@@ -64,7 +59,7 @@ export default function Table(props: TableProps) {
             : 1);
     }, [state.selected])
 
-    const handleMasterCheck = () => {
+    function handleMasterCheck() {
         if (allChecked) {
             setChecked([]);
             setAllChecked(false);
@@ -74,20 +69,17 @@ export default function Table(props: TableProps) {
         }
     };
 
-    const handleRowCheck = (id: number) => {
-        if (checked.includes(id)) {
-            setChecked(checked.filter(n => n !== id));
-        } else {
-            setChecked([...checked, id]);
-        }
+    function handleRowCheck(id: number) {
+        if (checked.includes(id)) setChecked(checked.filter(n => n !== id));
+        else setChecked([...checked, id]);
     };
 
-    const handleDateChange = async (value: OriginState) => {
+    async function handleDateChange(value: OriginState) {
         if (value == "HEAD") {
             // Attach to monitor HEAD.
-            const head = monitor.context.state.monitors.get(state.monitor.id);
+            const head = monitorContext.state.monitors.get(state.monitor.id);
             if (!head) return;
-            monitor.context.dispatch({
+            monitorContext.dispatch({
                 type: 'pane',
                 pane: { type: 'view', target: { monitor: head, measurement: null, disableToggle: true, origin: "HEAD" } },
             });
@@ -95,29 +87,29 @@ export default function Table(props: TableProps) {
         }
 
         // Detach from HEAD, make duplicate monitor with fixed measurement set, freeze state.
-        const measurements = await monitor.service.getMeasurement(account.state.token!.raw,
-            state.monitor.id, value);
+        const token = accountContext.state.token!;
+        const measurements = await monitorService.getMeasurement(token.raw, state.monitor.id, value);
         if (!measurements.ok()) return;
 
         const packet: DataPacket<{measurements: Measurement[]}> = await measurements.json();
 
-        const mon = { ...state.monitor, measurements: [...packet.data.measurements].toReversed() };
-        monitor.context.dispatch({
-            type: 'pane',
-            pane: { type: 'view', target: { monitor: mon, measurement: null, disableToggle: true, origin: value } },
+        const monitor = { ...state.monitor, measurements: [...packet.data.measurements].toReversed() };
+        monitorContext.dispatch({ type: 'pane',
+            pane: { type: 'view', target: { monitor, measurement: null, disableToggle: true, origin: value } },
         });
     }
 
-    const handleDelete = async () => {
-        const extract = await measurement.service.deleteMeasurement(account.state.token!.raw, checked);
+    async function handleDelete() {
+        const token = accountContext.state.token!;
+        const extract = await measurementService.deleteMeasurement(token.raw, checked);
         if (!extract.ok()) return;
-        monitor.context.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })
+        monitorContext.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })
         // If a measurement's properties are being displayed and that measurement is deleted,
         // stop showing them.
         if (state.selected && checked.includes(state.selected.id)) {
             const target = { monitor: state.monitor, measurement: null, disableToggle: true };
             const pane = { type: 'view' as const, target }
-            monitor.context.dispatch({ type: 'pane', pane })
+            monitorContext.dispatch({ type: 'pane', pane })
         }
         const newPages = Math.ceil((measurements.length - checked.length) / PAGESIZE);
         setChecked([]);
@@ -125,11 +117,11 @@ export default function Table(props: TableProps) {
         setPage(prev => Math.min(prev, newPages) || 1);
     }
     
-    const handleRowClick = (id: number) => {
+    function handleRowClick(id: number) {
         const measurement = measurements.find(n => n.id === id) || null;
         const target = { monitor: state.monitor, measurement, disableToggle: true };
         const pane = { type: 'view' as const, target }
-        monitor.context.dispatch({ type: 'pane', pane })
+        monitorContext.dispatch({ type: 'pane', pane })
     }
 
     return <div className="table_component">

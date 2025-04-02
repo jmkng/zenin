@@ -1,10 +1,11 @@
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMonitorContext } from "@/hooks/useMonitor";
 import { useNotify } from "@/hooks/useNotify";
-import { useDefaultSettingsService } from "@/hooks/useSettingsService";
-import { useAccountContext } from "@/internal/account";
+import { useSettings } from "@/hooks/useSettings";
 import { formatTheme } from "@/internal/layout/graphics";
-import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
+import { isArrayEqual } from "@/internal/monitor";
 import { isErrorPacket } from "@/internal/server";
-import { DEFAULT_DARK, DEFAULT_LIGHT, SettingsState, THEME_ATTR, THEME_BLOCK_ID, useSettingsContext } from "@/internal/settings";
+import { DEFAULT_DARK, DEFAULT_LIGHT, SettingsState, THEME_ATTR, THEME_BLOCK_ID } from "@/internal/settings";
 import { useEffect, useMemo, useRef, useState } from "react";
     
 import Button from "../../Button/Button";
@@ -14,31 +15,24 @@ import SelectInput from "../../Input/SelectInput/SelectInput";
 import "./Settings.css";
 
 export default function Settings() {
-    const monitor = { 
-        context: useMonitorContext() 
-    };
-    const settings = { 
-        context: useSettingsContext(), 
-        service: useDefaultSettingsService() 
-    };
-    const account = { 
-        context: useAccountContext() 
-    };
+    const monitorContext = useMonitorContext();
+    const { service: settingsService, context: settingsContext } = useSettings();
+    const accountContext = useAccountContext();
     const notify = useNotify();
     const errorsContainerRef = useRef<HTMLDivElement>(null);
 
     // The options displayed in the theme select input are all of the themes available on the server,
     // plus a few default options for managing the built-in theme.
-    const options = [DEFAULT_DARK, DEFAULT_LIGHT, ...settings.context.state.themes];
+    const options = [DEFAULT_DARK, DEFAULT_LIGHT, ...settingsContext.state.themes];
 
-    const [editor, setEditor] = useState<SettingsState>({...settings.context.state });
+    const [editor, setEditor] = useState<SettingsState>({...settingsContext.state });
     const [errors, setErrors] = useState<string[]>([]);
 
     const hasValidDelimiters = useMemo(() => isValidDelimiters(editor.delimiters), [editor.delimiters])
     const canSave = useMemo(() => 
-        !isSettingsEqual(editor, settings.context.state) 
+        !isSettingsEqual(editor, settingsContext.state) 
         && hasValidDelimiters,
-    [editor, settings.context.state])
+    [editor, settingsContext.state])
 
     useEffect(() => {
         if (errors.length > 0) {
@@ -50,7 +44,7 @@ export default function Settings() {
         const delimiters = editor.delimiters;
         let active = editor.active;
 
-        const extract = await settings.service.updateSettings(account.context.state.token!.raw, { delimiters, theme: active });
+        const extract = await settingsService.updateSettings(accountContext.state.token!.raw, { delimiters, theme: active });
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) setErrors(body.errors);
@@ -60,8 +54,8 @@ export default function Settings() {
         // Theme hot-swap
         const ok = await tryLoadTheme(active);
         
-        const themes = settings.context.state.themes;
-        settings.context.dispatch({ type: 'reset', state: { delimiters, active, themes } });
+        const themes = settingsContext.state.themes;
+        settingsContext.dispatch({ type: 'reset', state: { delimiters, active, themes } });
         if (ok) setErrors([]);
         notify(true, "Settings saved.");
     }
@@ -77,7 +71,7 @@ export default function Settings() {
             return true;
         } 
         
-        const extract = await settings.service.getActiveTheme(account.context.state.token!.raw);
+        const extract = await settingsService.getActiveTheme(true);
         if (!extract.ok()) {
             if (extract.status() == 404) {
                 setErrors(["Theme file was not found, reverted to default theme."])
@@ -125,8 +119,8 @@ export default function Settings() {
                 <div className="settings_reload_theme">
                     <Button 
                         border={true} 
-                        disabled={isDefaultTheme(settings.context.state.active)}
-                        onClick={() => reloadTheme(settings.context.state.active)}
+                        disabled={isDefaultTheme(settingsContext.state.active)}
+                        onClick={() => reloadTheme(settingsContext.state.active)}
                     >Reload Theme</Button>
                 </div>
             </div>
@@ -168,7 +162,7 @@ export default function Settings() {
             <div className="h_ml-auto">
                 <Button
                     border={true}
-                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                    onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
                 >
                     <span>Close</span>
                 </Button>

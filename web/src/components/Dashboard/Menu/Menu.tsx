@@ -1,5 +1,4 @@
-import { useMonitorContext } from '@/internal/monitor';
-import { useDefaultMonitorService } from '@/hooks/useMonitorService';
+import { useMonitorContext } from '@/hooks/useMonitor';
 
 import Button from '../../Button/Button';
 import AddIcon from '../../Icon/AddIcon';
@@ -12,14 +11,11 @@ import SortDialogContent from './SortDialogContent';
 import './Menu.css';
 
 export default function Menu() {
-    const monitor = {
-        context: useMonitorContext(),
-        service: useDefaultMonitorService()
-    }
+    const monitorContext = useMonitorContext();
 
-    const handleAdd = () => {
+    const draft = () => {
         const pane = { type: 'draft' as const }
-        monitor.context.dispatch({type: 'pane', pane })
+        monitorContext.dispatch({type: 'pane', pane })
     }
 
     return <div className='default_menu menu'>
@@ -27,15 +23,15 @@ export default function Menu() {
             <div className="menu_left_contextual">
                 <div className="dashboard_menu">
                     <div className="menu_margin_right menu_button_container">
-                        <Button tooltip="Create Monitor" icon={<AddIcon />} onClick={handleAdd}>
+                        <Button tooltip="Create Monitor" icon={<AddIcon />} onClick={draft}>
                         </Button>
                     </div>
                     <div className="menu_margin_right">
                         <Dialog
                             dialog={{
                                 content: <SortDialogContent
-                                    filter={monitor.context.state.filter}
-                                    onFilterChange={filter => monitor.context.dispatch({ type: 'filter', filter })}
+                                    filter={monitorContext.state.filter}
+                                    onFilterChange={filter => monitorContext.dispatch({ type: 'filter', filter })}
                                 />
                             }}
                         >

@@ -1,8 +1,10 @@
-import { useMonitorService } from '@/hooks/useMonitorService';
-import { monitor } from '@/internal';
+import { MouseEvent } from 'react';
+
+import { useMonitorContext } from '@/hooks/useMonitor';
 import { formatUTCDate, MINIMAL_FORMAT } from '@/internal/layout/graphics';
 import { Measurement } from '@/internal/measurement';
-import { useMonitorContext } from '@/internal/monitor';
+import { Monitor as MonitorKind } from '@/internal/monitor';
+import { PaneKind } from '@/internal/monitor/reducer';
 
 import Button from '../../Button/Button';
 import VMenuIcon from '../../Icon/VMenuIcon';
@@ -14,60 +16,55 @@ import Timeline from './Timeline/Timeline';
 import './Monitor.css';
 
 interface MonitorProps {
-    monitor: monitor.Monitor;
+    monitor: MonitorKind;
     
     onToggle: (active: boolean, id: number[]) => void;
     onPoll: (id: number) => void;
 }
 
 export default function Monitor(props: MonitorProps) {
-    const { onToggle, onPoll } = props;
-    const monitor = {
-        data: props.monitor,
-        context: useMonitorContext(),
-        service: useMonitorService()
-    }
-    const reversed = monitor.data.measurements.toReversed();
-    const classes = ['monitor', monitor.context.state.selected.includes(monitor.data) ? 'selected' : ''];
+    const { monitor, onToggle, onPoll } = props;
+    const monitorContext = useMonitorContext();
+    const reversed = monitor.measurements.toReversed();
+    const classes = ['monitor', monitorContext.state.selected.includes(monitor) ? 'selected' : ''];
 
-    const handleSelect = () => {
-        monitor.context.dispatch({ type: 'select', monitor: monitor.data })
+    function select() {
+        monitorContext.dispatch({ type: 'select', monitor: monitor })
     }
 
-    const handleView = () => {
-        const measurement = null;
-        const target = { monitor: monitor.data, measurement };
-        monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target } });
+    function view(event: MouseEvent<HTMLDivElement>) {
+        event.stopPropagation();
+        const target = { monitor, measurement: null };
+        const pane: PaneKind = { type: 'view', target };
+        monitorContext.dispatch({ type: 'pane', pane });
     }
 
-    const handleTimelineSlotClick = (measurement: Measurement) => {
-        const target = { monitor: monitor.data, measurement, disableToggle: true };
-        monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target } });
+    const viewWithMeasurement = (measurement: Measurement) => {
+        const target = { monitor, measurement, disableToggle: true };
+        const pane: PaneKind = { type: 'view', target };
+        monitorContext.dispatch({ type: 'pane', pane });
     }
 
     return <div className={classes.join(' ')}>
-        <div className="monitor_top" onClick={handleSelect}>
+        <div className="monitor_top" onClick={select}>
             <div className="monitor_top_upper">
                 <div className="monitor_top_controls">
-                    <div className="monitor_name" onClick={e => {e.stopPropagation(); handleView()}}>
-                        {monitor.data.name}
+                    <div className="monitor_name" onClick={view}>
+                        {monitor.name}
                     </div>
                 </div>
                 <div className="monitor_menu_container h_ml-auto">
-                    {!monitor.data.active
+                    {!monitor.active
                         ? <div className="monitor_inactive_widget">
-                            <InactiveWidget active={monitor.data.active} />
+                            <InactiveWidget active={monitor.active} />
                         </div>
                         : null}
                         <div onClick={e => e.stopPropagation()}>
-                            <Dialog 
-                                dialog={{content: 
-                                    <MonitorDialogContent monitor={monitor.data} onToggle={onToggle} onPoll={onPoll} />
-                                }}>
-                                    <div className="monitor_dialog_button_container">
-                                        <Button hover={false} icon={<VMenuIcon />}>
-                                        </Button>
-                                    </div>
+                            <Dialog dialog={{content: <MonitorDialogContent monitor={monitor} onToggle={onToggle} onPoll={onPoll} />}}>
+                                <div className="monitor_dialog_button_container">
+                                    <Button hover={false} icon={<VMenuIcon />}>
+                                    </Button>
+                                </div>
                             </Dialog>
                         </div>
                 </div>
@@ -80,7 +77,7 @@ export default function Monitor(props: MonitorProps) {
         </div>
 
         <div className='monitor_bottom'>
-            <Timeline measurements={reversed} onSlotClick={handleTimelineSlotClick} />
+            <Timeline measurements={reversed} onSlotClick={viewWithMeasurement} />
         </div>
     </div>
 }

@@ -1,6 +1,6 @@
-import { useDefaultAccountService } from "@/hooks/useAccountService";
-import { setLSToken, useAccountContext } from "@/internal/account";
-import { useLayoutContext } from "@/internal/layout";
+import { useAccount } from "@/hooks/useAccount";
+import { useLayoutContext } from "@/hooks/useLayout";
+import { setLSToken } from "@/internal/account";
 import { DataPacket, isErrorPacket } from "@/internal/server";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -12,11 +12,8 @@ import TextInput from "../Input/TextInput/TextInput";
 import "./Login.css";
 
 export default function Login() {
-    const account = { 
-        service: useDefaultAccountService(), 
-        context: useAccountContext() 
-    };
-    const layout = useLayoutContext();
+    const { service: accountService, context: accountContext } = useAccount();
+    const layoutContext = useLayoutContext();
     const navigate = useNavigate();
 
     const [editor, setEditor] = useState<LoginState>(defaults);
@@ -29,7 +26,7 @@ export default function Login() {
 
     useEffect(() => {
         (async () => {
-            const extract = await account.service.getClaimed();
+            const extract = await accountService.getClaimed();
             if (!extract.ok()) return;
             const packet: DataPacket<{claimed: boolean}> = await extract.json();
             setIsClaimed(packet.data.claimed);
@@ -38,7 +35,7 @@ export default function Login() {
 
     useEffect(() => {
         if (isClaimed === null) return;
-        layout.dispatch({ type: 'load', loading: false })
+        layoutContext.dispatch({ type: 'load', loading: false })
     }, [isClaimed])
 
     useEffect(() => {
@@ -56,27 +53,28 @@ export default function Login() {
     }, [handleSubmit]);
 
     async function handleSubmit() {
-    if (isClaimed === null || !handleFormValidate()) return;
+        if (isClaimed === null || !handleFormValidate()) return;
 
         const username = editor.username || "";
         const password = editor.password || "";
-        layout.dispatch({ type: 'load', loading: true });
+        layoutContext.dispatch({ type: 'load', loading: true });
 
         const extract = isClaimed
-            ? await account.service.authenticate(username, password)
-            : await account.service.setClaimed(username, password)
+            ? await accountService.authenticate(username, password)
+            : await accountService.setClaimed(username, password)
 
         const packet: DataPacket<{token: string}> = await extract.json();
         if (!extract.ok()) {
-            handleFailure(packet);
+            if (isErrorPacket(packet)) setErrors(packet.errors);
+            layoutContext.dispatch({ type: 'load', loading: false });
             return;
         }
 
         const token = packet.data.token;
         setLSToken(token);
-        account.context.dispatch({ type: 'login', token });
+        accountContext.dispatch({ type: 'login', token });
         setErrors([]);
-        navigate("/login");
+        navigate("/");
     }
 
     function handleFormValidate() {
@@ -87,13 +85,6 @@ export default function Login() {
             result = false;
         }
         return result;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function handleFailure(packet: any) {
-        if (isErrorPacket(packet)) setErrors(packet.errors);
-        else setErrors(["An internal server error has occurred. Try again."]);
-        layout.dispatch({ type: 'load', loading: false });
     }
 
     // TODO: Documentation

@@ -1,9 +1,9 @@
-import { useLayoutContext } from "@/internal/layout";
+import { useLayoutContext } from "./useLayout";
 
 export const useNotify = () => {
-    const layout = useLayoutContext();
+    const context = useLayoutContext();
     const action = (autoDismiss: boolean, ...messages: string[]) => {
-        layout.dispatch({ type: "send", messages, autoDismiss });
+        context.dispatch({ type: "send", messages, autoDismiss });
     };
 
     return action;

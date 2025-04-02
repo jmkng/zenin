@@ -1,10 +1,18 @@
-import { useDefaultMonitorService } from '@/hooks/useMonitorService';
+import { useEffect } from 'react';
+
+import { useAccount } from '@/hooks/useAccount';
+import { useFeedSocket } from '@/hooks/useFeedSocket';
+import { useLayoutContext } from '@/hooks/useLayout';
+import { useMonitor } from '@/hooks/useMonitor';
+import { useNetworkErrorHandler } from '@/hooks/useNetworkErrorHandler';
 import { useNotify } from '@/hooks/useNotify';
-import { monitor } from '@/internal';
-import { useAccountContext } from '@/internal/account';
-import { useMonitorContext } from '@/internal/monitor';
-import { DataPacket, isErrorPacket, Timestamp } from '@/internal/server';
-import { useMemo } from 'react';
+import { useSettings } from '@/hooks/useSettings';
+import { useSortedMonitors } from '@/hooks/useSortedMonitors';
+import { monitor, settings } from '@/internal';
+import { Account } from '@/internal/account';
+import { formatTheme } from '@/internal/layout/graphics';
+import { inventoryBatchSize, monitorDefault } from '@/internal/monitor/reducer';
+import { DataPacket, Extract, isErrorPacket, Timestamp } from "@/internal/server";
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';
@@ -20,52 +28,67 @@ import Settings from './Settings/Settings';
 import './Dashboard.css';
 
 export default function Dashboard() {
-    const monitor = {
-        context: useMonitorContext(),
-        service: useDefaultMonitorService()
-    }
-    const account = useAccountContext();
-    const notify = useNotify();
-    const sorted = useMemo(() => {
-        return [...monitor.context.state.monitors.values()].sort((a, b) => {
-            switch (monitor.context.state.filter) {
-                case "NAME_ASC": 
-                    return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
-                case "NAME_DESC": 
-                    return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
-                case "UPDATED_NEW": 
-                    return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
-                case "UPDATED_OLD": 
-                    return Date.parse(a.updatedAt) - Date.parse(b.updatedAt);
-            }
-        });
-    }, [monitor.context.state.monitors, monitor.context.state.filter]);
-    const isSplit = monitor.context.state.split.pane != null;
+    const { service: monitorService, context: monitorContext } = useMonitor();
+    const { service: accountService, context: accountContext } = useAccount();
+    const { service: settingsService, context: settingsContext } = useSettings();
+    const layoutContext = useLayoutContext();
 
-    const deleteMonitors = async (monitors: monitor.Monitor[]) => {
+    const notify = useNotify();
+    const onNetworkError = useNetworkErrorHandler();
+    // @ts-ignore
+    const _socket = useFeedSocket();
+
+    const sorted = useSortedMonitors();
+    const isSplit = monitorContext.state.split.pane != null;
+
+    useEffect(() => {
+        const token = accountContext.state.token!;
+
+        let queue = [
+            monitorService.getMonitor(token.raw, inventoryBatchSize, true),
+            settingsService.getSettings(token.raw, true),
+        ];
+        if (token.payload.root) queue.push(accountService.getAccounts(token.raw));
+        
+        (async () => {
+            try {
+                const [monitorEx, settingsEx, accountEx] = await Promise.all(queue);
+                if (monitorEx.ok()) await resetMonitors(monitorEx);
+                if (settingsEx.ok()) await resetSettings(settingsEx);
+                if (accountEx?.ok()) await resetAccounts(accountEx); 
+            } catch(err) {
+                onNetworkError(err);
+            }
+
+            const loading = false;
+            layoutContext.dispatch({ type: 'load', loading })
+        })();
+    }, [])
+
+    async function deleteMonitors (monitors: monitor.Monitor[]) {
         const id = monitors.map(n => n.id!);
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.deleteMonitor(token, id);
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.deleteMonitor(token, id);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) notify(false, ...body.errors)
             return;
         }
 
-        monitor.context.dispatch({ type: 'delete', monitors: id });
+        monitorContext.dispatch({ type: 'delete', monitors: id });
         const length = id.length;
         const message = length > 1 ? `Deleted ${length} monitors.` : "Monitor deleted.";
         notify(true, message);
     }
 
-    const startDraft = () => {
+    function startDraft() {
         const pane = { type: 'draft' as const }
-        monitor.context.dispatch({type: 'pane', pane })
+        monitorContext.dispatch({type: 'pane', pane })
     }
 
-    const toggleMonitors = async (active: boolean, id: number[]) => {
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.toggleMonitor(token, id, active);
+    async function toggleMonitors (active: boolean, id: number[]) {
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.toggleMonitor(token, id, active);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) notify(false, ...body.errors);
@@ -73,13 +96,13 @@ export default function Dashboard() {
         };
 
         const body: DataPacket<Timestamp> = await extract.json();
-        monitor.context.dispatch({ type: 'toggle', monitors: id, active, time: body.data.time });
+        monitorContext.dispatch({ type: 'toggle', monitors: id, active, time: body.data.time });
         notify(true, `Monitor${id.length > 1 ? "s" : ""} ${active ? "started" : "stopped"}.`)
     }
 
-    const pollMonitor = async (id: number) => {
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.pollMonitor(token, id);
+    async function pollMonitor (id: number) {
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.pollMonitor(token, id);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) notify(false, ...body.errors);
@@ -89,10 +112,34 @@ export default function Dashboard() {
         notify(true, "Monitor poll queued.")
     }
 
+    async function resetMonitors (ex: Extract) {
+        const packet: DataPacket<{monitors: monitor.Monitor[], plugins: string[]}> = await ex.json();
+        const monitors = packet.data.monitors;
+        const plugins = packet.data.plugins;
+        const state = { ...monitorDefault, monitors, plugins };
+        monitorContext.dispatch({ type: 'reset', state });
+    }
+    
+    const resetSettings = async (ex: Extract) => {
+        const packet: DataPacket<{settings: settings.Settings, themes: string[]}> = await ex.json();
+        const delimiters = packet.data.settings.delimiters;
+        const active = packet.data.settings.theme;
+        const themes = packet.data.themes;
+        const state = { delimiters, active, themes };
+        if (active) document.documentElement.setAttribute("data-theme", formatTheme(active));
+        settingsContext.dispatch({ type: 'reset', state });
+    }
+
+    const resetAccounts = async (ex: Extract) => {
+        const packet: DataPacket<{accounts: Account[]}> = await ex.json();
+        const accounts = packet.data.accounts;
+        accountContext.dispatch({ type: 'reset', accounts });
+    }
+
     return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
         <div className="dashboard_main">
             <div className="dashboard_main_top">
-                <div className={["dashboard_select_menu", monitor.context.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
+                <div className={["dashboard_select_menu", monitorContext.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
                     <SelectMenu onToggle={toggleMonitors} />
                 </div>
                 <Menu />
@@ -114,17 +161,17 @@ export default function Dashboard() {
 
                 {isSplit
                     ? <div className={"dashboard_activity"}>
-                        {monitor.context.state.split.isEditorPane()
-                            ? <Editor state={monitor.context.state.split.pane}
+                        {monitorContext.state.split.isEditorPane()
+                            ? <Editor state={monitorContext.state.split.pane}
                             />
                             : null}
-                        {monitor.context.state.split.isViewPane()
-                            ? <Info state={monitor.context.state.split.pane} />
+                        {monitorContext.state.split.isViewPane()
+                            ? <Info state={monitorContext.state.split.pane} />
                             : null}
-                        {monitor.context.state.split.isSettingsPane()
+                        {monitorContext.state.split.isSettingsPane()
                             ? <Settings />
                             : null}
-                        {monitor.context.state.split.isAccountsPane()
+                        {monitorContext.state.split.isAccountsPane()
                             ? <Accounts />
                             : null}
                     </div>
@@ -134,11 +181,11 @@ export default function Dashboard() {
 
         <DialogModal
             title="Confirm"
-            visible={monitor.context.state.deleting.length > 0}
-            onCancel={() => monitor.context.dispatch({ type: 'queue', monitors: [] })}
+            visible={monitorContext.state.deleting.length > 0}
+            onCancel={() => monitorContext.dispatch({ type: 'queue', monitors: [] })}
             content={<DeleteDialogContent
-                queue={monitor.context.state.deleting}
-                onConfirm={() => deleteMonitors(monitor.context.state.deleting)}
+                queue={monitorContext.state.deleting}
+                onConfirm={() => deleteMonitors(monitorContext.state.deleting)}
             />}
         />
     </div>

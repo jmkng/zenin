@@ -1,11 +1,11 @@
-import { useLayoutContext } from "@/internal/layout";
+import { useLayoutContext } from "./useLayout";
 
 export const useNetworkErrorHandler = () => {
-    const layout = useLayoutContext();
+    const context = useLayoutContext();
 
     const messages = ["Network request failed. The server may be unreachable. Check server logs for details."];
     const action = (_: unknown): string => {
-        layout.dispatch({ type: "send", messages, autoDismiss: false });
+        context.dispatch({ type: "send", messages, autoDismiss: false });
         return messages[0];
     }
 
