@@ -1,18 +1,14 @@
 import { useEffect } from 'react';
 
-import { useAccount } from '@/hooks/useAccount';
+import { useAccountContext } from '@/hooks/useAccount';
+import { useDataFetch } from '@/hooks/useDataFetch';
 import { useFeedSocket } from '@/hooks/useFeedSocket';
 import { useLayoutContext } from '@/hooks/useLayout';
 import { useMonitor } from '@/hooks/useMonitor';
-import { useNetworkErrorHandler } from '@/hooks/useNetworkErrorHandler';
 import { useNotify } from '@/hooks/useNotify';
-import { useSettings } from '@/hooks/useSettings';
 import { useSortedMonitors } from '@/hooks/useSortedMonitors';
-import { monitor, settings } from '@/internal';
-import { Account } from '@/internal/account';
-import { formatTheme } from '@/internal/layout/graphics';
-import { inventoryBatchSize, monitorDefault } from '@/internal/monitor/reducer';
-import { DataPacket, Extract, isErrorPacket, Timestamp } from "@/internal/server";
+import { monitor } from '@/internal';
+import { DataPacket, isErrorPacket, Timestamp } from "@/internal/server";
 
 import Button from '../Button/Button';
 import Accounts from './Accounts/Accounts';
@@ -29,12 +25,11 @@ import './Dashboard.css';
 
 export default function Dashboard() {
     const { service: monitorService, context: monitorContext } = useMonitor();
-    const { service: accountService, context: accountContext } = useAccount();
-    const { service: settingsService, context: settingsContext } = useSettings();
+    const  accountContext = useAccountContext();
     const layoutContext = useLayoutContext();
-
+    
+    const fetch = useDataFetch();
     const notify = useNotify();
-    const onNetworkError = useNetworkErrorHandler();
     // @ts-ignore
     const _socket = useFeedSocket();
 
@@ -42,24 +37,8 @@ export default function Dashboard() {
     const isSplit = monitorContext.state.split.pane != null;
 
     useEffect(() => {
-        const token = accountContext.state.token!;
-
-        let queue = [
-            monitorService.getMonitor(token.raw, inventoryBatchSize, true),
-            settingsService.getSettings(token.raw, true),
-        ];
-        if (token.payload.root) queue.push(accountService.getAccounts(token.raw));
-        
         (async () => {
-            try {
-                const [monitorEx, settingsEx, accountEx] = await Promise.all(queue);
-                if (monitorEx.ok()) await resetMonitors(monitorEx);
-                if (settingsEx.ok()) await resetSettings(settingsEx);
-                if (accountEx?.ok()) await resetAccounts(accountEx); 
-            } catch(err) {
-                onNetworkError(err);
-            }
-
+            await fetch();
             const loading = false;
             layoutContext.dispatch({ type: 'load', loading })
         })();
@@ -108,32 +87,7 @@ export default function Dashboard() {
             if (isErrorPacket(body)) notify(false, ...body.errors);
             return;
         }
-
         notify(true, "Monitor poll queued.")
-    }
-
-    async function resetMonitors (ex: Extract) {
-        const packet: DataPacket<{monitors: monitor.Monitor[], plugins: string[]}> = await ex.json();
-        const monitors = packet.data.monitors;
-        const plugins = packet.data.plugins;
-        const state = { ...monitorDefault, monitors, plugins };
-        monitorContext.dispatch({ type: 'reset', state });
-    }
-    
-    const resetSettings = async (ex: Extract) => {
-        const packet: DataPacket<{settings: settings.Settings, themes: string[]}> = await ex.json();
-        const delimiters = packet.data.settings.delimiters;
-        const active = packet.data.settings.theme;
-        const themes = packet.data.themes;
-        const state = { delimiters, active, themes };
-        if (active) document.documentElement.setAttribute("data-theme", formatTheme(active));
-        settingsContext.dispatch({ type: 'reset', state });
-    }
-
-    const resetAccounts = async (ex: Extract) => {
-        const packet: DataPacket<{accounts: Account[]}> = await ex.json();
-        const accounts = packet.data.accounts;
-        accountContext.dispatch({ type: 'reset', accounts });
     }
 
     return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
