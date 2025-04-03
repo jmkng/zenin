@@ -14,7 +14,7 @@ export default function Notifications() {
     
     useEffect(() => {
         for (const n of layoutContext.state.notifications) {
-            if (n.autoDismiss) startTimer(n.id);
+            if (n.options.autoDismiss) startTimer(n.id);
         }
     }, [layoutContext.state.notifications]);
 
@@ -42,7 +42,7 @@ export default function Notifications() {
                     </Button>
                 </div>
             
-                {n.autoDismiss
+                {n.options.autoDismiss
                     ? <div className="notification_progress_container">
                         <div className="notification_progress" style={{ animationDuration: `${TIME_DELAY_MS+150}ms` }} />
                     </div>

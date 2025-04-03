@@ -52,14 +52,14 @@ export default function Dashboard() {
             const extract = await monitorService.deleteMonitor(token, id);
             if (!extract.ok()) {
                 const body = await extract.json();
-                if (isErrorPacket(body)) notify(false, ...body.errors);
+                if (isErrorPacket(body)) notify(body.errors, { autoDismiss: false });
                 return;
             }
     
             monitorContext.dispatch({ type: "delete", monitors: id });
             const length = id.length;
             const message = length > 1 ? `Deleted ${length} monitors.` : "Monitor deleted.";
-            notify(true, message);
+            notify(message);
         } catch {
             monitorContext.dispatch({ type: "queue", monitors: [] });
         }
@@ -75,13 +75,13 @@ export default function Dashboard() {
         const extract = await monitorService.toggleMonitor(token, id, active);
         if (!extract.ok()) {
             const body = await extract.json();
-            if (isErrorPacket(body)) notify(false, ...body.errors);
+            if (isErrorPacket(body)) notify(body.errors, { autoDismiss: false });
             return;
         }
 
         const body: DataPacket<Timestamp> = await extract.json();
         monitorContext.dispatch({ type: "toggle", monitors: id, active, time: body.data.time });
-        notify(true, `Monitor${id.length > 1 ? "s" : ""} ${active ? "started" : "stopped"}.`);
+        notify(`Monitor${id.length > 1 ? "s" : ""} ${active ? "started" : "stopped"}.`);
     }
 
     async function pollMonitor(id: number) {
@@ -89,10 +89,10 @@ export default function Dashboard() {
         const extract = await monitorService.pollMonitor(token, id);
         if (!extract.ok()) {
             const body = await extract.json();
-            if (isErrorPacket(body)) notify(false, ...body.errors);
+            if (isErrorPacket(body)) notify(body.errors, { autoDismiss: false });
             return;
         }
-        notify(true, "Monitor poll queued.");
+        notify("Monitor poll queued.");
     }
 
     return <div className={["dashboard", isSplit ? "split" : ""].join(" ")}>

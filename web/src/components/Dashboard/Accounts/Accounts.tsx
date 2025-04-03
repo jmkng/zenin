@@ -111,7 +111,7 @@ export default function Accounts() {
         });
         reset();
         setErrors([]);
-        notify(true, "Account created.");
+        notify("Account created.");
     }
 
     async function updateAccount(id: number, username: string, password: string) {
@@ -138,7 +138,7 @@ export default function Accounts() {
         }
         reset();
         setErrors([]);
-        notify(true, "Account updated.");
+        notify("Account updated.");
     }
 
     async function deleteAccount(id: number) {
@@ -153,7 +153,7 @@ export default function Accounts() {
     
             setIsDeleting(null);
             accountContext.dispatch({ type: "delete", id })
-            notify(true, "Account deleted.");
+            notify("Account deleted.");
         } catch {
             setIsDeleting(null);
         }

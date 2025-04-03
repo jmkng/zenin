@@ -117,7 +117,7 @@ export default function Editor(props: EditorProps) {
         const measurements: Measurement[] = [];
         const full: Monitor = { ...value, id: body.data.id, measurements }
         monitorContext.dispatch({ type: "update", monitor: full })
-        notify(true, "Monitor created.");
+        notify("Monitor created.");
     }
 
     async function updateMonitor(value: Monitor) {
@@ -132,7 +132,7 @@ export default function Editor(props: EditorProps) {
         const body: DataPacket<Timestamp> = await extract.json();
         value.updatedAt = body.data.time;
         monitorContext.dispatch({ type: "update", monitor: value })
-        notify(true, "Monitor updated.");
+        notify("Monitor updated.");
     }
 
     // Check if the ICMP probe values might cause the operation to exceed the timeout.

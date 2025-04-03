@@ -1,4 +1,8 @@
-type Notification = { id: number, message: string, autoDismiss: boolean };
+export interface NotificationOptions {
+    autoDismiss: boolean
+}
+
+type Notification = { id: number, message: string, options: NotificationOptions };
 
 export interface LayoutState {
     loading: boolean,
@@ -13,8 +17,13 @@ export const layoutDefault: LayoutState = {
 /** Enable or disable the loading screen. */
 type LoadAction = { type: "load", loading: boolean };
 
+export interface SendNotificationOptions {
+    autoDismiss?: boolean
+    sendOnce?: boolean
+}
+
 /** Send a notification. */
-type SendNotificationAction = { type: "send", messages: string[], autoDismiss: boolean };
+type SendNotificationAction = { type: "send", messages: string[], options?: SendNotificationOptions };
 
 /** Dismiss a notification. */
 type DismissNotification = { type: "dismiss", id: number };
@@ -30,8 +39,15 @@ const loadAction = (state: LayoutState, action: LoadAction): LayoutState => {
 }
 
 const sendNotificationAction = (state: LayoutState, action: SendNotificationAction): LayoutState => {
+    const autoDismiss: boolean = action.options?.autoDismiss ?? true;
+    const sendOnce: boolean = action.options?.sendOnce ?? false;
+
+    const unique = new Set(state.notifications.map(n => n.message));
+    
+    const options: NotificationOptions = { autoDismiss };
     const mapped: Notification[] = action.messages
-        .map(n => ({ id: (Date.now() + Math.random()), message: n, autoDismiss: action.autoDismiss }));
+        .filter(n => !(sendOnce && unique.has(n)))
+        .map(n => ({ id: (Date.now() + Math.random()), message: n, options }));
 
     const notifications = [...state.notifications, ...mapped];
     return { ...state, notifications };

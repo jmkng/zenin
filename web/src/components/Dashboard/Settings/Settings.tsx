@@ -54,7 +54,7 @@ export default function Settings() {
         const themes = settingsContext.state.themes;
         settingsContext.dispatch({ type: "reset", state: { delimiters, active, themes } });
         if (ok) setErrors([]);
-        notify(true, "Settings saved.");
+        notify("Settings saved.");
     }
 
     async function tryLoadTheme(name: string | null): Promise<boolean> {
