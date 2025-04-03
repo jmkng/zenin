@@ -113,5 +113,5 @@ type WaitingState = "WAITING";
 type ReadyState = { certificates: Certificate[], expanded: boolean };
 
 function isReadyState(state: ChainState): state is ReadyState {
-    return typeof state === 'object' && state !== null && 'certificates' in state && 'expanded' in state;
+    return typeof state === "object" && state !== null && "certificates" in state && "expanded" in state;
 }

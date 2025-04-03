@@ -24,13 +24,9 @@
     }
 
     .monitor_inactive_widget {
-        margin-right: 4px;
+        margin-right: 8px;
     }
     
-    .monitor_dialog_button_container .button {
-        padding-right: 0;
-    }
-
     .monitor_top_upper {
         max-height: 38px;
         display: flex;

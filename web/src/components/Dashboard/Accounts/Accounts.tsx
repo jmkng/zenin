@@ -72,6 +72,17 @@ export default function Accounts() {
         else createAccount(username, password);
     }
 
+    function reset() {
+        setEditor(prev => {
+            const state = {
+                ...prev.draft,
+                password: defaults.password,
+                passwordConfirm: defaults.passwordConfirm,
+            };
+            return { ...prev, draft: state, original: state }
+        })
+    }
+
     async function createAccount(username: string, password: string) {
         const token = accountContext.state.token!.raw;
 
@@ -123,17 +134,6 @@ export default function Accounts() {
         reset();
         setErrors([]);
         notify(true, "Account updated.");
-    }
-
-    function reset() {
-        setEditor(prev => {
-            const state = {
-                ...prev.draft,
-                password: defaults.password,
-                passwordConfirm: defaults.passwordConfirm,
-            };
-            return { ...prev, draft: state, original: state }
-        })
     }
 
     async function deleteAccount(id: number) {

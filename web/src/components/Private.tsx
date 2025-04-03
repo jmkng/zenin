@@ -1,8 +1,8 @@
-import { useAccount } from '@/hooks/useAccount';
-import { Navigate, Outlet } from 'react-router-dom';
+import { useAccount } from "@/hooks/useAccount";
+import { Navigate, Outlet } from "react-router-dom";
 
 interface PrivateProps {
-    redirectPath: string
+    redirectPath: string;
 }
 
 /** Redirect unauthenticated users away from children. */
@@ -14,5 +14,5 @@ export default function Private(props: PrivateProps) {
 
     return shouldAllow
         ? <Outlet />
-        : <Navigate to={redirectPath} />
+        : <Navigate to={redirectPath} />;
 }

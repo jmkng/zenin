@@ -1,10 +1,10 @@
-import { useAccount } from '@/hooks/useAccount';
-import { useLayoutContext } from '@/hooks/useLayout';
-import { useSettings } from '@/hooks/useSettings';
-import { readLSToken } from '@/internal/account';
-import { formatTheme, hideLoadingScreen, showLoadingScreen } from '@/internal/layout/graphics';
-import { DataPacket } from '@/internal/server';
-import { ReactNode, useEffect, useState } from 'react';
+import { useAccount } from "@/hooks/useAccount";
+import { useLayoutContext } from "@/hooks/useLayout";
+import { useSettings } from "@/hooks/useSettings";
+import { readLSToken } from "@/internal/account";
+import { formatTheme, hideLoadingScreen, showLoadingScreen } from "@/internal/layout/graphics";
+import { DataPacket } from "@/internal/server";
+import { ReactNode, useEffect, useState } from "react";
 
 interface InitializeProps {
     children?: ReactNode
@@ -35,8 +35,8 @@ export default function Initialize(props: InitializeProps) {
     useEffect(() => {
         const token = readLSToken();
         
-        if (token) accountContext.dispatch({ type: 'login', token });
-        else accountContext.dispatch({ type: 'logout' });
+        if (token) accountContext.dispatch({ type: "login", token });
+        else accountContext.dispatch({ type: "logout" });
 
         setInitialized(true);
     }, [])

@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { defaultDialogStrategy, PositionStrategy } from "./position";
 
 import "./Dialog.css";
@@ -102,18 +102,18 @@ export default function Dialog(props: DialogProps) {
                 setState(defaultDialogState)
             }
         }
-        portal.addEventListener('toggle', handleClose, false)
+        portal.addEventListener("toggle", handleClose, false)
 
-        // Popover API doesn't seem to support closing on scroll, so this handles that.
+        // Popover API doesn"t seem to support closing on scroll, so this handles that.
         const handleScroll = () => {
             portal.hidePopover();
         }
         const scrollParents = getScrollParents(root);
-        scrollParents.forEach(n => n.addEventListener('scroll', handleScroll, false));
+        scrollParents.forEach(n => n.addEventListener("scroll", handleScroll, false));
 
         return () => {
-            scrollParents.forEach(n => n.removeEventListener('scroll', handleScroll, false));
-            portal.removeEventListener('toggle', handleClose, false)
+            scrollParents.forEach(n => n.removeEventListener("scroll", handleScroll, false));
+            portal.removeEventListener("toggle", handleClose, false)
         };
     }, [state.isPositioned])
 
@@ -134,7 +134,7 @@ export default function Dialog(props: DialogProps) {
 }
 
 function getScrollParents(e: HTMLElement | null, parents: Array<HTMLElement | Window> = []): Array<HTMLElement | Window> {
-    if (!e || e.tagName === 'BODY') return [...parents, window];
+    if (!e || e.tagName === "BODY") return [...parents, window];
     return getScrollParents(e.parentElement, isScrollParent(e) ? [...parents, e] : parents)
 }
 

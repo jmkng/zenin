@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import { formatUTCDate } from '@/internal/layout/graphics';
 import { Measurement } from '@/internal/measurement';
 
@@ -10,12 +11,14 @@ interface RowProps {
     measurement: Measurement,
     highlight: boolean;
     checked: number[]
+    
     onCheck: (id: number) => void;
     onClick: (id: number) => void;
 }
 
 export default function Row(props: RowProps) {
     const { measurement, highlight, checked, onCheck, onClick } = props;
+
     const isChecked = useMemo(() => {
         if (checked.includes(measurement.id!)) return true;
         return false;
@@ -32,5 +35,5 @@ export default function Row(props: RowProps) {
         <td>
             <span className="state" data-state={measurement.state}>{measurement.state}</span>
         </td>
-    </tr >
+    </tr>
 }

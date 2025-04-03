@@ -1,5 +1,5 @@
-import Button from "../../Button/Button"
 import TrashIcon from "../..//Icon/TrashIcon"
+import Button from "../../Button/Button"
 import EditIcon from "../../Icon/EditIcon"
 
 interface AccountDialogContentProps {

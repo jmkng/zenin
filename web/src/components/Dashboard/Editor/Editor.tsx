@@ -1,5 +1,9 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useAccountContext } from "@/hooks/useAccount";
 import { useMonitor } from "@/hooks/useMonitor";
+import { useNotify } from "@/hooks/useNotify";
+import { Measurement } from "@/internal/measurement";
 import {
     ACTIVE_UI,
     Event,
@@ -38,7 +42,7 @@ import {
     Timestamp,
     UDP_API
 } from "@/internal/server";
-import { useEffect, useMemo, useRef, useState } from "react";
+
 import Button from "../../Button/Button";
 import EventInput from "../../Input/EventInput/EventInput";
 import NumberInput from "../../Input/NumberInput/NumberInput";
@@ -50,9 +54,6 @@ import TextAreaInput from "../../Input/TextAreaInput/TextAreaInput";
 import TextInput from "../../Input/TextInput/TextInput";
 import ToggleInput from "../../Input/ToggleInput/ToggleInput";
 
-import { useNotify } from "@/hooks/useNotify";
-import { Measurement } from "@/internal/measurement";
-
 import "./Editor.css";
 
 interface EditorProps {
@@ -61,6 +62,7 @@ interface EditorProps {
 
 export default function Editor(props: EditorProps) {
     const { state } = props;
+
     const { service: monitorService, context: monitorContext } = useMonitor();
     const accountContext = useAccountContext();
     const notify = useNotify();
@@ -99,10 +101,10 @@ export default function Editor(props: EditorProps) {
     
     function save() {
         const sanitized: Monitor = sanitize(editor.draft);
-        sanitized.id != null && isMonitor(sanitized) ? update(sanitized) : create(sanitized)
+        sanitized.id != null && isMonitor(sanitized) ? updateMonitor(sanitized) : createMonitor(sanitized)
     }
     
-    async function create(value:Monitor) {
+    async function createMonitor(value:Monitor) {
         const token = accountContext.state.token!.raw;
         const extract = await monitorService.createMonitor(token, value);
         if (!extract.ok()) {
@@ -116,11 +118,11 @@ export default function Editor(props: EditorProps) {
         value.updatedAt = body.data.time;
         const measurements: Measurement[] = [];
         const full: Monitor = { ...value, id: body.data.id, measurements }
-        monitorContext.dispatch({ type: 'update', monitor: full })
+        monitorContext.dispatch({ type: "update", monitor: full })
         notify(true, "Monitor created.");
     }
 
-    async function update(value: Monitor) {
+    async function updateMonitor(value: Monitor) {
         const token = accountContext.state.token!.raw;
         const extract = await monitorService.updateMonitor(token, value.id, value);
         if (!extract.ok()) {
@@ -131,7 +133,7 @@ export default function Editor(props: EditorProps) {
 
         const body: DataPacket<Timestamp> = await extract.json();
         value.updatedAt = body.data.time;
-        monitorContext.dispatch({ type: 'update', monitor: value })
+        monitorContext.dispatch({ type: "update", monitor: value })
         notify(true, "Monitor updated.");
     }
 
@@ -144,9 +146,9 @@ export default function Editor(props: EditorProps) {
         return icmpCount * icmpWait / 1000 < timeout;
     }, [editor.draft.icmpWait, editor.draft.icmpCount, editor.draft.timeout, editor.draft.kind]);
 
-    type eventFields = 'pluginName' | 'pluginArgs' | 'threshold';
+    type eventFields = "pluginName" | "pluginArgs" | "threshold";
 
-    const handleUpdateEvent = (index: number, field: eventFields, value: any) => {
+    function updateEventIndex(index: number, field: eventFields, value: any) {
         setEditor(prev => ({
             ...prev,
             draft: {
@@ -156,7 +158,7 @@ export default function Editor(props: EditorProps) {
         }));
     };
 
-    const handleDeleteEvent = (index: number) => {
+    function deleteEventIndex(index: number) {
         setEditor(prev => {
             const events = prev.draft.events!.filter((_, i) => i !== index);
             return { ...prev, draft: { ...prev.draft, events } }
@@ -201,7 +203,7 @@ export default function Editor(props: EditorProps) {
                     { value: "false", text: INACTIVE_UI }
                 ]}
                 onChange={value =>
-                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === 'true' } }))
+                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === "true" } }))
                 }
             />
         </div>
@@ -490,17 +492,17 @@ export default function Editor(props: EditorProps) {
                         <EventInput
                             plugin={{
                                 value: event.pluginName,
-                                onChange: value => handleUpdateEvent(index, 'pluginName', value)
+                                onChange: value => updateEventIndex(index, "pluginName", value)
                             }}
                             args={{
                                 value: event.pluginArgs,
-                                onChange: value => handleUpdateEvent(index, 'pluginArgs', value)
+                                onChange: value => updateEventIndex(index, "pluginArgs", value)
                             }}
                             threshold={{
                                 value: event.threshold,
-                                onChange: value => handleUpdateEvent(index, 'threshold', value)
+                                onChange: value => updateEventIndex(index, "threshold", value)
                             }}
-                            onDelete={() => handleDeleteEvent(index)}
+                            onDelete={() => deleteEventIndex(index)}
                         />
                     </div>
                 </div>)}
@@ -553,7 +555,7 @@ export default function Editor(props: EditorProps) {
                     onClick={() => {
                         isViewingEvents
                             ? setIsViewingEvents(false)
-                            : monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })
+                            : monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: null } })
                     }}
                 >
                     Back
@@ -564,7 +566,7 @@ export default function Editor(props: EditorProps) {
             <div className="h_ml-auto">
                 <Button
                     border={true}
-                    onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                    onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: null } })}
                 >
                     Close
                 </Button>
@@ -729,7 +731,7 @@ function isValidKind(kind: string | null): boolean {
 }
 
 function isValidState(state: boolean): boolean {
-    return typeof state === 'boolean';
+    return typeof state === "boolean";
 }
 
 function isValidInterval(interval: number | null): boolean {

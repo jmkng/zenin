@@ -1,25 +1,25 @@
-import { useAccountContext } from '@/hooks/useAccount';
-import { useMeasurementService } from '@/hooks/useMeasurement';
-import { useMonitor } from '@/hooks/useMonitor';
-import { Measurement } from '@/internal/measurement';
-import { OriginState, ViewPane } from '@/internal/monitor/split';
-import { DataPacket } from '@/internal/server';
-import { useEffect, useRef, useState } from 'react';
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMeasurementService } from "@/hooks/useMeasurement";
+import { useMonitor } from "@/hooks/useMonitor";
+import { Measurement } from "@/internal/measurement";
+import { OriginState, ViewPane } from "@/internal/monitor/split";
+import { DataPacket } from "@/internal/server";
+import { useEffect, useRef, useState } from "react";
 
-import Button from '../../../Button/Button';
-import ClockIcon from '../../../Icon/ClockIcon';
-import FirstIcon from '../../../Icon/FirstIcon';
-import LastIcon from '../../../Icon/LastIcon';
-import NextIcon from '../../../Icon/NextIcon';
-import PreviousIcon from '../../../Icon/PreviousIcon';
-import TrashIcon from '../../../Icon/TrashIcon';
-import CheckboxInput from '../../../Input/CheckboxInput/CheckboxInput';
-import Dialog from '../../Dialog/Dialog';
-import Property from '../Property/Property';
-import Row from './Row/Row';
-import TableDialogContent from './TableDialogContext';
+import Button from "../../../Button/Button";
+import ClockIcon from "../../../Icon/ClockIcon";
+import FirstIcon from "../../../Icon/FirstIcon";
+import LastIcon from "../../../Icon/LastIcon";
+import NextIcon from "../../../Icon/NextIcon";
+import PreviousIcon from "../../../Icon/PreviousIcon";
+import TrashIcon from "../../../Icon/TrashIcon";
+import CheckboxInput from "../../../Input/CheckboxInput/CheckboxInput";
+import Dialog from "../../Dialog/Dialog";
+import Property from "../Property/Property";
+import Row from "./Row/Row";
+import TableDialogContent from "./TableDialogContext";
 
-import './Table.css';
+import "./Table.css";
 
 interface TableProps {
     state: ViewPane
@@ -27,11 +27,11 @@ interface TableProps {
 
 export default function Table(props: TableProps) {
     const { state } = props;
-    
+
     const { service: monitorService, context: monitorContext } = useMonitor();
     const measurementService = useMeasurementService();
     const accountContext = useAccountContext();
-    
+
     const measurements = (state.monitor.measurements || []).toReversed();
     const pages = Math.ceil(measurements.length / PAGESIZE);
     const [page, setPage] = useState(1);
@@ -52,14 +52,14 @@ export default function Table(props: TableProps) {
 
     useEffect(() => {
         if (state.selected && propertyContainerRef.current) {
-            propertyContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            propertyContainerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         }
         setPage(state.selected
             ? measurements.reduce((acc, _, i, a) => acc === -1 && i % 7 === 0 && a.slice(i, i + 7).includes(state.selected!) ? Math.floor(i / 7) + 1 : acc, -1)
             : 1);
-    }, [state.selected])
+    }, [state.selected]);
 
-    function handleMasterCheck() {
+    function checkAll() {
         if (allChecked) {
             setChecked([]);
             setAllChecked(false);
@@ -69,19 +69,19 @@ export default function Table(props: TableProps) {
         }
     };
 
-    function handleRowCheck(id: number) {
+    function checkRow(id: number) {
         if (checked.includes(id)) setChecked(checked.filter(n => n !== id));
         else setChecked([...checked, id]);
     };
 
-    async function handleDateChange(value: OriginState) {
+    async function changeDateRange(value: OriginState) {
         if (value == "HEAD") {
             // Attach to monitor HEAD.
             const head = monitorContext.state.monitors.get(state.monitor.id);
             if (!head) return;
             monitorContext.dispatch({
-                type: 'pane',
-                pane: { type: 'view', target: { monitor: head, measurement: null, disableToggle: true, origin: "HEAD" } },
+                type: "pane",
+                pane: { type: "view", target: { monitor: head, measurement: null, disableToggle: true, origin: "HEAD" } },
             });
             return;
         }
@@ -91,37 +91,38 @@ export default function Table(props: TableProps) {
         const measurements = await monitorService.getMeasurement(token.raw, state.monitor.id, value);
         if (!measurements.ok()) return;
 
-        const packet: DataPacket<{measurements: Measurement[]}> = await measurements.json();
+        const packet: DataPacket<{ measurements: Measurement[] }> = await measurements.json();
 
         const monitor = { ...state.monitor, measurements: [...packet.data.measurements].toReversed() };
-        monitorContext.dispatch({ type: 'pane',
-            pane: { type: 'view', target: { monitor, measurement: null, disableToggle: true, origin: value } },
+        monitorContext.dispatch({
+            type: "pane",
+            pane: { type: "view", target: { monitor, measurement: null, disableToggle: true, origin: value } },
         });
     }
 
-    async function handleDelete() {
+    async function deleteMeasurement() {
         const token = accountContext.state.token!;
         const extract = await measurementService.deleteMeasurement(token.raw, checked);
         if (!extract.ok()) return;
-        monitorContext.dispatch({ type: 'measurement', monitor: state.monitor.id, id: checked })
+        monitorContext.dispatch({ type: "measurement", monitor: state.monitor.id, id: checked })
         // If a measurement's properties are being displayed and that measurement is deleted,
         // stop showing them.
         if (state.selected && checked.includes(state.selected.id)) {
             const target = { monitor: state.monitor, measurement: null, disableToggle: true };
-            const pane = { type: 'view' as const, target }
-            monitorContext.dispatch({ type: 'pane', pane })
+            const pane = { type: "view" as const, target }
+            monitorContext.dispatch({ type: "pane", pane })
         }
         const newPages = Math.ceil((measurements.length - checked.length) / PAGESIZE);
         setChecked([]);
         setAllChecked(false);
         setPage(prev => Math.min(prev, newPages) || 1);
     }
-    
-    function handleRowClick(id: number) {
+
+    function viewMeasurement(id: number) {
         const measurement = measurements.find(n => n.id === id) || null;
         const target = { monitor: state.monitor, measurement, disableToggle: true };
-        const pane = { type: 'view' as const, target }
-        monitorContext.dispatch({ type: 'pane', pane })
+        const pane = { type: "view" as const, target }
+        monitorContext.dispatch({ type: "pane", pane })
     }
 
     return <div className="table_component">
@@ -132,13 +133,13 @@ export default function Table(props: TableProps) {
 
             <div className="table_controls_container">
                 <Button
-                    onClick={handleDelete}
+                    onClick={deleteMeasurement}
                     disabled={checked.length == 0}
                     border={true}
                     icon={<TrashIcon />}
                 />
 
-                <Dialog dialog={{ content: <TableDialogContent onDateChange={handleDateChange} /> }}>
+                <Dialog dialog={{ content: <TableDialogContent onDateChange={changeDateRange} /> }}>
                     <Button border={true} icon={<ClockIcon />} >
                         {state.origin == "HEAD" ? "Most Recent" : state.origin.toString()}
                     </Button>
@@ -153,25 +154,25 @@ export default function Table(props: TableProps) {
                     <col width="100%" span={1} />
                     <col span={1} />
                 </colgroup>
-                <thead className='table_head'>
+                <thead className="table_head">
                     <tr>
                         <th>
-                            <CheckboxInput checked={allChecked} name={`table_master`} onChange={handleMasterCheck} />
+                            <CheckboxInput checked={allChecked} name={`table_master`} onChange={checkAll} />
                         </th>
                         <th>ID</th>
                         <th>Time</th>
                         <th>State</th>
                     </tr>
                 </thead>
-                <tbody className='table_body'>
+                <tbody className="table_body">
                     {visible.map((n, index) =>
                         <Row
                             key={index}
                             measurement={n}
                             highlight={state.selected != null && n.id === state.selected.id}
                             checked={checked}
-                            onCheck={handleRowCheck}
-                            onClick={handleRowClick}
+                            onCheck={checkRow}
+                            onClick={viewMeasurement}
                         />
                     )}
                 </tbody>
@@ -211,7 +212,7 @@ export default function Table(props: TableProps) {
                 <Property measurement={state.selected} />
             </div>
             : null}
-    </div >
+    </div>
 }
 
 const PAGESIZE = 7;

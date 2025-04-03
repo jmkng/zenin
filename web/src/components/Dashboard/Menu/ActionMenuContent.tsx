@@ -15,8 +15,8 @@ export default function ActionMenuContent() {
 
     const logout = useLogout();
 
-    const handleAccountPane = () => {
-        monitorContext.dispatch({ type: 'pane', pane: { type: 'accounts' } });
+    function openAccountPane () {
+        monitorContext.dispatch({ type: "pane", pane: { type: "accounts" } });
     }
 
     return <div className="action_menu_dialog_content dialog_content">
@@ -27,14 +27,14 @@ export default function ActionMenuContent() {
         </div>
         <div className="action_menu_dialog_section dialog_section">
             {accountContext.state.token?.payload.root
-                ? <Button onClick={handleAccountPane} icon={<AccountIcon />}>
+                ? <Button onClick={openAccountPane} icon={<AccountIcon />}>
                     Manage Accounts
                 </Button>
-                : <Button onClick={handleAccountPane} icon={<AccountIcon />}>
+                : <Button onClick={openAccountPane} icon={<AccountIcon />}>
                     Edit Account
                 </Button>}
             <Button
-                onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'settings' } })}
+                onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "settings" } })}
                 icon={<SettingsIcon />}
             >
                 Settings

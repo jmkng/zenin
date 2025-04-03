@@ -1,5 +1,5 @@
-import { useAccount } from '@/hooks/useAccount';
-import { Navigate, Outlet } from 'react-router-dom';
+import { useAccount } from "@/hooks/useAccount";
+import { Navigate, Outlet } from "react-router-dom";
 
 interface HiddenProps {
     redirectPath: string

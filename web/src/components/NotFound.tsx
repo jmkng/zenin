@@ -17,7 +17,7 @@ export default function NotFound() {
     function back() {
         layoutContext.dispatch({ type: 'load', loading: true });
         navigate("/");
-    };
+    }
 
     return <div className="not_found">
         <div className="not_found_text">

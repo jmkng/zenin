@@ -18,13 +18,13 @@ export default function Notifications() {
         }
     }, [layoutContext.state.notifications]);
 
-    const startTimer = (id: number) => {
+    function startTimer(id: number) {
         setTimeout(() => dismiss(id), TIME_DELAY_MS);
-    };
+    }
 
-    const dismiss = (id: number) => {
-        layoutContext.dispatch({ type: 'dismiss', id });
-    };
+    function dismiss(id: number) {
+        layoutContext.dispatch({ type: "dismiss", id });
+    }
 
     return <div className="notifications" role="region" aria-live="polite" aria-label="Notifications">
         {layoutContext.state.notifications.map(n => 

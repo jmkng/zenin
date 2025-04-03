@@ -1,31 +1,31 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-import { useAccountContext } from '@/hooks/useAccount';
-import { useDataFetch } from '@/hooks/useDataFetch';
-import { useFeedSocket } from '@/hooks/useFeedSocket';
-import { useLayoutContext } from '@/hooks/useLayout';
-import { useMonitor } from '@/hooks/useMonitor';
-import { useNotify } from '@/hooks/useNotify';
-import { useSortedMonitors } from '@/hooks/useSortedMonitors';
-import { monitor } from '@/internal';
+import { useAccountContext } from "@/hooks/useAccount";
+import { useDataFetch } from "@/hooks/useDataFetch";
+import { useFeedSocket } from "@/hooks/useFeedSocket";
+import { useLayoutContext } from "@/hooks/useLayout";
+import { useMonitor } from "@/hooks/useMonitor";
+import { useNotify } from "@/hooks/useNotify";
+import { useSortedMonitors } from "@/hooks/useSortedMonitors";
+import { monitor } from "@/internal";
 import { DataPacket, isErrorPacket, Timestamp } from "@/internal/server";
 
-import Button from '../Button/Button';
-import Accounts from './Accounts/Accounts';
-import DeleteDialogContent from './DeleteDialogContent';
-import DialogModal from './Dialog/DialogModal';
-import Editor from './Editor/Editor';
-import Info from './Info/Info';
-import Menu from './Menu/Menu';
-import SelectMenu from './Menu/SelectMenu';
-import Monitor from './Monitor/Monitor';
-import Settings from './Settings/Settings';
+import Button from "../Button/Button";
+import Accounts from "./Accounts/Accounts";
+import DeleteDialogContent from "./DeleteDialogContent";
+import DialogModal from "./Dialog/DialogModal";
+import Editor from "./Editor/Editor";
+import Info from "./Info/Info";
+import Menu from "./Menu/Menu";
+import SelectMenu from "./Menu/SelectMenu";
+import Monitor from "./Monitor/Monitor";
+import Settings from "./Settings/Settings";
 
-import './Dashboard.css';
+import "./Dashboard.css";
 
 export default function Dashboard() {
     const { service: monitorService, context: monitorContext } = useMonitor();
-    const  accountContext = useAccountContext();
+    const accountContext = useAccountContext();
     const layoutContext = useLayoutContext();
     
     const fetch = useDataFetch();
@@ -40,46 +40,46 @@ export default function Dashboard() {
         (async () => {
             await fetch();
             const loading = false;
-            layoutContext.dispatch({ type: 'load', loading })
+            layoutContext.dispatch({ type: "load", loading });
         })();
-    }, [])
+    }, []);
 
-    async function deleteMonitors (monitors: monitor.Monitor[]) {
+    async function deleteMonitors(monitors: monitor.Monitor[]) {
         const id = monitors.map(n => n.id!);
         const token = accountContext.state.token!.raw;
         const extract = await monitorService.deleteMonitor(token, id);
         if (!extract.ok()) {
             const body = await extract.json();
-            if (isErrorPacket(body)) notify(false, ...body.errors)
+            if (isErrorPacket(body)) notify(false, ...body.errors);
             return;
         }
 
-        monitorContext.dispatch({ type: 'delete', monitors: id });
+        monitorContext.dispatch({ type: "delete", monitors: id });
         const length = id.length;
         const message = length > 1 ? `Deleted ${length} monitors.` : "Monitor deleted.";
         notify(true, message);
     }
 
     function startDraft() {
-        const pane = { type: 'draft' as const }
-        monitorContext.dispatch({type: 'pane', pane })
+        const pane = { type: "draft" as const };
+        monitorContext.dispatch({ type: "pane", pane });
     }
 
-    async function toggleMonitors (active: boolean, id: number[]) {
+    async function toggleMonitors(active: boolean, id: number[]) {
         const token = accountContext.state.token!.raw;
         const extract = await monitorService.toggleMonitor(token, id, active);
         if (!extract.ok()) {
             const body = await extract.json();
             if (isErrorPacket(body)) notify(false, ...body.errors);
             return;
-        };
+        }
 
         const body: DataPacket<Timestamp> = await extract.json();
-        monitorContext.dispatch({ type: 'toggle', monitors: id, active, time: body.data.time });
-        notify(true, `Monitor${id.length > 1 ? "s" : ""} ${active ? "started" : "stopped"}.`)
+        monitorContext.dispatch({ type: "toggle", monitors: id, active, time: body.data.time });
+        notify(true, `Monitor${id.length > 1 ? "s" : ""} ${active ? "started" : "stopped"}.`);
     }
 
-    async function pollMonitor (id: number) {
+    async function pollMonitor(id: number) {
         const token = accountContext.state.token!.raw;
         const extract = await monitorService.pollMonitor(token, id);
         if (!extract.ok()) {
@@ -87,13 +87,13 @@ export default function Dashboard() {
             if (isErrorPacket(body)) notify(false, ...body.errors);
             return;
         }
-        notify(true, "Monitor poll queued.")
+        notify(true, "Monitor poll queued.");
     }
 
-    return <div className={["dashboard", isSplit ? 'split' : ''].join(' ')}>
+    return <div className={["dashboard", isSplit ? "split" : ""].join(" ")}>
         <div className="dashboard_main">
             <div className="dashboard_main_top">
-                <div className={["dashboard_select_menu", monitorContext.state.selected.length > 0 ? 'selection' : ''].join(' ')}>
+                <div className={["dashboard_select_menu", monitorContext.state.selected.length > 0 ? "selection" : ""].join(" ")}>
                     <SelectMenu onToggle={toggleMonitors} />
                 </div>
                 <Menu />
@@ -136,7 +136,7 @@ export default function Dashboard() {
         <DialogModal
             title="Confirm"
             visible={monitorContext.state.deleting.length > 0}
-            onCancel={() => monitorContext.dispatch({ type: 'queue', monitors: [] })}
+            onCancel={() => monitorContext.dispatch({ type: "queue", monitors: [] })}
             content={<DeleteDialogContent
                 queue={monitorContext.state.deleting}
                 onConfirm={() => deleteMonitors(monitorContext.state.deleting)}

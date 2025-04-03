@@ -5,7 +5,7 @@ import { DEAD_API, OK_API, WARN_API } from "@/internal/server";
 import List from "./List/List";
 
 interface StatisticsProps {
-    state: ViewPane,
+    state: ViewPane
 }
 
 export default function Statistics(props: StatisticsProps) {

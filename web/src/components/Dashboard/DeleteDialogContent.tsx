@@ -6,6 +6,7 @@ import "./DeleteDialogContent.css";
 
 interface DeleteDialogContentProps {
     queue: Monitor[],
+    
     onConfirm: () => void;
 }
 

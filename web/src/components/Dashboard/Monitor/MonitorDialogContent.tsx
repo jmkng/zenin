@@ -20,7 +20,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
     const { monitor, onToggle, onPoll } = props;
     const monitorContext = useMonitorContext();
 
-    const handleView = () => {
+    function openInfoPane() {
         monitorContext.dispatch({
             type: 'pane',
             pane: { type: 'view', target: { monitor, measurement: null } }
@@ -29,7 +29,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
 
     return <div className="monitor_dialog_content dialog_content">
         <div className="dialog_section">
-            <Button icon={<InfoIcon />} onClick={handleView}>
+            <Button icon={<InfoIcon />} onClick={openInfoPane}>
                 Info
             </Button>
             <Button

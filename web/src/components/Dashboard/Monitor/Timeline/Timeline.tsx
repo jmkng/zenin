@@ -1,11 +1,11 @@
-import { Measurement } from '@/internal/measurement';
-import { DEAD_API, WARN_API } from '@/internal/server';
-import { useEffect, useRef, useState } from 'react';
+import { Measurement } from "@/internal/measurement";
+import { DEAD_API, WARN_API } from "@/internal/server";
+import { useEffect, useRef, useState } from "react";
 
-import FailureIcon from '@/components/Icon/FailureIcon';
-import WarningIcon from '@/components/Icon/WarningIcon';
+import FailureIcon from "@/components/Icon/FailureIcon";
+import WarningIcon from "@/components/Icon/WarningIcon";
 
-import './Timeline.css';
+import "./Timeline.css";
 
 interface TimelineProps {
     measurements: Measurement[]
@@ -59,8 +59,7 @@ export default function Timeline(props: TimelineProps) {
         return cache;
     }
 
-
-    return <div className="measurement_timeline" dir='rtl' style={{ gap: slotGap }} ref={containerRef}>
+    return <div className="measurement_timeline" dir="rtl" style={{ gap: slotGap }} ref={containerRef}>
         {renderSlots()}
     </div>
 }

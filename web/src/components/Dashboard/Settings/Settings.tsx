@@ -35,9 +35,7 @@ export default function Settings() {
     [editor, settingsContext.state])
 
     useEffect(() => {
-        if (errors.length > 0) {
-            errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
-        }
+        if (errors.length > 0) errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
     }, [errors]);
     
     async function save() {
@@ -51,11 +49,10 @@ export default function Settings() {
             return
         };
 
-        // Theme hot-swap
         const ok = await tryLoadTheme(active);
         
         const themes = settingsContext.state.themes;
-        settingsContext.dispatch({ type: 'reset', state: { delimiters, active, themes } });
+        settingsContext.dispatch({ type: "reset", state: { delimiters, active, themes } });
         if (ok) setErrors([]);
         notify(true, "Settings saved.");
     }

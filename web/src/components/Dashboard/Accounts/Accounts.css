@@ -11,6 +11,7 @@
 
     .account_rank {
         color: var(--secondary-color, var(--primary-color));
+        margin-right: 8px;
     }
 
     .account:not(:last-of-type) {

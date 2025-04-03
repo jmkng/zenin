@@ -13,14 +13,7 @@ interface TextAreaProps {
 }
 
 export default function TextAreaInput(props: TextAreaProps) {
-    const {
-        name,
-        value = props.value,
-        onChange,
-        label,
-        subtext,
-        placeholder
-    } = props;
+    const { name, value = props.value, onChange, label, subtext, placeholder } = props;
 
     return <div className="text_area_input input_container h_f-col">
         {label ?

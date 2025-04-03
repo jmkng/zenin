@@ -20,9 +20,9 @@ export default function Login() {
     const [errors, setErrors] = useState<string[]>([]);
     const [isClaimed, setIsClaimed] = useState<boolean | null>(null);
 
-    const hasValidPasswords = useMemo(() => isClaimed ? true : editor.password == editor.passwordConfirm, [isClaimed, editor.password, editor.passwordConfirm])
-    const hasValidPasswordConfirm = useMemo(() => editor.password == editor.passwordConfirm, [editor.password, editor.passwordConfirm])
-    const canSave: boolean = useMemo(() => hasValidPasswords, [hasValidPasswords])
+    const hasValidPasswords = useMemo(() => isClaimed ? true : editor.password == editor.passwordConfirm, [isClaimed, editor.password, editor.passwordConfirm]);
+    const hasValidPasswordConfirm = useMemo(() => editor.password == editor.passwordConfirm, [editor.password, editor.passwordConfirm]);
+    const canSave: boolean = useMemo(() => hasValidPasswords, [hasValidPasswords]);
 
     useEffect(() => {
         (async () => {
@@ -35,7 +35,7 @@ export default function Login() {
             };
             
             setIsClaimed(claimed);
-            layoutContext.dispatch({ type: 'load', loading: false })
+            layoutContext.dispatch({ type: "load", loading: false })
         })()
     }, [])
 
@@ -51,14 +51,14 @@ export default function Login() {
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [submit]);
+    }, [submit])
 
     async function submit() {
         if (isClaimed === null || !validateForm()) return;
 
         const username = editor.username || "";
         const password = editor.password || "";
-        layoutContext.dispatch({ type: 'load', loading: true });
+        layoutContext.dispatch({ type: "load", loading: true });
 
         const extract = isClaimed
             ? await accountService.authenticate(username, password)
@@ -67,13 +67,13 @@ export default function Login() {
         const packet: DataPacket<{token: string}> = await extract.json();
         if (!extract.ok()) {
             if (isErrorPacket(packet)) setErrors(packet.errors);
-            layoutContext.dispatch({ type: 'load', loading: false });
+            layoutContext.dispatch({ type: "load", loading: false });
             return;
         }
 
         const token = packet.data.token;
         setLSToken(token);
-        accountContext.dispatch({ type: 'login', token });
+        accountContext.dispatch({ type: "login", token });
 
         setErrors([]);
         navigate("/");
@@ -95,13 +95,11 @@ export default function Login() {
     </div>
 
     const login = <div className="login">
-        <header className="login_header">
-        </header>
         <div className="login_logo_container">
             <LogoIcon />
         </div>
 
-        <div className="login_form_container">
+        <div className="login_container">
             <div className="login_spaced">
                 <TextInput
                     name="login_username"

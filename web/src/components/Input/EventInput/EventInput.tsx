@@ -1,14 +1,16 @@
 import { DEAD_UI, WARN_UI } from "@/internal/monitor";
 import { DEAD_API, WARN_API } from "@/internal/server";
+import { PluginInputProps } from "../PluginInput";
 
 import Button from "../../Button/Button";
-import PluginInput, { PluginInputProps } from "../PluginInput";
+import PluginInput from "../PluginInput";
 import SelectInput from "../SelectInput/SelectInput";
 
 import "./EventInput.css";
 
 interface ThresholdProps {
     threshold: { value: string | null, onChange: (value: string | null) => void },
+    
     onDelete: () => void
 }
 

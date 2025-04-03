@@ -1,6 +1,6 @@
-import UpDownIcon from '../../Icon/UpDownIcon';
+import UpDownIcon from "../../Icon/UpDownIcon";
 
-import './SelectInput.css';
+import "./SelectInput.css";
 
 interface SelectProps {
     name: string

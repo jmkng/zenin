@@ -1,19 +1,20 @@
-import { ReactNode, useCallback, useEffect, useRef } from 'react';
-import { PositionStrategy } from '../Dashboard/Dialog/position';
+import { ReactNode, useCallback, useEffect, useRef } from "react";
+import { PositionStrategy } from "../Dashboard/Dialog/position";
 
-import './Button.css';
+import "./Button.css";
 
 interface ButtonProps {
-    children?: ReactNode
-    kind?: "default" | "primary" | "destructive"
+    children?: ReactNode;
+    kind?: "default" | "primary" | "destructive";
     border?: boolean;
     hover?: boolean;
     icon?: ReactNode;
     background?: boolean;
     disabled?: boolean;
     tooltip?: string;
+    ariaLabel?: string;
+
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-    ariaLabel?: string
 }
 
 export default function Button(props: ButtonProps) {
@@ -29,17 +30,18 @@ export default function Button(props: ButtonProps) {
         onClick,
         ariaLabel
     } = props;
+
     const rootRef = useRef<HTMLDivElement>(null);
     const tooltipRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const click = useCallback((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         if (onClick) onClick(event);
-        handleHideTooltip();
+        hideTooltip();
     }, [onClick])
 
-    const handleHideTooltip = () => {
+    function hideTooltip() {
         const id = timeoutRef.current;
         if (!id) return;
         clearTimeout(id);
@@ -48,8 +50,8 @@ export default function Button(props: ButtonProps) {
         const element = tooltipRef.current;
         if (!element) return;
 
-        element.classList.remove('visible')
-    };
+        element.classList.remove("visible")
+    }
 
     useEffect(() => {
         const handleShowTooltip = () => {
@@ -62,7 +64,7 @@ export default function Button(props: ButtonProps) {
             tooltipElement.style.left = `${left}px`;
             tooltipElement.style.top = `${top}px`;
 
-            tooltipElement.classList.add('visible')
+            tooltipElement.classList.add("visible")
         };
         const handleMouseEnter = () => {
             if (!window.matchMedia("(max-width: 700px)").matches) {
@@ -72,27 +74,27 @@ export default function Button(props: ButtonProps) {
 
         const buttonElement = buttonRef.current;
         if (!buttonElement) return;
-        buttonElement.addEventListener('mouseenter', handleMouseEnter);
-        buttonElement.addEventListener('mouseleave', handleHideTooltip);
+        buttonElement.addEventListener("mouseenter", handleMouseEnter);
+        buttonElement.addEventListener("mouseleave", hideTooltip);
         return () => {
             if (!buttonElement) return;
-            buttonElement.removeEventListener('mouseenter', handleMouseEnter);
-            buttonElement.removeEventListener('mouseleave', handleHideTooltip);
+            buttonElement.removeEventListener("mouseenter", handleMouseEnter);
+            buttonElement.removeEventListener("mouseleave", hideTooltip);
         }
     }, [tooltip])
 
     const button = <button
         ref={buttonRef}
-        onClick={event => { if (!disabled) handleClick(event) }}
+        onClick={event => { if (!disabled) click(event) }}
         aria-label={ariaLabel}
         className={[
-            'button',
+            "button",
             kind,
-            border ? 'border' : '',
-            hover ? 'hover' : '',
-            background ? 'background' : '',
-            disabled ? 'disabled' : '',
-        ].join(' ')}
+            border ? "border" : "",
+            hover ? "hover" : "",
+            background ? "background" : "",
+            disabled ? "disabled" : "",
+        ].join(" ")}
     >
         {icon
             ? <span className={["button_icon", children ? "pair" : ""].join(" ")}>{icon}</span>
