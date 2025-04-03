@@ -28,10 +28,14 @@ type SendNotificationAction = { type: "send", messages: string[], options?: Send
 /** Dismiss a notification. */
 type DismissNotification = { type: "dismiss", id: number };
 
+/** Clear all notifications. */
+type ClearNotification = { type: "clear" };
+
 export type LayoutAction =
     | LoadAction
     | SendNotificationAction
     | DismissNotification
+    | ClearNotification
 
 const loadAction = (state: LayoutState, action: LoadAction): LayoutState => {
     const loading = action.loading;
@@ -58,10 +62,15 @@ const dismissNotificationAction = (state: LayoutState, action: DismissNotificati
     return { ...state, notifications };
 }
 
+const clearNotificationAction = (state: LayoutState): LayoutState => {
+    return { ...state, notifications: [] };
+}
+
 export const layoutReducer = (state: LayoutState, action: LayoutAction): LayoutState => {
     switch (action.type) {
         case "load": return loadAction(state, action);
         case "send": return sendNotificationAction(state, action);
         case "dismiss": return dismissNotificationAction(state, action);
+        case "clear": return clearNotificationAction(state);
     }
 }

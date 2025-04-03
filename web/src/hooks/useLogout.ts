@@ -24,6 +24,7 @@ export function useLogout() {
         clearLSToken();
         accountContext.dispatch({ type: "logout" });
         monitorContext.dispatch({ type: "logout" });
+        layoutContext.dispatch({ type: "clear" });
         layoutContext.dispatch({ type: "load", loading: true });
     };
 }
