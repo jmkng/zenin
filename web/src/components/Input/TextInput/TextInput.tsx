@@ -14,15 +14,7 @@ interface TextProps {
 }
 
 export default function TextInput(props: TextProps) {
-    const {
-        name,
-        value = props.value,
-        onChange,
-        type,
-        label,
-        subtext,
-        placeholder
-    } = props;
+    const { name, value = props.value, onChange, type, label, subtext, placeholder } = props;
 
     return <div className="text_input input_container h_f-col">
         {label ?

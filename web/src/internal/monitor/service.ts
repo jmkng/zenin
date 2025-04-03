@@ -1,6 +1,4 @@
-import { useRef } from "react";
 import { Monitor } from ".";
-import { useDefaultInterceptors } from "../../hooks/useDefaultInterceptors";
 import { DELETE_API, GET_API, PATCH_API, POST_API, PUT_API, Service } from "../server";
 import { AuthenticatedRequest } from "../server/request";
 import { DetachedState } from "./split";
@@ -15,7 +13,7 @@ class MonitorService extends Service {
         if (measurement > 0) params.push(`measurements=${measurement}`);
         if (plugins) params.push(`plugins=${plugins}`);
         if (params.length > 0) {
-            address += `?${params.join('&')}`;
+            address += `?${params.join("&")}`;
         }
         
         const request = new AuthenticatedRequest(token, address);
@@ -23,7 +21,7 @@ class MonitorService extends Service {
     }
 
     async deleteMonitor(token: string, id: number[]) {
-        const joined = id.join(',');
+        const joined = id.join(",");
         const address = `/monitor?id=${joined}`;
         const request = new AuthenticatedRequest(token, address).method(DELETE_API)
         return await this.extract(request);
@@ -36,7 +34,7 @@ class MonitorService extends Service {
     }
 
     async toggleMonitor(token: string, id: number[], active: boolean) {
-        const joined = id.join(',');
+        const joined = id.join(",");
         const address = `/monitor?id=${joined}&active=${active}`;
         const request = new AuthenticatedRequest(token, address).method(PATCH_API)
         return await this.extract(request);
@@ -50,7 +48,7 @@ class MonitorService extends Service {
         return await this.extract(request);
     }
 
-    async addMonitor(token: string, value: Monitor) {
+    async createMonitor(token: string, value: Monitor) {
         const body = JSON.stringify(value)
         const address = `/monitor`;
         const request = new AuthenticatedRequest(token, address).method(POST_API).body(body)
@@ -65,20 +63,10 @@ class MonitorService extends Service {
     }
 
     async getPlugins(token: string) {
-        const address = '/monitor/plugins';
+        const address = "/monitor/plugins";
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }
-}
-
-export const useDefaultMonitorService = () => {
-    const interceptors = useDefaultInterceptors();
-    const ref = useRef<MonitorService | null>(null);
-    if (ref.current === null) {
-        const service = new MonitorService().interceptor(...interceptors);
-        ref.current = service;
-    }
-    return ref.current;
 }
 
 export { MonitorService };

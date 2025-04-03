@@ -1,17 +1,12 @@
-import { useMemo, useState } from "react";
-
-import { useAccountContext } from "@/internal/account";
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMonitorContext } from "@/hooks/useMonitor";
+import { useNotify } from "@/hooks/useNotify";
+import { useSettings } from "@/hooks/useSettings";
 import { formatTheme } from "@/internal/layout/graphics";
-import { isArrayEqual, useMonitorContext } from "@/internal/monitor";
-import {
-    DEFAULT_DARK,
-    DEFAULT_LIGHT,
-    SettingsState,
-    THEME_ATTR,
-    THEME_BLOCK_ID,
-    useDefaultSettingsService,
-    useSettingsContext
-} from "@/internal/settings";
+import { isArrayEqual } from "@/internal/monitor";
+import { isErrorPacket } from "@/internal/server";
+import { DEFAULT_DARK, DEFAULT_LIGHT, SettingsState, THEME_ATTR, THEME_BLOCK_ID } from "@/internal/settings";
+import { useEffect, useMemo, useRef, useState } from "react";
     
 import Button from "../../Button/Button";
 import PairListInput from "../../Input/PairListInput/PairListInput";
@@ -20,65 +15,97 @@ import SelectInput from "../../Input/SelectInput/SelectInput";
 import "./Settings.css";
 
 export default function Settings() {
-    const monitor = { context: useMonitorContext() };
-    const settings = { context: useSettingsContext(), service: useDefaultSettingsService() };
-    const account = { context: useAccountContext() };
+    const monitorContext = useMonitorContext();
+    const { service: settingsService, context: settingsContext } = useSettings();
+    const accountContext = useAccountContext();
+    const notify = useNotify();
+    const errorsContainerRef = useRef<HTMLDivElement>(null);
 
     // The options displayed in the theme select input are all of the themes available on the server,
     // plus a few default options for managing the built-in theme.
-    const options = [DEFAULT_DARK, DEFAULT_LIGHT, ...settings.context.state.themes];
+    const options = [DEFAULT_DARK, DEFAULT_LIGHT, ...settingsContext.state.themes];
 
-    const [editor, setEditor] = useState<SettingsState>({...settings.context.state });
+    const [editor, setEditor] = useState<SettingsState>({...settingsContext.state });
+    const [errors, setErrors] = useState<string[]>([]);
 
     const hasValidDelimiters = useMemo(() => isValidDelimiters(editor.delimiters), [editor.delimiters])
     const canSave = useMemo(() => 
-        !isSettingsEqual(editor, settings.context.state) 
+        !isSettingsEqual(editor, settingsContext.state) 
         && hasValidDelimiters,
-    [editor, settings.context.state])
+    [editor, settingsContext.state])
 
-    const handleSave = async () => {        
+    useEffect(() => {
+        if (errors.length > 0) errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
+    }, [errors]);
+    
+    async function save() {
         const delimiters = editor.delimiters;
         let active = editor.active;
 
-        const extract = await settings.service.updateSettings(account.context.state.token!.raw, { delimiters, theme: active });
-        if (!extract.ok()) return;
+        const extract = await settingsService.updateSettings(accountContext.state.token!.raw, { delimiters, theme: active });
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) setErrors(body.errors);
+            return
+        };
 
-        // Theme hot-swap
-        await handleReload(active);
+        const ok = await tryLoadTheme(active);
         
-        const themes = settings.context.state.themes;
-        settings.context.dispatch({ type: 'reset', state: { delimiters, active, themes } });
+        const themes = settingsContext.state.themes;
+        settingsContext.dispatch({ type: "reset", state: { delimiters, active, themes } });
+        if (ok) setErrors([]);
+        notify("Settings saved.");
     }
 
-    const handleReload = async (active: string | null) =>{
+    async function tryLoadTheme(name: string | null): Promise<boolean> {
         const root = document.documentElement;
-        const ss = document.getElementById(THEME_BLOCK_ID)
 
-        const clean = () => {
-            if (ss) ss.parentNode?.removeChild(ss);
-            document.adoptedStyleSheets = [];
-        };
-        
-        if (active) root.setAttribute(THEME_ATTR, formatTheme(active));
+        if (name) root.setAttribute(THEME_ATTR, formatTheme(name));
         else root.removeAttribute(THEME_ATTR);
         
-        if (isDefaultTheme(active)) {
-            clean();
-        } else {
-            const extract = await settings.service.getActiveTheme(account.context.state.token!.raw);
-            if (!extract.ok()) return;
-            
-            const css = await extract.response.text();
-            const styleSheet = new CSSStyleSheet();
-            await styleSheet.replace(css);
-            clean();
-            document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet]
-        }
+        if (isDefaultTheme(name)) {
+            cleanStyleSheets();
+            return true;
+        } 
+        
+        const extract = await settingsService.getActiveTheme(true);
+        if (!extract.ok()) {
+            if (extract.status() == 404) {
+                setErrors(["Theme file was not found, reverted to default theme."])
+            } else {
+                const body = await extract.json();
+                if (isErrorPacket(body)) setErrors(body.errors);
+            }
+            cleanStyleSheets();
+            return false
+        };
+        
+        const css = await extract.response.text();
+        const styleSheet = new CSSStyleSheet();
+        await styleSheet.replace(css);
+        cleanStyleSheets();
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, styleSheet]
+
+        return true;
+    }
+
+    async function reloadTheme(name: string | null) {
+        const ok = tryLoadTheme(name);
+        if (!ok) return;
+        setErrors([]);
+    }
+
+    function cleanStyleSheets() {
+        const ss = document.getElementById(THEME_BLOCK_ID)
+        if (ss) ss.parentNode?.removeChild(ss);
+        document.adoptedStyleSheets = [];
     }
     
     return <div className="settings">
         <div className="detail_body">
-            <div className="h_mb-c">
+            <h1 className="h_m-0">Settings</h1>
+            
+            <div className="h_mt-c">
                 <SelectInput
                     label="Theme"
                     name={"settings_theme"}
@@ -89,12 +116,13 @@ export default function Settings() {
                 <div className="settings_reload_theme">
                     <Button 
                         border={true} 
-                        disabled={isDefaultTheme(settings.context.state.active)}
-                        onClick={() => handleReload(settings.context.state.active)}
+                        disabled={isDefaultTheme(settingsContext.state.active)}
+                        onClick={() => reloadTheme(settingsContext.state.active)}
                     >Reload Theme</Button>
                 </div>
             </div>
-            <div>
+
+            <div className="h_mt-c">
                 <PairListInput
                     label="Template Delimiters"
                     name="settings_template_delimiters"
@@ -108,6 +136,7 @@ export default function Settings() {
                     ? <span className="detail_validation h_c-dead-a">Delimiters are required. They must not contain whitespace.</span>
                     : null}
             </div>
+
             <div className="settings_about h_mt-c">
                 <a href="#">
                     User Guide
@@ -116,17 +145,21 @@ export default function Settings() {
                     Report Issue
                 </a>
             </div>
+
+            <div className="settings_message_container" ref={errorsContainerRef}>
+                {errors.map((n, index) => <div key={index} className="settings_message error h_mt-c">{n}</div>)}
+            </div>
         </div>
 
         <div className="detail_controls">
-            <Button kind="primary" onClick={handleSave} disabled={!canSave}>
+            <Button kind="primary" onClick={save} disabled={!canSave}>
                 <span>Save</span>
             </Button>
 
             <div className="h_ml-auto">
                 <Button
                     border={true}
-                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                    onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: null } })}
                 >
                     <span>Close</span>
                 </Button>

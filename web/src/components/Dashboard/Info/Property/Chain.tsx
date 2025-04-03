@@ -1,37 +1,36 @@
-import { useLayoutEffect, useState } from "react";
-import { useAccountContext } from "@/internal/account";
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMeasurementService } from "@/hooks/useMeasurement";
 import { formatUTCDate } from "@/internal/layout/graphics";
 import { Certificate, Measurement } from "@/internal/measurement";
-import { useDefaultMeasurementService } from "@/internal/measurement/service";
 import { DataPacket } from "@/internal/server";
+import { useLayoutEffect, useState } from "react";
 
 import ChevronIcon from "../../../Icon/ChevronIcon";
 
 import "./Chain.css";
-
 
 interface ChainProps {
     measurement: Measurement
 }
 
 export default function Chain(props: ChainProps) {
-    const account = useAccountContext();
-    const measurement = {
-        service: useDefaultMeasurementService(),
-        data: props.measurement,
-    }
+    const { measurement } = props;
+    
+    const accountContext = useAccountContext();
+    const measurementService = useMeasurementService();
+
     const [state, setState] = useState<ChainState>("WAITING")
 
     useLayoutEffect(() => {
         setState("WAITING");
-    }, [measurement.data])
+    }, [measurement])
 
     const handleExpand = async () => {
         if (state == "PENDING" || isReadyState(state) && state.certificates.length == 0) return;
         if (state == "WAITING") {
             setState("PENDING");
-            const token = account.state.token!.raw;
-            const certificates = await measurement.service.getCertificate(token, measurement.data.id);
+            const token = accountContext.state.token!.raw;
+            const certificates = await measurementService.getCertificate(token, measurement.id);
             if (!certificates.ok()) return;
             const packet: DataPacket<{certificates: Certificate[]}> = await certificates.json();
             setState({ certificates: packet.data.certificates, expanded: true });
@@ -59,7 +58,7 @@ export default function Chain(props: ChainProps) {
             </div>
 
             <div
-                className={["chain_toggle h_f-row-center"].join(' ')}
+                className={["chain_toggle h_f-row-center"].join(" ")}
                 onClick={handleExpand}
             >
                 <ChevronIcon />
@@ -114,5 +113,5 @@ type WaitingState = "WAITING";
 type ReadyState = { certificates: Certificate[], expanded: boolean };
 
 function isReadyState(state: ChainState): state is ReadyState {
-    return typeof state === 'object' && state !== null && 'certificates' in state && 'expanded' in state;
+    return typeof state === "object" && state !== null && "certificates" in state && "expanded" in state;
 }

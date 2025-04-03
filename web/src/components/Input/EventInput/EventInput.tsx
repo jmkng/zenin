@@ -1,14 +1,16 @@
 import { DEAD_UI, WARN_UI } from "@/internal/monitor";
 import { DEAD_API, WARN_API } from "@/internal/server";
+import { PluginInputProps } from "../PluginInput";
 
 import Button from "../../Button/Button";
-import PluginInput, { PluginInputProps } from "../PluginInput";
+import PluginInput from "../PluginInput";
 import SelectInput from "../SelectInput/SelectInput";
 
 import "./EventInput.css";
 
 interface ThresholdProps {
     threshold: { value: string | null, onChange: (value: string | null) => void },
+    
     onDelete: () => void
 }
 
@@ -43,7 +45,7 @@ export default function EventInput(props: EventInputProps) {
                     { value: DEAD_API, text: DEAD_UI },
                     { value: "NONE", text: "None" }, // No threshold, converted to null.
                 ]}
-                subtext={<span>Define a probe <a href="#">threshold</a>.</span>}/* TODO: Add documentation link. */
+                subtext={<span>Define an event activation <a href="#">threshold</a>.</span>} /* TODO: Add documentation link. */
                 onChange={value => threshold.onChange(value == "NONE" ? null : value)}
             />
             {<span className="event_input_threshold_description">

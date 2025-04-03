@@ -1,0 +1,29 @@
+.dialog_content {
+    min-width: 175px;
+    background: var(--dialog-background, var(--background));
+    border: 1px solid var(--dialog-border-color, var(--border-color));
+    border-radius: 4px;
+}
+
+.dialog_section .button {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+
+.dialog_close_icon {
+    display: flex;
+    transform: rotate(45deg);
+}
+
+.dialog_section {
+    padding: 6px;
+}
+
+.dialog_section .button:not(:last-of-type) {
+    margin-bottom: 6px;
+}
+
+.dialog_section:not(:last-of-type) {
+    border-bottom: 1px solid var(--dialog-border-color, var(--border-color));
+}

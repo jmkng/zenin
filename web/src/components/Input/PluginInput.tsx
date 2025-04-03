@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
-import { useMonitorContext } from "@/internal/monitor";
+import { useMonitorContext } from "@/hooks/useMonitor";
+
 import ArrayInput from "./ArrayInput/ArrayInput";
 import SelectInput from "./SelectInput/SelectInput";
 
@@ -15,18 +16,19 @@ export interface PluginInputProps {
 
 export default function PluginInput(props: PluginInputProps) {
     const { plugin, args } = props;
-    const monitor = { context: useMonitorContext() };
+
+    const monitorContext = useMonitorContext();
 
     const hasValidArguments = useMemo(() =>
         (args.value == null || args.value.length == 0)
         || (args.value && args.value.length > 0 && args.value.every(n => n.trim() != "")), [args.value]);
 
-    const options = useMemo(() => Array.from(new Set([...monitor.context.state.plugins, plugin.value || ""]))
+    const options = useMemo(() => Array.from(new Set([...monitorContext.state.plugins, plugin.value || ""]))
         .map(n => ({ text: n, value: n }))
-        .filter(n => n.text.trim() != ""), [monitor.context.state.plugins]);
+        .filter(n => n.text.trim() != ""), [monitorContext.state.plugins]);
 
-    const selection = useMemo(() => plugin.value || monitor.context.state.plugins[0], 
-    [plugin.value, monitor.context.state.plugins]);
+    const selection = useMemo(() => plugin.value || monitorContext.state.plugins[0], 
+    [plugin.value, monitorContext.state.plugins]);
 
     return <div className="plugin_spec">
         <div className="plugin_spec_control">

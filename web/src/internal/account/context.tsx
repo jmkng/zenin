@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useReducer } from 'react';
-import { AccountAction, accountDefault, accountReducer, AccountState } from './reducer';
+import { createContext, ReactNode, useReducer } from "react";
+import { AccountAction, accountDefault, accountReducer, AccountState } from "./reducer";
 
 export const AccountContext = createContext<AccountState | null>(null);
 export const AccountDispatchContext = createContext<((action: AccountAction) => void) | null>(null);

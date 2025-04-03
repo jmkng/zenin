@@ -11,10 +11,10 @@ export const settingsDefault: SettingsState = {
 }
 
 /** Reset the state. */
-type ResetAction = { type: 'reset', state: SettingsState };
+type ResetAction = { type: "reset", state: SettingsState };
 
 /** Update the active theme. */
-type ChangeActiveThemeAction = { type: 'active', active: string | null };
+type ChangeActiveThemeAction = { type: "active", active: string | null };
 
 export type SettingsAction =
     | ResetAction

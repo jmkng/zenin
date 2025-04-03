@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import AccountProvider, { AccountContext, AccountDispatchContext } from "./context";
+import AccountProvider from "./context";
 
 export const
     ROOT_ACCOUNT_UI = "Root"
@@ -32,11 +31,15 @@ interface TokenPayload {
     root: boolean,
 }
 
-export const useAccountContext = () => {
-    const state = useContext(AccountContext);
-    const dispatch = useContext(AccountDispatchContext);
-    if (!state || !dispatch) throw new Error('account context must be used within provider');
-    return { state, dispatch }
-}
+const TOKEN_KEY: string = "token";
+
+/** Set the `token` key to the provided string in localStorage. */
+export const setLSToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
+
+/** Read the `token` key from localStorage. */
+export const readLSToken = () => localStorage.getItem(TOKEN_KEY);
+
+/** Clear the `token` key from localStorage. */
+export const clearLSToken = () => localStorage.removeItem(TOKEN_KEY);
 
 export { AccountProvider }

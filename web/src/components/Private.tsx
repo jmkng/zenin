@@ -1,12 +1,18 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAccountContext } from '@/internal/account';
+import { useAccount } from "@/hooks/useAccount";
+import { Navigate, Outlet } from "react-router-dom";
 
-export default function Private() {
-    const account = useAccountContext();
-    const initialized = account.state.initialized;
-    const guard: boolean = !initialized || (initialized && (account.state.token !== null));
+interface PrivateProps {
+    redirectPath: string;
+}
 
-    return guard
+/** Redirect unauthenticated users away from children. */
+export default function Private(props: PrivateProps) {
+    const { redirectPath } = props;
+
+    const { context } = useAccount();
+    const shouldAllow: boolean = context.state.token !== null;
+
+    return shouldAllow
         ? <Outlet />
-        : <Navigate to="/login" />
+        : <Navigate to={redirectPath} />;
 }

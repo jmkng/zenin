@@ -1,17 +1,17 @@
-import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
+import react from "@vitejs/plugin-react";
+import { resolve } from "path";
+import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 const config = defineConfig({
     build: {
-        target: 'es2022',
+        target: "es2022",
         outDir: "../server/build",
         assetsDir: ".",
     },
     server: {
         proxy: {
-            '/api': {
+            "/api": {
                 target: `http://localhost:${process.env.ZENIN_PORT}`,
                 changeOrigin: true,
                 secure: false
@@ -21,7 +21,7 @@ const config = defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            "@": resolve('./src'),
+            "@": resolve("./src"),
         }
     }
 });

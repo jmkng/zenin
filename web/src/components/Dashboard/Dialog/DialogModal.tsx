@@ -17,7 +17,7 @@ export default function DialogModal(props: DialogModalProps) {
     const { title, content, visible, onCancel } = props;
     const modalRef = useRef<HTMLDialogElement>(null);
 
-    const handleCancel = () => {
+    function cancel() {
         const modal = modalRef.current;
         if (!modal) return;
         modal.close();
@@ -35,7 +35,7 @@ export default function DialogModal(props: DialogModalProps) {
     return <dialog ref={modalRef} onCancel={onCancel} className="dialog_modal">
         <div className="dialog_modal_top">
             <span className="dialog_modal_title">{title}</span>
-            <Button onClick={handleCancel} icon={<span className="dialog_modal_close_icon">
+            <Button onClick={cancel} icon={<span className="dialog_close_icon">
                 <AddIcon />
             </span>}>
             </Button>

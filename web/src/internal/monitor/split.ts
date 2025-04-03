@@ -4,7 +4,7 @@ import { Measurement } from "../measurement";
 export class SplitState {
     constructor(
         /** The active pane. */
-        public pane: ViewPane | EditorPane | SettingsPane | null
+        public pane: ViewPane | EditorPane | SettingsPane | AccountsPane | null
     ) { }
 
     isViewPane(): this is { pane: ViewPane } {

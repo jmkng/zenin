@@ -1,6 +1,4 @@
-import { useAccountContext } from "@/internal/account";
-import { useDefaultMonitorService, useMonitorContext } from "@/internal/monitor";
-import { DataPacket, Timestamp } from "@/internal/server";
+import { useMonitorContext } from "@/hooks/useMonitor";
 
 import Button from "../../Button/Button";
 import DeselectIcon from "../../Icon/DeselectIcon";
@@ -11,46 +9,33 @@ import TrashIcon from "../../Icon/TrashIcon";
 
 import "./SelectMenu.css";
 
-export default function SelectMenu() {
-    const monitor = {
-        context: useMonitorContext(),
-        service: useDefaultMonitorService()
-    }
-    const account = useAccountContext();
+interface SelectProps {
+    onToggle: (active: boolean, id: number[]) => void;
+}
 
-    const handleToggle = async (active: boolean) => {
-        const monitors = [...monitor.context.state.selected.map(n => n.id!)];
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.toggleMonitor(token, monitors, active);
-        if (!extract.ok()) return;
+export default function SelectMenu(props: SelectProps) {
+    const { onToggle } = props;
 
-        const body: DataPacket<Timestamp> = await extract.json();
-        monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
-    }
-
-    const handleDelete = () => {
-        const monitors = monitor.context.state.selected;
-        monitor.context.dispatch({ type: 'queue', monitors });
-    }
+    const monitorContext= useMonitorContext();
 
     return <div className="select_menu menu">
         <div className="menu_left">
             <div className="menu_margin_right">
                 <Button
                     tooltip="Select All"
-                    onClick={() => monitor.context.dispatch({ 'type': 'select', monitor: "ALL" })}
+                    onClick={() => monitorContext.dispatch({ "type": "select", monitor: "ALL" })}
                     icon={<SelectIcon />}
                 />
             </div>
             <div className="menu_margin_right">
                 <Button
                     tooltip = "Clear Selection"
-                    onClick={() => monitor.context.dispatch({ type: 'select', monitor: 'NONE' })}
+                    onClick={() => monitorContext.dispatch({ type: "select", monitor: "NONE" })}
                     icon={<DeselectIcon />}
                 />
             </div>
-            {monitor.context.state.selected.length > 0
-                ? <span className="select_menu_count">{monitor.context.state.selected.length} Selected</span>
+            {monitorContext.state.selected.length > 0
+                ? <span className="select_menu_count">{monitorContext.state.selected.length} Selected</span>
                 : null}
         </div>
 
@@ -58,24 +43,24 @@ export default function SelectMenu() {
             <div className="menu_margin_right">
                 <Button
                     tooltip="Resume Selected"
-                    disabled={!monitor.context.state.selected.some(n => !n.active)}
+                    disabled={!monitorContext.state.selected.some(n => !n.active)}
                     icon={<PlayIcon />}
-                    onClick={() => handleToggle(true)}
+                    onClick={() => onToggle(true, monitorContext.state.selected.map(n => n.id))}
                     />
             </div>
             <div className="menu_margin_right">
                 <Button
                     tooltip="Pause Selected"
-                    disabled={!monitor.context.state.selected.some(n => n.active)}
+                    disabled={!monitorContext.state.selected.some(n => n.active)}
                     icon={<PauseIcon />}
-                    onClick={() => handleToggle(false)}
+                    onClick={() => onToggle(false, monitorContext.state.selected.map(n => n.id))}
                 />
             </div>
             <div onClick={(event) => event.stopPropagation()}>
                 <Button
                     tooltip="Delete Selected"
                     icon={<TrashIcon />}
-                    onClick={handleDelete}
+                    onClick={() =>  monitorContext.dispatch({ type: "queue", monitors: monitorContext.state.selected })}
                 />
             </div>
         </div>

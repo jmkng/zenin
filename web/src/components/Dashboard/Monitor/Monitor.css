@@ -24,23 +24,21 @@
     }
 
     .monitor_inactive_widget {
-        margin-right: 4px;
+        margin-right: 8px;
     }
     
-    .monitor_top_controls {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-    }
-
-    .monitor_dialog_button_container .button {
-        padding-right: 0;
-    }
-
     .monitor_top_upper {
         max-height: 38px;
         display: flex;
         flex: 1;
+        align-items: center;
+    }
+
+    .monitor_top_controls {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-start;
         align-items: center;
     }
 
@@ -49,7 +47,6 @@
         text-overflow: ellipsis;
         margin-right: 9px;
         overflow: hidden;
-        max-width: 100%;
         white-space: nowrap;
         cursor: default;
     }

@@ -19,7 +19,7 @@ export default function List(props: ListProps) {
     const listRef = useRef<HTMLDivElement>(null);
 
     return <div className="list_component" ref={listRef}>
-        <div className={["list_intro", data.length == 0 ? 'empty' : ''].join(' ')}>
+        <div className={["list_intro", data.length == 0 ? "empty" : ""].join(" ")}>
             <span className="list_intro_title">{title}</span>
         </div>
 
@@ -49,5 +49,5 @@ function Single({ item }: { item: string }) {
 }
 
 function isKeyValueItem(item: ListItem): item is KeyValueItem {
-    return typeof item === "object" && 'key' in item && 'value' in item;
+    return typeof item === "object" && "key" in item && "value" in item;
 }

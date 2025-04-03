@@ -1,35 +1,33 @@
 import { Account, Token } from ".";
 
 export interface AccountState {
-    initialized: boolean;
     /** A token representing the currently authenticated account. Null when unauthenticated. */
     token: Token | null
     accounts: Account[]
 }
 
 export const accountDefault: AccountState = {
-    initialized: false,
     token: null,
     accounts: []
 }
 
 /** Reset the state. */
-type ResetAction = { type: 'reset', accounts: Account[] };
+type ResetAction = { type: "reset", accounts: Account[] };
 
 /** Log in. */
-type LoginAction = { type: 'login', token: string };
+type LoginAction = { type: "login", token: string };
 
 /** Log out. */
-type LogoutAction = { type: 'logout' };
+type LogoutAction = { type: "logout" };
 
 /** Update an account. */
-type UpdateAction = { type: 'update', id: number, username: string, updatedAt: string };
+type UpdateAction = { type: "update", id: number, username: string, updatedAt: string };
 
 /** Delete an account. */
-type DeleteAction = { type: 'delete', id: number };
+type DeleteAction = { type: "delete", id: number };
 
 /** Add an account. */
-type CreateAction = { type: 'create', account: Account };
+type CreateAction = { type: "create", account: Account };
 
 export type AccountAction =
     | LoginAction
@@ -41,18 +39,16 @@ export type AccountAction =
 
 const loginAction = (state: AccountState, action: LoginAction): AccountState => {
     const raw = action.token;
-    const header = JSON.parse(window.atob(raw.split('.')[0]));
-    const payload = JSON.parse(window.atob(raw.split('.')[1]));
+    const header = JSON.parse(window.atob(raw.split(".")[0]));
+    const payload = JSON.parse(window.atob(raw.split(".")[1]));
     const token: Token = { raw, header, payload };
-    const initialized = true;
-    return { ...state, initialized, token };
+    return { ...state, token };
 }
 
 const logoutAction = (state: AccountState): AccountState => {
-    const initialized = true;
     const token = null;
     const accounts: Array<Account> = [];
-    return { ...state, initialized, token, accounts };
+    return { ...state, token, accounts };
 }
 
 const resetAction = (state: AccountState, action: ResetAction): AccountState => {

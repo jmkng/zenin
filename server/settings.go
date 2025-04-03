@@ -43,12 +43,12 @@ func (a SettingsProvider) Mux() http.Handler {
 	//// private /////
 	router.Group(func(private chi.Router) {
 		private.Use(Authenticate)
-		router.Get("/", a.HandleGetSettings)
-		router.Get("/themes", a.HandleGetThemes)
-		router.Get("/themes/active", a.HandleGetActiveTheme)
-		router.Post("/", a.HandleUpdateSettings)
+		private.Get("/", a.HandleGetSettings)
+		private.Get("/themes", a.HandleGetThemes)
+		private.Post("/", a.HandleUpdateSettings)
 	})
 	//////////////////
+	router.Get("/themes/active", a.HandleGetActiveTheme)
 
 	return router
 }

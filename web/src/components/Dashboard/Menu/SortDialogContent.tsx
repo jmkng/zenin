@@ -15,32 +15,32 @@ export default function SortDialogContent(props: SortDialogContentProps) {
     return <div className="sort_dialog_content dialog_content">
         <div className="sort_dialog_section dialog_section">
             <Button
-                disabled={filter == 'NAME_ASC'}
-                onClick={() => onFilterChange('NAME_ASC')}
-                icon={filter === 'NAME_ASC' ? <CheckIcon /> : null}
+                disabled={filter == "NAME_ASC"}
+                onClick={() => onFilterChange("NAME_ASC")}
+                icon={filter === "NAME_ASC" ? <CheckIcon /> : null}
             >
                 {NAME_ASC_UI}
             </Button>
             <Button
-                disabled={filter == 'NAME_DESC'}
-                onClick={() => onFilterChange('NAME_DESC')}
-                icon={filter === 'NAME_DESC' ? <CheckIcon /> : null}
+                disabled={filter == "NAME_DESC"}
+                onClick={() => onFilterChange("NAME_DESC")}
+                icon={filter === "NAME_DESC" ? <CheckIcon /> : null}
             >
                 {NAME_DESC_UI}
             </Button>
         </div>
         <div className="sort_dialog_section dialog_section">
             <Button
-                disabled={filter == 'UPDATED_NEW'}
-                onClick={() => onFilterChange('UPDATED_NEW')}
-                icon={filter === 'UPDATED_NEW' ? <CheckIcon /> : null}
+                disabled={filter == "UPDATED_NEW"}
+                onClick={() => onFilterChange("UPDATED_NEW")}
+                icon={filter === "UPDATED_NEW" ? <CheckIcon /> : null}
             >
                 {UPDATED_NEW_UI}
             </Button>
             <Button
-                disabled={filter == 'UPDATED_OLD'}
-                onClick={() => onFilterChange('UPDATED_OLD')}
-                icon={filter === 'UPDATED_OLD' ? <CheckIcon /> : null}
+                disabled={filter == "UPDATED_OLD"}
+                onClick={() => onFilterChange("UPDATED_OLD")}
+                icon={filter === "UPDATED_OLD" ? <CheckIcon /> : null}
             >
                 {UPDATED_OLD_UI}
             </Button>

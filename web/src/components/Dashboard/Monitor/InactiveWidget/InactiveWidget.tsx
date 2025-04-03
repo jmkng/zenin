@@ -4,13 +4,12 @@ import "./InactiveWidget.css";
 
 interface InactiveWidgetProps {
     active: boolean;
-    onClick: () => void;
 }
 
 export default function InactiveWidget(props: InactiveWidgetProps) {
-    const { active, onClick } = props;
+    const { active } = props;
 
-    return <div className="widget inactive_widget" onClick={onClick} data-active={active}>
+    return <div className="widget inactive_widget" data-active={active}>
         <EyeIcon hide={active} />
     </div>
 }

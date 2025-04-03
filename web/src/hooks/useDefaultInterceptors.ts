@@ -1,19 +1,17 @@
-import { useAccountContext } from "@/internal/account";
-import { useDefaultAccountService } from "@/internal/account/service";
+import { clearLSToken } from "@/internal/account";
 import { Extract, Interceptor } from "@/internal/server";
 import { useNavigate } from "react-router-dom";
+import { useAccountContext } from "./useAccount";
 
 export const useDefaultInterceptors = () => {
-    const account = {
-        service: useDefaultAccountService(),
-        context: useAccountContext()
-    }
+    const context = useAccountContext();
     const navigate = useNavigate();
+
     const redirect = (extract: Extract) => {
         if (extract.unauthorized()) {
-            account.service.clearLSToken();                         // 1. Clear old token.
-            account.context.dispatch({ type: 'logout' })            // 2. Update the state.
-            navigate("/login")                                      // 3. Redirect.
+            clearLSToken();                         // 1. Clear old token.
+            context.dispatch({ type: "logout" })    // 2. Update the state.
+            navigate("/login")                      // 3. Redirect.
         }
     }
     const logger = (extract: Extract) => {
@@ -21,5 +19,6 @@ export const useDefaultInterceptors = () => {
             console.error(`interceptor received failed extract: status=${extract.response.status}`);
         }
     }
+    
     return [redirect, logger] as Interceptor[];
 }

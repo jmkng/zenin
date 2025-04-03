@@ -1,7 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "@/internal/account";
-import { useDefaultAccountService } from "@/internal/account/service";
-import { useMonitorContext } from "@/internal/monitor";
+import { useAccountContext } from "@/hooks/useAccount";
+import { useLogout } from "@/hooks/useLogout";
+import { useMonitorContext } from "@/hooks/useMonitor";
 
 import Button from "../../Button/Button";
 import AccountIcon from "../../Icon/AccountIcon";
@@ -11,46 +10,37 @@ import SettingsIcon from "../../Icon/SettingsIcon";
 import "./ActionMenuContent.css";
 
 export default function ActionMenuContent() {
-    const account = {
-        context: useAccountContext(),
-        service: useDefaultAccountService()
-    }
-    const monitor = { context: useMonitorContext() };
-    const navigate = useNavigate();
+    const accountContext = useAccountContext();
+    const monitorContext = useMonitorContext();
 
-    const handleLogout = () => {
-        account.service.clearLSToken();
-        account.context.dispatch({ type: 'logout' });
-        monitor.context.dispatch({ type: 'logout' });
-        navigate("/login");
-    }
+    const logout = useLogout();
 
-    const handleAccountPane = () => {
-        monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } });
+    function openAccountPane () {
+        monitorContext.dispatch({ type: "pane", pane: { type: "accounts" } });
     }
 
     return <div className="action_menu_dialog_content dialog_content">
         <div className="action_menu_dialog_section dialog_section">
             <div className="action_menu_dialog_name">
-                {account.context.state.token?.payload.username}
+                {accountContext.state.token?.payload.username}
             </div>
         </div>
         <div className="action_menu_dialog_section dialog_section">
-            {account.context.state.token?.payload.root
-                ? <Button onClick={handleAccountPane} icon={<AccountIcon />}>
+            {accountContext.state.token?.payload.root
+                ? <Button onClick={openAccountPane} icon={<AccountIcon />}>
                     Manage Accounts
                 </Button>
-                : <Button onClick={handleAccountPane} icon={<AccountIcon />}>
+                : <Button onClick={openAccountPane} icon={<AccountIcon />}>
                     Edit Account
                 </Button>}
             <Button
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'settings' } })}
+                onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "settings" } })}
                 icon={<SettingsIcon />}
             >
                 Settings
             </Button>
             <Button
-                onClick={handleLogout}
+                onClick={logout}
                 kind="destructive"
                 icon={<span className="action_menu_log_out_icon">
                     <AddIcon />

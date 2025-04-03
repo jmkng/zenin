@@ -14,16 +14,16 @@ interface ArrayInputProps {
 export default function ArrayInput(props: ArrayInputProps) {
     const { name, value, label, onChange } = props;
 
-    const handleInputChange = (index: number, updated: string) => {
+    function changeIndex(index: number, updated: string) {
         const state = [...value];
         state[index] = updated;
         onChange(state);
-    };
+    }
 
-    const handleDelete = (index: number) => {
+    function deleteIndex(index: number) {
         const state = value.filter((_, i) => i !== index);
         onChange(state);
-    };
+    }
 
     return <div className="array_input input_container">
         {label
@@ -39,11 +39,11 @@ export default function ArrayInput(props: ArrayInputProps) {
             <TextInput
                 name={name}
                 value={value}
-                onChange={value => handleInputChange(index, value ?? "")}
+                onChange={value => changeIndex(index, value ?? "")}
             />
             <div onDragOver={e => e.preventDefault()} className="array_input_delete">
                 <Button
-                    onClick={() => handleDelete(index)}
+                    onClick={() => deleteIndex(index)}
                     border={true}
                     kind="destructive"
                 >
@@ -58,7 +58,7 @@ export default function ArrayInput(props: ArrayInputProps) {
         <Button
             disabled={false}
             border={true}
-            onClick={() => onChange([...value, ''])}
+            onClick={() => onChange([...value, ""])}
         >
             Add Row
         </Button>

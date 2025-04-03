@@ -1,4 +1,4 @@
-import { useMonitorContext } from "@/internal/monitor";
+import { useMonitorContext } from "@/hooks/useMonitor";
 import { ViewPane } from "@/internal/monitor/split";
 
 import Button from "../../Button/Button";
@@ -15,7 +15,8 @@ interface InfoProps {
 
 export default function Info(props: InfoProps) {
     const { state } = props;
-    const monitor = { context: useMonitorContext() }
+
+    const monitorContext = useMonitorContext();
 
     return <div className="info_component">
         <div className="detail_body">
@@ -47,13 +48,13 @@ export default function Info(props: InfoProps) {
         <div className="detail_controls">
             <Button
                 kind="primary"
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: state.monitor } })}
+                onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: state.monitor } })}
             >
                 <span>Edit</span>
             </Button>
             <Button
                 border={true}
-                onClick={() => monitor.context.dispatch({ type: 'queue', monitors: [state.monitor!] })}
+                onClick={() => monitorContext.dispatch({ type: "queue", monitors: [state.monitor] })}
                 kind="destructive"
             >
                 Delete
@@ -61,7 +62,7 @@ export default function Info(props: InfoProps) {
             <div className="detail_controls_delete">
                 <Button
                     border={true}
-                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'view', target: null } })}
+                    onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "view", target: null } })}
                 >
                     <span>Close</span>
                 </Button>

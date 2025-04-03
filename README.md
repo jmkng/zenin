@@ -280,6 +280,10 @@ You can use your browser's [developer tools](https://developer.mozilla.org/en-US
 | `--pane-background` | Pane background color.
 | `--pane-controls-border-color` | Pane controls window border color.
 | `--pane-controls-background` | Pane controls window background color.
+| `--notification-background` | Toast notification background color.
+| `--notification-border-color` | Toast notification border color.
+| `--notification-progress-color` | Toast notification progress bar color.
+| `--notification-progress-border-color` | Toast notification progress bar border color.
 
 ## Environment Variables
 

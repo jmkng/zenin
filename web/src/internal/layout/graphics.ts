@@ -1,15 +1,15 @@
 export function hideLoadingScreen() {
-    document.body.style.overflow = 'auto';
-    document.body.style.background = 'initial';
-    const cover = document.querySelector('#cover') as HTMLDivElement | null;
-    if (cover) cover.style.display = 'none';
+    document.body.style.overflow = "auto";
+    document.body.style.background = "initial";
+    const cover = document.querySelector("#cover") as HTMLDivElement | null;
+    if (cover) cover.style.display = "none";
 }
 
 export function showLoadingScreen() {
-    document.body.style.overflow = 'hidden';
-    document.body.style.background = 'var(--bg);';
-    const cover = document.querySelector('#cover') as HTMLDivElement | null;
-    if (cover) cover.style.display = 'flex';
+    document.body.style.overflow = "hidden";
+    document.body.style.background = "var(--bg);";
+    const cover = document.querySelector("#cover") as HTMLDivElement | null;
+    if (cover) cover.style.display = "flex";
 }
 
 export const MINIMAL_FORMAT = "MINIMAL"
@@ -30,8 +30,8 @@ export function formatUTCDate(value: string, format: TimeFormatKind = FULL_FORMA
 
     const formatter = new Intl.DateTimeFormat(undefined, {
         ...(format === MINIMAL_FORMAT && isToday
-            ? { hour: 'numeric', minute: 'numeric' }
-            : { day: '2-digit', month: '2-digit', year: '2-digit', hour: 'numeric', minute: 'numeric' }
+            ? { hour: "numeric", minute: "numeric" }
+            : { day: "2-digit", month: "2-digit", year: "2-digit", hour: "numeric", minute: "numeric" }
         ),
     });
 

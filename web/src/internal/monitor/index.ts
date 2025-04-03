@@ -1,24 +1,22 @@
-import { useContext } from "react";
 import { Measurement } from "../measurement";
-import MonitorProvider, { MonitorContext, MonitorDispatchContext } from "./context";
+import MonitorProvider from "./context";
 import { MonitorState } from "./reducer";
-import { useDefaultMonitorService } from "./service";
 
 export const
-    HTTP_UI = 'HTTP',
-    ICMP_UI = 'ICMP',
-    TCP_UI = 'TCP',
-    PLUGIN_UI = 'Plugin',
-    OK_UI = 'Ok',
-    WARN_UI = 'Warn',
-    DEAD_UI = 'Dead',
-    OFF_UI = 'Off',
-    ACTIVE_UI = 'Active',
-    INACTIVE_UI = 'Inactive',
-    NAME_ASC_UI = 'Name (A-Z)',
-    NAME_DESC_UI = 'Name (Z-A)',
-    UPDATED_NEW_UI = 'Updated (New)',
-    UPDATED_OLD_UI = 'Updated (Old)'
+    HTTP_UI = "HTTP",
+    ICMP_UI = "ICMP",
+    TCP_UI = "TCP",
+    PLUGIN_UI = "Plugin",
+    OK_UI = "Ok",
+    WARN_UI = "Warn",
+    DEAD_UI = "Dead",
+    OFF_UI = "Off",
+    ACTIVE_UI = "Active",
+    INACTIVE_UI = "Inactive",
+    NAME_ASC_UI = "Name (A-Z)",
+    NAME_DESC_UI = "Name (Z-A)",
+    UPDATED_NEW_UI = "Updated (New)",
+    UPDATED_OLD_UI = "Updated (Old)"
     ;
 
 export type FilterKind =
@@ -72,11 +70,11 @@ export interface Event {
 // eslint-disable-next-line
 export function isMonitor(obj: any): obj is Monitor {
     return obj &&
-        Object.hasOwn(obj, 'name') && typeof obj.name === 'string' &&
-        Object.hasOwn(obj, 'kind') && typeof obj.kind === 'string' &&
-        Object.hasOwn(obj, 'active') && typeof obj.active == 'boolean' &&
-        Object.hasOwn(obj, 'interval') && typeof obj.interval === 'number' &&
-        Object.hasOwn(obj, 'timeout') && typeof obj.timeout === 'number'
+        Object.hasOwn(obj, "name") && typeof obj.name === "string" &&
+        Object.hasOwn(obj, "kind") && typeof obj.kind === "string" &&
+        Object.hasOwn(obj, "active") && typeof obj.active == "boolean" &&
+        Object.hasOwn(obj, "interval") && typeof obj.interval === "number" &&
+        Object.hasOwn(obj, "timeout") && typeof obj.timeout === "number"
 }
 
 export function isArrayEqual(a1: any[] | null, a2: any[] | null): boolean {
@@ -134,12 +132,6 @@ export function isMonitorEqual(a: Monitor, b: Monitor): boolean {
         && eveq(a.events, b.events)
 }
 
-export const useMonitorContext = () => {
-    const state = useContext(MonitorContext);
-    const dispatch = useContext(MonitorDispatchContext);
-    if (!state || !dispatch) throw new Error('monitor context must be used within provider');
-    return { state, dispatch }
-}
-
-export { MonitorProvider, useDefaultMonitorService };
+export { MonitorProvider };
 export type { MonitorState };
+

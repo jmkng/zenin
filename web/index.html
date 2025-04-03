@@ -5,14 +5,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <style>
+        @layer globals, base, helpers, components;
+    </style>
+
     <script>
-        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
         const update = () => {
-            if (mq.matches) document.documentElement.setAttribute('prefers-dark', '');
-            else document.documentElement.removeAttribute('prefers-dark');
+            if (mq.matches) document.documentElement.setAttribute("prefers-dark", "");
+            else document.documentElement.removeAttribute("prefers-dark");
         };
         update();
-        mq.addEventListener('change', update);
+        mq.addEventListener("change", update);
     </script>
 
     <link rel="icon" href="/favicon.ico" />

@@ -15,3 +15,8 @@
     color: var(--secondary-color, var(--primary-color));
     margin: 0 0 6px 0;
 }
+
+.detail_validation {
+    display: block;
+    margin-top: 9px;
+}

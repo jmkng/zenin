@@ -11,6 +11,7 @@
 
     .account_rank {
         color: var(--secondary-color, var(--primary-color));
+        margin-right: 8px;
     }
 
     .account:not(:last-of-type) {
@@ -33,21 +34,7 @@
         align-items: center;
     }
 
-    .account_message_container {
-        margin-top: 6px;
-    }
-
-    .account_message {
-        border: 1px solid var(--primary-color);
-        border-radius: 4px;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .account_message.error {
+    .accounts_message.error {
         color: var(--failure-color);
-        border-color: var(--failure-color);
     }
 }

@@ -11,13 +11,14 @@ interface PairListInputProps {
     label?: string | React.ReactNode;
     value: PairListValue;
     allowMultipleRows?: boolean;
+    
     onChange: (value: PairListValue) => void;
 }
 
 export default function PairListInput(props: PairListInputProps) {
     const { name, label, value, allowMultipleRows = true, onChange } = props;
 
-    const handleUpdate = (index: number, kind: "key" | "value", updated: string) => {
+    function updateIndex(index: number, kind: "key" | "value", updated: string) {
         const state = [...value];
         const array = state[index];
         if (kind == "key") array.key = updated;
@@ -25,7 +26,7 @@ export default function PairListInput(props: PairListInputProps) {
         onChange(state);
     };
 
-    const handleDelete = (index: number) => {
+    function deleteIndex(index: number) {
         if (!allowMultipleRows) return;
         const state = value.filter((_, i) => i !== index);
         onChange(state);
@@ -46,20 +47,20 @@ export default function PairListInput(props: PairListInputProps) {
                 <TextInput
                     name={`${name}_key_${index}`}
                     value={key}
-                    onChange={value => handleUpdate(index, "key", value ?? "")}
+                    onChange={value => updateIndex(index, "key", value ?? "")}
                 />
             </div>
             <div className="pair_list_value_input">
                 <TextInput
                     name={`${name}_value_${index}`}
                     value={value}
-                    onChange={value => handleUpdate(index, "value", value ?? "")}
+                    onChange={value => updateIndex(index, "value", value ?? "")}
                 />
             </div>
             {allowMultipleRows
                 ? <div className="pair_list_input_delete">
                     <Button
-                        onClick={() => handleDelete(index)}
+                        onClick={() => deleteIndex(index)}
                         border={true}
                         kind="destructive"
                     >

@@ -11,10 +11,9 @@
     }
 
     .input_label.toggle_input_label {
+        display: flex ;
+        align-items: center;
         margin-bottom: 0;
-    }
-
-    .toggle_input_label {
         width: 100%;
     }
 

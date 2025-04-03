@@ -1,9 +1,9 @@
+import { useAccount } from "@/hooks/useAccount";
+import { useLayoutContext } from "@/hooks/useLayout";
+import { setLSToken } from "@/internal/account";
+import { DataPacket, isErrorPacket } from "@/internal/server";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAccountContext } from "@/internal/account";
-import { useDefaultAccountService } from "@/internal/account/service";
-import { useLayoutContext } from "@/internal/layout";
-import { DataPacket, isErrorPacket } from "@/internal/server";
 
 import Button from "../Button/Button";
 import LogoIcon from "../Icon/LogoIcon";
@@ -12,59 +12,74 @@ import TextInput from "../Input/TextInput/TextInput";
 import "./Login.css";
 
 export default function Login() {
-    const account = {
-        service: useDefaultAccountService(),
-        context: useAccountContext()
-    };
-    const layout = useLayoutContext();
+    const { service: accountService, context: accountContext } = useAccount();
+    const layoutContext = useLayoutContext();
     const navigate = useNavigate();
 
     const [editor, setEditor] = useState<LoginState>(defaults);
     const [errors, setErrors] = useState<string[]>([]);
     const [isClaimed, setIsClaimed] = useState<boolean | null>(null);
 
-    const hasValidPasswords = useMemo(() => isClaimed ? true : editor.password == editor.passwordConfirm, [isClaimed, editor.password, editor.passwordConfirm])
-    const canSave: boolean = useMemo(() => hasValidPasswords, [hasValidPasswords])
+    const hasValidPasswords = useMemo(() => isClaimed ? true : editor.password == editor.passwordConfirm, [isClaimed, editor.password, editor.passwordConfirm]);
+    const hasValidPasswordConfirm = useMemo(() => editor.password == editor.passwordConfirm, [editor.password, editor.passwordConfirm]);
+    const canSave: boolean = useMemo(() => hasValidPasswords, [hasValidPasswords]);
 
     useEffect(() => {
         (async () => {
-            const extract = await account.service.getClaimed();
-            if (!extract.ok()) return;
-            const packet: DataPacket<{claimed: boolean}> = await extract.json();
-            setIsClaimed(packet.data.claimed);
+            let claimed = true;
+            
+            const extract = await accountService.getClaimed();
+            if (extract.ok()) {
+                const packet: DataPacket<{claimed: boolean}> = await extract.json();
+                claimed = packet.data.claimed;
+            };
+            
+            setIsClaimed(claimed);
+            layoutContext.dispatch({ type: "load", loading: false })
         })()
     }, [])
 
     useEffect(() => {
-        if (isClaimed === null) return;
-        layout.dispatch({ type: 'load', loading: false })
-    }, [isClaimed])
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submit();
+            }
+        };
+    
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [submit])
 
-    const handleSubmit = async () => {
-        if (isClaimed === null || !handleFormValidate()) return;
+    async function submit() {
+        if (isClaimed === null || !validateForm()) return;
 
         const username = editor.username || "";
         const password = editor.password || "";
-        layout.dispatch({ type: 'load', loading: true });
+        layoutContext.dispatch({ type: "load", loading: true });
 
         const extract = isClaimed
-            ? await account.service.authenticate(username, password)
-            : await account.service.setClaimed(username, password)
+            ? await accountService.authenticate(username, password)
+            : await accountService.setClaimed(username, password)
 
         const packet: DataPacket<{token: string}> = await extract.json();
         if (!extract.ok()) {
-            handleFailure(packet);
+            if (isErrorPacket(packet)) setErrors(packet.errors);
+            layoutContext.dispatch({ type: "load", loading: false });
             return;
         }
 
         const token = packet.data.token;
-        account.service.setLSToken(token);
-        account.context.dispatch({ type: 'login', token });
+        setLSToken(token);
+        accountContext.dispatch({ type: "login", token });
+
         setErrors([]);
-        navigate("/login");
+        navigate("/");
     }
 
-    const handleFormValidate = () => {
+    function validateForm() {
         let result = true;
         if (isClaimed === null) return;
         if (isClaimed === false && (editor.password != editor.passwordConfirm)) {
@@ -74,25 +89,17 @@ export default function Login() {
         return result;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleFailure = (packet: any) => {
-        if (isErrorPacket(packet)) setErrors(packet.errors);
-        else setErrors(["An internal server error has occurred. Try again."]);
-        layout.dispatch({ type: 'load', loading: false });
-    }
-
     // TODO: Documentation
     const warning = <div className="login_message">
         <span>You are logging in to an <a href="#">unclaimed</a> Zenin server. This action will create the first account on the server.</span>
     </div>
 
     const login = <div className="login">
-        <header className="login_header">
-        </header>
         <div className="login_logo_container">
             <LogoIcon />
         </div>
-        <div className="login_form_container">
+
+        <div className="login_container">
             <div className="login_spaced">
                 <TextInput
                     name="login_username"
@@ -113,16 +120,20 @@ export default function Login() {
                 <div className="login_spaced">
                     <TextInput
                         name="login_password_confirm"
-                        label="Confirm Password"
+                        label={<span className={hasValidPasswords ? "" : "h_c-dead-a"}>Confirm Password</span>}
                         type="password"
                         value={editor.passwordConfirm}
-                        onChange={(confirm: string | null) => setEditor(prev => ({ ...prev, passwordConfirm: confirm }))} />
+                        onChange={(confirm: string | null) => setEditor(prev => ({ ...prev, passwordConfirm: confirm }))} 
+                    />
+                    {!hasValidPasswordConfirm
+                    ? <span className="detail_validation h_c-dead-a">Passwords do not match.</span>
+                    : null}
                 </div>
                 : null}
             <div className="login_controls">
                 <Button
                     kind="primary"
-                    onClick={handleSubmit}
+                    onClick={submit}
                     disabled={!canSave}
                 >{isClaimed !== null && isClaimed === true ? "Submit" : "Claim"}
                 </Button>

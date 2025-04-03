@@ -1,26 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useAccountContext } from "@/hooks/useAccount";
+import { useMonitor } from "@/hooks/useMonitor";
+import { useNotify } from "@/hooks/useNotify";
+import { Measurement } from "@/internal/measurement";
 import {
     ACTIVE_UI,
     Event,
     HTTP_UI,
     ICMP_UI,
     INACTIVE_UI,
+    isMonitor,
     isMonitorEqual,
     Monitor,
     PairListValue,
     PLUGIN_UI,
     TCP_UI,
-    useMonitorContext
 } from "@/internal/monitor";
 import { EditorPane } from "@/internal/monitor/split";
 import {
     CLIENTERROR_API,
+    CreatedTimestamp,
+    DataPacket,
     DELETE_API,
     GET_API,
     HEAD_API,
     HTTP_API,
     ICMP_API,
     INFORMATIONAL_API,
+    isErrorPacket,
     OFF_API,
     OPTIONS_API,
     PATCH_API,
@@ -31,6 +39,7 @@ import {
     SERVERERROR_API,
     SUCCESSFUL_API,
     TCP_API,
+    Timestamp,
     UDP_API
 } from "@/internal/server";
 
@@ -49,20 +58,27 @@ import "./Editor.css";
 
 interface EditorProps {
     state: EditorPane
-    onChange: (target: Monitor) => void;
 }
 
 export default function Editor(props: EditorProps) {
-    const { state, onChange } = props;
-    const monitor = {
-        context: useMonitorContext(),
-    }
+    const { state } = props;
 
-    const base = useMemo(() => reset(state.monitor, monitor.context.state.plugins), [state.monitor]);
+    const { service: monitorService, context: monitorContext } = useMonitor();
+    const accountContext = useAccountContext();
+    const notify = useNotify();
+
+    const base = useMemo(() => reset(state.monitor, monitorContext.state.plugins), [state.monitor]);
     const [editor, setEditor] = useState<EditorState>(split(base))
     const [isViewingEvents, setIsViewingEvents] = useState<boolean>(false);
+    const [errors, setErrors] = useState<string[]>([]);
+
+    const errorsContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => setEditor(prev => ({ ...prev, ...split(base) })), [base])
+
+    useEffect(() => {
+        if (errors.length > 0) errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
+    }, [errors]);
 
     useEffect(() => {
         if (!state.monitor) return;
@@ -80,6 +96,44 @@ export default function Editor(props: EditorProps) {
     const hasValidIcmpCount = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpCount), [editor.draft.icmpCount]);
     const hasValidIcmpTtl = useMemo(() => isValidNonZeroWholeNumber(editor.draft.icmpTtl), [editor.draft.icmpTtl]);
     const canSave = useMemo(() => !isMonitorEqual(editor.draft as Monitor, editor.original as Monitor) && isValidMonitor(editor.draft), [editor])
+    
+    function save() {
+        const sanitized: Monitor = sanitize(editor.draft);
+        sanitized.id != null && isMonitor(sanitized) ? updateMonitor(sanitized) : createMonitor(sanitized)
+    }
+    
+    async function createMonitor(value:Monitor) {
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.createMonitor(token, value);
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) setErrors(body.errors);
+            return
+        };
+
+        const body: DataPacket<CreatedTimestamp> = await extract.json();
+        value.createdAt = body.data.time;
+        value.updatedAt = body.data.time;
+        const measurements: Measurement[] = [];
+        const full: Monitor = { ...value, id: body.data.id, measurements }
+        monitorContext.dispatch({ type: "update", monitor: full })
+        notify("Monitor created.");
+    }
+
+    async function updateMonitor(value: Monitor) {
+        const token = accountContext.state.token!.raw;
+        const extract = await monitorService.updateMonitor(token, value.id, value);
+        if (!extract.ok()) {
+            const body = await extract.json();
+            if (isErrorPacket(body)) setErrors(body.errors);
+            return
+        };
+
+        const body: DataPacket<Timestamp> = await extract.json();
+        value.updatedAt = body.data.time;
+        monitorContext.dispatch({ type: "update", monitor: value })
+        notify("Monitor updated.");
+    }
 
     // Check if the ICMP probe values might cause the operation to exceed the timeout.
     const hasValidIcmpTime = useMemo(() => {
@@ -90,9 +144,9 @@ export default function Editor(props: EditorProps) {
         return icmpCount * icmpWait / 1000 < timeout;
     }, [editor.draft.icmpWait, editor.draft.icmpCount, editor.draft.timeout, editor.draft.kind]);
 
-    type eventFields = 'pluginName' | 'pluginArgs' | 'threshold';
+    type eventFields = "pluginName" | "pluginArgs" | "threshold";
 
-    const handleUpdateEvent = (index: number, field: eventFields, value: any) => {
+    function updateEventIndex(index: number, field: eventFields, value: any) {
         setEditor(prev => ({
             ...prev,
             draft: {
@@ -102,7 +156,7 @@ export default function Editor(props: EditorProps) {
         }));
     };
 
-    const handleDeleteEvent = (index: number) => {
+    function deleteEventIndex(index: number) {
         setEditor(prev => {
             const events = prev.draft.events!.filter((_, i) => i !== index);
             return { ...prev, draft: { ...prev.draft, events } }
@@ -110,7 +164,7 @@ export default function Editor(props: EditorProps) {
     };
 
     const monitorTab = <>
-        <div className="h_mb-c">
+        <div className="h_mt-c">
             <TextInput
                 label={<span className={hasValidName ? "" : "h_c-dead-a"}>Name</span>}
                 name="detail_monitor_name"
@@ -125,7 +179,7 @@ export default function Editor(props: EditorProps) {
                 null}
         </div>
 
-        <div className="h_mb-c">
+        <div className="h_mt-c">
             <TextAreaInput
                 label="Description"
                 name="detail_monitor_description"
@@ -136,7 +190,7 @@ export default function Editor(props: EditorProps) {
             />
         </div>
 
-        <div className="h_mb-c">
+        <div className="h_mt-c">
             <SelectInput
                 name="detail_monitor_active"
                 value={editor.draft.active.toString()}
@@ -147,12 +201,12 @@ export default function Editor(props: EditorProps) {
                     { value: "false", text: INACTIVE_UI }
                 ]}
                 onChange={value =>
-                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === 'true' } }))
+                    setEditor(prev => ({ ...prev, draft: { ...prev.draft, active: value === "true" } }))
                 }
             />
         </div>
 
-        <div className="h_mb-c">
+        <div className="h_mt-c">
             <NumberInput
                 label={<span className={hasValidInterval ? "" : "h_c-dead-a"}>Interval</span>}
                 name="detail_monitor_interval"
@@ -167,7 +221,7 @@ export default function Editor(props: EditorProps) {
                 null}
         </div>
 
-        <div className="h_mb-c">
+        <div className="h_mt-c">
             <NumberInput
                 label={<span className={!hasValidTimeout ? "h_c-dead-a" : !hasValidIcmpTime ? "h_c-warn" : ""}>Timeout</span>}
                 name="detail_monitor_timeout"
@@ -183,7 +237,7 @@ export default function Editor(props: EditorProps) {
                     : null}
         </div>
 
-        <div className="h_mb-c detail_kind_container">
+        <div className="h_mt-c detail_kind_container">
             <SelectInput
                 label="Kind"
                 name="detail_monitor_kind"
@@ -198,14 +252,14 @@ export default function Editor(props: EditorProps) {
                 onChange={kind => setEditor(prev => ({
                     ...prev, draft: {
                         ...prev.draft, kind,
-                        pluginName: kind == PLUGIN_API ? prev.draft.pluginName || monitor.context.state.plugins[0] : null
+                        pluginName: kind == PLUGIN_API ? prev.draft.pluginName || monitorContext.state.plugins[0] : null
                     }
                 }))}
             />
         </div>
 
         {editor.draft.kind == HTTP_API || editor.draft.kind == ICMP_API || editor.draft.kind == TCP_API ?
-            <div className="h_mb-c detail_remote_address_container">
+            <div className="h_mt-c detail_remote_address_container">
                 <TextInput
                     label={<span className={hasValidRemoteAddress ? "" : "h_c-dead-a"}>Remote Address</span>}
                     name="detail_monitor_remote_address"
@@ -223,7 +277,7 @@ export default function Editor(props: EditorProps) {
             null}
 
         {editor.draft.kind == TCP_API ?
-            <div className="h_mb-c detail_remote_port_container">
+            <div className="h_mt-c detail_remote_port_container">
                 <NumberInput
                     label={<span className={hasValidRemotePort ? "" : "h_c-dead-a"}>Remote Port</span>}
                     name="detail_monitor_remote_port"
@@ -241,7 +295,7 @@ export default function Editor(props: EditorProps) {
 
         {editor.draft.kind == HTTP_API ?
             <div>
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <PairListInput
                         label="Request Headers"
                         name="detail_monitor_http_request_headers"
@@ -250,7 +304,7 @@ export default function Editor(props: EditorProps) {
                     />
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <TextAreaInput
                         label="Request Body"
                         name="detail_monitor_http_body"
@@ -261,7 +315,7 @@ export default function Editor(props: EditorProps) {
                     />
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <SelectInput
                         label="Method"
                         name="detail_monitor_method"
@@ -280,7 +334,7 @@ export default function Editor(props: EditorProps) {
                     />
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <SelectInput
                         label="Header Range"
                         name="detail_monitor_range"
@@ -297,7 +351,7 @@ export default function Editor(props: EditorProps) {
                     />
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <ToggleInput
                         name={"detail_capture_header"}
                         label="Capture Response Headers"
@@ -305,7 +359,7 @@ export default function Editor(props: EditorProps) {
                         onChange={httpCaptureHeaders => setEditor(prev => ({ ...prev, draft: { ...prev.draft, httpCaptureHeaders } }))}
                     />
                 </div>
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <ToggleInput
                         name={"detail_capture_body"}
                         label="Capture Response Body"
@@ -319,7 +373,7 @@ export default function Editor(props: EditorProps) {
 
         {editor.draft.kind == ICMP_API ?
             <>
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <ToggleInput
                         name={"detail_"}
                         label="Use UDP Protocol"
@@ -334,7 +388,7 @@ export default function Editor(props: EditorProps) {
                     />
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <NumberInput
                         label={<span className={hasValidIcmpSize ? "" : "h_c-dead-a"}>Packet Size</span>}
                         name="detail_monitor_icmp_size"
@@ -348,7 +402,7 @@ export default function Editor(props: EditorProps) {
                         null}
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <NumberInput
                         label={<span className={!hasValidIcmpWait ? "h_c-dead-a" : !hasValidIcmpTime ? "h_c-warn" : ""}>Packet Wait</span>}
                         name="detail_monitor_icmp_wait"
@@ -362,7 +416,7 @@ export default function Editor(props: EditorProps) {
                         null}
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <NumberInput
                         label={<span className={!hasValidIcmpCount ? "h_c-dead-a" : !hasValidIcmpTime ? "h_c-warn" : ""}>Packet Count</span>}
                         name="detail_monitor_icmp_count"
@@ -376,7 +430,7 @@ export default function Editor(props: EditorProps) {
                         null}
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <NumberInput
                         label={<span className={hasValidIcmpTtl ? "" : "h_c-dead-a"}>Packet TTL</span>}
                         name="detail_monitor_icmp_ttl"
@@ -390,7 +444,7 @@ export default function Editor(props: EditorProps) {
                         null}
                 </div>
 
-                <div className="h_mb-c">
+                <div className="h_mt-c">
                     <SliderInput
                         label={"Allowable Packet Loss"}
                         name={"detail_monitor_icmp_loss_threshold"}
@@ -411,7 +465,7 @@ export default function Editor(props: EditorProps) {
             : null}
 
         {editor.draft.kind == PLUGIN_API
-            ? <div className="h_mb-c">
+            ? <div className="h_mt-c">
                 <PluginInput
                     plugin={{
                         subtext: (<span>Choose a <a href="#">plugin</a> to probe the monitor.</span>),
@@ -431,59 +485,65 @@ export default function Editor(props: EditorProps) {
     const eventTab = <>
         {editor.draft.events && editor.draft.events.length > 0
             ? <div className="detail_events">
-                {editor.draft.events.map((event, index) => <div key={index} className="detail_event_container">
+                {editor.draft.events.map((event, index) => <div key={index} className="detail_event_container h_mt-c">
                     <div className="detail_event">
                         <EventInput
                             plugin={{
                                 value: event.pluginName,
-                                onChange: value => handleUpdateEvent(index, 'pluginName', value)
+                                onChange: value => updateEventIndex(index, "pluginName", value)
                             }}
                             args={{
                                 value: event.pluginArgs,
-                                onChange: value => handleUpdateEvent(index, 'pluginArgs', value)
+                                onChange: value => updateEventIndex(index, "pluginArgs", value)
                             }}
                             threshold={{
                                 value: event.threshold,
-                                onChange: value => handleUpdateEvent(index, 'threshold', value)
+                                onChange: value => updateEventIndex(index, "threshold", value)
                             }}
-                            onDelete={() => handleDeleteEvent(index)}
+                            onDelete={() => deleteEventIndex(index)}
                         />
                     </div>
                 </div>)}
             </div>
             : null}
 
-        <Button
-            border={true}
-            onClick={() => setEditor(prev => ({
-                ...prev,
-                draft: {
-                    ...prev.draft,
-                    events: [
-                        ...(prev.draft.events),
-                        {
-                            pluginName: (monitor.context.state.plugins[0] || null),
-                            pluginArgs: [], threshold: null
-                        } as Event
-                    ]
-                }
-            }))}
-        >
-            <span>Add Event</span>
-        </Button>
+        <div className="h_mt-c">
+            <Button
+                border={true}
+                onClick={() => setEditor(prev => ({
+                    ...prev,
+                    draft: {
+                        ...prev.draft,
+                        events: [
+                            ...(prev.draft.events),
+                            {
+                                pluginName: (monitorContext.state.plugins[0] || null),
+                                pluginArgs: [], threshold: null
+                            } as Event
+                        ]
+                    }
+                }))}
+            >
+                <span>Add Event</span>
+            </Button>
+        </div>
     </>
 
     return <div className="detail_component">
         <div className="detail_body">
-            <h1 className="h_m-0 h_mb-c">{editor.original.name}</h1>
+            <h1 className="h_m-0">{editor.original.name}</h1>
             {isViewingEvents ? eventTab : monitorTab}
+
+            <div className="editor_message_container" ref={errorsContainerRef}>
+                {errors.map((n, index) => <div key={index} className="editor_message error h_mt-c">{n}</div>)}
+            </div>
         </div>
 
         <div className="detail_controls">
             <Button
                 kind="primary"
                 disabled={!canSave}
-                onClick={() => onChange(sanitize(editor.draft))}
+                onClick={save}
             >
                 <span>Save</span>
             </Button>
@@ -493,7 +553,7 @@ export default function Editor(props: EditorProps) {
                     onClick={() => {
                         isViewingEvents
                             ? setIsViewingEvents(false)
-                            : monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })
+                            : monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: null } })
                     }}
                 >
                     Back
@@ -504,7 +564,7 @@ export default function Editor(props: EditorProps) {
             <div className="h_ml-auto">
                 <Button
                     border={true}
-                    onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                    onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: null } })}
                 >
                     Close
                 </Button>
@@ -669,7 +729,7 @@ function isValidKind(kind: string | null): boolean {
 }
 
 function isValidState(state: boolean): boolean {
-    return typeof state === 'boolean';
+    return typeof state === "boolean";
 }
 
 function isValidInterval(interval: number | null): boolean {

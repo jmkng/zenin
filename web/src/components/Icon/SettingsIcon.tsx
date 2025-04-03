@@ -14,6 +14,5 @@ export default function SettingsIcon() {
             }}
             transform="translate(-1.162 -1.16) scale(1.09665)"
         />
-    </svg >
+    </svg>
 }
-

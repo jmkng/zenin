@@ -18,4 +18,8 @@
     .settings_about>*:first-child {
         margin-right: 9px;
     }
+
+    .settings_message.error {
+        color: var(--failure-color);
+    }
 }

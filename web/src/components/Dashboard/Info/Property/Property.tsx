@@ -2,8 +2,8 @@ import { formatMS } from "@/internal/layout/graphics";
 import { Measurement } from "@/internal/measurement";
 import { HTTP_API } from "@/internal/server";
 
-import Text from "../Text/Text";
 import List from "../List/List";
+import Text from "../Text/Text";
 import Chain from "./Chain";
 
 export interface PropertyProps {
@@ -56,8 +56,6 @@ export default function Property(props: PropertyProps) {
                 <List title="Hints" data={measurement.stateHint} />
             </div>
             : null}
-
-        {/****** lazy load ******/}
 
         {measurement.kind == HTTP_API ?
             <div className="property_http_addon h_mt-c">

@@ -1,6 +1,5 @@
-import { useAccountContext } from "@/internal/account"
-import { Monitor, useDefaultMonitorService, useMonitorContext } from "@/internal/monitor"
-import { DataPacket, Timestamp } from "@/internal/server"
+import { useMonitorContext } from "@/hooks/useMonitor"
+import { Monitor } from "@/internal/monitor"
 
 import Button from "../../Button/Button"
 import DatabaseIcon from "../../Icon/DatabaseIcon"
@@ -12,61 +11,42 @@ import TrashIcon from "../../Icon/TrashIcon"
 
 interface MonitorDialogContentProps {
     monitor: Monitor
+
+    onToggle: (active: boolean, id: number[]) => void;
+    onPoll: (id: number) => void;
 }
 
 export default function MonitorDialogContent(props: MonitorDialogContentProps) {
-    const monitor = {
-        data: props.monitor,
-        context: useMonitorContext(),
-        service: useDefaultMonitorService()
-    }
-    const account = useAccountContext()
+    const { monitor, onToggle, onPoll } = props;
+    const monitorContext = useMonitorContext();
 
-    const handleView = () => {
-        monitor.context.dispatch({
-            type: 'pane',
-            pane: { type: 'view', target: { monitor: monitor.data, measurement: null } }
+    function openInfoPane() {
+        monitorContext.dispatch({
+            type: "pane",
+            pane: { type: "view", target: { monitor, measurement: null } }
         })
-    }
-
-    const handleToggle = async () => {
-        const active = !monitor.data.active;
-        const monitors = [monitor.data.id!];
-        const token = account.state.token!.raw;
-        const extract = await monitor.service.toggleMonitor(token, monitors, active);
-        if (!extract.ok()) return;
-        const body: DataPacket<Timestamp> = await extract.json();
-        monitor.context.dispatch({ type: 'toggle', monitors, active, time: body.data.time });
-    }
-
-    const handlePoll = async () => {
-        const token = account.state.token!.raw;
-        await monitor.service.pollMonitor(token, monitor.data.id!);
     }
 
     return <div className="monitor_dialog_content dialog_content">
         <div className="dialog_section">
-            <Button
-                icon={<InfoIcon />}
-                onClick={handleView}
-            >
+            <Button icon={<InfoIcon />} onClick={openInfoPane}>
                 Info
             </Button>
             <Button
-                onClick={handleToggle}
-                icon={monitor.data.active ? <PauseIcon /> : <PlayIcon />}
+                onClick={() => onToggle(!monitor.active, [monitor.id])}
+                icon={monitor.active ? <PauseIcon /> : <PlayIcon />}
             >
-                {monitor.data.active ? "Pause" : "Resume"}
+                {monitor.active ? "Pause" : "Resume"}
             </Button>
             <Button
                 icon={<DatabaseIcon />}
-                onClick={handlePoll}
+                onClick={() => onPoll(monitor.id)}
             >
                 Poll
             </Button>
             <Button
                 icon={<EditIcon />}
-                onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'editor', monitor: monitor.data } })}
+                onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor } })}
             >
                 Edit
             </Button>
@@ -75,7 +55,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
             <Button
                 kind="destructive"
                 icon={<TrashIcon />}
-                onClick={() => monitor.context.dispatch({ type: 'queue', monitors: [monitor.data] })}
+                onClick={() => monitorContext.dispatch({ type: "queue", monitors: [monitor] })}
             >
                 Delete
             </Button>

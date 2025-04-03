@@ -1,12 +1,18 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAccountContext } from '@/internal/account';
-import { useDefaultAccountService } from '@/internal/account/service';
+import { useAccount } from "@/hooks/useAccount";
+import { Navigate, Outlet } from "react-router-dom";
 
-export default function Hidden() {
-    const account = {
-        context: useAccountContext(),
-        service: useDefaultAccountService()
-    }
-    const hide: boolean = account.service.isAuthenticated(account.context.state);
-    return hide ? <Navigate to="/" /> : <Outlet />
+interface HiddenProps {
+    redirectPath: string
+}
+
+/** Hide children from authenticated users. */
+export default function Hidden(props: HiddenProps) {
+    const { redirectPath } = props;
+    
+    const { context } = useAccount();
+    const shouldHide: boolean = context.state.token !== null;
+    
+    return shouldHide 
+        ? <Navigate to={redirectPath} /> 
+        : <Outlet />
 }

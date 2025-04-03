@@ -1,16 +1,18 @@
-import { Account, ROOT_ACCOUNT_UI, useAccountContext } from "@/internal/account";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useAccount } from "@/hooks/useAccount";
+import { useMonitorContext } from "@/hooks/useMonitor";
+import { useNotify } from "@/hooks/useNotify";
+import { Account, ROOT_ACCOUNT_UI, setLSToken } from "@/internal/account";
 import { formatUTCDate } from "@/internal/layout/graphics";
-import { useMonitorContext } from "@/internal/monitor";
-import { useMemo, useState } from "react";
-import { useDefaultAccountService } from "@/internal/account/service";
 import { CreatedTimestamp, DataPacket, isErrorPacket } from "@/internal/server";
 
 import TextInput from "@/components/Input/TextInput/TextInput";
 import Button from "../../../components/Button/Button";
 import VMenuIcon from "../../Icon/VMenuIcon";
 import Dialog from "../Dialog/Dialog";
-import AccountDialogContent from "./AccountDialogContent";
 import DialogModal from "../Dialog/DialogModal";
+import AccountDialogContent from "./AccountDialogContent";
 
 import "./Accounts.css";
 
@@ -23,26 +25,28 @@ interface Draft {
 
 type EditorState = { draft: Draft, original: Draft };
 
+const defaults: Draft = {
+    id: null,
+    username: null,
+    password: null,
+    passwordConfirm: null
+};
+
 export default function Accounts() {
-    const account = {
-        context: useAccountContext(),
-        service: useDefaultAccountService()
-    }
-    const monitor = {
-        context: useMonitorContext(),
-    }
-    const payload = account.context.state.token!.payload;
-    const defaults: Draft = {
-        id: null,
-        username: null,
-        password: null,
-        passwordConfirm: null
-    };
+    const { service: accountService, context: accountContext } = useAccount();
+    const monitorContext = useMonitorContext();
+    const notify = useNotify();
+    const payload = accountContext.state.token!.payload;
+    const errorsContainerRef = useRef<HTMLDivElement>(null);
 
     const [editor, setEditor] = useState<EditorState>({ draft: defaults, original: defaults });
     const [isEditing, setIsEditing] = useState<boolean>(payload.root ? false : true);
     const [errors, setErrors] = useState<string[]>([]);
     const [isDeleting, setIsDeleting] = useState<Account | null>(null);
+
+    useEffect(() => {
+        if (errors.length > 0) errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
+    }, [errors]);
 
     const hasValidPasswords = useMemo(() =>
         editor.draft.id
@@ -57,24 +61,23 @@ export default function Accounts() {
 
     const canSave: boolean = useMemo(() => isDraftValid && isDraftChanged, [isDraftValid, isDraftChanged])
 
-    const handleManagerEdit = (account: Account) => {
+    function editAccount(account: Account) {
         setIsEditing(true);
         const draft: Draft = { ...defaults, id: account.id, username: account.username };
         setEditor({ draft, original: draft });
     }
 
-    const handleSave = async () => {
+    async function save() {
         // Validations prevent saving before we have good username/password values.
         const username: string = editor.draft.username!;
         const password: string = editor.draft.password!;
 
         // When id is set we will update that account, otherwise create a new account.
-        if (editor.draft.id)
-            handleUpdate(editor.draft.id, username, password);
-        else handleCreate(username, password);
+        if (editor.draft.id) updateAccount(editor.draft.id, username, password);
+        else createAccount(username, password);
     }
 
-    const handleReset = () => {
+    function reset() {
         setEditor(prev => {
             const state = {
                 ...prev.draft,
@@ -85,116 +88,134 @@ export default function Accounts() {
         })
     }
 
-    const handleCreate = async (username: string, password: string) => {
-        const token = account.context.state.token!.raw;
+    async function createAccount(username: string, password: string) {
+        const token = accountContext.state.token!.raw;
 
-        const extract = await account.service.createAccount(token, username, password);
-        if (extract.ok()) {
-            const packet: DataPacket<CreatedTimestamp> = await extract.json();
-            account.context.dispatch({
-                type: 'create',
-                account: {
-                    createdAt: packet.data.time,
-                    updatedAt: packet.data.time,
-                    id: packet.data.id,
-                    username,
-                    root: false
-                }
-            });
-            handleReset();
-            setErrors([]);
-        } else {
+        const extract = await accountService.createAccount(token, username, password);
+        if (!extract.ok()) {
             const packet = await extract.json();
             if (isErrorPacket(packet)) setErrors(packet.errors);
+            return;
         }
+        
+        const packet: DataPacket<CreatedTimestamp> = await extract.json();
+        accountContext.dispatch({
+            type: "create",
+            account: {
+                createdAt: packet.data.time,
+                updatedAt: packet.data.time,
+                id: packet.data.id,
+                username,
+                root: false
+            }
+        });
+        reset();
+        setErrors([]);
+        notify("Account created.");
     }
 
-    const handleUpdate = async (id: number, username: string, password: string) => {
-        const token = account.context.state.token!.raw;
+    async function updateAccount(id: number, username: string, password: string) {
+        const token = accountContext.state.token!.raw;
 
         // Request a new token when updating the active account.
-        const reissue: boolean = id == account.context.state.token!.payload.sub;
+        const reissue: boolean = id == accountContext.state.token!.payload.sub;
 
-        const extract = await account.service.updateAccount(token, id, username, password, reissue);
-        if (extract.ok()) {
-            const packet: DataPacket<{ time: string, token?: string }> = await extract.json();
-            const updatedAt = packet.data.time;
-            account.context.dispatch({ type: 'update', id, username, updatedAt });
-            if (reissue) {
-                // Token will only be set when a reissue is requested.
-                const token = packet.data.token!;
-                account.service.setLSToken(token);
-                account.context.dispatch({ type: 'login', token });
-            }
-            handleReset();
-            setErrors([]);
-        } else {
+        const extract = await accountService.updateAccount(token, id, username, password, reissue);
+        if (!extract.ok()) {
             const packet = await extract.json();
             if (isErrorPacket(packet)) setErrors(packet.errors);
+            return;
+        }
+        
+        const packet: DataPacket<{ time: string, token?: string }> = await extract.json();
+        const updatedAt = packet.data.time;
+        accountContext.dispatch({ type: "update", id, username, updatedAt });
+        if (reissue) {
+            // Token will only be set when a reissue is requested.
+            const newToken = packet.data.token!;
+            setLSToken(newToken);
+            accountContext.dispatch({ type: "login", token: newToken });
+        }
+        reset();
+        setErrors([]);
+        notify("Account updated.");
+    }
+
+    async function deleteAccount(id: number) {
+        const token = accountContext.state.token!.raw;
+        try {
+            const extract = await accountService.deleteAccount(token, [id]);
+            if (!extract.ok()) {
+                const body = await extract.json();
+                if (isErrorPacket(body)) setErrors(body.errors);
+                return
+            };
+    
+            setIsDeleting(null);
+            accountContext.dispatch({ type: "delete", id })
+            notify("Account deleted.");
+        } catch {
+            setIsDeleting(null);
         }
     }
 
-    async function handleDelete(id: number) {
-        const token = account.context.state.token!.raw;
-        const extract = await account.service.deleteAccount(token, [id]);
-        if (!extract.ok) return;
-
-        setIsDeleting(null);
-        account.context.dispatch({ type: 'delete', id })
-    }
-
-    function handleEdit() {
+    function draftAccount() {
         setEditor({ draft: defaults, original: defaults });
         setIsEditing(true);
     }
 
     const accountManagerTab = <>
-        {account.context.state.accounts.map((n, i) => <div key={i} className="account">
-            <div className="account_top">
-                <div className="account_top_left">
-                    <div className="account_name">
-                        {n.username}
+        <h1 className="h_m-0">Accounts</h1>
+        <div className="h_mt-c">
+            {accountContext.state.accounts.map((n, i) => <div key={i} className="account">
+                <div className="account_top">
+                    <div className="account_top_left">
+                        <div className="account_name">
+                            {n.username}
+                        </div>
+                    </div>
+                    <div className="account_top_right">
+                        {n.root
+                            ? <div className="account_rank">
+                                {ROOT_ACCOUNT_UI}
+                            </div>
+                            : null}
+
+                        <Dialog dialog={{
+                            content: <AccountDialogContent
+                                allowDelete={!n.root}
+                                onDelete={() => setIsDeleting(n)}
+                                onEdit={() => editAccount(n)}
+                            />
+                        }}>
+                            <Button hover={false} icon={<VMenuIcon />}>
+                            </Button>
+                        </Dialog>
                     </div>
                 </div>
-                <div className="account_top_right">
-                    {n.root
-                        ? <div className="account_rank">
-                            {ROOT_ACCOUNT_UI}
-                        </div>
-                        : null}
 
-                    <Dialog dialog={{
-                        content: <AccountDialogContent
-                            allowDelete={!n.root}
-                            onDelete={() => setIsDeleting(n)}
-                            onEdit={() => handleManagerEdit(n)}
-                        />
-                    }}>
-                        <Button hover={false} icon={<VMenuIcon />}>
-                        </Button>
-                    </Dialog>
-                </div>
-            </div>
-
-            <small className="account_updated_timestamp">
-                {formatUTCDate(n.updatedAt)}
-            </small>
-        </div>)}
+                <small className="account_updated_timestamp">
+                    {formatUTCDate(n.updatedAt)}
+                </small>
+            </div>)}
+        </div>
     </>
 
     const accountEditTab = <>
-        <h1 className="h_m-0 h_mb-c">{editor.original.username}</h1>
-        <TextInput
-            name={"account_name"}
-            label="Username"
-            subtext="The account display name."
-            value={editor.draft.username}
-            onChange={username => setEditor(prev => ({ ...prev, draft: { ...prev.draft, username } }))}
-        />
+        <h1 className="h_m-0">{editor.original.username}</h1>
+        <div className="h_mt-c">
+            <TextInput
+                name={"account_name"}
+                label="Username"
+                subtext="The account display name."
+                value={editor.draft.username}
+                onChange={username => setEditor(prev => ({ ...prev, draft: { ...prev.draft, username } }))}
+            />
+        </div>
         <div className="h_mt-c">
             <TextInput
                 type="password"
-                name={"account_name"}
+                name={"account_password"}
                 label="Password"
                 value={editor?.draft.password || null}
                 onChange={password => setEditor(prev => ({ ...prev, draft: { ...prev.draft, password } }))}
@@ -215,13 +236,13 @@ export default function Accounts() {
                     ? <span className="detail_validation h_c-dead-a">Passwords do not match.</span>
                     : null}
 
-                {errors
-                    ? <div className="account_message_container">
-                        {errors.map((error, index) => <div key={index} className="account_message error">{error}</div>)}
-                    </div>
-                    : null}
+   
             </div>
             : null}
+
+            <div className="accounts_message_container">
+                {errors.map((n, index) => <div key={index} className="accounts_message error h_mt-c">{n}</div>)}
+            </div>
     </>
 
     return <div className="accounts">
@@ -231,7 +252,7 @@ export default function Accounts() {
 
         <div className="detail_controls">
             {isEditing
-                ? <Button kind="primary" border={true} disabled={!canSave} onClick={handleSave}>
+                ? <Button kind="primary" border={true} disabled={!canSave} onClick={save}>
                     Save
                 </Button>
                 : null}
@@ -246,12 +267,12 @@ export default function Accounts() {
                 : null}
 
             {payload.root && !isEditing
-                ? <Button kind="primary" border={true} onClick={handleEdit}>
+                ? <Button kind="primary" border={true} onClick={draftAccount}>
                     Create
                 </Button>
                 : null}
             <div className="h_ml-auto">
-                <Button border={true} onClick={() => monitor.context.dispatch({ type: 'pane', pane: { type: 'accounts' } })}>
+                <Button border={true} onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "accounts" } })}>
                     Close
                 </Button>
             </div>
@@ -268,7 +289,7 @@ export default function Accounts() {
                         <div>This action cannot be undone.</div>
                     </div>
                     <div className="dialog_confirm_content_bottom">
-                        <Button onClick={() => handleDelete(isDeleting.id)} kind="primary">
+                        <Button onClick={() => deleteAccount(isDeleting.id)} kind="primary">
                             <span>Delete</span>
                         </Button>
                     </div>
