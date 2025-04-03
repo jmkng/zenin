@@ -143,16 +143,20 @@ export default function Accounts() {
 
     async function deleteAccount(id: number) {
         const token = accountContext.state.token!.raw;
-        const extract = await accountService.deleteAccount(token, [id]);
-        if (!extract.ok()) {
-            const body = await extract.json();
-            if (isErrorPacket(body)) setErrors(body.errors);
-            return
-        };
-
-        setIsDeleting(null);
-        accountContext.dispatch({ type: 'delete', id })
-        notify(true, "Account deleted.");
+        try {
+            const extract = await accountService.deleteAccount(token, [id]);
+            if (!extract.ok()) {
+                const body = await extract.json();
+                if (isErrorPacket(body)) setErrors(body.errors);
+                return
+            };
+    
+            setIsDeleting(null);
+            accountContext.dispatch({ type: "delete", id })
+            notify(true, "Account deleted.");
+        } catch {
+            setIsDeleting(null);
+        }
     }
 
     function draftAccount() {

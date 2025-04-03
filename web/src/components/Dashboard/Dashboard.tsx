@@ -8,6 +8,7 @@ import { useMonitor } from "@/hooks/useMonitor";
 import { useNotify } from "@/hooks/useNotify";
 import { useSortedMonitors } from "@/hooks/useSortedMonitors";
 import { monitor } from "@/internal";
+import { NONE_SELECT } from "@/internal/monitor/reducer";
 import { DataPacket, isErrorPacket, Timestamp } from "@/internal/server";
 
 import Button from "../Button/Button";
@@ -47,17 +48,21 @@ export default function Dashboard() {
     async function deleteMonitors(monitors: monitor.Monitor[]) {
         const id = monitors.map(n => n.id!);
         const token = accountContext.state.token!.raw;
-        const extract = await monitorService.deleteMonitor(token, id);
-        if (!extract.ok()) {
-            const body = await extract.json();
-            if (isErrorPacket(body)) notify(false, ...body.errors);
-            return;
+        try {
+            const extract = await monitorService.deleteMonitor(token, id);
+            if (!extract.ok()) {
+                const body = await extract.json();
+                if (isErrorPacket(body)) notify(false, ...body.errors);
+                return;
+            }
+    
+            monitorContext.dispatch({ type: "delete", monitors: id });
+            const length = id.length;
+            const message = length > 1 ? `Deleted ${length} monitors.` : "Monitor deleted.";
+            notify(true, message);
+        } catch {
+            monitorContext.dispatch({ type: "queue", monitors: [] });
         }
-
-        monitorContext.dispatch({ type: "delete", monitors: id });
-        const length = id.length;
-        const message = length > 1 ? `Deleted ${length} monitors.` : "Monitor deleted.";
-        notify(true, message);
     }
 
     function startDraft() {
