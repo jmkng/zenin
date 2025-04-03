@@ -159,7 +159,7 @@ export default function Settings() {
             <div className="h_ml-auto">
                 <Button
                     border={true}
-                    onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: null } })}
+                    onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: null } })}
                 >
                     <span>Close</span>
                 </Button>

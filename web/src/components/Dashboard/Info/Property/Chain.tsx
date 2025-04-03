@@ -58,7 +58,7 @@ export default function Chain(props: ChainProps) {
             </div>
 
             <div
-                className={["chain_toggle h_f-row-center"].join(' ')}
+                className={["chain_toggle h_f-row-center"].join(" ")}
                 onClick={handleExpand}
             >
                 <ChevronIcon />

@@ -23,14 +23,14 @@ export default function SelectMenu(props: SelectProps) {
             <div className="menu_margin_right">
                 <Button
                     tooltip="Select All"
-                    onClick={() => monitorContext.dispatch({ 'type': 'select', monitor: "ALL" })}
+                    onClick={() => monitorContext.dispatch({ "type": "select", monitor: "ALL" })}
                     icon={<SelectIcon />}
                 />
             </div>
             <div className="menu_margin_right">
                 <Button
                     tooltip = "Clear Selection"
-                    onClick={() => monitorContext.dispatch({ type: 'select', monitor: 'NONE' })}
+                    onClick={() => monitorContext.dispatch({ type: "select", monitor: "NONE" })}
                     icon={<DeselectIcon />}
                 />
             </div>
@@ -60,7 +60,7 @@ export default function SelectMenu(props: SelectProps) {
                 <Button
                     tooltip="Delete Selected"
                     icon={<TrashIcon />}
-                    onClick={() =>  monitorContext.dispatch({ type: 'queue', monitors: monitorContext.state.selected })}
+                    onClick={() =>  monitorContext.dispatch({ type: "queue", monitors: monitorContext.state.selected })}
                 />
             </div>
         </div>

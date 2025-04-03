@@ -12,22 +12,22 @@ export const accountDefault: AccountState = {
 }
 
 /** Reset the state. */
-type ResetAction = { type: 'reset', accounts: Account[] };
+type ResetAction = { type: "reset", accounts: Account[] };
 
 /** Log in. */
-type LoginAction = { type: 'login', token: string };
+type LoginAction = { type: "login", token: string };
 
 /** Log out. */
-type LogoutAction = { type: 'logout' };
+type LogoutAction = { type: "logout" };
 
 /** Update an account. */
-type UpdateAction = { type: 'update', id: number, username: string, updatedAt: string };
+type UpdateAction = { type: "update", id: number, username: string, updatedAt: string };
 
 /** Delete an account. */
-type DeleteAction = { type: 'delete', id: number };
+type DeleteAction = { type: "delete", id: number };
 
 /** Add an account. */
-type CreateAction = { type: 'create', account: Account };
+type CreateAction = { type: "create", account: Account };
 
 export type AccountAction =
     | LoginAction
@@ -39,8 +39,8 @@ export type AccountAction =
 
 const loginAction = (state: AccountState, action: LoginAction): AccountState => {
     const raw = action.token;
-    const header = JSON.parse(window.atob(raw.split('.')[0]));
-    const payload = JSON.parse(window.atob(raw.split('.')[1]));
+    const header = JSON.parse(window.atob(raw.split(".")[0]));
+    const payload = JSON.parse(window.atob(raw.split(".")[1]));
     const token: Token = { raw, header, payload };
     return { ...state, token };
 }

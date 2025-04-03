@@ -12,7 +12,7 @@ class AccountService extends Service {
     }
 
     async getClaimed() {
-        const address = '/account/claim';
+        const address = "/account/claim";
         const request = new Request(address);
         return await this.extract(request);
     }
@@ -25,7 +25,7 @@ class AccountService extends Service {
     }
 
     async getAccounts(token: string) {
-        const address = '/account'
+        const address = "/account"
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request)
     }
@@ -38,7 +38,7 @@ class AccountService extends Service {
     }
 
     async deleteAccount(token: string, id: number[]) {
-        const joined = id.join(',');
+        const joined = id.join(",");
         const address = `/account?id=${joined}`;
         const request = new AuthenticatedRequest(token, address).method(DELETE_API);
         return await this.extract(request);

@@ -28,6 +28,6 @@ type SettingsContextBundle = { state: SettingsState, dispatch: (action: Settings
 export function useSettingsContext(): SettingsContextBundle {
     const state = useContext(SettingsContext);
     const dispatch = useContext(SettingsDispatchContext);
-    if (!state || !dispatch) throw new Error('settings context must be used within provider');
+    if (!state || !dispatch) throw new Error("settings context must be used within provider");
     return { state, dispatch }
 }

@@ -38,7 +38,7 @@ export function useDataFetch() {
         const monitors = packet.data.monitors;
         const plugins = packet.data.plugins;
         const state = { ...monitorDefault, monitors, plugins };
-        monitorContext.dispatch({ type: 'reset', state });
+        monitorContext.dispatch({ type: "reset", state });
     }
     
     async function resetSettings(ex: Extract) {
@@ -48,13 +48,13 @@ export function useDataFetch() {
         const themes = packet.data.themes;
         const state = { delimiters, active, themes };
         if (active) document.documentElement.setAttribute("data-theme", formatTheme(active));
-        settingsContext.dispatch({ type: 'reset', state });
+        settingsContext.dispatch({ type: "reset", state });
     }
 
     async function resetAccounts(ex: Extract) {
         const packet: DataPacket<{accounts: Account[]}> = await ex.json();
         const accounts = packet.data.accounts;
-        accountContext.dispatch({ type: 'reset', accounts });
+        accountContext.dispatch({ type: "reset", accounts });
     }
 
     return load;

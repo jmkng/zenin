@@ -8,7 +8,6 @@ import { useMonitor } from "@/hooks/useMonitor";
 import { useNotify } from "@/hooks/useNotify";
 import { useSortedMonitors } from "@/hooks/useSortedMonitors";
 import { monitor } from "@/internal";
-import { NONE_SELECT } from "@/internal/monitor/reducer";
 import { DataPacket, isErrorPacket, Timestamp } from "@/internal/server";
 
 import Button from "../Button/Button";

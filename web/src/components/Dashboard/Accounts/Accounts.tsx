@@ -100,7 +100,7 @@ export default function Accounts() {
         
         const packet: DataPacket<CreatedTimestamp> = await extract.json();
         accountContext.dispatch({
-            type: 'create',
+            type: "create",
             account: {
                 createdAt: packet.data.time,
                 updatedAt: packet.data.time,
@@ -129,12 +129,12 @@ export default function Accounts() {
         
         const packet: DataPacket<{ time: string, token?: string }> = await extract.json();
         const updatedAt = packet.data.time;
-        accountContext.dispatch({ type: 'update', id, username, updatedAt });
+        accountContext.dispatch({ type: "update", id, username, updatedAt });
         if (reissue) {
             // Token will only be set when a reissue is requested.
             const newToken = packet.data.token!;
             setLSToken(newToken);
-            accountContext.dispatch({ type: 'login', token: newToken });
+            accountContext.dispatch({ type: "login", token: newToken });
         }
         reset();
         setErrors([]);
@@ -272,7 +272,7 @@ export default function Accounts() {
                 </Button>
                 : null}
             <div className="h_ml-auto">
-                <Button border={true} onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'accounts' } })}>
+                <Button border={true} onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "accounts" } })}>
                     Close
                 </Button>
             </div>

@@ -2,8 +2,8 @@ import { BASE_WINDOW_PROTO_ENDPOINT } from ".";
 
 export class Request {
     #address = BASE_WINDOW_PROTO_ENDPOINT;
-    #method = 'GET';
-    #headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    #method = "GET";
+    #headers = { "Content-Type": "application/json", "Accept": "application/json" };
     #body: string | null = null
 
     constructor(address: string) {

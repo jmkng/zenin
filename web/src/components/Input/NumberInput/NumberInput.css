@@ -19,6 +19,6 @@
     }
 
     .number_input_box::before {
-        content: 'up'
+        content: "up"
     }
 }

@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useReducer, } from 'react';
-import { MonitorAction, MonitorState, monitorReducer, monitorDefault } from './reducer';
+import { createContext, ReactNode, useReducer, } from "react";
+import { MonitorAction, MonitorState, monitorReducer, monitorDefault } from "./reducer";
 
 export const MonitorContext = createContext<MonitorState | null>(null);
 export const MonitorDispatchContext = createContext<((action: MonitorAction) => void) | null>(null);

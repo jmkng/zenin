@@ -24,9 +24,9 @@ export interface Measurement {
 
 // eslint-disable-next-line
 export function isMeasurement(obj: any): obj is Measurement {
-    return typeof obj == 'object' &&
-        Object.hasOwn(obj, 'duration') && typeof obj.duration == 'number' &&
-        Object.hasOwn(obj, 'state') && typeof obj.state === 'string'
+    return typeof obj == "object" &&
+        Object.hasOwn(obj, "duration") && typeof obj.duration == "number" &&
+        Object.hasOwn(obj, "state") && typeof obj.state === "string"
 }
 
 export interface Certificate {

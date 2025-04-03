@@ -26,10 +26,10 @@ export default function Monitor(props: MonitorProps) {
     const { monitor, onToggle, onPoll } = props;
     const monitorContext = useMonitorContext();
     const reversed = monitor.measurements.toReversed();
-    const classes = ['monitor', monitorContext.state.selected.includes(monitor) ? "selected" : ""];
+    const classes = ["monitor", monitorContext.state.selected.includes(monitor) ? "selected" : ""];
 
     function select() {
-        monitorContext.dispatch({ type: 'select', monitor: monitor })
+        monitorContext.dispatch({ type: "select", monitor: monitor })
     }
 
     function openInfoPane(event: MouseEvent<HTMLDivElement>) {

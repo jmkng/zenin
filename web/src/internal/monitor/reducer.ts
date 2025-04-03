@@ -39,47 +39,47 @@ interface MonitorResetData {
 }
 
 /** Reset the state. */
-type ResetAction = { type: 'reset', state: MonitorResetData };
+type ResetAction = { type: "reset", state: MonitorResetData };
 
 /** Queue monitors for deletion. */
-type QueueDeleteMonitorAction = { type: 'queue', monitors: Monitor[] };
+type QueueDeleteMonitorAction = { type: "queue", monitors: Monitor[] };
 
 /** Delete monitors. */
-type DeleteMonitorAction = { type: 'delete', monitors: number[] };
+type DeleteMonitorAction = { type: "delete", monitors: number[] };
 
 /** Toggle the active state of monitors. */
-type ToggleMonitorAction = { type: 'toggle', monitors: number[], time: string, active: boolean };
+type ToggleMonitorAction = { type: "toggle", monitors: number[], time: string, active: boolean };
 
 /** Overwrite a monitor. */
-type UpdateMonitorAction = { type: 'update', monitor: Monitor };
+type UpdateMonitorAction = { type: "update", monitor: Monitor };
 
 /** Add a measurement. */
-type PollAction = { type: 'poll', measurement: Measurement };
+type PollAction = { type: "poll", measurement: Measurement };
 
 /** Change the dashboard filter. */
-type FilterAction = { type: 'filter', filter: FilterKind };
+type FilterAction = { type: "filter", filter: FilterKind };
 
-const ALL_SELECT = "ALL";
-const NONE_SELECT = "NONE";
+export const ALL_SELECT = "ALL";
+export const NONE_SELECT = "NONE";
 
 type SelectKind = Monitor | typeof ALL_SELECT | typeof NONE_SELECT;
 
 /** Select monitors. */
-type SelectAction = { type: 'select', monitor: SelectKind };
+type SelectAction = { type: "select", monitor: SelectKind };
 
 /** Add a new measurement to a monitor. */
-type AddMeasurementAction = { type: 'measurement', id: number[], monitor: number };
+type AddMeasurementAction = { type: "measurement", id: number[], monitor: number };
 
 export type PaneKind = ViewPaneAction | EditorPaneAction | DraftPaneAction | SettingsPaneAction | AccountsPaneAction;
 
 type PaneAction = {
-    type: 'pane',
+    type: "pane",
     pane: PaneKind
 }
 
 /** View monitor details. */
 type ViewPaneAction = {
-    type: 'view',
+    type: "view",
     target: {
         monitor: Monitor,
         measurement: Measurement | null,
@@ -90,27 +90,27 @@ type ViewPaneAction = {
 
 /** Edit a monitor. */
 type EditorPaneAction = {
-    type: 'editor',
+    type: "editor",
     monitor: Monitor | null
 };
 
 /** Draft a new monitor. */
 type DraftPaneAction = {
-    type: 'draft',
+    type: "draft",
 }
 
 /** View settings. */
 type SettingsPaneAction = {
-    type: 'settings'
+    type: "settings"
 };
 
 /** View accounts. */
 type AccountsPaneAction = {
-    type: 'accounts'
+    type: "accounts"
 }
 
 /** Log out. */
-type LogoutAction = { type: 'logout' }
+type LogoutAction = { type: "logout" }
 
 export type MonitorDispatch = (action: MonitorAction) => void;
 

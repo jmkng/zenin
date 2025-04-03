@@ -27,6 +27,6 @@ type MonitorContextBundle = { state: MonitorState, dispatch: (action: MonitorAct
 export function useMonitorContext() {
     const state = useContext(MonitorContext);
     const dispatch = useContext(MonitorDispatchContext);
-    if (!state || !dispatch) throw new Error('monitor context must be used within provider');
+    if (!state || !dispatch) throw new Error("monitor context must be used within provider");
     return { state, dispatch }
 }

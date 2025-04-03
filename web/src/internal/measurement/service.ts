@@ -11,7 +11,7 @@ class MeasurementService extends Service {
     }
 
     async deleteMeasurement(token: string, id: number[]) {
-        const joined = id.join(',');
+        const joined = id.join(",");
         const address = `/measurement?id=${joined}`;
         const request = new AuthenticatedRequest(token, address).method(DELETE_API)
         return await this.extract(request);

@@ -1,5 +1,5 @@
-import { createContext, ReactNode, useReducer } from 'react';
-import { LayoutState, LayoutAction, layoutReducer, layoutDefault } from './reducer';
+import { createContext, ReactNode, useReducer } from "react";
+import { LayoutState, LayoutAction, layoutReducer, layoutDefault } from "./reducer";
 
 export const LayoutContext = createContext<LayoutState | null>(null);
 export const LayoutDispatchContext = createContext<((action: LayoutAction) => void) | null>(null);

@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
-import { formatUTCDate } from '@/internal/layout/graphics';
-import { Measurement } from '@/internal/measurement';
+import { formatUTCDate } from "@/internal/layout/graphics";
+import { Measurement } from "@/internal/measurement";
 
-import CheckboxInput from '../../../../Input/CheckboxInput/CheckboxInput';
+import CheckboxInput from "../../../../Input/CheckboxInput/CheckboxInput";
 
-import './Row.css';
+import "./Row.css";
 
 interface RowProps {
     measurement: Measurement,
@@ -25,7 +25,7 @@ export default function Row(props: RowProps) {
     }, [checked, measurement])
 
     return <tr onClick={() => onClick(measurement.id!)}
-        className={['row_component', highlight ? 'highlight' : ''].join(' ')}>
+        className={["row_component", highlight ? "highlight" : ""].join(" ")}>
         <td onClick={event => event.stopPropagation()}>
             <CheckboxInput onChange={() => onCheck(measurement.id)}
                 checked={isChecked} name={`row_${measurement.id}`} />

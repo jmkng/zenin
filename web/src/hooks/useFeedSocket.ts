@@ -1,15 +1,15 @@
-import { isMeasurement } from '@/internal/measurement';
-import { FEED, handleConnect, handleDisconnect } from '@/internal/server';
-import { useEffect } from 'react';
-import { useAccountContext } from './useAccount';
-import { useMonitorContext } from './useMonitor';
+import { isMeasurement } from "@/internal/measurement";
+import { FEED, handleConnect, handleDisconnect } from "@/internal/server";
+import { useEffect } from "react";
+import { useAccountContext } from "./useAccount";
+import { useMonitorContext } from "./useMonitor";
 
 export function useFeedSocket() {
     const accountContext = useAccountContext();
     const monitorContext = useMonitorContext();
 
     const dispatch = (data: unknown) => {
-        if (isMeasurement(data)) monitorContext.dispatch({ type: 'poll', measurement: data })
+        if (isMeasurement(data)) monitorContext.dispatch({ type: "poll", measurement: data })
     }
 
     useEffect(() => {

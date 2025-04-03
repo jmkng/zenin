@@ -2,21 +2,21 @@ import { Request } from "./request";
 import { FEED, handleConnect, handleDisconnect } from "./feed";
 
 export const
-    HTTP_API = 'HTTP',
-    ICMP_API = 'ICMP',
-    UDP_API = 'UDP',
-    TCP_API = 'TCP',
-    PLUGIN_API = 'PLUGIN',
-    GET_API = 'GET',
-    HEAD_API = 'HEAD',
-    POST_API = 'POST',
-    PUT_API = 'PUT',
-    PATCH_API = 'PATCH',
-    DELETE_API = 'DELETE',
-    OPTIONS_API = 'OPTIONS',
-    OK_API = 'OK',
-    WARN_API = 'WARN',
-    DEAD_API = 'DEAD',
+    HTTP_API = "HTTP",
+    ICMP_API = "ICMP",
+    UDP_API = "UDP",
+    TCP_API = "TCP",
+    PLUGIN_API = "PLUGIN",
+    GET_API = "GET",
+    HEAD_API = "HEAD",
+    POST_API = "POST",
+    PUT_API = "PUT",
+    PATCH_API = "PATCH",
+    DELETE_API = "DELETE",
+    OPTIONS_API = "OPTIONS",
+    OK_API = "OK",
+    WARN_API = "WARN",
+    DEAD_API = "DEAD",
     OFF_API = null,
     INFORMATIONAL_API = "100-199",
     SUCCESSFUL_API = "200-299",
@@ -95,7 +95,7 @@ export class Extract {
             const json = await this.response.json();
             return json;
         } catch(err) {
-            console.error('failed to extract JSON response body:', err)
+            console.error("failed to extract JSON response body:", err)
             return null;
         }
     }
@@ -109,7 +109,7 @@ export interface DataPacket<T> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isDataPacket(obj: any): obj is DataPacket<any> {
-    return obj && typeof obj.data == 'object'
+    return obj && typeof obj.data == "object"
 }
 
 export interface CreatedTimestamp {
@@ -133,7 +133,7 @@ export function isErrorPacket(obj: any): obj is ErrorPacket {
     return obj && obj.errors && Array.isArray(obj.errors)
 }
 
-const PORT = import.meta.env.DEV ? '23111' : window.location.port
+const PORT = import.meta.env.DEV ? "23111" : window.location.port
 const BASE_ENDPOINT = `${window.location.hostname}:${PORT}/api/v1`;
 export const BASE_WINDOW_PROTO_ENDPOINT = `${window.location.protocol}//${BASE_ENDPOINT}`;
 export const FEED_WS_ENDPOINT = `ws://${BASE_ENDPOINT}/feed`;

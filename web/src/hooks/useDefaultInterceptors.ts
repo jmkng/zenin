@@ -10,7 +10,7 @@ export const useDefaultInterceptors = () => {
     const redirect = (extract: Extract) => {
         if (extract.unauthorized()) {
             clearLSToken();                         // 1. Clear old token.
-            context.dispatch({ type: 'logout' })    // 2. Update the state.
+            context.dispatch({ type: "logout" })    // 2. Update the state.
             navigate("/login")                      // 3. Redirect.
         }
     }

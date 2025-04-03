@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useMonitorContext } from './useMonitor';
+import { useMemo } from "react";
+import { useMonitorContext } from "./useMonitor";
 
 export const useSortedMonitors = () => {
     const context = useMonitorContext();

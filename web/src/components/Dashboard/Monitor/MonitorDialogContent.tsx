@@ -22,8 +22,8 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
 
     function openInfoPane() {
         monitorContext.dispatch({
-            type: 'pane',
-            pane: { type: 'view', target: { monitor, measurement: null } }
+            type: "pane",
+            pane: { type: "view", target: { monitor, measurement: null } }
         })
     }
 
@@ -46,7 +46,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
             </Button>
             <Button
                 icon={<EditIcon />}
-                onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor } })}
+                onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor } })}
             >
                 Edit
             </Button>
@@ -55,7 +55,7 @@ export default function MonitorDialogContent(props: MonitorDialogContentProps) {
             <Button
                 kind="destructive"
                 icon={<TrashIcon />}
-                onClick={() => monitorContext.dispatch({ type: 'queue', monitors: [monitor] })}
+                onClick={() => monitorContext.dispatch({ type: "queue", monitors: [monitor] })}
             >
                 Delete
             </Button>

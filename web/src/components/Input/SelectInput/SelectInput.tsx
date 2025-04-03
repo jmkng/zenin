@@ -38,7 +38,7 @@ export default function SelectInput(props: SelectProps) {
     // NOTE:
     // showPicker() is used below, but not full supported on Safari yet.
             
-    return <div className={["select", "input_container", "h_f-col"].join(' ')}>
+    return <div className={["select", "input_container", "h_f-col"].join(" ")}>
         {label
             ? <label
                 className="text_input_label input_label"
@@ -74,10 +74,10 @@ export default function SelectInput(props: SelectProps) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isGroup(obj: any): obj is SelectGroup {
-    return obj && typeof obj.label === 'string' && Array.isArray(obj.options) && obj.options.every(isOption);
+    return obj && typeof obj.label === "string" && Array.isArray(obj.options) && obj.options.every(isOption);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isOption(obj: any): obj is SelectOption {
-    return obj && typeof obj.text === 'string' && typeof obj.value === 'string';
+    return obj && typeof obj.text === "string" && typeof obj.value === "string";
 }

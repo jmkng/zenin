@@ -13,7 +13,7 @@ class MonitorService extends Service {
         if (measurement > 0) params.push(`measurements=${measurement}`);
         if (plugins) params.push(`plugins=${plugins}`);
         if (params.length > 0) {
-            address += `?${params.join('&')}`;
+            address += `?${params.join("&")}`;
         }
         
         const request = new AuthenticatedRequest(token, address);
@@ -21,7 +21,7 @@ class MonitorService extends Service {
     }
 
     async deleteMonitor(token: string, id: number[]) {
-        const joined = id.join(',');
+        const joined = id.join(",");
         const address = `/monitor?id=${joined}`;
         const request = new AuthenticatedRequest(token, address).method(DELETE_API)
         return await this.extract(request);
@@ -34,7 +34,7 @@ class MonitorService extends Service {
     }
 
     async toggleMonitor(token: string, id: number[], active: boolean) {
-        const joined = id.join(',');
+        const joined = id.join(",");
         const address = `/monitor?id=${joined}&active=${active}`;
         const request = new AuthenticatedRequest(token, address).method(PATCH_API)
         return await this.extract(request);
@@ -63,7 +63,7 @@ class MonitorService extends Service {
     }
 
     async getPlugins(token: string) {
-        const address = '/monitor/plugins';
+        const address = "/monitor/plugins";
         const request = new AuthenticatedRequest(token, address);
         return await this.extract(request);
     }

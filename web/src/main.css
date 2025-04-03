@@ -1,11 +1,11 @@
-@import './css/spinner.css' layer(base);
-@import './css/cover.css' layer(base);
-@import './css/icon.css' layer(base);
-@import './css/input.css' layer(base);
-@import './css/menu.css' layer(base);
-@import './css/scrollbar.css' layer(base);
+@import "./css/spinner.css" layer(base);
+@import "./css/cover.css" layer(base);
+@import "./css/icon.css" layer(base);
+@import "./css/input.css" layer(base);
+@import "./css/menu.css" layer(base);
+@import "./css/scrollbar.css" layer(base);
 
-@import './css/helper.css' layer(helpers);
+@import "./css/helper.css" layer(helpers);
 
 @layer base {
     :root {

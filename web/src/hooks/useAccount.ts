@@ -27,6 +27,6 @@ type AccountContextBundle = { state: AccountState, dispatch: (action: AccountAct
 export function useAccountContext(): AccountContextBundle {
     const state = useContext(AccountContext);
     const dispatch = useContext(AccountDispatchContext);
-    if (!state || !dispatch) throw new Error('account context must be used within provider');
+    if (!state || !dispatch) throw new Error("account context must be used within provider");
     return { state, dispatch }
 }

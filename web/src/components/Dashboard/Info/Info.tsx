@@ -48,13 +48,13 @@ export default function Info(props: InfoProps) {
         <div className="detail_controls">
             <Button
                 kind="primary"
-                onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'editor', monitor: state.monitor } })}
+                onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "editor", monitor: state.monitor } })}
             >
                 <span>Edit</span>
             </Button>
             <Button
                 border={true}
-                onClick={() => monitorContext.dispatch({ type: 'queue', monitors: [state.monitor] })}
+                onClick={() => monitorContext.dispatch({ type: "queue", monitors: [state.monitor] })}
                 kind="destructive"
             >
                 Delete
@@ -62,7 +62,7 @@ export default function Info(props: InfoProps) {
             <div className="detail_controls_delete">
                 <Button
                     border={true}
-                    onClick={() => monitorContext.dispatch({ type: 'pane', pane: { type: 'view', target: null } })}
+                    onClick={() => monitorContext.dispatch({ type: "pane", pane: { type: "view", target: null } })}
                 >
                     <span>Close</span>
                 </Button>

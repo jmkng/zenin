@@ -11,11 +11,11 @@ export default function NotFound() {
     const layoutContext = useLayoutContext();
 
     useEffect(() => {
-        layoutContext.dispatch({ type: 'load', loading: false });
+        layoutContext.dispatch({ type: "load", loading: false });
     }, []);
 
     function back() {
-        layoutContext.dispatch({ type: 'load', loading: true });
+        layoutContext.dispatch({ type: "load", loading: true });
         navigate("/");
     }
 
