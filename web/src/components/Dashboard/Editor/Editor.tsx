@@ -77,9 +77,7 @@ export default function Editor(props: EditorProps) {
     useEffect(() => setEditor(prev => ({ ...prev, ...split(base) })), [base])
 
     useEffect(() => {
-        if (errors.length > 0) {
-            errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
-        }
+        if (errors.length > 0) errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
     }, [errors]);
 
     useEffect(() => {

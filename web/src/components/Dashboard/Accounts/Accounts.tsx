@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAccount } from "@/hooks/useAccount";
 import { useMonitorContext } from "@/hooks/useMonitor";
@@ -37,11 +37,16 @@ export default function Accounts() {
     const monitorContext = useMonitorContext();
     const notify = useNotify();
     const payload = accountContext.state.token!.payload;
+    const errorsContainerRef = useRef<HTMLDivElement>(null);
 
     const [editor, setEditor] = useState<EditorState>({ draft: defaults, original: defaults });
     const [isEditing, setIsEditing] = useState<boolean>(payload.root ? false : true);
     const [errors, setErrors] = useState<string[]>([]);
     const [isDeleting, setIsDeleting] = useState<Account | null>(null);
+
+    useEffect(() => {
+        if (errors.length > 0) errorsContainerRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
+    }, [errors]);
 
     const hasValidPasswords = useMemo(() =>
         editor.draft.id
