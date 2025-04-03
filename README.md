@@ -214,6 +214,7 @@ You can use your browser's [developer tools](https://developer.mozilla.org/en-US
 | `--failure-color` | Failure text color.
 | `--focus-outline-color` | Outline color of elements when focused by keyboard.
 | `--scrollbar-thumb-color` | Scrollbar thumb color.
+| `--scrollbar-track-color` | Scrollbar track color.
 | `--widget-background` | Widget background color.
 | `--widget-border-color` | Widget border color.
 | `--dialog-border-color` | Dialog border color.
