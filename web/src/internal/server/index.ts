@@ -60,7 +60,7 @@ export class Service {
             response = await request.response();
         } catch(err) {
             this.#networkErrorHandler?.(err);
-            throw err;
+            throw new Error("network request failed", { cause: err });
         }
         try {
             const extract = new Extract(response);
@@ -70,7 +70,7 @@ export class Service {
             return extract;
         } catch(err) {
             this.#interceptorErrorHandler?.(err);
-            throw err;
+            throw new Error("interceptor processing failed", { cause: err });
         }
     }
 }
