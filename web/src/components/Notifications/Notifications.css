@@ -37,7 +37,8 @@
     left: 4px;
     right: 4px;
     height: 6px;
-    background: transparent;
+    border-radius: 4px;
+    background: var(--notification-progress-background-color, transparent);
     overflow: hidden;
 }
 

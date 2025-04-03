@@ -283,6 +283,7 @@ You can use your browser's [developer tools](https://developer.mozilla.org/en-US
 | `--notification-background` | Toast notification background color.
 | `--notification-border-color` | Toast notification border color.
 | `--notification-progress-color` | Toast notification progress bar color.
+| `--notification-progress-background-color` | Toast notification progress bar background color.
 | `--notification-progress-border-color` | Toast notification progress bar border color.
 
 ## Environment Variables
