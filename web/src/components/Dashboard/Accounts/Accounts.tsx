@@ -30,7 +30,7 @@ const defaults: Draft = {
     username: null,
     password: null,
     passwordConfirm: null
-};
+}
 
 export default function Accounts() {
     const { service: accountService, context: accountContext } = useAccount();
@@ -39,7 +39,8 @@ export default function Accounts() {
     const payload = accountContext.state.token!.payload;
     const errorsContainerRef = useRef<HTMLDivElement>(null);
 
-    const [editor, setEditor] = useState<EditorState>({ draft: defaults, original: defaults });
+    const initial = payload.root ? defaults : { ...defaults, id: payload.sub, username: payload.username };
+    const [editor, setEditor] = useState<EditorState>({ draft: initial, original: initial });
     const [isEditing, setIsEditing] = useState<boolean>(payload.root ? false : true);
     const [errors, setErrors] = useState<string[]>([]);
     const [isDeleting, setIsDeleting] = useState<Account | null>(null);
@@ -165,7 +166,6 @@ export default function Accounts() {
     }
 
     const accountManagerTab = <>
-        <h1 className="h_m-0">Accounts</h1>
         <div className="h_mt-c">
             {accountContext.state.accounts.map((n, i) => <div key={i} className="account">
                 <div className="account_top">
@@ -202,7 +202,6 @@ export default function Accounts() {
     </>
 
     const accountEditTab = <>
-        <h1 className="h_m-0">{editor.original.username}</h1>
         <div className="h_mt-c">
             <TextInput
                 name={"account_name"}
@@ -247,6 +246,7 @@ export default function Accounts() {
 
     return <div className="accounts">
         <div className="detail_body">
+            <h1 className="h_m-0">{isEditing ? editor.draft.username : "Accounts"}</h1>
             {isEditing ? accountEditTab : accountManagerTab}
         </div>
 
