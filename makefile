@@ -14,10 +14,10 @@ all: build
 web:
 	cd web && npm run build
 
-run: web
+run:
 	go run -ldflags="$(LDFLAGS)" cmd/zenin.go
 
-build: web
+build:
 	go build -ldflags="$(LDFLAGS)" -o zenin cmd/zenin.go
 
 build-armv7:
@@ -25,13 +25,13 @@ build-armv7:
 
 build-all:
 	$(MAKE) build-platform GOOS=linux 	GOARCH=amd64   		  	SUFFIX=linux-amd64
-	$(MAKE) build-platform GOOS=linux 	GOARCH=386     	      	SUFFIX=linux-386
+	$(MAKE) build-platform GOOS=linux   GOARCH=arm64 			SUFFIX=linux-arm64
 	$(MAKE) build-platform GOOS=linux 	GOARCH=arm 	  GOARM=7 	SUFFIX=$(LINUX_ARMV7_NAME)
 	$(MAKE) build-platform GOOS=darwin 	GOARCH=amd64  			SUFFIX=macos-amd64
 	$(MAKE) build-platform GOOS=darwin 	GOARCH=arm64  			SUFFIX=macos-arm64
 	$(MAKE) build-platform GOOS=windows GOARCH=amd64 			SUFFIX=windows-amd64.exe
 
-build-platform: web
+build-platform:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) \
 	go build -ldflags="$(LDFLAGS)" -o zenin-$(SUFFIX) cmd/zenin.go
 
