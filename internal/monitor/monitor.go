@@ -154,7 +154,7 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 	e.UpdatedAt = internal.NewTimeValue(start)
 	e.Duration = duration
 
-	env.Debug("poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
+	logByState(e.State, "poll stopping", "monitor(id)", *m.Id, "duration(ms)", fmt.Sprintf("%.2f", duration),
 		"state", e.State, "hints", e.StateHint, "events", len(m.Events))
 
 	executor := PluginExecutor{
@@ -170,7 +170,6 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 		if !v.IsEligible(span.State) {
 			continue
 		}
-
 		env.Debug("event starting", "monitor(id)", *m.Id, "event(id)", *v.Id, "plugin", *v.PluginName, "arguments", v.PluginArgs)
 		go func() {
 			ctx, cancel := m.Context(context.Background())
@@ -178,7 +177,7 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 
 			code, stdout, stderr, dx := executor.Run(ctx, v.PluginFields)
 			hints := append(dx.Warnings, dx.Errors...)
-			env.Debug("event stopping", "monitor(id)", *m.Id, "hints", hints, "code", code, "stdout", stdout, "stderr", stderr)
+			logByExitCode(code, "event stopping", "monitor(id)", *m.Id, "hints", hints, "code", code, "stdout", stdout, "stderr", stderr)
 		}()
 	}
 
@@ -287,4 +286,28 @@ type StopMessage struct {
 // PollMessage is used to manually trigger a poll action.
 type PollMessage struct {
 	Monitor Monitor
+}
+
+// logByState logs a message at an appropriate level for the provided state.
+func logByState(state measurement.ProbeState, msg string, args ...any) {
+	switch state {
+	case measurement.Warn:
+		env.Warn(msg, args...)
+	case measurement.Dead:
+		env.Error(msg, args...)
+	default:
+		env.Debug(msg, args...)
+	}
+}
+
+// logByExitCode logs a message at an appropriate level for the provided exit code.
+func logByExitCode(code int, msg string, args ...any) {
+	switch code {
+	case 0:
+		env.Debug(msg, args...)
+	case 1:
+		env.Warn(msg, args...)
+	default:
+		env.Error(msg, args...)
+	}
 }
