@@ -216,6 +216,7 @@ export default function Accounts() {
                 type="password"
                 name={"account_password"}
                 label="Password"
+                subtext="Set a new account password."
                 value={editor?.draft.password || null}
                 onChange={password => setEditor(prev => ({ ...prev, draft: { ...prev.draft, password } }))}
             />
