@@ -1,7 +1,8 @@
 .PHONY: all web run build build-armv7 test
 
-VERSION := 0.1.0
+VERSION := $(shell git describe --tags --abbrev=0)
 COMMIT := $(shell git rev-parse HEAD)
+
 LDFLAGS := \
 	-X github.com/jmkng/zenin/internal/env.Commit=$(COMMIT) \
 	-X github.com/jmkng/zenin/internal/env.Version=$(VERSION)
