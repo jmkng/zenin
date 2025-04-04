@@ -33,7 +33,11 @@ export default function Info(props: InfoProps) {
                             <List
                                 title={<div className="info_event_title">
                                     <span className="info_event_name">{event.pluginName}</span>
-                                    {event.threshold ? <span className="info_event_threshold state" data-state={event.threshold}>{event.threshold}</span> : null}
+                                    {event.threshold 
+                                        ? event.threshold == "DEAD" 
+                                            ? "On dead states" 
+                                            : "On warn or dead states" 
+                                        : null}
                                 </div>}
                                 data={event.pluginArgs}
                             />
