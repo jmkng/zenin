@@ -171,7 +171,7 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 			continue
 		}
 
-		env.Debug("event starting", "monitor(id)", m.Id, "event(id)", v.Id, "plugin", v.PluginName, "arguments", v.PluginArgs)
+		env.Debug("event starting", "monitor(id)", *m.Id, "event(id)", *v.Id, "plugin", *v.PluginName, "arguments", v.PluginArgs)
 		go func() {
 			ctx, cancel := m.Context(context.Background())
 			defer cancel()
