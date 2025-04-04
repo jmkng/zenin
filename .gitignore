@@ -7,3 +7,4 @@ doc
 server/build
 node_modules
 zenin
+dist
