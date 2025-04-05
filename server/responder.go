@@ -29,10 +29,13 @@ func (r *Responder) Data(data any, status int) {
 
 	response, err := NewDataPacket(data).JSON()
 	if err != nil {
-		env.Error("responder failed to send data response", "error", err)
+		env.Error("responder failed to serialize response", "error", err)
 		return
 	}
-	r.writer.Write(response)
+
+	if _, err = r.writer.Write(response); err != nil {
+		env.Error("responder failed to write data response", "error", err)
+	}
 }
 
 // HTML will send HTML and a status code.
@@ -40,22 +43,18 @@ func (r *Responder) HTML(data []byte, status int) {
 	r.writer.Header().Add(ContentType, ContentTypeTextHtmlUTF8)
 	r.writer.WriteHeader(status)
 
-	_, err := r.writer.Write(data)
-	if err != nil {
-		env.Error("responder failed to send html response", "error", err)
-		return
+	if _, err := r.writer.Write(data); err != nil {
+		env.Error("responder failed to write html response", "error", err)
 	}
 }
 
-// HTML will send CSS and a status code.
+// CSS will send CSS and a status code.
 func (r *Responder) CSS(data []byte, status int) {
 	r.writer.Header().Add(ContentType, ContentTypeCSS)
 	r.writer.WriteHeader(status)
 
-	_, err := r.writer.Write(data)
-	if err != nil {
-		env.Error("responder failed to send css response", "error", err)
-		return
+	if _, err := r.writer.Write(data); err != nil {
+		env.Error("responder failed to write css response", "error", err)
 	}
 }
 
@@ -83,10 +82,12 @@ func (r *Responder) Error(err error, status int) {
 	if len(client) > 0 {
 		response, err := NewErrorPacket(client...).JSON()
 		if err != nil {
-			env.Error("responder failed to send error response", "error", err)
+			env.Error("responder failed to serialize response", "error", err)
 			return
 		}
-		r.writer.Write(response)
+		if _, err = r.writer.Write(response); err != nil {
+			env.Error("responder failed to write error response", "error", err)
+		}
 	}
 
 	env.Error(origin.Error())
@@ -180,7 +181,7 @@ type DataPacket struct {
 func (d DataPacket) JSON() ([]byte, error) {
 	bytes, err := json.Marshal(d)
 	if err != nil {
-		return bytes, fmt.Errorf("failed to marshal data response: %w", err)
+		return bytes, fmt.Errorf("failed to marshal data packet: %w", err)
 	}
 	return bytes, err
 }
