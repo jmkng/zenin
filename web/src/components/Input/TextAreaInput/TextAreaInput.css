@@ -8,7 +8,7 @@
             background .30s ease-in-out;
         width: 100%;
         outline: none;
-        padding: 9px;
+        padding: 6px 12px;
         border-radius: 4px;
         resize: vertical;
     }

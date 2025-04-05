@@ -61,10 +61,15 @@ export interface Monitor {
     events: Event[]
 }
 
+export type EventThresholdKind = 
+    | "WARN"
+    | "DEAD"
+    ;
+
 export interface Event {
     pluginName: string,
     pluginArgs: string[],
-    threshold: string | null
+    threshold: EventThresholdKind | null
 }
 
 // eslint-disable-next-line

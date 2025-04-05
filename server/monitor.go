@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -107,32 +108,25 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 	var incoming monitor.Monitor
 	err := StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(env.
-			NewValidation("Received unexpected data, only keys `name`, `kind`, `active`, `interval`, `timeout` are required."),
+		responder.Error(env.NewValidation("Received unexpected data, only keys `name`, `kind`, `active`, `interval`, `timeout` are required."),
 			http.StatusBadRequest)
 		return
 	}
 
-	err = incoming.Validate()
+	id, time, err := m.Service.CreateMonitor(r.Context(), incoming)
 	if err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
+		status := http.StatusInternalServerError
+		if errors.As(err, &env.Validation{}) {
+			status = http.StatusBadRequest
+		}
 
-	time := internal.NewTimeValue(time.Now())
-	incoming.CreatedAt = time
-	incoming.UpdatedAt = time
-	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
-	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		responder.Error(err, status)
 		return
 	}
 
 	responder.Data(internal.CreatedTimestampValue{
-		Id: id,
-		TimestampValue: internal.TimestampValue{
-			Time: time,
-		},
+		Id:             id,
+		TimestampValue: time,
 	}, http.StatusCreated)
 }
 
@@ -224,21 +218,19 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	var incoming monitor.Monitor
 	err = StrictDecoder(r.Body).Decode(&incoming)
 	if err != nil {
-		// TODO: Bundle "err".
 		responder.Error(env.NewValidation("Received unexpected data, only keys `id`, `name`, `kind`, `active`, `interval`, `timeout` are required."),
 			http.StatusBadRequest)
 		return
 	}
 
-	err = incoming.Validate()
-	if err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
-
 	time, err := m.Service.UpdateMonitor(r.Context(), incoming)
 	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.As(err, &env.Validation{}) {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
 		return
 	}
 

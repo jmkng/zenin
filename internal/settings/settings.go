@@ -24,8 +24,10 @@ type Settings struct {
 func (m Settings) Validate() error {
 	var errors []string
 
-	if m.Delimiters == nil || len(*m.Delimiters) != 2 || strings.TrimSpace((*m.Delimiters)[0]) == "" || strings.TrimSpace((*m.Delimiters)[1]) == "" {
+	if m.Delimiters == nil {
 		errors = append(errors, "value for field `delimiters` is required")
+	} else if len(*m.Delimiters) != 2 || strings.TrimSpace((*m.Delimiters)[0]) == "" || strings.TrimSpace((*m.Delimiters)[1]) == "" {
+		errors = append(errors, "value for field `delimiters` must be an array of two strings")
 	}
 
 	if len(errors) > 0 {
