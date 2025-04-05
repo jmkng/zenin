@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -113,15 +114,14 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = incoming.Validate()
-	if err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
-
 	id, time, err := m.Service.CreateMonitor(r.Context(), incoming)
 	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.As(err, &env.Validation{}) {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
 		return
 	}
 
@@ -225,15 +225,14 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = incoming.Validate()
-	if err != nil {
-		responder.Error(err, http.StatusBadRequest)
-		return
-	}
-
 	time, err := m.Service.UpdateMonitor(r.Context(), incoming)
 	if err != nil {
-		responder.Error(err, http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		if errors.As(err, &env.Validation{}) {
+			status = http.StatusBadRequest
+		}
+
+		responder.Error(err, status)
 		return
 	}
 

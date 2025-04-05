@@ -37,6 +37,10 @@ func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 }
 
 func (s MonitorService) CreateMonitor(ctx context.Context, monitor Monitor) (int, internal.TimestampValue, error) {
+	if err := monitor.Validate(); err != nil {
+		return -1, internal.TimestampValue{}, err
+	}
+
 	time := internal.NewTimeValue(time.Now())
 	monitor.CreatedAt = time
 	monitor.UpdatedAt = time
@@ -63,6 +67,10 @@ func (s MonitorService) CreateMonitor(ctx context.Context, monitor Monitor) (int
 }
 
 func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (internal.TimestampValue, error) {
+	if err := monitor.Validate(); err != nil {
+		return internal.TimestampValue{}, err
+	}
+
 	time := internal.NewTimeValue(time.Now())
 	monitor.UpdatedAt = time
 	id := monitor.Id
