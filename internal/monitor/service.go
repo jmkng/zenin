@@ -65,17 +65,25 @@ func (s MonitorService) CreateMonitor(ctx context.Context, monitor Monitor) (int
 func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (internal.TimestampValue, error) {
 	time := internal.NewTimeValue(time.Now())
 	monitor.UpdatedAt = time
+	id := monitor.Id
 
 	if err := s.Repository.UpdateMonitor(ctx, monitor); err != nil {
 		return internal.TimestampValue{}, err
 	}
 
+	updated, err := s.Repository.SelectMonitor(ctx, 0, &SelectMonitorParams{
+		Id: &[]int{*id},
+	})
+	if err != nil {
+		return internal.TimestampValue{}, err
+	}
+
 	s.Distributor <- StopMessage{
-		Id: *monitor.Id,
+		Id: *id,
 	}
 	if monitor.Active {
 		s.Distributor <- StartMessage{
-			Monitor: monitor,
+			Monitor: updated[0],
 		}
 	}
 
