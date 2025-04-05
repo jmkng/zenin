@@ -70,15 +70,10 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 	responder := NewResponder(w)
 
 	var application account.CreateApplication
-
 	err := StrictDecoder(r.Body).Decode(&application)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
 			http.StatusBadRequest)
-		return
-	}
-	if err := application.Validate(); err != nil {
-		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 
