@@ -119,20 +119,15 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	time := internal.NewTimeValue(time.Now())
-	incoming.CreatedAt = time
-	incoming.UpdatedAt = time
-	id, err := m.Service.Repository.InsertMonitor(r.Context(), incoming)
+	id, time, err := m.Service.CreateMonitor(r.Context(), incoming)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 
 	responder.Data(internal.CreatedTimestampValue{
-		Id: id,
-		TimestampValue: internal.TimestampValue{
-			Time: time,
-		},
+		Id:             id,
+		TimestampValue: time,
 	}, http.StatusCreated)
 }
 

@@ -36,6 +36,32 @@ func (s MonitorService) GetActive(ctx context.Context) ([]Monitor, error) {
 	return resume, err
 }
 
+func (s MonitorService) CreateMonitor(ctx context.Context, monitor Monitor) (int, internal.TimestampValue, error) {
+	time := internal.NewTimeValue(time.Now())
+	monitor.CreatedAt = time
+	monitor.UpdatedAt = time
+	id, err := s.Repository.InsertMonitor(ctx, monitor)
+	if err != nil {
+		return -1, internal.TimestampValue{}, err
+	}
+
+	updated, err := s.Repository.SelectMonitor(ctx, 0, &SelectMonitorParams{
+		Id: &[]int{id},
+	})
+	if err != nil {
+		return -1, internal.TimestampValue{}, err
+	}
+	if monitor.Active {
+		s.Distributor <- StartMessage{
+			Monitor: updated[0],
+		}
+	}
+
+	return id, internal.TimestampValue{
+		Time: time,
+	}, nil
+}
+
 func (s MonitorService) UpdateMonitor(ctx context.Context, monitor Monitor) (internal.TimestampValue, error) {
 	time := internal.NewTimeValue(time.Now())
 	monitor.UpdatedAt = time
