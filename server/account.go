@@ -272,7 +272,7 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 	time, err := a.Service.UpdateAccount(ctx, id, application)
 	if err != nil {
 		status := http.StatusInternalServerError
-		if _, ok := err.(env.Validation); ok {
+		if errors.As(err, &env.Validation{}) {
 			status = http.StatusBadRequest
 		}
 
