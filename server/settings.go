@@ -87,7 +87,7 @@ func (a SettingsProvider) HandleUpdateSettings(w http.ResponseWriter, r *http.Re
 	responder := NewResponder(w)
 
 	var incoming settings.Settings
-	err := StrictDecoder(r.Body).Decode(&incoming)
+	err := Decoder(r.Body).Decode(&incoming)
 	if err != nil {
 		responder.Error(env.NewValidation("Received unexpected data, only key `delimiters` is required."),
 			http.StatusBadRequest)

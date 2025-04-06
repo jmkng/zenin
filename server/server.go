@@ -51,10 +51,9 @@ type TlsConfig struct {
 	Key  []byte
 }
 
-// StrictDecoder returns a `*json.Decoder` with `DisallowUnknownFields` set.
-func StrictDecoder(r io.Reader) *json.Decoder {
+// Decoder returns a [*json.Decoder].
+func Decoder(r io.Reader) *json.Decoder {
 	d := json.NewDecoder(r)
-	d.DisallowUnknownFields()
 	return d
 }
 

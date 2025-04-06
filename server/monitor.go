@@ -106,7 +106,7 @@ func (m MonitorProvider) HandleCreateMonitor(w http.ResponseWriter, r *http.Requ
 	responder := NewResponder(w)
 
 	var incoming monitor.Monitor
-	err := StrictDecoder(r.Body).Decode(&incoming)
+	err := Decoder(r.Body).Decode(&incoming)
 	if err != nil {
 		responder.Error(env.NewValidation("Received unexpected data, only keys `name`, `kind`, `active`, `interval`, `timeout` are required."),
 			http.StatusBadRequest)
