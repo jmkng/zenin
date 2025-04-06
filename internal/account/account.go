@@ -3,6 +3,7 @@ package account
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 
@@ -60,11 +61,21 @@ type CreateApplication struct {
 // The error will always be `env.Validation`.
 func (c CreateApplication) Validate() error {
 	validation := env.NewValidation()
+
+	var missing []string
 	if c.Username == "" {
-		validation.Join(usernameRequiredError)
+		missing = append(missing, "username")
 	}
-	if !isValidAccountPassword(c.PasswordPlainText) {
-		validation.Join(invalidPasswordError)
+	if c.PasswordPlainText == "" {
+		missing = append(missing, "password")
+	} else {
+		if !isValidAccountPassword(c.PasswordPlainText) {
+			validation.Join(invalidPasswordError)
+		}
+	}
+
+	if len(missing) > 0 {
+		validation.Push(fmt.Sprintf("Missing required fields: %s.", strings.Join(missing, ", ")))
 	}
 	if !validation.Empty() {
 		return validation
