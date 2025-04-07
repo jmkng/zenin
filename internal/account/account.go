@@ -129,6 +129,4 @@ func isValidAccountPassword(p string) bool {
 	return true
 }
 
-var invalidPasswordError env.Validation = env.NewValidation("Password must be between 8-100 characters, including upper and lowercase letters and at least one number.")
-
-var usernameRequiredError env.Validation = env.NewValidation("Username is required.")
+var invalidPasswordError = env.NewValidation("Password must be between 8-100 characters, including upper and lowercase letters and at least one number.")
