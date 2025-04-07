@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/jmkng/zenin/internal"
@@ -21,17 +22,22 @@ type Settings struct {
 	Delimiters *internal.ArrayValue `json:"delimiters"`
 }
 
+// Validate will validate the [Settings], returning a [env.Validation] if errors are found.
 func (m Settings) Validate() error {
-	var errors []string
+	validation := env.NewValidation()
 
+	var missing []string
 	if m.Delimiters == nil {
-		errors = append(errors, "value for field `delimiters` is required")
+		missing = append(missing, "delimiters")
 	} else if len(*m.Delimiters) != 2 || strings.TrimSpace((*m.Delimiters)[0]) == "" || strings.TrimSpace((*m.Delimiters)[1]) == "" {
-		errors = append(errors, "value for field `delimiters` must be an array of two strings")
+		validation.Push("Delimiters must be an array of two strings.")
+	}
+	if len(missing) > 0 {
+		validation.Push(fmt.Sprintf("Missing required fields: %s.", strings.Join(missing, ", ")))
 	}
 
-	if len(errors) > 0 {
-		return env.NewValidation(errors...)
+	if !validation.Empty() {
+		return validation
 	}
 	return nil
 }

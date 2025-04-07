@@ -3,8 +3,10 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/jmkng/zenin/internal"
+	"github.com/jmkng/zenin/internal/env"
 	"github.com/jmkng/zenin/internal/measurement"
 	"github.com/jmkng/zenin/pkg/sql"
 )
@@ -57,6 +59,27 @@ func (s SelectMonitorParams) Inject(builder *sql.Builder) {
 		builder.Push(x)
 		builder.BindString(kind)
 	}
+}
+
+// Validate will validate the [SelectMonitorParams], returning a [env.Validation] if errors are found.
+func (s SelectMonitorParams) Validate() error {
+	validation := env.NewValidation()
+
+	var missing []string
+	if s.Id == nil || len(*s.Id) == 0 {
+		missing = append(missing, "id")
+	}
+	if s.Active == nil {
+		missing = append(missing, "active")
+	}
+	if len(missing) > 0 {
+		validation.Push(fmt.Sprintf("Missing required query parameters: %s.", strings.Join(missing, ", ")))
+	}
+
+	if !validation.Empty() {
+		return validation
+	}
+	return nil
 }
 
 // SelectMeasurementParams is a set of parameters used to narrow the scope of the `SelectMeasurement`

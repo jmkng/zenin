@@ -45,15 +45,16 @@ func (m MeasurementProvider) Mux() http.Handler {
 
 func (m MeasurementProvider) HandleGetCertificates(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	param := chi.URLParam(r, "id")
-	parsed, err := strconv.Atoi(param)
+	id, err := strconv.Atoi(param)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
 		return
 	}
 
-	certificates, err := m.Service.Repository.SelectCertificate(r.Context(), parsed)
+	certificates, err := m.Service.Repository.SelectCertificate(r.Context(), id)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -72,7 +73,7 @@ func (m MeasurementProvider) HandleDeleteMeasurements(w http.ResponseWriter, r *
 
 	id := scanQueryParameterIds(r.URL.Query())
 	if len(id) == 0 {
-		responder.Error(env.NewValidation("Expected `id` query parameter."),
+		responder.Error(env.NewValidation(`Missing "id" query parameter.`),
 			http.StatusBadRequest)
 		return
 	}

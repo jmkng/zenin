@@ -34,7 +34,7 @@ func (v Validation) Empty() bool {
 	return len(v.messages) == 0
 }
 
-// Join will add one `Validation` to another.
+// Join will add the messages in the provided [Validation] to this one.
 func (v *Validation) Join(o Validation) {
 	for _, n := range o.Messages() {
 		v.Push(n)

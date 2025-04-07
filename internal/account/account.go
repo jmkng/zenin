@@ -56,9 +56,7 @@ type CreateApplication struct {
 	Root              bool   `json:"-"`
 }
 
-// Validate will return an error if the `CreateApplication` is in an invalid state.
-//
-// The error will always be `env.Validation`.
+// Validate will validate the [CreateApplication], returning a [env.Validation] if errors are found.
 func (c CreateApplication) Validate() error {
 	validation := env.NewValidation()
 
@@ -73,10 +71,10 @@ func (c CreateApplication) Validate() error {
 			validation.Join(invalidPasswordError)
 		}
 	}
-
 	if len(missing) > 0 {
 		validation.Push(fmt.Sprintf("Missing required fields: %s.", strings.Join(missing, ", ")))
 	}
+
 	if !validation.Empty() {
 		return validation
 	}
@@ -88,19 +86,21 @@ type UpdateApplication struct {
 	PasswordPlainText *string `json:"password"`
 }
 
-// Validate will return an error if the `UpdateApplication` is in an invalid state.
-//
-// The error will always be `env.Validation`.
+// Validate will validate the [UpdateApplication], returning a [env.Validation] if errors are found.
 func (u UpdateApplication) Validate() error {
 	validation := env.NewValidation()
+	var missing []string
+
 	if u.Username == "" {
-		validation.Join(env.NewValidation("Username is required."))
+		missing = append(missing, "username")
 	}
-	if u.PasswordPlainText != nil {
-		if !isValidAccountPassword(*u.PasswordPlainText) {
-			validation.Join(invalidPasswordError)
-		}
+	if u.PasswordPlainText != nil && !isValidAccountPassword(*u.PasswordPlainText) {
+		validation.Join(invalidPasswordError)
 	}
+	if len(missing) > 0 {
+		validation.Push(fmt.Sprintf("Missing required fields: %s.", strings.Join(missing, ", ")))
+	}
+
 	if !validation.Empty() {
 		return validation
 	}

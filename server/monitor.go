@@ -134,7 +134,7 @@ func (m MonitorProvider) HandleDeleteMonitor(w http.ResponseWriter, r *http.Requ
 
 	params := newSelectMonitorParamsFromQuery(r.URL.Query())
 	if len(*params.Id) == 0 {
-		responder.Error(env.NewValidation("Expected `id` query parameter."),
+		responder.Error(env.NewValidation(`Missing "id" query parameter.`),
 			http.StatusBadRequest)
 		return
 	}
@@ -156,22 +156,15 @@ func (m MonitorProvider) HandleToggleMonitor(w http.ResponseWriter, r *http.Requ
 	responder := NewResponder(w)
 
 	params := newSelectMonitorParamsFromQuery(r.URL.Query())
-	validation := env.NewValidation()
-	if params.Id == nil || len(*params.Id) == 0 {
-		validation.Push("Expected `id` query parameter.")
-	}
-	if params.Active == nil {
-		validation.Push("Expected `active` query parameter.")
-	}
-	if !validation.Empty() {
-		responder.Error(validation, http.StatusBadRequest)
+	if err := params.Validate(); err != nil {
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 
 	// Make sure `Kind` doesn't interfere with below query.
 	params.Kind = nil
-
 	time := internal.NewTimeValue(time.Now())
+
 	m.Service.Repository.ToggleMonitor(r.Context(), *params.Id, *params.Active, time)
 	if *params.Active {
 		monitors, err := m.Service.Repository.SelectMonitor(r.Context(), 0, &params)
@@ -195,7 +188,7 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	responder := NewResponder(w)
 
 	param := chi.URLParam(r, "id")
-	parsed, err := strconv.Atoi(param)
+	id, err := strconv.Atoi(param)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
@@ -203,13 +196,13 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 	}
 
 	found, err := m.Service.Repository.SelectMonitor(r.Context(),
-		0, &monitor.SelectMonitorParams{Id: &[]int{parsed}})
+		0, &monitor.SelectMonitorParams{Id: &[]int{id}})
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 	if len(found) == 0 {
-		message := fmt.Sprintf("Monitor with id `%v` does not exist.", param)
+		message := fmt.Sprintf(`Monitor with id "%d" does not exist.`, id)
 		responder.Error(env.NewValidation(message), http.StatusBadRequest)
 		return
 	}
@@ -238,8 +231,8 @@ func (m MonitorProvider) HandleUpdateMonitor(w http.ResponseWriter, r *http.Requ
 func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	rid := chi.URLParam(r, "id")
-	pid, err := strconv.Atoi(rid)
+	param := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(param)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
@@ -247,11 +240,7 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 	}
 
 	params := newSelectMeasurementParamsFromQuery(r.URL.Query())
-
-	measurements, err := m.
-		Service.
-		Repository.
-		SelectMeasurement(r.Context(), pid, &params)
+	measurements, err := m.Service.Repository.SelectMeasurement(r.Context(), id, &params)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
@@ -268,8 +257,8 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
 
-	rid := chi.URLParam(r, "id")
-	pid, err := strconv.Atoi(rid)
+	param := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(param)
 	if err != nil {
 		responder.Error(env.NewValidation("Expected integer url parameter."),
 			http.StatusBadRequest)
@@ -277,13 +266,13 @@ func (m MonitorProvider) HandlePollMonitor(w http.ResponseWriter, r *http.Reques
 	}
 
 	found, err := m.Service.Repository.SelectMonitor(r.Context(),
-		0, &monitor.SelectMonitorParams{Id: &[]int{pid}})
+		0, &monitor.SelectMonitorParams{Id: &[]int{id}})
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 	if len(found) == 0 {
-		message := fmt.Sprintf("Monitor with id `%v` does not exist.", pid)
+		message := fmt.Sprintf(`Monitor with id "%d" does not exist.`, id)
 		responder.Error(env.NewValidation(message), http.StatusBadRequest)
 		return
 	}

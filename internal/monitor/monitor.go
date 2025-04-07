@@ -184,74 +184,71 @@ func (m Monitor) Poll(s settings.Settings) measurement.Measurement {
 	return e
 }
 
-// Validate will return an error if the `Monitor` is in an invalid state.
+// Validate will validate the [Monitor], returning a [env.Validation] if errors are found.
 func (m Monitor) Validate() error {
-	errors := []string{}
+	validation := env.NewValidation()
 
-	require := func(value string) {
-		message := fmt.Sprintf("value for field `%v` is required", value)
-		errors = append(errors, message)
-	}
-
-	// Monitor
+	var missing []string
 	if m.Interval == 0 {
-		require("interval")
+		missing = append(missing, "interval")
 	}
 	if m.Timeout == 0 {
-		require("timeout")
+		missing = append(missing, "timeout")
 	}
-	if m.Name == "" {
-		require("name")
-	}
-
-	kind, err := measurement.ProbeKindFromString(string(m.Kind))
-	if err != nil {
-		require("kind")
-	}
-	switch kind {
-	case measurement.HTTP:
-		if m.RemoteAddress == nil {
-			require("remoteAddress")
-		}
-		if m.HTTPRange == nil {
-			require("httpRange")
-		}
-	case measurement.TCP, measurement.ICMP:
-		if m.RemoteAddress == nil {
-			require("remoteAddress")
-		}
-	case measurement.Plugin:
-		if m.PluginName == nil {
-			require("pluginName")
-		}
+	if strings.TrimSpace(m.Name) == "" {
+		missing = append(missing, "name")
 	}
 
-	// Events
-	name := false
-	args := false
-	for _, v := range m.Events {
-		if !name {
-			if v.PluginName == nil || strings.TrimSpace(*v.PluginName) == "" {
-				errors = append(errors, "event must have a plugin name")
-				name = true
+	if _, err := measurement.ProbeKindFromString(string(m.Kind)); err != nil {
+		missing = append(missing, "kind")
+	} else {
+		switch m.Kind {
+		case measurement.HTTP:
+			if m.RemoteAddress == nil {
+				missing = append(missing, "remoteAddress")
+			}
+			if m.HTTPRange == nil {
+				missing = append(missing, "httpRange")
+			}
+		case measurement.TCP, measurement.ICMP:
+			if m.RemoteAddress == nil {
+				missing = append(missing, "remoteAddress")
+			}
+		case measurement.Plugin:
+			if m.PluginName == nil {
+				missing = append(missing, "pluginName")
 			}
 		}
-		if !args {
+	}
+	if len(missing) > 0 {
+		validation.Push(fmt.Sprintf("Missing required fields: %s.", strings.Join(missing, ", ")))
+	}
+
+	hadEventNameError := false
+	hadEventArgsError := false
+	for _, v := range m.Events {
+		if !hadEventNameError {
+			if v.PluginName == nil || strings.TrimSpace(*v.PluginName) == "" {
+				validation.Push("Event must have a plugin name.")
+				hadEventNameError = true
+			}
+		}
+		if !hadEventArgsError {
 			for _, v := range v.PluginArgs {
 				if strings.TrimSpace(v) == "" {
-					errors = append(errors, "event arguments must not be empty")
-					args = true
+					validation.Push("Event arguments must not be empty.")
+					hadEventArgsError = true
 				}
 			}
 		}
 
-		if name && args {
+		if hadEventNameError && hadEventArgsError {
 			break
 		}
 	}
 
-	if len(errors) > 0 {
-		return env.NewValidation(errors...)
+	if !validation.Empty() {
+		return validation
 	}
 	return nil
 }

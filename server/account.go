@@ -208,8 +208,7 @@ func (a AccountProvider) HandleDeleteAccount(w http.ResponseWriter, r *http.Requ
 
 	id := scanQueryParameterIds(r.URL.Query())
 	if len(id) == 0 {
-		responder.Error(env.NewValidation("Expected `id` query parameter."),
-			http.StatusBadRequest)
+		responder.Error(env.NewValidation(`Missing "id" query parameter.`), http.StatusBadRequest)
 		return
 	}
 
@@ -229,8 +228,7 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 	param := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(param)
 	if err != nil {
-		responder.Error(env.NewValidation("Expected integer url parameter."),
-			http.StatusBadRequest)
+		responder.Error(env.NewValidation("Expected integer url parameter."), http.StatusBadRequest)
 		return
 	}
 
