@@ -93,23 +93,6 @@ func (r *Responder) Error(err error, status int) {
 	env.Error(origin.Error())
 }
 
-// Example will send an [ExamplePacket] and a 400 status code.
-func (r *Responder) Example(example map[string]any, errors ...string) {
-	r.writer.Header().Add(ContentType, ContentTypeApplicationJson)
-	r.writer.WriteHeader(http.StatusBadRequest)
-
-	packet := NewExamplePacket(example, errors...)
-	response, err := packet.JSON()
-	if err != nil {
-		env.Error("responder failed to serialize response", "error", err)
-		return
-	}
-
-	if _, err = r.writer.Write(response); err != nil {
-		env.Error("responder failed to write response", "error", err)
-	}
-}
-
 // Redirect will set a location header and send a status code.
 func (r *Responder) Redirect(location string, status int) {
 	r.writer.Header().Add(Location, location)
@@ -138,29 +121,6 @@ func (e ErrorPacket) JSON() ([]byte, error) {
 	bytes, err := json.Marshal(e)
 	if err != nil {
 		return bytes, fmt.Errorf("failed to marshal error packet: %w", err)
-	}
-	return bytes, nil
-}
-
-// NewExamplePacket returns a new `ExamplePacket` containing error messages and example data.
-func NewExamplePacket(example map[string]any, errors ...string) ExamplePacket {
-	return ExamplePacket{
-		ErrorPacket: NewErrorPacket(errors...),
-		Example:     example,
-	}
-}
-
-// ExamplePacket is used to send an [ErrorPacket] and example data.
-type ExamplePacket struct {
-	ErrorPacket
-	Example map[string]any `json:"example"`
-}
-
-// JSON will marshal the `ExamplePacket` as a JSON string, returning the bytes: { "errors": ..., "example": ... }
-func (e ExamplePacket) JSON() ([]byte, error) {
-	bytes, err := json.Marshal(e)
-	if err != nil {
-		return bytes, fmt.Errorf("failed to marshal example packet: %w", err)
 	}
 	return bytes, nil
 }
