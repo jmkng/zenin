@@ -254,6 +254,7 @@ func (m MonitorProvider) HandleGetMeasurements(w http.ResponseWriter, r *http.Re
 		SelectMeasurement(r.Context(), pid, &params)
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
+		return
 	}
 	if measurements == nil {
 		measurements = make([]measurement.Measurement, 0)
