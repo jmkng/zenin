@@ -44,8 +44,8 @@ func (a SettingsProvider) Mux() http.Handler {
 	router.Group(func(private chi.Router) {
 		private.Use(Authenticate)
 		private.Get("/", a.HandleGetSettings)
-		private.Get("/themes", a.HandleGetThemes)
 		private.Post("/", a.HandleUpdateSettings)
+		private.Get("/themes", a.HandleGetThemes)
 	})
 	//////////////////
 	router.Get("/themes/active", a.HandleGetActiveTheme)
@@ -55,13 +55,16 @@ func (a SettingsProvider) Mux() http.Handler {
 
 func (a SettingsProvider) HandleGetSettings(w http.ResponseWriter, r *http.Request) {
 	responder := NewResponder(w)
+
 	s, err := a.Service.GetSettings(r.Context())
 	if err != nil {
 		responder.Error(err, http.StatusInternalServerError)
 		return
 	}
 
-	includeThemes, _ := strconv.ParseBool(r.URL.Query().Get("themes"))
+	param := r.URL.Query().Get("themes")
+	includeThemes, _ := strconv.ParseBool(param)
+
 	if includeThemes {
 		themes, err := a.Service.GetThemes()
 		if err != nil {
@@ -71,6 +74,7 @@ func (a SettingsProvider) HandleGetSettings(w http.ResponseWriter, r *http.Reque
 		if themes == nil {
 			themes = make([]string, 0)
 		}
+
 		responder.Data(struct {
 			Settings settings.Settings `json:"settings"`
 			Themes   []string          `json:"themes"`
@@ -89,8 +93,7 @@ func (a SettingsProvider) HandleUpdateSettings(w http.ResponseWriter, r *http.Re
 	var incoming settings.Settings
 	err := Decoder(r.Body).Decode(&incoming)
 	if err != nil {
-		responder.Error(env.NewValidation("Received unexpected data, only key `delimiters` is required."),
-			http.StatusBadRequest)
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 

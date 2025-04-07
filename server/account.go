@@ -71,6 +71,8 @@ func (a AccountProvider) HandleCreateClaim(w http.ResponseWriter, r *http.Reques
 
 	var application account.CreateApplication
 	err := Decoder(r.Body).Decode(&application)
+	if err != nil {
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 
@@ -106,6 +108,8 @@ func (a AccountProvider) HandleAuthenticate(w http.ResponseWriter, r *http.Reque
 
 	var application account.CreateApplication
 	err := Decoder(r.Body).Decode(&application)
+	if err != nil {
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 
@@ -176,8 +180,7 @@ func (a AccountProvider) HandleCreateAccount(w http.ResponseWriter, r *http.Requ
 	var application account.CreateApplication
 	err := Decoder(r.Body).Decode(&application)
 	if err != nil {
-		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
-			http.StatusBadRequest)
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 
@@ -249,10 +252,9 @@ func (a AccountProvider) HandleUpdateAccount(w http.ResponseWriter, r *http.Requ
 	}
 
 	var application account.UpdateApplication
-	err = StrictDecoder(r.Body).Decode(&application)
+	err = Decoder(r.Body).Decode(&application)
 	if err != nil {
-		responder.Error(env.NewValidation("Expected `username` and `password` keys."),
-			http.StatusBadRequest)
+		responder.Error(err, http.StatusBadRequest)
 		return
 	}
 
