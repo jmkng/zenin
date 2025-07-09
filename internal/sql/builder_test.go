@@ -4,8 +4,6 @@ import (
 	"testing"
 )
 
-// TODO
-
 func TestBuilderPush(t *testing.T) {
 	b := NewBuilder(MarkerQuestion)
 	b.Push("SELECT")
@@ -15,7 +13,7 @@ func TestBuilderPush(t *testing.T) {
 	got := b.String()
 	want := "SELECT * FROM users"
 	if got != want {
-		t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string: got: %q want: %q", got, want)
 	}
 }
 
@@ -27,7 +25,7 @@ func TestBuilderBind(t *testing.T) {
 	got := b.String()
 	want := "WHERE age > $1"
 	if got != want {
-		t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string: got: %q want: %q", got, want)
 	}
 
 	a := b.Args()
@@ -44,7 +42,7 @@ func TestBuilderSpread(t *testing.T) {
 		b.Spread(1, 2, 3)
 		got := b.String()
 		if got != want {
-			t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+			t.Errorf("unexpected query string: got: %q want: %q", got, want)
 		}
 	})
 
@@ -54,7 +52,7 @@ func TestBuilderSpread(t *testing.T) {
 		Spread(b, id...)
 		got := b.String()
 		if got != want {
-			t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+			t.Errorf("unexpected query string: got: %q want: %q", got, want)
 		}
 	})
 
@@ -63,19 +61,23 @@ func TestBuilderSpread(t *testing.T) {
 		Spread(b, 1, 2, 3)
 		got := b.String()
 		if got != want {
-			t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+			t.Errorf("unexpected query string: got: %q want: %q", got, want)
 		}
 	})
 }
 
 func TestBuilderSpreadBind(t *testing.T) {
+	wantQuery := "?,?,?"
+
 	t.Run("method variadic spreadbind", func(t *testing.T) {
 		b := NewBuilder(MarkerQuestion)
 		b.SpreadBind("a", "b", "c")
+
 		got := b.String()
-		if got != "?,?,?" {
-			t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, "?,?,?")
+		if got != wantQuery {
+			t.Errorf("unexpected query string: got: %q want: %q", got, wantQuery)
 		}
+
 		gotArgs := b.Args()
 		if len(gotArgs) != 3 || gotArgs[0] != "a" || gotArgs[1] != "b" || gotArgs[2] != "c" {
 			t.Errorf("unexpected args: %v", gotArgs)
@@ -84,12 +86,14 @@ func TestBuilderSpreadBind(t *testing.T) {
 
 	t.Run("generic function slice spreadbind", func(t *testing.T) {
 		b := NewBuilder(MarkerQuestion)
-		id := []string{"a", "b", "c"}
-		SpreadBind(b, id...)
+		args := []string{"a", "b", "c"}
+		SpreadBind(b, args...)
+
 		got := b.String()
-		if got != "?,?,?" {
-			t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, "?,?,?")
+		if got != wantQuery {
+			t.Errorf("unexpected query string: got: %q want: %q", got, wantQuery)
 		}
+
 		gotArgs := b.Args()
 		if len(gotArgs) != 3 || gotArgs[0] != "a" || gotArgs[1] != "b" || gotArgs[2] != "c" {
 			t.Errorf("unexpected args: %v", gotArgs)
@@ -99,10 +103,12 @@ func TestBuilderSpreadBind(t *testing.T) {
 	t.Run("generic function variadic spreadbind", func(t *testing.T) {
 		b := NewBuilder(MarkerQuestion)
 		SpreadBind(b, "a", "b", "c")
+
 		got := b.String()
-		if got != "?,?,?" {
-			t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, "?,?,?")
+		if got != wantQuery {
+			t.Errorf("unexpected query string: got: %q want: %q", got, wantQuery)
 		}
+
 		gotArgs := b.Args()
 		if len(gotArgs) != 3 || gotArgs[0] != "a" || gotArgs[1] != "b" || gotArgs[2] != "c" {
 			t.Errorf("unexpected args: %v", gotArgs)
@@ -117,7 +123,7 @@ func TestBuilderParenthesize(t *testing.T) {
 	got := b.String()
 	want := "(foo,bar)"
 	if got != want {
-		t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string: got: %q want: %q", got, want)
 	}
 }
 
@@ -128,7 +134,7 @@ func TestBuilderParenthesizeBind(t *testing.T) {
 	got := b.String()
 	want := "($1,$2,$3)"
 	if got != want {
-		t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string: got: %q want: %q", got, want)
 	}
 
 	a := b.Args()
@@ -168,7 +174,7 @@ func TestWhereExpression(t *testing.T) {
 	got := b.String()
 	want := "WHERE age > 18"
 	if got != want {
-		t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string: got: %q want: %q", got, want)
 	}
 }
 
@@ -181,7 +187,7 @@ func TestWhereExpressionBind(t *testing.T) {
 	got := b.String()
 	want := "WHERE score >= $1"
 	if got != want {
-		t.Errorf("unexpected query string:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string: got: %q want: %q", got, want)
 	}
 
 	a := b.Args()
@@ -198,7 +204,7 @@ func TestAdvanceNumbered(t *testing.T) {
 	got := b.String()
 	want := "$4"
 	if got != want {
-		t.Errorf("unexpected query string after advance:\ngot: %q\nwant: %q", got, want)
+		t.Errorf("unexpected query string after advance: got: %q want: %q", got, want)
 	}
 }
 
