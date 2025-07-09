@@ -13,8 +13,8 @@ import (
 // (...) ignoring struct tags (see below), x's type and T are not type parameters but have identical underlying types.
 
 // TagParameters converts params to an equivalent tagged parameters struct.
-// Panics if params is not a parameters struct from the [probe] package.
-func TagParameters(params any) any {
+// Panics if params is not a recognized struct from the [probe] package.
+func TagParameters(params probe.Poller) any {
 	switch v := params.(type) {
 	case probe.Plugin:
 		return Plugin(v)
@@ -35,9 +35,9 @@ func UntagParameters(params any) probe.Poller {
 }
 
 // MarshalParameters returns the JSON encoding of params.
-// Panics if params is not a parameters struct from the [probe] package,
+// Panics if params is not a recognized struct from the [probe] package,
 // or marshaling fails.
-func MarshalParameters(params any) []byte {
+func MarshalParameters(params probe.Poller) []byte {
 	tagged := TagParameters(params)
 	b, err := json.Marshal(tagged)
 	if err != nil {
