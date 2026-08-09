@@ -6,13 +6,18 @@ pub struct StringId(u32);
 
 impl StringId {
     #[inline]
-    pub fn from_f64(val: f64) -> Self {
-        StringId(val as u32)
+    pub fn new(val: u32) -> Self {
+        Self(val)
     }
 
     #[inline]
-    pub fn into_f64(self) -> f64 {
+    pub fn f64(&self) -> f64 {
         self.0 as f64
+    }
+
+    #[inline]
+    pub fn u32(&self) -> u32 {
+        self.0
     }
 }
 
@@ -37,7 +42,7 @@ impl StringPool {
     }
 
     /// Returns a StringId for text, interning it if missing.
-    pub fn id(&mut self, text: &str) -> StringId {
+    pub fn id_or_insert(&mut self, text: &str) -> StringId {
         if let Some(&id) = self.str_to_id.get(text) {
             return id;
         }
@@ -64,19 +69,19 @@ mod tests {
     #[test]
     fn test_id_f64_roundtrip() {
         let id = StringId(42);
-        let float_val = id.into_f64();
+        let float_val = id.f64();
 
         assert_eq!(float_val, 42.0);
-        assert_eq!(StringId::from_f64(float_val), id);
+        assert_eq!(StringId::new(float_val as u32), id);
     }
 
     #[test]
     fn test_insert_is_sequential() {
         let mut dict = StringPool::new();
 
-        let id0 = dict.id("a.b");
-        let id1 = dict.id("c.d");
-        let id2 = dict.id("efg");
+        let id0 = dict.id_or_insert("a.b");
+        let id1 = dict.id_or_insert("c.d");
+        let id2 = dict.id_or_insert("efg");
 
         assert_eq!(id0, StringId(0));
         assert_eq!(id1, StringId(1));
@@ -87,9 +92,9 @@ mod tests {
     fn test_dedup() {
         let mut dict = StringPool::new();
 
-        let id_first = dict.id("a.b");
-        let _id_other = dict.id("c.d");
-        let id_second = dict.id("a.b");
+        let id_first = dict.id_or_insert("a.b");
+        let _id_other = dict.id_or_insert("c.d");
+        let id_second = dict.id_or_insert("a.b");
 
         assert_eq!(id_first, StringId(0));
         // Should return the original.
@@ -101,8 +106,8 @@ mod tests {
     fn test_id_to_str() {
         let mut dict = StringPool::new();
 
-        let a_id = dict.id("a");
-        let b_id = dict.id("b");
+        let a_id = dict.id_or_insert("a");
+        let b_id = dict.id_or_insert("b");
 
         assert_eq!(dict.str(a_id), Some("a"));
         assert_eq!(dict.str(b_id), Some("b"));
@@ -112,7 +117,7 @@ mod tests {
     fn test_oob_is_none() {
         let mut dict = StringPool::new();
         assert_eq!(dict.str(StringId(999)), None);
-        dict.id("a");
+        dict.id_or_insert("a");
         assert_eq!(dict.str(StringId(999)), None);
         assert_eq!(dict.str(StringId(0)), Some("a"));
     }
@@ -121,10 +126,10 @@ mod tests {
     fn test_empty_string_works() {
         let mut dict = StringPool::new();
 
-        let empty_id = dict.id("");
+        let empty_id = dict.id_or_insert("");
         assert_eq!(dict.str(empty_id), Some(""));
 
-        let empty_id_dup = dict.id("");
+        let empty_id_dup = dict.id_or_insert("");
         assert_eq!(empty_id, empty_id_dup);
     }
 

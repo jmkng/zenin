@@ -128,30 +128,78 @@
 
 #![allow(dead_code)]
 
-use zenin::probe::process;
-use zenin::series::Engine;
-use zenin::string::StringPool;
+use zenin::engine::Engine;
+use zenin::probe::cpu;
 
-/// Allocates value on the heap and returns a static reference to it.
 fn leak<T>(value: T) -> &'static mut T {
     Box::leak(Box::new(value))
 }
 
-fn intern_probe_strings(dict: &mut StringPool) -> StringHandles {
-    StringHandles {
-        probe: process::ProbeHandles::register(dict),
-    }
-}
-
-struct StringHandles {
-    probe: process::ProbeHandles,
-}
+// fn intern_strings(dict: &mut StringPool) -> StringHandles {
+//     StringHandles {
+//         probe: process::ProbeHandles::register(dict),
+//     }
+// }
+//
+// struct StringHandles {
+//     probe: process::ProbeHandles,
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-fn main() {
-    let mut dict = leak(StringPool::new());
-    let handles = intern_probe_strings(&mut dict);
+const DEFAULT_RING_SIZE: usize = 3600;
 
-    let mut engine = Engine::new(1000);
+
+fn main() {
+    let mut engine = Engine::new(DEFAULT_RING_SIZE);
+
+    println!("registering cpu probe...");
+    cpu::CMedicCpuProbe::register(&mut engine);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // let proc = process::ProcessProbe {
+    //     command: "/usr/bin/curl",
+    //     args: &["-s", "https://example.com"],
+    //     timeout_ms: 10,
+    //     stdout_max: 2048,
+    //     stderr_max: 2048,
+    // };
+    //
+    // let now = now();
+    // let timer = Instant::now();
+    //
+    // proc.sample(|name, value| {
+    //     println!("{}: {}: {}", now, name, value);
+    // });
+    //
+    // let elapsed_ms = timer.elapsed().as_secs_f64() * 1000.0;
+    // let duration_ms_id = MetricId::new(strings.id_or_insert("probe.duration_ms"), &[]);
+    // let timeout_ms_f64 = proc.timeout_ms as f64;
+    // let duration_ms = if elapsed_ms >= timeout_ms_f64 {
+    //     timeout_ms_f64
+    // } else {
+    //     elapsed_ms
+    // };
+    //
+    // println!(
+    //     "{}: {}: {}",
+    //     now,
+    //     strings.str(duration_ms_id.name).unwrap(),
+    //     duration_ms
+    // );
 }

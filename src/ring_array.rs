@@ -6,7 +6,10 @@ pub struct RingArray<T> {
 }
 
 impl<T: Default + Clone> RingArray<T> {
+    /// Returns a new RingArray with size cap,
+    /// which must be > 0.
     pub fn new(cap: usize) -> Self {
+        assert!(cap > 0);
         let data: Box<[T]> = vec![T::default(); cap].into_boxed_slice();
         let head: usize = 0;
         let len: usize = 0;
@@ -24,10 +27,6 @@ impl<T: Default + Clone> RingArray<T> {
     }
 
     pub fn push(&mut self, value: T) {
-        if self.cap() == 0 {
-            self.data = vec![T::default(); 2].into_boxed_slice();
-        }
-
         if self.len < self.cap() {
             self.data[self.len] = value;
             self.len += 1;
