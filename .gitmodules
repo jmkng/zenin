@@ -1,0 +1,3 @@
+[submodule "vendor/medic"]
+	path = vendor/medic
+	url = https://github.com/jmkng/medic.git
