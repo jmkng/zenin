@@ -128,8 +128,9 @@
 
 #![allow(dead_code)]
 
+use std::time::Instant;
 use zenin::engine::Engine;
-use zenin::probe::cpu;
+use zenin::probe;
 
 fn leak<T>(value: T) -> &'static mut T {
     Box::leak(Box::new(value))
@@ -149,28 +150,26 @@ fn leak<T>(value: T) -> &'static mut T {
 
 const DEFAULT_RING_SIZE: usize = 3600;
 
-
 fn main() {
     let mut engine = Engine::new(DEFAULT_RING_SIZE);
 
-    println!("registering cpu probe...");
-    cpu::CMedicCpuProbe::register(&mut engine);
+    eprintln!("initializing probes");
 
+    let now = Instant::now();
 
+    let cpu_p = probe::cpu::CMedicCpuProbe::register(&mut engine);
+    eprintln!(
+        "probe {} registration time: {}ms",
+        "cpu",
+        now.elapsed().as_millis()
+    );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    let cpu_p = probe::process::Process::register(&mut engine);
+    eprintln!(
+        "probe {} registration time: {}ms",
+        "cpu",
+        now.elapsed().as_millis()
+    );
 
     // let proc = process::ProcessProbe {
     //     command: "/usr/bin/curl",

@@ -2,7 +2,7 @@ use crate::ring_array::RingArray;
 use crate::string::{StringId, StringPool};
 use core::fmt::{Debug, Result as FmtResult};
 use std::collections::HashMap;
-use std::fmt::Formatter;
+use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::ops::{Index, IndexMut};
 
@@ -68,6 +68,12 @@ impl MetricId {
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct SeriesId(u32);
 
+impl Display for SeriesId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl SeriesId {
     #[inline]
     pub fn new(val: u32) -> Self {
@@ -130,16 +136,17 @@ impl Unit {
     }
 }
 
+#[derive(Debug)]
 pub enum Type {
-    Raw,
+    Point,
     Monotonic,
 }
 
 impl Type {
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Raw => "gauge",
-            Self::Monotonic => "counter",
+            Self::Point => "point",
+            Self::Monotonic => "monotonic",
         }
     }
 }
@@ -185,22 +192,22 @@ impl<T> IndexMut<SeriesId> for SeriesVec<T> {
 }
 
 pub struct Engine {
-    strings: StringPool,
+     strings: StringPool,
 
-    ring_size: usize,
-    series: SeriesVec<MetricArray>,
-    units: SeriesVec<Unit>,
-    types: SeriesVec<Type>,
+     ring_size: usize,
+     series: SeriesVec<MetricArray>,
+     units: SeriesVec<Unit>,
+     types: SeriesVec<Type>,
 
-    identity: HashMap<MetricId, SeriesId>,
-
-    /// The SeriesList must be sorted. This is handled by storing rings in a
-    /// Vec and using length as the SeriesId.
-    name: HashMap<StringId, SeriesList>,
+     identity: HashMap<MetricId, SeriesId>,
 
     /// The SeriesList must be sorted. This is handled by storing rings in a
     /// Vec and using length as the SeriesId.
-    label: HashMap<(StringId, StringId), SeriesList>,
+     name: HashMap<StringId, SeriesList>,
+
+    /// The SeriesList must be sorted. This is handled by storing rings in a
+    /// Vec and using length as the SeriesId.
+     label: HashMap<(StringId, StringId), SeriesList>,
 }
 
 pub enum SaveError {
