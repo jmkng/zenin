@@ -8,7 +8,7 @@ use crate::medic::{
 use std::ffi::c_void;
 
 #[derive(Default)]
-pub struct CoreStatHandles {
+pub struct CoreHandles {
     pub user: SeriesId,
     pub system: SeriesId,
     pub nice: SeriesId,
@@ -16,16 +16,13 @@ pub struct CoreStatHandles {
 }
 
 pub struct CMedicCpuProbe {
-    pub total: CoreStatHandles,
-    pub per_core: Vec<CoreStatHandles>,
+    pub total: CoreHandles,
+    pub per_core: Vec<CoreHandles>,
 }
 
 impl CMedicCpuProbe {
-    pub fn register(engine: &mut Engine) -> Self {
-        // - Per-core mono counter.
-        // - Aggregate mono counter.
-
-        let total = CoreStatHandles {
+    pub fn new(engine: &mut Engine) -> Self {
+        let total = CoreHandles {
             user: engine.register_series(
                 "cpu.time",
                 [("mode", "user")],
@@ -53,8 +50,8 @@ impl CMedicCpuProbe {
         };
 
         // cpu.time{core,"mode="user|system|nice|idle"}
-        let mut reg_core = |core: &str| -> CoreStatHandles {
-            CoreStatHandles {
+        let mut reg_core = |core: &str| -> CoreHandles {
+            CoreHandles {
                 user: engine.register_series(
                     "cpu.time",
                     [("core", core), ("mode", "user")],
@@ -84,7 +81,7 @@ impl CMedicCpuProbe {
 
         let detected = unsafe { medic_cpu_num_logical() }.max(1) as usize;
 
-        let mut per_core: Vec<CoreStatHandles> = Vec::with_capacity(detected);
+        let mut per_core: Vec<CoreHandles> = Vec::with_capacity(detected);
 
         for i in 0..detected {
             let core_name = i.to_string();
