@@ -3,6 +3,7 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub mod engine;
+pub mod job;
 pub mod probe;
 pub mod ring_array;
 pub mod string;

@@ -126,9 +126,9 @@
  * ```
  */
 
-#![allow(dead_code)]
+#![allow(dead_code, warnings)]
 
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use zenin::engine::Engine;
 use zenin::probe;
 
@@ -153,52 +153,15 @@ const DEFAULT_RING_SIZE: usize = 3600;
 fn main() {
     let mut engine = Engine::new(DEFAULT_RING_SIZE);
 
-    eprintln!("initializing probes");
+    // We have jobs on disk that represent process probe instances for now...
+    // later they will represent any tool probe.
 
-    let now = Instant::now();
+    let mut pcpu = probe::cpu::CMedicCpuProbe::new(&mut engine);
+    let mut pproc = probe::process::ProcessProbe::new(&mut engine, "/usr/bin/curl", ["-I"], Duration::from_secs(5));
 
-    let cpu_p = probe::cpu::CMedicCpuProbe::register(&mut engine);
-    eprintln!(
-        "probe {} registration time: {}ms",
-        "cpu",
-        now.elapsed().as_millis()
-    );
 
-    let cpu_p = probe::process::Process::register(&mut engine);
-    eprintln!(
-        "probe {} registration time: {}ms",
-        "cpu",
-        now.elapsed().as_millis()
-    );
-
-    // let proc = process::ProcessProbe {
-    //     command: "/usr/bin/curl",
-    //     args: &["-s", "https://example.com"],
-    //     timeout_ms: 10,
-    //     stdout_max: 2048,
-    //     stderr_max: 2048,
-    // };
-    //
-    // let now = now();
-    // let timer = Instant::now();
-    //
-    // proc.sample(|name, value| {
-    //     println!("{}: {}: {}", now, name, value);
-    // });
-    //
-    // let elapsed_ms = timer.elapsed().as_secs_f64() * 1000.0;
-    // let duration_ms_id = MetricId::new(strings.id_or_insert("probe.duration_ms"), &[]);
-    // let timeout_ms_f64 = proc.timeout_ms as f64;
-    // let duration_ms = if elapsed_ms >= timeout_ms_f64 {
-    //     timeout_ms_f64
-    // } else {
-    //     elapsed_ms
-    // };
-    //
-    // println!(
-    //     "{}: {}: {}",
-    //     now,
-    //     strings.str(duration_ms_id.name).unwrap(),
-    //     duration_ms
-    // );
+    pproc.sample(|series, value| {
+        let metric = engine.metric(series);
+        println!("{metric}: {value}");
+    });
 }
