@@ -6,7 +6,7 @@ use std::fmt::{Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::ops::{Index, IndexMut};
 
-#[derive(Clone, Eq)]
+#[derive(Clone, Copy, Eq)]
 pub struct MetricId {
     pub name: StringId,
     /// Labels are canonicalized.
@@ -76,7 +76,7 @@ impl Display for SeriesId {
 
 impl SeriesId {
     #[inline]
-    pub fn new(val: u32) -> Self {
+    fn new(val: u32) -> Self {
         Self(val)
     }
 
@@ -115,23 +115,21 @@ impl SeriesList {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum Unit {
-    Ratio = 0,
-    Count = 1,
-    Bytes = 2,
-    Seconds = 3,
-    Hertz = 4,
-    Celsius = 5,
+    None = 0,
+    Ratio = 1,
+    Count = 2,
+    Bytes = 3,
+    Seconds = 4,
 }
 
 impl Unit {
     pub const fn as_str(self) -> &'static str {
         match self {
+            Unit::None => "none",
             Unit::Ratio => "ratio",
             Unit::Count => "count",
             Unit::Bytes => "bytes",
             Unit::Seconds => "seconds",
-            Unit::Hertz => "hz",
-            Unit::Celsius => "celsius",
         }
     }
 }
@@ -192,29 +190,69 @@ impl<T> IndexMut<SeriesId> for SeriesVec<T> {
 }
 
 pub struct Engine {
-     strings: StringPool,
+    strings: StringPool,
 
-     ring_size: usize,
-     series: SeriesVec<MetricArray>,
-     units: SeriesVec<Unit>,
-     types: SeriesVec<Type>,
+    ring_size: usize,
+    series: SeriesVec<MetricArray>,
+    identity: SeriesVec<MetricId>,
+    units: SeriesVec<Unit>,
+    types: SeriesVec<Type>,
 
-     identity: HashMap<MetricId, SeriesId>,
-
+    identity_index: HashMap<MetricId, SeriesId>,
     /// The SeriesList must be sorted. This is handled by storing rings in a
     /// Vec and using length as the SeriesId.
-     name: HashMap<StringId, SeriesList>,
-
+    name_index: HashMap<StringId, SeriesList>,
     /// The SeriesList must be sorted. This is handled by storing rings in a
     /// Vec and using length as the SeriesId.
-     label: HashMap<(StringId, StringId), SeriesList>,
+    label_index: HashMap<(StringId, StringId), SeriesList>,
 }
 
 pub enum SaveError {
     MaxSeriesExceeded,
 }
 
-const MAX_LABELS: usize = 8;
+/// Human-readable metric.
+pub struct MetricRef<'a> {
+    name: &'a str,
+    labels: [(&'a str, &'a str); MAX_LABELS],
+    len: usize,
+}
+
+impl<'a> MetricRef<'a> {
+    pub fn name(&self) -> &str {
+        self.name
+    }
+
+    pub fn labels(&self) -> &[(&'a str, &'a str)] {
+        &self.labels[..self.len]
+    }
+}
+
+impl<'a> Display for MetricRef<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.write_str(self.name)?;
+
+        let labels = self.labels();
+        if labels.is_empty() {
+            return Ok(());
+        }
+
+        // Formatted as {k1="v1",k2="v2"}
+        f.write_str("{")?;
+        for (i, (k, v)) in labels.iter().enumerate() {
+            if i > 0 {
+                f.write_str(",")?;
+            }
+            f.write_str(k)?;
+            f.write_str("=\"")?;
+            f.write_str(v)?;
+            f.write_str("\"")?;
+        }
+        f.write_str("}")
+    }
+}
+
+pub const MAX_LABELS: usize = 8;
 
 impl Engine {
     /// series_cap is the capacity for each metric array.
@@ -224,11 +262,12 @@ impl Engine {
             strings: StringPool::new(),
             ring_size,
             series: SeriesVec::new(),
+            identity: SeriesVec::new(),
             units: SeriesVec::new(),
             types: SeriesVec::new(),
-            identity: HashMap::new(),
-            name: HashMap::new(),
-            label: HashMap::new(),
+            identity_index: HashMap::new(),
+            name_index: HashMap::new(),
+            label_index: HashMap::new(),
         };
     }
 
@@ -253,7 +292,7 @@ impl Engine {
 
         let metric_id = MetricId::new(name_id, &label_ids);
 
-        if let Some(&existing_id) = self.identity.get(&metric_id) {
+        if let Some(&existing_id) = self.identity_index.get(&metric_id) {
             return existing_id;
         }
 
@@ -263,13 +302,17 @@ impl Engine {
         let series_len = u32::try_from(self.series.len()).expect("process exceeded maximum series");
         let series_id = SeriesId::new(series_len);
         self.series.push(MetricArray::new(self.ring_size));
+        self.identity.push(metric_id);
         self.units.push(unit);
         self.types.push(r#type);
 
-        self.identity.insert(metric_id, series_id);
-        self.name.entry(name_id).or_default().push(series_id);
+        self.identity_index.insert(metric_id, series_id);
+        self.name_index.entry(name_id).or_default().push(series_id);
         for &(k_id, v_id) in &label_ids {
-            self.label.entry((k_id, v_id)).or_default().push(series_id);
+            self.label_index
+                .entry((k_id, v_id))
+                .or_default()
+                .push(series_id);
         }
 
         series_id
@@ -280,6 +323,24 @@ impl Engine {
     #[inline]
     pub fn save(&mut self, id: SeriesId, time: u64, value: f64) {
         self.series[id].push((time, value));
+    }
+
+    /// Return a Metric description.
+    pub fn metric<'a>(&'a self, id: SeriesId) -> MetricRef<'a> {
+        let id = &self.identity[id];
+
+        let name = self.strings.str(id.name).unwrap();
+
+        let mut labels = [("", ""); MAX_LABELS];
+        for i in 0..id.len {
+            let (k, v) = id.labels[i];
+            let key = self.strings.str(k).unwrap();
+            let val = self.strings.str(v).unwrap();
+            labels[i] = (key, val);
+        }
+        let len = id.len;
+
+        MetricRef { name, labels, len }
     }
 
     // pub fn query(
