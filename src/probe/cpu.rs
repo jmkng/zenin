@@ -15,12 +15,12 @@ pub struct CoreHandles {
     pub idle: SeriesId,
 }
 
-pub struct CMedicCpuProbe {
+pub struct MedicCpuProbe {
     pub total: CoreHandles,
     pub per_core: Vec<CoreHandles>,
 }
 
-impl CMedicCpuProbe {
+impl MedicCpuProbe {
     pub fn new(engine: &mut Engine) -> Self {
         let total = CoreHandles {
             user: engine.register_series(

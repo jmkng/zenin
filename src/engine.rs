@@ -76,7 +76,7 @@ impl Display for SeriesId {
 
 impl SeriesId {
     #[inline]
-    fn new(val: u32) -> Self {
+    pub(crate) fn new(val: u32) -> Self {
         Self(val)
     }
 
@@ -255,7 +255,7 @@ impl<'a> Display for MetricRef<'a> {
 pub const MAX_LABELS: usize = 8;
 
 impl Engine {
-    /// series_cap is the capacity for each metric array.
+    /// ring_size is the capacity for each metric array.
     /// Retention window is determined by probe execution intervals.
     pub fn new(ring_size: usize) -> Self {
         return Self {
