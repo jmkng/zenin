@@ -1,49 +1,73 @@
 #[derive(Debug)]
-pub struct RingArray<T> {
+pub struct Ring<T> {
     data: Box<[T]>,
-    head: usize,
-    len: usize,
 }
 
-impl<T: Default + Clone> RingArray<T> {
-    /// Returns a new RingArray with size cap,
-    /// which must be > 0.
+impl<T: Default + Copy> Ring<T> {
+    /// Returns a new ring with allocated capacity of `cap`.
+    /// Asserts `cap > 0`.
     pub fn new(cap: usize) -> Self {
         assert!(cap > 0);
-        let data: Box<[T]> = vec![T::default(); cap].into_boxed_slice();
-        let head: usize = 0;
-        let len: usize = 0;
+        assert!(cap.is_power_of_two(), "Ring cap must be pow2 (got {cap})");
 
-        RingArray { data, head, len }
+        Ring {
+            data: vec![T::default(); cap].into_boxed_slice(),
+        }
+    }
+
+    #[inline]
+    pub fn oldest(&self, head: usize, len: usize) -> Option<T> {
+        if len == 0 {
+            None
+        } else if len < self.cap() {
+            Some(self.data[0])
+        } else {
+            Some(self.data[head])
+        }
+    }
+
+    #[inline]
+    pub fn newest(&self, head: usize, len: usize) -> Option<T> {
+        if len == 0 {
+            None
+        } else {
+            let mask = self.cap() - 1;
+            let index = head.wrapping_sub(1) & mask;
+            Some(self.data[index])
+        }
+    }
+
+    #[inline]
+    pub fn get(&self, head: usize, len: usize, index: usize) -> Option<T> {
+        if index >= len {
+            return None;
+        }
+        let mask = self.cap() - 1;
+        let start_slot = if len < self.cap() { 0 } else { head };
+        let i = (start_slot + index) & mask;
+        Some(self.data[i])
+    }
+}
+
+impl<T> Ring<T> {
+    #[inline]
+    pub fn as_logical_slices(&self, head: usize, len: usize) -> (&[T], &[T]) {
+        let cap = self.cap();
+        if len < cap {
+            (&self.data[..head], &[])
+        } else {
+            (&self.data[head..], &self.data[..head])
+        }
+    }
+
+    #[inline]
+    pub fn write(&mut self, index: usize, value: T) {
+        self.data[index] = value;
     }
 
     #[inline]
     pub fn cap(&self) -> usize {
         self.data.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.len == 0
-    }
-
-    pub fn push(&mut self, value: T) {
-        if self.len < self.cap() {
-            self.data[self.len] = value;
-            self.len += 1;
-        } else {
-            self.data[self.head] = value;
-            self.head = (self.head + 1) % self.cap();
-        }
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item = &T> {
-        let (first, second) = if self.len < self.cap() {
-            (&self.data[..self.len], &self.data[0..0])
-        } else {
-            (&self.data[self.head..], &self.data[..self.head])
-        };
-
-        first.iter().chain(second.iter())
     }
 }
 
@@ -52,83 +76,49 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_new_and_empty() {
-        let ring: RingArray<i32> = RingArray::new(5);
-
-        assert_eq!(ring.cap(), 5);
-        assert!(ring.is_empty());
-        assert_eq!(ring.iter().count(), 0);
-    }
-
-    #[test]
     fn test_partial_fill() {
-        let mut ring = RingArray::new(5);
-        ring.push(10);
-        ring.push(20);
+        let mut ring = Ring::<u64>::new(4);
 
-        assert!(!ring.is_empty());
-        assert_eq!(ring.cap(), 5);
+        ring.write(0, 10);
+        ring.write(1, 20);
 
-        let collected: Vec<&i32> = ring.iter().collect();
-        // Iteraton matches push order?
-        assert_eq!(collected, vec![&10, &20]);
+        assert_eq!(ring.get(2, 2, 0), Some(10)); // Oldest.
+        assert_eq!(ring.get(2, 2, 1), Some(20)); // Newest.
+        assert_eq!(ring.get(2, 2, 2), None); // OOB.
+
+        let (left, right) = ring.as_logical_slices(2, 2);
+        assert_eq!(left, &[10, 20]);
+        assert_eq!(right, &[]);
     }
 
     #[test]
-    fn test_exact_cap() {
-        let mut ring = RingArray::new(3);
+    fn test_wrap() {
+        let mut ring = Ring::<u64>::new(4);
 
-        ring.push(1);
-        ring.push(2);
-        ring.push(3);
-
-        assert_eq!(ring.iter().copied().collect::<Vec<i32>>(), vec![1, 2, 3]);
-    }
-
-    #[test]
-    fn test_overwriting() {
-        let mut ring = RingArray::new(3);
-
-        ring.push(1);
-        ring.push(2);
-        ring.push(3);
-
-        assert_eq!(ring.iter().copied().collect::<Vec<i32>>(), vec![1, 2, 3]);
-
-        // Should overwrite the olds, which is 1.
-        ring.push(4);
-        assert_eq!(ring.iter().copied().collect::<Vec<i32>>(), vec![2, 3, 4]);
-
-        // Overwrite 2
-        ring.push(5);
-        assert_eq!(ring.iter().copied().collect::<Vec<i32>>(), vec![3, 4, 5]);
-
-        // Overwrite 3
-        ring.push(6);
-        assert_eq!(ring.iter().copied().collect::<Vec<i32>>(), vec![4, 5, 6]);
-    }
-
-    #[test]
-    fn test_multiple_wraparounds() {
-        let mut ring = RingArray::new(3);
-
-        for i in 1..=10 {
-            ring.push(i);
+        for (i, v) in [10, 20, 30, 40].iter().enumerate() {
+            ring.write(i, *v);
         }
 
-        assert_eq!(ring.iter().copied().collect::<Vec<i32>>(), vec![8, 9, 10]);
+        // Overwrite first two slots.
+        ring.write(0, 50);
+        ring.write(1, 60);
+
+        assert_eq!(ring.get(2, 4, 0), Some(30));
+        assert_eq!(ring.get(2, 4, 1), Some(40));
+        assert_eq!(ring.get(2, 4, 2), Some(50));
+        assert_eq!(ring.get(2, 4, 3), Some(60));
+
+        let (old_slice, new_slice) = ring.as_logical_slices(2, 4);
+        assert_eq!(old_slice, &[30, 40]);
+        assert_eq!(new_slice, &[50, 60]);
     }
 
     #[test]
-    fn test_zero_capacity_guard() {
-        // Zero cap is for lazy allocation.
-        let mut ring: RingArray<i32> = RingArray::new(0);
-        assert_eq!(ring.cap(), 0);
-        assert!(ring.is_empty());
-
-        // Now it should allocate a small initial size, so this should work.
-        ring.push(42);
-
-        assert_eq!(ring.iter().count(), 1);
+    #[should_panic]
+    fn test_ring_requires_power_of_two() {
+        let _ = Ring::<i32>::new(5);
     }
 }
+
+// TODO: Can have some kind of generic wrapper RingArray in here too,
+// for using Ring in a more normal way.

@@ -1,30 +1,47 @@
-use crate::engine::{Engine, SeriesId};
-use crate::job::JobScheduler;
-use crate::now;
+use crate::engine::ix::IxIter;
+use crate::engine::{
+    AggregateOp,
+    BinaryOp,
+    Engine,
+    Expr,
+    MetricUnit,
+    Plan,
+    Query,
+    RollupOp,
+    Sink,
+    map_series,
+};
+use crate::now_s;
 use crate::probe::cpu::MedicCpuProbe;
+use std::io::{Read, Result as IoResult, Write};
+use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::thread::{JoinHandle, sleep, spawn};
 use std::time::{Duration, Instant};
 
 pub fn spawn_interval_loop(
     stop: &'static AtomicBool,
-    mut engine: Engine,
+    engine: Arc<Mutex<Engine>>,
     mut probe: MedicCpuProbe,
 ) -> JoinHandle<()> {
-    let interval = Duration::from_secs(1);
+    let tick_interval = Duration::from_secs(1);
     let mut next_tick = Instant::now();
 
     spawn(move || {
         while !stop.load(Ordering::Relaxed) {
-            next_tick += interval;
+            next_tick += tick_interval;
 
-            interval_work(&mut engine, &mut probe);
+            {
+                let mut _engine = engine.lock().unwrap();
+                interval_loop_work(&mut _engine, &mut probe);
+            }
 
             let sleep_time = next_tick.saturating_duration_since(Instant::now());
             if !sleep_time.is_zero() {
                 sleep(sleep_time);
             } else {
-                // Interval overrun, reset next_tick.
+                // Interval overrun, reset for next tick.
                 next_tick = Instant::now();
             }
         }
@@ -32,10 +49,8 @@ pub fn spawn_interval_loop(
 }
 
 #[inline]
-pub fn interval_work(mut engine: &mut Engine, mut probe: &mut MedicCpuProbe) {
-    probe.sample(|series_id, value| {
-        let now = now();
-        println!("[{}] {}: {}", now, series_id, value);
-        engine.save(series_id, now, value);
+pub fn interval_loop_work(engine: &mut Engine, probe: &mut MedicCpuProbe) {
+    probe.emit(|series_id, value| {
+        engine.push(series_id, now_s(), value);
     });
 }

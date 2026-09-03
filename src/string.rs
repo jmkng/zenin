@@ -41,9 +41,17 @@ impl StringPool {
         }
     }
 
+    /// Returns a StringId for text.
+    pub fn id(&self, text: &str) -> Option<StringId> {
+        if let Some(&id) = self.str_to_id.get(text) {
+            return Some(id);
+        }
+        None
+    }
+
     /// Returns a StringId for text, interning it if missing.
     pub fn id_or_insert(&mut self, text: &str) -> StringId {
-        if let Some(&id) = self.str_to_id.get(text) {
+        if let Some(id) = self.id(text) {
             return id;
         }
 

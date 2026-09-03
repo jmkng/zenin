@@ -9,27 +9,25 @@
  * durations with no dependency on external storage.
  * Likewise, more advanced configurations may exist for more advanced use cases.
  *
- * The next sections describe some core concepts in isolation.
- *
  * # Station
  *
- * Stations are individual installations of the program that exist on one or
- * more computers in a network. They are like hoppers that process incoming
- * data, and may be equipped with probes that can generate data.
+ * Stations are individual installations of the program. They are like hoppers
+ * that process incoming data, and may be equipped with probes that can generate
+ * data.
  *
  * ```text
  *
  *              ┌─────────────────── STREAM 1
- *              │ ┌─────────────s─── STREAM 2
- *       SAMPLE s │
+ *              │ ┌─────────────x─── STREAM 2
+ *         DATA x │
  *              │ │
  *              ▼ ▼
  *         │           │
  *         │           │
  *         │           │
- *         │         ◄─┼─s─ PROBE
+ *         │         ◄─┼─x─ PROBE
  * STATION └─────┬─────┘
- *               s
+ *               x
  *               │
  *               ▼
  *
@@ -37,32 +35,24 @@
  *
  * # Metric
  *
- * Metrics are the smallest units of information processed by a Station.
- * They are defined by a unique identity, which is a metric name combined with
- * zero or more key/value labels, and a value.
+ * Metrics describe a stream of data stored in the engine.
+ * They contain a name, zero or more key-value labels, and a value.
  *
  * ```text
  *
- *          METRIC A
- *          ┌────────────────────────┐
- * IDENTITY │ disk.used{subject="A"} │
- * VALUE    │ 30.0                   │
- *          └────────────────────────┘
- *
- *           METRIC B
- *          ┌────────────────────────┐
- *          │ disk.used{subject="B"} │
- *          │ 97.0                   │
- *          └────────────────────────┘
+ *          ┌────────────────────┐
+ * IDENTITY │ disk.used{sub="A"} │
+ *          └────────────────────┘
+ *          ┌────────────────────┐
+ *          │ disk.used{sub="B"} │
+ *          └────────────────────┘
  *
  * ```
  *
  * # Monitor
  *
- * Monitors are rules that allow the system to react to metrics.
- *
- * They contain a condition and an action. When a metric is received by a
- * station and matches the condition of a monitor, the action is executed.
+ * Monitors are rules that react to changes in metric data.
+ * They contain a condition and an action.
  *
  * ```text
  *
@@ -77,12 +67,12 @@
  *
  * # Probe
  *
- * Probes are components that can generate metrics.
+ * Probes generate points of data for a metric series.
  * Depending on probe capabilities, it may be possible to retrieve information
  * about the local system, or poll a remote device across a network.
  *
  * For remote environments, a minimal station can be deployed directly to the
- * device to act as a transmitter by pushing samples upstream.
+ * device to act as a transmitter by pushing data to another station.
  *
  * ```text
  *
@@ -110,24 +100,26 @@
 #![allow(dead_code, warnings)]
 
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{Duration, Instant};
+use std::sync::{Arc, Mutex};
 use zenin::engine::Engine;
+use zenin::probe;
 use zenin::thread::spawn_interval_loop;
-use zenin::{now, probe};
+
+const DEFAULT_RING_SIZE: usize = 4096;
+
+static SHUTDOWN: AtomicBool = AtomicBool::new(false);
 
 fn leak<T>(value: T) -> &'static mut T {
     Box::leak(Box::new(value))
 }
 
-const DEFAULT_RING_SIZE: usize = 3600;
-
-static SHUTDOWN: AtomicBool = AtomicBool::new(false);
-
 fn main() {
     let mut engine = Engine::new(DEFAULT_RING_SIZE);
-    let mut pcpu = probe::cpu::MedicCpuProbe::new(&mut engine);
+    let mut cpu_p = probe::cpu::MedicCpuProbe::new(&mut engine);
 
-    spawn_interval_loop(&SHUTDOWN, engine, pcpu);
+    let engine = Arc::new(Mutex::new(engine));
+    spawn_interval_loop(&SHUTDOWN, engine.clone(), cpu_p);
+    // spawn_server(&SHUTDOWN, engine.clone(), "127.0.0.1:23111");
 
     _ = wait_for_signals(&[SIGINT, SIGTERM]);
     SHUTDOWN.store(true, Ordering::Relaxed);
