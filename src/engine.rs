@@ -1,6 +1,5 @@
 pub mod binary_op;
 pub mod irate;
-pub mod ix;
 pub mod scale;
 pub mod sum;
 
@@ -910,7 +909,7 @@ impl<'a> Display for MetricRef<'a> {
 }
 
 /// Returns an array of lists associated with a set of name and labels.
-pub fn map_series<'engine, 'a>(
+fn map_series<'engine, 'a>(
     engine: &'engine Engine,
     name: &'a str,
     labels: &'a [(&'a str, &'a str)],

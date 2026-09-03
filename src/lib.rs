@@ -1,3 +1,5 @@
+#![allow(warnings)]
+
 pub mod engine;
 pub mod probe;
 pub mod ring_array;
