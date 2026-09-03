@@ -1,20 +1,7 @@
+use crate::engine::Engine;
 use crate::engine::ix::IxIter;
-use crate::engine::{
-    AggregateOp,
-    BinaryOp,
-    Engine,
-    Expr,
-    MetricUnit,
-    Plan,
-    Query,
-    RollupOp,
-    Sink,
-    map_series,
-};
 use crate::now_s;
 use crate::probe::cpu::MedicCpuProbe;
-use std::io::{Read, Result as IoResult, Write};
-use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread::{JoinHandle, sleep, spawn};
