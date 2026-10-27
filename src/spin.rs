@@ -58,8 +58,10 @@ impl<T> Spinlock<T> {
         None
     }
 
-    /// Returns a mutable reference to the underlying data, bypassing the lock.
+    /// Returns a mutable reference to the inner data, bypassing the lock.
+    /// Useful for initialization of local data.
     pub fn get_mut(&mut self) -> &mut T {
+        // SAFETY: This method needs `&mut self` so it should be okay to have `&mut T`.
         unsafe { &mut *self.inner.get() }
     }
 }
