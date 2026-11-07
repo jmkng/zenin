@@ -107,9 +107,7 @@ impl<T> DerefMut for Pad<T> {
 
 impl<T: fmt::Debug> fmt::Debug for Pad<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Pad")
-            .field("value", &self.value)
-            .finish()
+        f.debug_struct("Pad").field("value", &self.value).finish()
     }
 }
 

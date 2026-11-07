@@ -11,26 +11,24 @@ pub struct Spinlock<T> {
     inner: UnsafeCell<T>,
 }
 
-unsafe impl<T: Send> Sync for Spinlock<T> {}
-unsafe impl<T: Send> Send for Spinlock<T> {}
-
 /// Guard type that releases the lock.
 pub struct SpinlockGuard<'a, T> {
     lock: &'a Spinlock<T>,
 }
 
+unsafe impl<T: Send> Sync for Spinlock<T> {}
+unsafe impl<T: Send> Send for Spinlock<T> {}
+
 impl<T> Spinlock<T> {
     /// Returns a new unlocked `Spinlock` wrapping `value`.
     pub fn new(value: T) -> Self {
-        Self {
-            is_locked: AtomicBool::new(false),
-            inner: UnsafeCell::new(value),
-        }
+        Self { is_locked: AtomicBool::new(false), inner: UnsafeCell::new(value) }
     }
 
     /// Acquires the lock, spinning until it is ready.
     /// Returns a guard that grants mutable access to the protected data, and releases the lock when
     /// dropped.
+    #[inline]
     pub fn lock(&self) -> SpinlockGuard<'_, T> {
         loop {
             // Spinning in read-only.
@@ -38,11 +36,7 @@ impl<T> Spinlock<T> {
                 spin_loop();
             }
             // TAS attempt.
-            if self
-                .is_locked
-                .compare_exchange_weak(false, true, Acquire, Relaxed)
-                .is_ok()
-            {
+            if self.is_locked.compare_exchange_weak(false, true, Acquire, Relaxed).is_ok() {
                 break;
             }
         }
@@ -51,6 +45,7 @@ impl<T> Spinlock<T> {
     }
 
     /// Attempts to acquire the lock without spinning. Returns None if the lock is already held.
+    #[inline]
     pub fn try_lock(&self) -> Option<SpinlockGuard<'_, T>> {
         if !self.is_locked.swap(true, Acquire) {
             return Some(SpinlockGuard { lock: self });
@@ -60,9 +55,15 @@ impl<T> Spinlock<T> {
 
     /// Returns a mutable reference to the protected data without acquiring the lock.
     /// Useful for initialization of local data.
+    #[inline]
     pub fn get_mut(&mut self) -> &mut T {
         // SAFETY: This method needs `&mut self` so it should be okay to have `&mut T`.
         unsafe { &mut *self.inner.get() }
+    }
+
+    #[inline]
+    pub fn data_ptr(&self) -> *mut T {
+        self.inner.get()
     }
 
     /// Unlocks the `Spinlock` directly.
@@ -70,12 +71,11 @@ impl<T> Spinlock<T> {
     /// # Safety
     ///
     /// Must only be called by the thread that currently holds the acquired lock.
+    #[inline]
     pub(crate) unsafe fn unlock(&self) {
         self.is_locked.store(false, Release);
     }
 }
-
-// *** Impls ***
 
 impl<T> Deref for SpinlockGuard<'_, T> {
     type Target = T;
@@ -92,7 +92,7 @@ impl<T> DerefMut for SpinlockGuard<'_, T> {
 
 impl<T> Drop for SpinlockGuard<'_, T> {
     fn drop(&mut self) {
-        // SAFETY: Caller owns the guard, so they must own the lock.
+        // SAFETY: This thread must have acquired the lock to have a guard.
         unsafe { self.lock.unlock() };
     }
 }
