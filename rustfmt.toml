@@ -1,1 +1,2 @@
 imports_layout = "HorizontalVertical"
+use_small_heuristics = "Max"
