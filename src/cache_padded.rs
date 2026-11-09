@@ -1,9 +1,6 @@
 // crossbeam/cache_padded.rs
 
-use core::{
-    fmt,
-    ops::{Deref, DerefMut},
-};
+use core::fmt;
 
 #[cfg_attr(
     any(
@@ -75,7 +72,7 @@ use core::{
 )]
 #[repr(C)]
 pub struct Pad<T> {
-    value: T,
+    pub value: T,
 }
 
 unsafe impl<T: Send> Send for Pad<T> {}
@@ -91,19 +88,19 @@ impl<T> Pad<T> {
     }
 }
 
-impl<T> Deref for Pad<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.value
-    }
-}
-
-impl<T> DerefMut for Pad<T> {
-    fn deref_mut(&mut self) -> &mut T {
-        &mut self.value
-    }
-}
+// impl<T> Deref for Pad<T> {
+//     type Target = T;
+//
+//     fn deref(&self) -> &T {
+//         &self.value
+//     }
+// }
+//
+// impl<T> DerefMut for Pad<T> {
+//     fn deref_mut(&mut self) -> &mut T {
+//         &mut self.value
+//     }
+// }
 
 impl<T: fmt::Debug> fmt::Debug for Pad<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

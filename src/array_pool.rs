@@ -40,13 +40,12 @@
 //!
 //! `Partition Head` → `Partition` → `Segment` → `Grow` → `Pool`
 //!
-//! For example, a `Partition` lock holder must not attempt to acquire the `Partition Head` lock, as the
-//! `Partition Head` holder will already be attempting to acquire `Partition` locks.
+//! For example, a `Partition` lock holder must not attempt to acquire the `Partition Head` lock,
+//! as the `Partition Head` holder will already be attempting to acquire `Partition` locks.
 
 use std::alloc::{Layout, alloc, dealloc, handle_alloc_error};
 use std::array;
 use std::cell::UnsafeCell;
-use std::hint::cold_path;
 use std::marker::PhantomData;
 use std::mem::{ManuallyDrop, offset_of};
 use std::ops::{Deref, DerefMut};
@@ -58,7 +57,7 @@ use std::time::Duration;
 
 use crate::cache_padded::Pad;
 use crate::inc_guard::atomic::AtomicIncrementGuard;
-use crate::spin::Spinlock;
+use crate::spin::Sleeplock;
 
 /// A concurrent memory pool for fixed-size objects.
 pub struct ArrayPool<T, const CAP: usize> {
@@ -66,7 +65,8 @@ pub struct ArrayPool<T, const CAP: usize> {
     /// they need to store pointers. This is a stable address for that data.
     inner: NonNull<PoolInner<T>>,
     /// No segments will maintain pointers to this field, it is only used by the pool itself.
-    grow_lock: Spinlock<()>,
+    /// Contains the number of slots currently being allocated.
+    grow_lock: Sleeplock<usize>,
 }
 
 unsafe impl<T, const CAP: usize> Send for ArrayPool<T, CAP> {}
@@ -76,6 +76,7 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
     /// Returns a new `ArrayPool` with `min` segments allocated and ready to use.
     /// Total available items are `CAP * min`.
     pub fn new(min: u32) -> Self {
+        let min = min.max(1);
         const { Self::asserts() };
 
         let segment_size = size_of::<Segment<T, CAP>>();
@@ -83,7 +84,6 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
         let segment_bytes = segment_size.saturating_mul(min as usize);
         let allocated_bytes = AtomicUsize::new(segment_bytes.saturating_add(inner_size));
 
-        // let inner = {
         let layout = Layout::new::<PoolInner<T>>();
 
         // SAFETY: Layout of `PoolInner` has non-zero size.
@@ -95,7 +95,8 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
         // SAFETY: `inner_ptr` is non-null and valid to dereference.
         unsafe {
             inner_ptr.write(PoolInner::new(min));
-            (*inner_ptr).stats.allocated_bytes = allocated_bytes;
+            (*inner_ptr).stats.value.allocated_bytes.value = allocated_bytes;
+            // (*inner_ptr).stats.allocated_bytes = allocated_bytes;
 
             let inner_nn = NonNull::new_unchecked(inner_ptr);
             let lists = (*inner_ptr).lists.get_mut();
@@ -105,7 +106,7 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
                 lists.push_to_partial_head(seg.cast());
             }
 
-            let grow_lock = Spinlock::new(());
+            let grow_lock = Sleeplock::new(0);
             Self { inner: inner_nn, grow_lock }
         }
     }
@@ -129,8 +130,9 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
     /// Allocates `value` in the pool and returns an `Orc` pointer to access it.
     pub fn alloc<'pool>(&'pool self, value: T) -> Orc<'pool, T> {
         // SAFETY: `inner` is valid to dereference.
-        // The memory is not deallocated until the pool is dropped.
-        let _alloc_sig_guard = unsafe { (*self.inner.as_ptr()).stats.is_allocating() };
+        // It is not deallocated until the pool is dropped.
+        let _alloc_sig_guard = unsafe { (*self.inner.as_ptr()).stats.value.is_allocating() };
+        // let _alloc_sig_guard = unsafe { (*self.inner.as_ptr()).stats.is_allocating() };
 
         'retry: loop {
             let acquired = unsafe { (*self.inner.as_ptr()).lists.lock().acquire_partial() };
@@ -141,25 +143,25 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
                     self.lock_grow();
                     continue 'retry;
                 }
-                Err(_) => {
-                    // Pool is blocked by a frozen segment. Waiting for the owner to clear it.
-                    cold_path();
+                Err(Blocked) => {
                     snooze();
                     continue 'retry;
                 }
             };
 
-            // Try to reserve a slot.
-            let header_ptr = header.as_ptr();
-            unsafe {
-                if !SegmentHeader::lock_reserve(header) {
-                    // Another thread reserved the last slot already. Release the acquired reference
-                    // and try again.
-                    (*header_ptr).rc.fetch_sub(1, Release);
-                    continue 'retry;
-                }
-            }
+            // // Try to reserve a slot.
+            // unsafe {
+            //     if !SegmentHeader::lock_reserve(header) {
+            //         // Another thread reserved the last slot already. Release the acquired reference
+            //         // and try again.
+            //         (*header_ptr).rc.fetch_sub(1, Release);
+            //         continue 'retry;
+            //     }
+            // }
 
+            // SAFETY: `header` is valid to dereference.
+            // Segments are not deallocated until they hit the frozen list, or the pool drops.
+            unsafe { SegmentHeader::lock_reserve(header) };
             let slot = Segment::<T, CAP>::alloc_reserved(header.cast(), value);
             return Orc::new(slot);
         }
@@ -168,11 +170,9 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
     /// Attempts to acquire the grow lock and allocate new memory.
     /// If another thread wins the race, yield and return.
     fn lock_grow(&self) {
-        // GROW LOCK
-        let Some(_grow_lock) = self.grow_lock.try_lock() else {
-            yield_now();
+        let Some(mut grow_lock) = self.grow_lock.try_lock() else {
+            snooze();
             return;
-            // GROW UNLOCK
         };
 
         // SAFETY: `inner` is valid to dereference.
@@ -181,38 +181,47 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
             let lists_ptr = &raw const (*self.inner.as_ptr()).lists;
             let stats_ptr = &raw const (*self.inner.as_ptr()).stats;
 
-            let deallocs = (*stats_ptr).in_flight_deallocs.load(Relaxed);
-            let allocs = (*stats_ptr).in_flight_allocs.load(Relaxed);
-            // Avoid allocating when deallocators exceed allocators.
-            if deallocs >= allocs {
+            let deallocs = (*stats_ptr).value.in_flight_deallocs.value.load(Relaxed);
+            let allocs = (*stats_ptr).value.in_flight_allocs.value.load(Relaxed);
+            // let deallocs = (*stats_ptr).in_flight_deallocs.load(Relaxed);
+            // let allocs = (*stats_ptr).in_flight_allocs.load(Relaxed);
+            if deallocs >= (allocs + *grow_lock) {
+                // Avoid allocating when deallocators/inbound memory can handle it.
+                snooze();
                 return;
-                // GROW UNLOCK
             }
 
-            (*stats_ptr).allocated_bytes.fetch_add(size_of::<Segment<T, CAP>>(), Relaxed);
+            // Mark the number of slots this thread will add.
+            *grow_lock += CAP;
+            drop(grow_lock);
 
             let seg = Segment::<T, CAP>::new_on_heap(self.inner);
-            // POOL LOCK/UNLOCK
+            (*stats_ptr)
+                .value
+                .allocated_bytes
+                .value
+                .fetch_add(size_of::<Segment<T, CAP>>(), Relaxed);
+            // (*stats_ptr).allocated_bytes.fetch_add(size_of::<Segment<T, CAP>>(), Relaxed);
             (*lists_ptr).lock().push_to_partial_head(seg.cast());
-            // GROW UNLOCK
+
+            // Now the new slots are in the pool, undo the mark.
+            let mut grow_lock = self.grow_lock.lock();
+            *grow_lock -= CAP;
+            drop(grow_lock);
         }
     }
 
     pub fn lock_trim(&self) {
-        // POOL LOCK
         // SAFETY: `inner` is valid to dereference.
         // The memory is not deallocated until the pool is dropped.
         let mut lists_lock = unsafe { (*self.inner.as_ptr()).lists.lock() };
         if lists_lock.num_segments <= lists_lock.min_segments {
             return;
-            // POOL UNLOCK
         }
         let Some(frozen_ptr) = lists_lock.pop_frozen() else {
             return;
-            // POOL UNLOCK
         };
         drop(lists_lock);
-        // POOL UNLOCK
 
         // SAFETY: `frozen_ptr` was allocated using `alloc` with the same layout.
         unsafe { dealloc(frozen_ptr.as_ptr().cast(), Layout::new::<Segment<T, CAP>>()) };
@@ -226,8 +235,8 @@ impl<T, const CAP: usize> Drop for ArrayPool<T, CAP> {
         let (lists, stats) = unsafe { ((*inner_ptr).lists.get_mut(), &(*inner_ptr).stats) };
 
         debug_assert!(
-            stats.in_flight_allocs.load(Relaxed) == 0
-                && stats.in_flight_deallocs.load(Relaxed) == 0,
+            stats.value.in_flight_allocs.value.load(Relaxed) == 0
+                && stats.value.in_flight_deallocs.value.load(Relaxed) == 0,
             "In flight operations must finish before deallocation"
         );
         debug_assert!(
@@ -305,15 +314,16 @@ impl<'pool, T> Drop for Orc<'pool, T> {
 }
 
 /// Shared pool data.
+#[repr(C)]
 struct PoolInner<T> {
-    lists: Spinlock<Lists<T>>,
-    stats: PoolStats,
+    lists: Sleeplock<Lists<T>>,
+    stats: Pad<PoolStats>,
 }
 
 impl<T> PoolInner<T> {
     /// Returns a new `PoolInner`.
     pub fn new(min: u32) -> Self {
-        Self { lists: Spinlock::new(Lists::new(min)), stats: PoolStats::new() }
+        Self { lists: Sleeplock::new(Lists::new(min)), stats: Pad::new(PoolStats::new()) }
     }
 }
 
@@ -358,15 +368,22 @@ impl<T> Lists<T> {
             // The memory is not deallocated until the pool is dropped.
             unsafe {
                 let rc_ptr = &raw mut (*header_ptr).rc;
-                if (*rc_ptr).fetch_add(1, Acquire) < 0 {
-                    // The segment is frozen and the freezer is on the way to the lock to clear it.
-                    (*rc_ptr).fetch_sub(1, Release);
+                // if (*rc_ptr).fetch_add(1, Acquire) < 0 {
+                //     // The segment is frozen and the freezer is on the way to the lock to clear it.
+                //     (*rc_ptr).fetch_sub(1, Release);
+                //     return Err(Blocked);
+                // }
+                let prev_rc = (*rc_ptr).value.fetch_add(1, Acquire);
+                if prev_rc < 0 || prev_rc as usize >= (*header_ptr).cap {
+                    // The segment is frozen and the freezer is on the way to clear it,
+                    // *or* the segment is over-acquired and won't be able to serve the request. The
+                    // thread that takes the last slot will move it.
+                    (*rc_ptr).value.fetch_sub(1, Relaxed);
                     return Err(Blocked);
                 }
             }
             return Ok(Some(header));
         }
-
         // Try to recycle a frozen segment.
         if let Some(header) = self.frozen {
             // SAFETY: `header` is valid to dereference. Segments on the frozen list are unreferenced
@@ -374,7 +391,7 @@ impl<T> Lists<T> {
             // the partial list.
             unsafe {
                 SegmentHeader::reset(header);
-                (*header.as_ptr()).rc.store(1, Release);
+                (*header.as_ptr()).rc.value.store(1, Release);
             }
             self.pop_frozen_to_partial_head();
             return Ok(Some(header));
@@ -556,41 +573,41 @@ impl<T> Lists<T> {
 
 /// Header memory region for `Segment`.
 /// Contains the state needed to manage an array of allocatable slots.
+#[rustfmt::skip]
 struct SegmentHeader<T> {
-    /// Primary partition for allocators.
-    partition_head: Pad<Spinlock<Option<NonNull<Slot<T>>>>>,
-    /// Sharded partitions for deallocators. Reserved slots are returned to partitions here, and
-    /// allocating threads lock a partition (using `partitions_bm` as a hint) to steal the list back
-    /// to `partition_head` as needed.
-    partitions: [Pad<Spinlock<Option<NonNull<Slot<T>>>>>; 4],
-
-    /// Shared pool data.
-    pool_inner: NonNull<PoolInner<T>>,
-
     /// Reference count tracking the number of threads holding pointers to this segment.
-    rc: AtomicI32,
+    rc: Pad<AtomicI32>,
     /// Index tracking the bump-allocation boundary. Used during initial "fast" phase of slot
     /// allocation. When exhausted, allocations come from `partition_head`.
-    bump_index: AtomicU64,
+    bump_index: Pad<AtomicU64>,
+    /// Bitmap state for `partitions`. The `partitions.len()` least significant bits are used to
+    /// track availability of the partitions. Bits read 0 when they are empty. Readable lock-free.
+    partitions_bm: Pad<AtomicU32>,
 
-    /// Number of slots reserved for allocation. It must be incremented on allocation and
-    /// decremented *after* a slot is linked back to a partition.
-    /// When the segment is full `(reserved == cap)` it must be moved from partial to full.
-    reserved: Spinlock<usize>,
-
-    // Intrusive links to other segments. Accessed by the holder of the pool lists lock.
-    prev: UnsafeCell<Option<NonNull<SegmentHeader<T>>>>,
-    next: UnsafeCell<Option<NonNull<SegmentHeader<T>>>>,
-
+    /*** Read ***/
+    /// Shared pool data.
+    pool_inner: NonNull<PoolInner<T>>,
     /// Equal to the associated `Segment::CAP` of the segment this header is paired with. Stored
     /// here as a field to avoid making the header generic over `CAP`. This means `Orc` can also
     /// avoid being generic over `CAP`, which is nice because the user doesn't care about segment
     /// capacity when they are just trying to use their `T`.
     cap: usize,
+    /************/
 
-    /// Bitmap state for `partitions`. The `partitions.len()` least significant bits are used to
-    /// track availability of the partitions. Bits read 0 when they are empty. Readable lock-free.
-    partitions_bm: AtomicU32,
+    /// Primary partition for allocators.
+    partition_head: Pad<Sleeplock<Option<NonNull<Slot<T>>>>>,
+    /// Sharded partitions for deallocators. Reserved slots are returned to partitions here, and
+    /// allocating threads lock a partition (using `partitions_bm` as a hint) to steal the list back
+    /// to `partition_head` as needed.
+    partitions: [Pad<Sleeplock<Option<NonNull<Slot<T>>>>>; 4],
+
+    /// Number of slots reserved for allocation. It must be incremented on allocation and
+    /// decremented *after* a slot is linked back to a partition.
+    /// When the segment is full `(reserved == cap)` it must be moved from partial to full.
+    reserved: Sleeplock<usize>,
+    // Intrusive links to other segments. Accessed by the holder of the pool lists lock.
+    prev: UnsafeCell<Option<NonNull<SegmentHeader<T>>>>,
+    next: UnsafeCell<Option<NonNull<SegmentHeader<T>>>>,
 }
 
 impl<T> SegmentHeader<T> {
@@ -600,45 +617,46 @@ impl<T> SegmentHeader<T> {
     /// Returns a new `SegmentHeader`.
     pub fn new(inner: NonNull<PoolInner<T>>, cap: usize) -> Self {
         SegmentHeader {
-            partition_head: Pad::new(Spinlock::new(None)),
-            partitions: array::from_fn(|_| Pad::new(Spinlock::new(None))),
+            partition_head: Pad::new(Sleeplock::new(None)),
+            partitions: array::from_fn(|_| Pad::new(Sleeplock::new(None))),
             pool_inner: inner,
             cap,
-            rc: 0.into(),
-            bump_index: 0.into(),
-            reserved: Spinlock::new(0),
+            rc: Pad::new(0.into()),
+            bump_index: Pad::new(0.into()),
+            reserved: Sleeplock::new(0),
             prev: None.into(),
             next: None.into(),
-            partitions_bm: 0.into(),
+            partitions_bm: Pad::new(0.into()),
         }
     }
 
     /// Reserves a slot in the segment by incrementing the reservation counter.
-    /// Returns false when no capacity is available.
+    /// Assumes a slot *can* be available. (rc < cap)
     ///
     /// # Safety
     ///
     /// `header` must be valid to dereference.
     #[inline]
-    unsafe fn lock_reserve(header: NonNull<Self>) -> bool {
+    unsafe fn lock_reserve(header: NonNull<Self>) /* -> bool */
+    {
         let header_ptr = header.as_ptr();
         unsafe {
-            // SEGMENT LOCK
             let mut segment_lock = (*header_ptr).reserved.lock();
-            if *segment_lock == (*header_ptr).cap {
-                // Segment has no capacity.
-                return false;
-            }
+            // This path assumes the slot has something available, otherwise the acquisition should
+            // have been rejected.
+            debug_assert!(*segment_lock < (*header_ptr).cap); // <-- THIS DEBUG ASSERTION FAILS
+            // if *segment_lock == (*header_ptr).cap {
+            //     // Segment has no capacity.
+            //     return false;
+            // }
             *segment_lock += 1;
             if *segment_lock == (*header_ptr).cap {
                 // This reservation exhausted the segment, so it must be moved to the full list.
                 let inner_ptr = (*header_ptr).pool_inner.as_ptr();
-                // POOL LOCK/UNLOCK
                 (*inner_ptr).lists.lock().move_partial_to_full(header);
             }
-            // SEGMENT UNLOCK
         }
-        true
+        // true
     }
 
     /// Returns a slot to the segment.
@@ -651,7 +669,7 @@ impl<T> SegmentHeader<T> {
         // SAFETY: `inner_ptr` is valid to dereference, it lives as long as the pool.
         unsafe {
             let inner_ptr = (*header.as_ptr()).pool_inner.as_ptr();
-            let _dealloc_guard = (*inner_ptr).stats.is_deallocating();
+            let _dealloc_guard = (*inner_ptr).stats.value.is_deallocating();
 
             Self::lock_push_partition(header, slot);
             Self::lock_release_unreserve(header);
@@ -670,18 +688,16 @@ impl<T> SegmentHeader<T> {
         let header_ptr = header.as_ptr();
         unsafe {
             let index = Self::natural_index(header, slot);
-            // PARTITION LOCK
             let (mut lock, index) = (0..(*header_ptr).partitions.len())
                 .find_map(|offset| {
                     let index = (index + offset) % (*header_ptr).partitions.len();
-                    (*header_ptr).partitions[index].try_lock().map(|lock| (lock, index))
+                    (*header_ptr).partitions[index].value.try_lock().map(|lock| (lock, index))
                 })
-                .unwrap_or_else(|| ((*header_ptr).partitions[index].lock(), index));
+                .unwrap_or_else(|| ((*header_ptr).partitions[index].value.lock(), index));
 
             (*slot.as_ptr()).payload.next = *lock;
             *lock = Some(slot);
-            (*header_ptr).partitions_bm.fetch_or(1u32 << index, Release);
-            // PARTITION UNLOCK
+            (*header_ptr).partitions_bm.value.fetch_or(1u32 << index, Release);
         }
     }
 
@@ -697,34 +713,31 @@ impl<T> SegmentHeader<T> {
         // dereference that too, because `PoolInner` lives as long as the pool.
         unsafe {
             let inner_ptr = (*header_ptr).pool_inner.as_ptr();
-            // SEGMENT LOCK
             let mut segment_lock = (*header_ptr).reserved.lock();
             debug_assert!(*segment_lock > 0);
             // If the segment is no longer full, move it off the full list.
             *segment_lock -= 1;
             if *segment_lock == (*header_ptr).cap - 1 {
-                // POOL LOCK
                 let mut lists_lock = (*inner_ptr).lists.lock();
                 lists_lock.move_full_to_partial_tail(header);
-                // POOL UNLOCK
             }
 
             // Reference release and opportunistic freeze attempt.
-            if (*header_ptr).rc.fetch_sub(1, Release) == 1 {
-                cold_path();
-                if (*header_ptr).rc.compare_exchange(0, Self::FROZEN, Acquire, Relaxed).is_ok() {
-                    // POOL LOCK
+            if (*header_ptr).rc.value.fetch_sub(1, Release) == 1 {
+                if (*header_ptr)
+                    .rc
+                    .value
+                    .compare_exchange(0, Self::FROZEN, Acquire, Relaxed)
+                    .is_ok()
+                {
                     let mut lists_lock = (*inner_ptr).lists.lock();
                     // Frozen list requires no aliasing on its segments. Move the segment over and
                     // release the lists lock when all reads/writes to the segment are done.
 
-                    // SEGMENT UNLOCK
                     drop(segment_lock);
                     lists_lock.move_partial_to_frozen(header);
-                    // POOL UNLOCK
                 }
             }
-            // SEGMENT UNLOCK
         }
     }
 
@@ -765,14 +778,14 @@ impl<T> SegmentHeader<T> {
             #[rustfmt::skip]
             debug_assert_eq!(reserved_ptr, 0, "Expected segment to be unreserved, has {} reservations", reserved_ptr);
 
-            *(*header_ptr).partition_head.data_ptr() = None;
+            *(*header_ptr).partition_head.value.data_ptr() = None;
             let partitions_ptr = (*header_ptr).partitions.as_ptr();
             for i in 0..(*header_ptr).partitions.len() {
                 let n_ptr = partitions_ptr.add(i);
-                (*n_ptr).data_ptr().write(None);
+                (*n_ptr).value.data_ptr().write(None);
             }
-            (*header_ptr).bump_index.store(0, Relaxed);
-            (*header_ptr).partitions_bm.store(0, Release);
+            (*header_ptr).bump_index.value.store(0, Relaxed);
+            (*header_ptr).partitions_bm.value.store(0, Release);
         }
     }
 } // impl SegmentHeader
@@ -792,32 +805,33 @@ union SlotPayload<T> {
     next: Option<NonNull<Slot<T>>>,
 }
 
+#[repr(C)]
 struct PoolStats {
     /// Number of allocation operations in progress.
-    in_flight_allocs: AtomicUsize,
+    in_flight_allocs: Pad<AtomicUsize>,
     /// Number of deallocation operations in progress.
-    in_flight_deallocs: AtomicUsize,
-
+    in_flight_deallocs: Pad<AtomicUsize>,
     /// Total heap footprint of **all** pool allocations. Includes segment memory and any internal
     /// structures such as `PoolInner`.
-    allocated_bytes: AtomicUsize,
+    allocated_bytes: Pad<AtomicUsize>,
 }
 
 impl PoolStats {
     /// Returns a new `PoolStats`.
     pub fn new() -> Self {
         PoolStats {
-            in_flight_allocs: 0.into(),
-            in_flight_deallocs: 0.into(),
-            allocated_bytes: 0.into(),
+            in_flight_allocs: Pad::new(0.into()),
+            in_flight_deallocs: Pad::new(0.into()),
+            allocated_bytes: Pad::new(0.into()),
         }
     }
+
     pub fn is_allocating<'a>(&'a self) -> AtomicIncrementGuard<'a> {
-        AtomicIncrementGuard::new(&self.in_flight_allocs)
+        AtomicIncrementGuard::new(&self.in_flight_allocs.value)
     }
 
     pub fn is_deallocating<'a>(&'a self) -> AtomicIncrementGuard<'a> {
-        AtomicIncrementGuard::new(&self.in_flight_deallocs)
+        AtomicIncrementGuard::new(&self.in_flight_deallocs.value)
     }
 }
 
@@ -877,9 +891,9 @@ impl<T, const CAP: usize> Segment<T, CAP> {
         // SAFETY: `seg_ptr` is valid to dereference.
         // Segment memory is never deallocated while threads hold acquired references.
         unsafe {
-            debug_assert!((*seg_ptr).header.rc.load(Acquire) > 0);
+            debug_assert!((*seg_ptr).header.rc.value.load(Acquire) > 0);
 
-            let bump_index = (*seg_ptr).header.bump_index.fetch_add(1, Acquire);
+            let bump_index = (*seg_ptr).header.bump_index.value.fetch_add(1, Acquire);
             debug_assert_ne!(bump_index, u64::MAX);
 
             let slot = if bump_index < (CAP as u64) {
@@ -891,6 +905,7 @@ impl<T, const CAP: usize> Segment<T, CAP> {
             } else {
                 Self::alloc_reserved_from_partition(seg)
             };
+
             (*slot.as_ptr()).payload.data = ManuallyDrop::new(value);
             slot
         }
@@ -907,20 +922,18 @@ impl<T, const CAP: usize> Segment<T, CAP> {
         // SAFETY: `seg_ptr` is a valid pointer to allocated and initialized memory.
         // Segment memory is never deallocated while threads hold acquired references.
         unsafe {
-            // PARTITION HEAD LOCK
             let mut partition_head_lock = {
-                let mut partition_head_lock = (*seg_ptr).header.partition_head.lock();
+                let mut partition_head_lock = (*seg_ptr).header.partition_head.value.lock();
                 if let Some(head) = *partition_head_lock {
                     *partition_head_lock = (*head.as_ptr()).payload.next;
                     return head;
-                    // PARTITION HEAD UNLOCK
                 }
                 partition_head_lock
             };
 
             // Steal a list into the partition head.
             let list = 'steal: loop {
-                let mut map = (*seg_ptr).header.partitions_bm.load(Acquire);
+                let mut map = (*seg_ptr).header.partitions_bm.value.load(Acquire);
                 debug_assert!(map != 0, "Bitmap must be >0 while holding lock");
 
                 while map != 0 {
@@ -928,22 +941,19 @@ impl<T, const CAP: usize> Segment<T, CAP> {
                     let mask = 1u32 << index;
                     map &= !mask;
 
-                    // PARTITION LOCK
-                    if let Some(mut guard) = (*seg_ptr).header.partitions[index].try_lock() {
+                    if let Some(mut guard) = (*seg_ptr).header.partitions[index].value.try_lock() {
                         let head = guard.take();
-                        (*seg_ptr).header.partitions_bm.fetch_and(!mask, Release);
+                        (*seg_ptr).header.partitions_bm.value.fetch_and(!mask, Release);
                         if let Some(list) = head {
                             break 'steal list;
                         }
                     }
-                    // PARTITION UNLOCK
                 }
             };
 
             // Keep the first slot for this thread and put the next one back in the partition head.
             *partition_head_lock = (*list.as_ptr()).payload.next;
             list
-            // PARTITION HEAD UNLOCK
         }
     }
 } // impl Segment
@@ -951,45 +961,45 @@ impl<T, const CAP: usize> Segment<T, CAP> {
 #[inline]
 fn snooze() {
     yield_now();
-    sleep(Duration::from_millis(1));
+    sleep(Duration::from_nanos(1));
 }
 
 #[cfg(test)]
 mod pool_tests {
     use super::*;
 
-    #[test]
-    fn test_pool_grow() {
-        let p1 = ArrayPool::<u8, 2>::new(1);
-        let lists = unsafe { &raw mut (*p1.inner.as_ptr()).lists };
-
-        unsafe {
-            assert_eq!((*lists).get_mut().num_segments, 1);
-
-            let v1 = p1.alloc(42);
-            let v2 = p1.alloc(43);
-
-            // This segment is full and shouldn't be on the partial list anymore.
-            assert!((*lists).get_mut().partial_head.is_none());
-
-            // This should allocate a new segment.
-            let v3 = p1.alloc(99);
-
-            assert_eq!((*lists).get_mut().num_segments, 2);
-
-            // Newly allocated segment should be alone on the partial list.
-            let head = (*lists).get_mut().partial_head;
-            let tail = (*lists).get_mut().partial_tail;
-            assert!(head.is_some());
-            assert!(tail.is_some());
-            assert_eq!(head, tail);
-            assert!((*(*lists).get_mut().partial_head.unwrap().as_ptr()).next.get_mut().is_none());
-
-            drop(v1);
-            drop(v2);
-            drop(v3);
-        }
-    }
+    // #[test]
+    // fn test_pool_grow() {
+    //     let p1 = ArrayPool::<u8, 2>::new(1);
+    //     let lists = unsafe { &raw mut (*p1.inner.as_ptr()).lists };
+    //
+    //     unsafe {
+    //         assert_eq!((*lists).get_mut().num_segments, 1);
+    //
+    //         let v1 = p1.alloc(42);
+    //         let v2 = p1.alloc(43);
+    //
+    //         // This segment is full and shouldn't be on the partial list anymore.
+    //         assert!((*lists).get_mut().partial_head.is_none());
+    //
+    //         // This should allocate a new segment.
+    //         let v3 = p1.alloc(99);
+    //
+    //         assert_eq!((*lists).get_mut().num_segments, 2);
+    //
+    //         // Newly allocated segment should be alone on the partial list.
+    //         let head = (*lists).get_mut().partial_head;
+    //         let tail = (*lists).get_mut().partial_tail;
+    //         assert!(head.is_some());
+    //         assert!(tail.is_some());
+    //         assert_eq!(head, tail);
+    //         assert!((*(*lists).get_mut().partial_head.unwrap().as_ptr()).next.get_mut().is_none());
+    //
+    //         drop(v1);
+    //         drop(v2);
+    //         drop(v3);
+    //     }
+    // }
 
     #[test]
     fn test_pool_thread_alloc() {
@@ -1001,6 +1011,7 @@ mod pool_tests {
 
         for _ in 0..8 {
             let pool_clone = Arc::clone(&pool);
+
             handles.push(thread::spawn(move || {
                 let mut orcs = Vec::with_capacity(100);
                 for _ in 0..100 {

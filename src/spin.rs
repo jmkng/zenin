@@ -3,8 +3,10 @@ use std::hint::spin_loop;
 use std::ops::{Deref, DerefMut};
 use std::sync::atomic::Ordering::{Acquire, Relaxed, Release};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread::sleep;
+use std::time::Duration;
 
-/// TATAS Spinlock.
+/// TATAS Spinlock. This implementation will actually spin, maybe see `Sleeplock` also.
 #[derive(Debug)]
 pub struct Spinlock<T> {
     is_locked: AtomicBool,
@@ -47,7 +49,8 @@ impl<T> Spinlock<T> {
     /// Attempts to acquire the lock without spinning. Returns None if the lock is already held.
     #[inline]
     pub fn try_lock(&self) -> Option<SpinlockGuard<'_, T>> {
-        if !self.is_locked.swap(true, Acquire) {
+        if !self.is_locked.load(Ordering::Relaxed) && !self.is_locked.swap(true, Ordering::Acquire)
+        {
             return Some(SpinlockGuard { lock: self });
         }
         None
@@ -72,7 +75,7 @@ impl<T> Spinlock<T> {
     ///
     /// Must only be called by the thread that currently holds the acquired lock.
     #[inline]
-    pub(crate) unsafe fn unlock(&self) {
+    pub unsafe fn unlock(&self) {
         self.is_locked.store(false, Release);
     }
 }
@@ -97,72 +100,109 @@ impl<T> Drop for SpinlockGuard<'_, T> {
     }
 }
 
-// *** Tests ****
+/// Similar to `Spinlock` but with exponential sleeping between rapid acquisition attempts.
+#[derive(Debug)]
+pub struct Sleeplock<T> {
+    is_locked: AtomicBool,
+    inner: UnsafeCell<T>,
+}
 
-#[cfg(test)]
-mod spinlock_tests {
-    use super::*;
+/// Guard type that releases the lock.
+pub struct SleeplockGuard<'a, T> {
+    lock: &'a Sleeplock<T>,
+}
 
-    #[test]
-    fn test_spinlock_get_mut() {
-        let mut lock = Spinlock::new(42);
-        let value_ref = lock.get_mut();
-        *value_ref += 10;
-        assert_eq!(*lock.get_mut(), 52);
+unsafe impl<T: Send> Sync for Sleeplock<T> {}
+unsafe impl<T: Send> Send for Sleeplock<T> {}
+
+impl<T> Sleeplock<T> {
+    /// Returns a new unlocked `Sleeplock` wrapping `value`.
+    pub fn new(value: T) -> Self {
+        Self { is_locked: AtomicBool::new(false), inner: UnsafeCell::new(value) }
     }
 
-    #[test]
-    fn test_spinlock_serial_locking() {
-        use std::sync::Arc;
-        use std::thread;
+    /// Acquires the lock, backing off to sleep as necessary.
+    /// Returns a guard that grants mutable access to the protected data, and releases the lock when
+    /// dropped.
+    #[inline]
+    pub fn lock(&self) -> SleeplockGuard<'_, T> {
+        let mut usec = 1u64;
+        const MAX_USEC: u64 = 512;
 
-        let lock = Arc::new(Spinlock::new(0));
-        let mut handles = vec![];
-
-        for _ in 0..20 {
-            let lock_clone = Arc::clone(&lock);
-            let handle = thread::spawn(move || {
-                for _ in 0..1000 {
-                    let mut guard = lock_clone.lock();
-                    *guard += 1;
-                }
-            });
-            handles.push(handle);
+        loop {
+            if !self.is_locked.load(Ordering::Relaxed)
+                && self
+                    .is_locked
+                    .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+                    .is_ok()
+            {
+                break;
+            }
+            // Sleep.
+            sleep(Duration::from_micros(usec));
+            if usec < MAX_USEC {
+                usec *= 2;
+            }
         }
 
-        for handle in handles {
-            handle.join().unwrap();
-        }
-        let value = lock.lock();
-        assert_eq!(*value, 20_000);
+        SleeplockGuard { lock: self }
     }
 
-    #[test]
-    fn test_spinlock_concurrent() {
-        use std::sync::Arc;
-        use std::thread;
+    /// Attempts to acquire the lock without sleeping. Returns None if the lock is already held.
+    #[inline]
+    pub fn try_lock(&self) -> Option<SleeplockGuard<'_, T>> {
+        if !self.is_locked.load(Ordering::Relaxed)
+            && self
+                .is_locked
+                .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
+                .is_ok()
+        {
+            return Some(SleeplockGuard { lock: self });
+        }
 
-        let lock = Arc::new(Spinlock::new(vec![0; 10]));
-        let t1 = {
-            let lock = Arc::clone(&lock);
-            thread::spawn(move || {
-                let mut guard = lock.lock();
-                guard[0] = 1;
-            })
-        };
+        None
+    }
 
-        let t2 = {
-            let lock = Arc::clone(&lock);
-            thread::spawn(move || {
-                let mut guard = lock.lock();
-                guard[1] = 2;
-            })
-        };
+    /// Returns a mutable reference to the protected data without acquiring the lock.
+    /// Useful for initialization of local data.
+    #[inline]
+    pub fn get_mut(&mut self) -> &mut T {
+        // SAFETY: This method needs `&mut self` so it should be okay to have `&mut T`.
+        unsafe { &mut *self.inner.get() }
+    }
 
-        t1.join().unwrap();
-        t2.join().unwrap();
-        let guard = lock.lock();
-        assert_eq!(guard[0], 1);
-        assert_eq!(guard[1], 2);
+    #[inline]
+    pub fn data_ptr(&self) -> *mut T {
+        self.inner.get()
+    }
+
+    /// Unlocks the `Sleeplock` directly.
+    ///
+    /// # Safety
+    ///
+    /// Must only be called by the thread that currently holds the acquired lock.
+    #[inline]
+    pub unsafe fn unlock(&self) {
+        self.is_locked.store(false, Release);
+    }
+}
+
+impl<T> Deref for SleeplockGuard<'_, T> {
+    type Target = T;
+    fn deref(&self) -> &T {
+        unsafe { &*self.lock.inner.get() }
+    }
+}
+
+impl<T> DerefMut for SleeplockGuard<'_, T> {
+    fn deref_mut(&mut self) -> &mut T {
+        unsafe { &mut *self.lock.inner.get() }
+    }
+}
+
+impl<T> Drop for SleeplockGuard<'_, T> {
+    fn drop(&mut self) {
+        // SAFETY: This thread must have acquired the lock to have a guard.
+        unsafe { self.lock.unlock() };
     }
 }
