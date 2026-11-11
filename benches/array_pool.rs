@@ -30,10 +30,10 @@ fn bench_thread<const CAP: usize>(
             alloc_ops.value.fetch_add(1, Ordering::Relaxed);
         }
 
-        for _ in 0..100 {
-            std::hint::spin_loop();
-        }
-
+        // for _ in 0..100 {
+        //     std::hint::spin_loop();
+        // }
+        //
         batch.clear();
         dealloc_ops.value.fetch_add(batch_size, Ordering::Relaxed);
     }
