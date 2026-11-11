@@ -24,18 +24,17 @@ fn bench_thread<const CAP: usize>(
     let mut batch = Vec::with_capacity(batch_size);
 
     while !stop.load(Ordering::Relaxed) {
-        batch.clear();
         for _ in 0..batch_size {
             let slot = pool.alloc(Payload { data: [0xAB; 32] });
             batch.push(slot);
             alloc_ops.value.fetch_add(1, Ordering::Relaxed);
         }
 
-        for _ in 0..10 {
+        for _ in 0..100 {
             std::hint::spin_loop();
         }
 
-        drop(batch.drain(..));
+        batch.clear();
         dealloc_ops.value.fetch_add(batch_size, Ordering::Relaxed);
     }
 }
@@ -109,8 +108,8 @@ fn main() {
     println!(
         "{}/s Average Throughput: {:.2} M allocs/s | {:.2} M deallocs/s",
         duration_secs,
-        (total_allocs as f64 / dur_secs) / 10000000f64,
-        (total_deallocs as f64 / dur_secs) / 10000000f64
+        (total_allocs as f64 / dur_secs) / 1_000_000.0,
+        (total_deallocs as f64 / dur_secs) / 1_000_000.0
     );
     println!("Total Operations: {} allocs | {} deallocs", total_allocs, total_deallocs);
 }
