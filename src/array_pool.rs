@@ -49,7 +49,7 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::{NonNull, drop_in_place};
 use std::sync::atomic::Ordering::{Acquire, Relaxed, Release};
 use std::sync::atomic::{AtomicI32, AtomicU32, AtomicU64, AtomicUsize};
-use std::thread::{sleep, yield_now};
+use std::thread::sleep;
 use std::time::Duration;
 
 use crate::cache_padded::Pad;
@@ -99,8 +99,9 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
 
             // `inner_ptr` points to heap memory, and both `stats` and `lists` are initialized,
             // now `init` the links.
-            let lists = (*inner_ptr).lists.get_mut();
-            lists.init();
+            let lists = NonNull::new_unchecked((*inner_ptr).lists.data_ptr());
+            Lists::init_to_self(lists);
+            // (*lists).init();
 
             // (*inner_ptr).stats.allocated_bytes = allocated_bytes;
 
@@ -110,7 +111,7 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
             let inner_nn = NonNull::new_unchecked(inner_ptr);
             for _ in 0..min {
                 let seg: NonNull<Segment<T, CAP>> = Segment::new_on_heap(inner_nn);
-                lists.push_to_partial_head(seg.cast());
+                Lists::push_to_partial_head(lists, seg.cast());
                 // lists.push_to_partial_head(seg.cast());
             }
 
@@ -140,10 +141,13 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
         // SAFETY: `inner` is valid to dereference.
         // It is not deallocated until the pool is dropped.
         let _alloc_sig_guard = unsafe { (*self.inner.as_ptr()).stats.value.is_allocating() };
-        // let _alloc_sig_guard = unsafe { (*self.inner.as_ptr()).stats.is_allocating() };
 
         'retry: loop {
-            let acquired = unsafe { (*self.inner.as_ptr()).lists.lock().acquire_partial() };
+            let acquired = unsafe {
+                let mut lists_lock = (*self.inner.as_ptr()).lists.lock();
+                let lists = NonNull::new_unchecked(&raw mut *lists_lock);
+                Lists::acquire_partial(lists)
+            };
 
             let header = match acquired {
                 Ok(Some(head)) => head,
@@ -157,18 +161,9 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
                 }
             };
 
-            // // Try to reserve a slot.
-            // unsafe {
-            //     if !SegmentHeader::lock_reserve(header) {
-            //         // Another thread reserved the last slot already. Release the acquired reference
-            //         // and try again.
-            //         (*header_ptr).rc.fetch_sub(1, Release);
-            //         continue 'retry;
-            //     }
-            // }
-
             // SAFETY: `header` is valid to dereference.
             // Segments are not deallocated until they hit the frozen list, or the pool drops.
+            // Now lock_reserve can safely acquire the lists lock when needed without deadlocking.
             unsafe { SegmentHeader::lock_reserve(header) };
             let slot = Segment::<T, CAP>::alloc_reserved(header.cast(), value);
             return Orc::new(slot);
@@ -191,8 +186,6 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
 
             let deallocs = (*stats_ptr).value.in_flight_deallocs.value.load(Relaxed);
             let allocs = (*stats_ptr).value.in_flight_allocs.value.load(Relaxed);
-            // let deallocs = (*stats_ptr).in_flight_deallocs.load(Relaxed);
-            // let allocs = (*stats_ptr).in_flight_allocs.load(Relaxed);
             if deallocs >= (allocs + *grow_lock) {
                 // Avoid allocating when deallocators/inbound memory can handle it.
                 snooze();
@@ -209,13 +202,17 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
                 .allocated_bytes
                 .value
                 .fetch_add(size_of::<Segment<T, CAP>>(), Relaxed);
-            // (*stats_ptr).allocated_bytes.fetch_add(size_of::<Segment<T, CAP>>(), Relaxed);
-            (*lists_ptr).lock().push_to_partial_head(seg.cast());
-            // (*lists_ptr).lock().push_to_partial_head(seg.cast());
+
+            let mut lists_lock = (*lists_ptr).lock();
+            let lists = NonNull::new_unchecked(&raw mut (*lists_lock));
+            Lists::push_to_partial_head(lists, seg.cast());
+            drop(lists_lock);
 
             // Now the new slots are in the pool, undo the mark.
             let mut grow_lock = self.grow_lock.lock();
             *grow_lock -= CAP;
+            // Drop explicitly just in case more is added to this function.
+            // It doesn't need to be locked anymore.
             drop(grow_lock);
         }
     }
@@ -223,17 +220,22 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
     pub fn trim(&self) {
         // SAFETY: `inner` is valid to dereference.
         // The memory is not deallocated until the pool is dropped.
-        let mut lists_lock = unsafe { (*self.inner.as_ptr()).lists.lock() };
-        if lists_lock.num_segments <= lists_lock.min_segments {
-            return;
-        }
-        let Some(frozen_ptr) = lists_lock.pop_frozen() else {
-            return;
-        };
-        drop(lists_lock);
+        unsafe {
+            let mut lists_lock = (*self.inner.as_ptr()).lists.lock();
+            let lists = NonNull::new_unchecked(&raw mut (*lists_lock));
 
-        // SAFETY: `frozen_ptr` was allocated using `alloc` with the same layout.
-        unsafe { dealloc(frozen_ptr.as_ptr().cast(), Layout::new::<Segment<T, CAP>>()) };
+            if (*lists_lock).num_segments <= (*lists_lock).min_segments {
+                return;
+            }
+
+            let Some(frozen_ptr) = Lists::pop_frozen(lists) else {
+                return;
+            };
+            drop(lists_lock);
+
+            // SAFETY: `frozen_ptr` was allocated using `alloc` with the same layout.
+            dealloc(frozen_ptr.as_ptr().cast(), Layout::new::<Segment<T, CAP>>());
+        }
     }
 } // impl ArrayPool
 
@@ -241,37 +243,26 @@ impl<T, const CAP: usize> Drop for ArrayPool<T, CAP> {
     fn drop(&mut self) {
         let inner_ptr = self.inner.as_ptr();
         // SAFETY: `inner_ptr` is valid to dereference. It gets deallocated at the end.
+        // The layouts used for deallocation are the same ones used in `alloc` calls.
         unsafe {
             let lists = (*inner_ptr).lists.get_mut();
             let stats = &(*inner_ptr).stats;
 
-            debug_assert!(
-                stats.value.in_flight_allocs.value.load(Relaxed) == 0
-                    && stats.value.in_flight_deallocs.value.load(Relaxed) == 0,
-                "In-flight operations must finish before deallocation"
-            );
+            #[rustfmt::skip]
+            debug_assert!(stats.value.in_flight_allocs.value.load(Relaxed) == 0 && stats.value.in_flight_deallocs.value.load(Relaxed) == 0, "In-flight operations must finish before pool dealloc");
+            #[rustfmt::skip]
+            debug_assert!(Link::is_empty(lists.partial) && Link::is_empty(lists.full), "All slots must be returned before pool dealloc");
 
-            let partial = NonNull::new_unchecked(&raw mut lists.partial);
-            let full = NonNull::new_unchecked(&raw mut lists.full);
-            let frozen = NonNull::new_unchecked(&raw mut lists.frozen);
-
-            debug_assert!(
-                Link::is_empty(partial) && Link::is_empty(full),
-                "All slots must be returned before deallocation"
-            );
-
-            let layout = Layout::new::<Segment<T, CAP>>();
-            while let Some(node) = Link::pop_head(frozen) {
+            let seg_layout = Layout::new::<Segment<T, CAP>>();
+            while let Some(node) = Link::pop_head(lists.frozen) {
                 let header = SegmentHeader::<T>::from_link(node);
-                dealloc(header.as_ptr().cast(), layout);
+                dealloc(header.as_ptr().cast(), seg_layout);
             }
-            // let mut current = lists.frozen.take();
-            // while let Some(seg) = current {
-            //     unsafe {
-            //         current = *(*seg.as_ptr()).next.get();
-            //         dealloc(seg.as_ptr() as *mut u8, layout);
-            //     }
-            // }
+
+            let link_layout = Layout::new::<Link>();
+            dealloc(lists.partial.as_ptr().cast(), link_layout);
+            dealloc(lists.full.as_ptr().cast(), link_layout);
+            dealloc(lists.frozen.as_ptr().cast(), link_layout);
             dealloc(inner_ptr.cast(), Layout::new::<PoolInner<T>>());
         }
     }
@@ -355,9 +346,9 @@ struct PoolInner<T> {
 /// they point to that one item, and the `prev` and `next` of that one item point back to the dummy.
 /// Otherwise, `next` points to the head of the list and `prev` to the tail.
 struct Lists<T> {
-    partial: Link,
-    full: Link,
-    frozen: Link,
+    partial: NonNull<Link>,
+    full: NonNull<Link>,
+    frozen: NonNull<Link>,
     // partial_head: Option<NonNull<SegmentHeader<T>>>,
     // partial_tail: Option<NonNull<SegmentHeader<T>>>,
     // full: Option<NonNull<SegmentHeader<T>>>,
@@ -375,51 +366,59 @@ struct Blocked;
 impl<T> Lists<T> {
     /// Returns a new uninitialized `Lists` that must be initialized before use.
     fn uninit(min: u32) -> Self {
-        Lists {
-            partial: Link::uninit(),
-            full: Link::uninit(),
-            frozen: Link::uninit(),
-            // partial_head: None,
-            // partial_tail: None,
-            // full: None,
-            // frozen: None,
-            num_segments: 0,
-            min_segments: min,
-            _pd: PhantomData,
+        unsafe {
+            let layout = Layout::new::<Link>();
+
+            let alloc_link = || {
+                let ptr = alloc(layout) as *mut Link;
+                if ptr.is_null() {
+                    handle_alloc_error(layout);
+                }
+                ptr.write(Link::uninit());
+                NonNull::new_unchecked(ptr)
+            };
+
+            Lists {
+                partial: alloc_link(),
+                full: alloc_link(),
+                frozen: alloc_link(),
+                num_segments: 0,
+                min_segments: min,
+                _pd: PhantomData,
+            }
         }
     }
 
-    /// Initializes the list links using the current pointers of `self`.
+    /// Initializes the links using the current pointers of `lists`.
     ///
     /// # Safety
     ///
-    /// Must be called only after `self` resides at its final memory address.
-    unsafe fn init(&mut self) {
+    /// Must be called only after `lists` resides at its final memory address.
+    #[inline]
+    unsafe fn init_to_self(lists: NonNull<Lists<T>>) {
+        let ptr = lists.as_ptr();
         unsafe {
-            let partial_ptr = NonNull::new_unchecked(&mut self.partial as *mut Link);
-            let full_ptr = NonNull::new_unchecked(&mut self.full as *mut Link);
-            let frozen_ptr = NonNull::new_unchecked(&mut self.frozen as *mut Link);
-
-            Link::init(partial_ptr);
-            Link::init(full_ptr);
-            Link::init(frozen_ptr);
+            Link::init((*ptr).partial);
+            Link::init((*ptr).full);
+            Link::init((*ptr).frozen);
         }
     }
 
     // Returns an acquired reference to a partially filled segment, or None when no segments are
     // available for allocation. Returns an error if the list is blocked.
+    //
+    // # Safety
+    //
+    // `lists` must be valid to dereference.
     #[inline]
-    fn acquire_partial(&mut self) -> Result<Option<NonNull<SegmentHeader<T>>>, Blocked> {
-        if let Some(header) = self.partial_head() {
-            let ptr = header.as_ptr();
-            // SAFETY: `header_ptr` is valid to dereference.
-            // Segment memory is not deallocated while the lock is held.
-            unsafe {
-                // if (*rc_ptr).fetch_add(1, Acquire) < 0 {
-                //     // The segment is frozen and the freezer is on the way to the lock to clear it.
-                //     (*rc_ptr).fetch_sub(1, Release);
-                //     return Err(Blocked);
-                // }
+    unsafe fn acquire_partial(
+        lists: NonNull<Lists<T>>,
+    ) -> Result<Option<NonNull<SegmentHeader<T>>>, Blocked> {
+        // SAFETY: `header_ptr` is valid to dereference.
+        // Segment memory is not deallocated while the lock is held.
+        unsafe {
+            if let Some(header) = Self::partial_head(lists) {
+                let ptr = header.as_ptr();
                 let prev_rc = (*ptr).rc.value.fetch_add(1, Acquire);
                 if prev_rc < 0 || prev_rc as usize >= (*ptr).cap {
                     // The segment is frozen and the freezer is on the way to clear it,
@@ -428,32 +427,33 @@ impl<T> Lists<T> {
                     (*ptr).rc.value.fetch_sub(1, Relaxed);
                     return Err(Blocked);
                 }
+                return Ok(Some(header));
             }
-            return Ok(Some(header));
-        }
 
-        // Try to recycle a frozen segment.
-        if let Some(header) = self.pop_frozen_to_partial_head() {
-            // SAFETY: `header` is valid to dereference.
-            // Segment memory is not deallocated while the lock is held.
-            unsafe { (*header.as_ptr()).rc.value.store(1, Release) };
-            return Ok(Some(header));
-        }
+            // Try to recycle a frozen segment.
+            if let Some(header) = Self::pop_frozen_to_partial_head(lists) {
+                (*header.as_ptr()).rc.value.store(1, Release);
+                return Ok(Some(header));
+            }
 
-        // The pool has nothing available.
-        Ok(None)
+            Ok(None)
+        }
     }
 
-    /// Returns a pointer to the head of the partial list, or None when the list is empty.
+    /// Returns a pointer to the head of the partial list, or None when empty.
+    ///
+    /// # Safety
+    ///
+    /// `lists` is valid to dereference.
     #[inline]
-    fn partial_head(&self) -> Option<NonNull<SegmentHeader<T>>> {
-        let partial = NonNull::from(&self.partial);
-        // SAFETY: `self.partial.next` is inside an allocated `SegmentHeader`.
+    unsafe fn partial_head(lists: NonNull<Lists<T>>) -> Option<NonNull<SegmentHeader<T>>> {
         unsafe {
+            let partial = (*lists.as_ptr()).partial;
             if Link::is_empty(partial) {
                 return None;
             }
-            Some(SegmentHeader::from_link(self.partial.next))
+            let next_link = *(*partial.as_ptr()).next.get();
+            Some(SegmentHeader::from_link(next_link))
         }
     }
 
@@ -461,13 +461,12 @@ impl<T> Lists<T> {
     ///
     /// # Safety
     ///
-    /// `header` must be valid to dereference.
+    /// `lists` and `header` must be valid to dereference.
     #[inline]
-    unsafe fn move_partial_to_full(&mut self, header: NonNull<SegmentHeader<T>>) {
+    unsafe fn move_partial_to_full(lists: NonNull<Lists<T>>, header: NonNull<SegmentHeader<T>>) {
         unsafe {
-            let list = NonNull::new_unchecked(&raw mut self.full);
             let link = SegmentHeader::link_ptr(header);
-            Link::move_head(list, link);
+            Link::move_head((*lists.as_ptr()).full, link);
         }
     }
 
@@ -475,13 +474,12 @@ impl<T> Lists<T> {
     ///
     /// # Safety
     ///
-    /// `header` must be valid to dereference.
+    /// `lists` and `header` must be valid to dereference.
     #[inline]
-    unsafe fn move_partial_to_frozen(&mut self, header: NonNull<SegmentHeader<T>>) {
+    unsafe fn move_partial_to_frozen(lists: NonNull<Lists<T>>, header: NonNull<SegmentHeader<T>>) {
         unsafe {
-            let list = NonNull::new_unchecked(&raw mut self.frozen);
             let link = SegmentHeader::link_ptr(header);
-            Link::move_head(list, link);
+            Link::move_head((*lists.as_ptr()).frozen, link);
         }
     }
 
@@ -489,47 +487,55 @@ impl<T> Lists<T> {
     ///
     /// # Safety
     ///
-    /// `header` must be valid to dereference.
+    /// `lists` and `header` must be valid to dereference.
     #[inline]
-    unsafe fn move_full_to_partial_tail(&mut self, header: NonNull<SegmentHeader<T>>) {
+    unsafe fn move_full_to_partial_tail(
+        lists: NonNull<Lists<T>>,
+        header: NonNull<SegmentHeader<T>>,
+    ) {
         unsafe {
-            let list = NonNull::new_unchecked(&raw mut self.partial);
             let link = SegmentHeader::link_ptr(header);
-            Link::move_tail(list, link);
+            Link::move_tail((*lists.as_ptr()).partial, link);
         }
     }
 
     /// Pops a segment off the frozen list head and decrements segment count.
+    ///
+    /// # Safety
+    ///
+    /// `lists` must be valid to dereference.
     #[inline]
-    fn pop_frozen(&mut self) -> Option<NonNull<SegmentHeader<T>>> {
-        // SAFETY: `first_frozen_link` is inside an allocated `SegmentHeader`.
-        let header = unsafe {
-            let list = NonNull::new_unchecked(&raw mut self.frozen);
-            let first_frozen_link = Link::pop_head(list)?; // Empty list, early return.
-            SegmentHeader::from_link(first_frozen_link)
-        };
-        self.num_segments = self.num_segments.saturating_sub(1);
-        Some(header)
+    unsafe fn pop_frozen(lists: NonNull<Lists<T>>) -> Option<NonNull<SegmentHeader<T>>> {
+        let ptr = lists.as_ptr();
+        unsafe {
+            let first_frozen_link = Link::pop_head((*ptr).frozen)?; // Empty list, early return.
+            (*ptr).num_segments = (*ptr).num_segments.saturating_sub(1);
+            Some(SegmentHeader::from_link(first_frozen_link))
+        }
     }
 
     /// Pops a segment off the frozen list and resets it before attaching it to the partial list head.
+    ///
+    /// # Safety
+    ///
+    /// `lists` must be valid to dereference.
     #[inline]
-    fn pop_frozen_to_partial_head(&mut self) -> Option<NonNull<SegmentHeader<T>>> {
+    unsafe fn pop_frozen_to_partial_head(
+        lists: NonNull<Lists<T>>,
+    ) -> Option<NonNull<SegmentHeader<T>>> {
+        let ptr = lists.as_ptr();
         unsafe {
-            let list = NonNull::new_unchecked(&raw mut self.frozen);
-            if Link::is_empty(list) {
+            if Link::is_empty((*ptr).frozen) {
                 return None;
             }
 
-            let first_frozen_link = self.frozen.next;
-            let partial_list = NonNull::new_unchecked(&raw mut self.partial);
+            let frozen_ptr = (*ptr).frozen.as_ptr();
+            let first_frozen_link = *(*frozen_ptr).next.get();
 
-            // Segments on partial **must** be ready to use, so reset it.
             let header = SegmentHeader::from_link(first_frozen_link);
             SegmentHeader::reset(header);
 
-            // Attach it.
-            Link::move_head(partial_list, first_frozen_link);
+            Link::move_head((*ptr).partial, first_frozen_link);
             Some(header)
         }
     }
@@ -538,194 +544,24 @@ impl<T> Lists<T> {
     ///
     /// # Safety
     ///
-    /// `header` must be valid to dereference.
+    /// `lists` and `header` must be valid to dereference.
     #[inline]
-    unsafe fn push_to_partial_head(&mut self, header: NonNull<SegmentHeader<T>>) {
+    unsafe fn push_to_partial_head(lists: NonNull<Lists<T>>, header: NonNull<SegmentHeader<T>>) {
+        let ptr = lists.as_ptr();
         unsafe {
-            let list = NonNull::new_unchecked(&raw mut self.partial);
+            (*ptr).num_segments = (*ptr).num_segments.saturating_add(1);
             let link = SegmentHeader::link_ptr(header);
-            Link::push_head(list, link);
+            Link::push_head((*ptr).partial, link);
         }
-        self.num_segments = self.num_segments.saturating_add(1);
     }
-
-    // /// Attaches a segment to the partial list head and increments segment count.
-    // ///
-    // /// # Safety
-    // ///
-    // /// `header` must be valid to dereference.
-    // #[inline]
-    // unsafe fn push_to_partial_head(&mut self, header: NonNull<SegmentHeader<T>>) {
-    //     let header_ptr = header.as_ptr();
-    //     // SAFETY: This thread has exclusive access to the lists.
-    //     unsafe {
-    //         *(*header_ptr).prev.get() = None;
-    //         *(*header_ptr).next.get() = self.partial_head;
-    //         if let Some(head) = self.partial_head {
-    //             *(*head.as_ptr()).prev.get() = Some(header);
-    //         } else {
-    //             // Partial list is empty, so this segment also becomes the tail.
-    //             self.partial_tail = Some(header);
-    //         }
-    //     }
-    //     self.partial_head = Some(header);
-    //     self.num_segments += 1;
-    // }
-    //
-    // /// Moves a segment in the partial list to the full list.
-    // ///
-    // /// # Safety
-    // ///
-    // /// `header` must be valid to dereference.
-    // #[inline]
-    // unsafe fn move_partial_to_full(&mut self, header: NonNull<SegmentHeader<T>>) {
-    //     let header_ptr = header.as_ptr();
-    //     unsafe {
-    //         let prev_seg = *(*header_ptr).prev.get();
-    //         let next_seg = *(*header_ptr).next.get();
-    //
-    //         // Detach from partial list.
-    //         if let Some(prev) = prev_seg {
-    //             *(*prev.as_ptr()).next.get() = next_seg;
-    //         } else {
-    //             self.partial_head = next_seg;
-    //         }
-    //
-    //         if let Some(next) = next_seg {
-    //             *(*next.as_ptr()).prev.get() = prev_seg;
-    //         } else {
-    //             self.partial_tail = prev_seg;
-    //         }
-    //
-    //         // Attach to full list.
-    //         *(*header_ptr).prev.get() = None;
-    //         *(*header_ptr).next.get() = self.full;
-    //         if let Some(head) = self.full {
-    //             *(*head.as_ptr()).prev.get() = Some(header);
-    //         }
-    //         self.full = Some(header);
-    //     }
-    // }
-    //
-    // /// Moves the frozen list head to the partial list.
-    // #[inline]
-    // fn pop_frozen_to_partial_head(&mut self) {
-    //     let Some(head) = self.frozen else { return };
-    //     let head_ptr = head.as_ptr();
-    //     // SAFETY: This thread has exclusive access to the lists.
-    //     unsafe {
-    //         // Detach from frozen list.
-    //         let next_seg = *(*head_ptr).next.get();
-    //         self.frozen = next_seg;
-    //         if let Some(header) = next_seg {
-    //             *(*header.as_ptr()).prev.get() = None;
-    //         }
-    //         *(*head_ptr).next.get() = self.partial_head;
-    //         *(*head_ptr).prev.get() = None;
-    //         if let Some(header) = self.partial_head {
-    //             *(*header.as_ptr()).prev.get() = Some(head);
-    //         } else {
-    //             // Partial list is empty, so this segment also becomes the tail.
-    //             self.partial_tail = Some(head);
-    //         }
-    //         self.partial_head = Some(head);
-    //     }
-    // }
-    //
-    // /// Moves a segment in the partial list to the frozen list.
-    // ///
-    // /// # Safety
-    // ///
-    // /// `header` must be valid to dereference.
-    // #[inline]
-    // unsafe fn move_partial_to_frozen(&mut self, header: NonNull<SegmentHeader<T>>) {
-    //     let header_ptr = header.as_ptr();
-    //     unsafe {
-    //         // Detach from partial list.
-    //         let prev_seg = *(*header_ptr).prev.get();
-    //         let next_seg = *(*header_ptr).next.get();
-    //         if let Some(prev_seg) = prev_seg {
-    //             *(*prev_seg.as_ptr()).next.get() = next_seg;
-    //         } else {
-    //             self.partial_head = next_seg;
-    //         }
-    //         if let Some(next_seg) = next_seg {
-    //             *(*next_seg.as_ptr()).prev.get() = prev_seg;
-    //         } else {
-    //             self.partial_tail = prev_seg;
-    //         }
-    //
-    //         // Attach to frozen list.
-    //         *(*header_ptr).prev.get() = None;
-    //         *(*header_ptr).next.get() = self.frozen;
-    //         if let Some(frozen_header) = self.frozen {
-    //             *(*frozen_header.as_ptr()).prev.get() = Some(header);
-    //         }
-    //         self.frozen = Some(header);
-    //     }
-    // }
-    //
-    // /// Moves a segment in the full list to the partial list tail.
-    // ///
-    // /// # Safety
-    // ///
-    // /// `header` must be valid to dereference.
-    // #[inline]
-    // unsafe fn move_full_to_partial_tail(&mut self, header: NonNull<SegmentHeader<T>>) {
-    //     let header_ptr = header.as_ptr();
-    //     unsafe {
-    //         // Detach from full list.
-    //         let prev_seg = *(*header_ptr).prev.get();
-    //         let next_seg = *(*header_ptr).next.get();
-    //         if let Some(prev_head) = prev_seg {
-    //             *(*prev_head.as_ptr()).next.get() = next_seg;
-    //         } else {
-    //             self.full = next_seg;
-    //         }
-    //         if let Some(next_head) = next_seg {
-    //             *(*next_head.as_ptr()).prev.get() = prev_seg;
-    //         }
-    //
-    //         // Attach to partial tail.
-    //         *(*header_ptr).next.get() = None;
-    //         *(*header_ptr).prev.get() = self.partial_tail;
-    //         if let Some(tail) = self.partial_tail {
-    //             *(*tail.as_ptr()).next.get() = Some(header);
-    //         } else {
-    //             // Partial list is empty, so this segment also becomes the head.
-    //             self.partial_head = Some(header);
-    //         }
-    //         self.partial_tail = Some(header);
-    //     }
-    // }
-    //
-    // /// Pops a segment from the frozen list head and decrements segment count.
-    // #[inline]
-    // fn pop_frozen(&mut self) -> Option<NonNull<SegmentHeader<T>>> {
-    //     let head = self.frozen?;
-    //     let head_ptr = head.as_ptr();
-    //     unsafe {
-    //         // Detach from frozen list.
-    //         let next_seg = *(*head_ptr).next.get();
-    //         self.frozen = next_seg;
-    //         if let Some(header) = next_seg {
-    //             *(*header.as_ptr()).prev.get() = None;
-    //         }
-    //
-    //         *(*head_ptr).next.get() = None;
-    //         *(*head_ptr).prev.get() = None;
-    //     }
-    //     self.num_segments -= 1;
-    //     Some(head)
-    // }
 } // impl Lists
 
 /// Circular list links. The internal links are dangling pointers and must be initialized with
 /// `init` after reaching a stable memory address.
 #[repr(C)]
 struct Link {
-    prev: NonNull<Link>,
-    next: NonNull<Link>,
+    prev: UnsafeCell<NonNull<Link>>,
+    next: UnsafeCell<NonNull<Link>>,
 }
 
 impl Link {
@@ -733,7 +569,10 @@ impl Link {
     /// The returned structure must be initialized using `Link::init` before use.
     #[inline]
     const fn uninit() -> Self {
-        Self { prev: NonNull::dangling(), next: NonNull::dangling() }
+        Self {
+            prev: UnsafeCell::new(NonNull::dangling()),
+            next: UnsafeCell::new(NonNull::dangling()),
+        }
     }
 
     /// Initializes `list` as linking to itself.
@@ -745,8 +584,8 @@ impl Link {
     unsafe fn init(list: NonNull<Link>) {
         let ptr = list.as_ptr();
         unsafe {
-            (*ptr).next = list;
-            (*ptr).prev = list;
+            *(*ptr).next.get() = list;
+            *(*ptr).prev.get() = list;
         }
     }
 
@@ -757,7 +596,7 @@ impl Link {
     /// `list` must be valid to dereference.
     #[inline]
     unsafe fn is_empty(list: NonNull<Link>) -> bool {
-        unsafe { (*list.as_ptr()).next == list }
+        unsafe { *(*list.as_ptr()).next.get() == list }
     }
 
     /// Detaches `seg` from its current list by storing dangling pointers.
@@ -769,12 +608,12 @@ impl Link {
     unsafe fn unlink(seg: NonNull<Link>) {
         let ptr = seg.as_ptr();
         unsafe {
-            let prev = (*ptr).prev;
-            let next = (*ptr).next;
-            (*prev.as_ptr()).next = next;
-            (*next.as_ptr()).prev = prev;
-            (*ptr).prev = NonNull::dangling();
-            (*ptr).next = NonNull::dangling();
+            let prev = *(*ptr).prev.get();
+            let next = *(*ptr).next.get();
+            *(*prev.as_ptr()).next.get() = next;
+            *(*next.as_ptr()).prev.get() = prev;
+            *(*ptr).prev.get() = NonNull::dangling();
+            *(*ptr).next.get() = NonNull::dangling();
         }
     }
 
@@ -789,17 +628,17 @@ impl Link {
         let seg_ptr = seg.as_ptr();
         unsafe {
             // Patch old list.
-            let old_prev = (*seg_ptr).prev;
-            let old_next = (*seg_ptr).next;
-            (*old_prev.as_ptr()).next = old_next;
-            (*old_next.as_ptr()).prev = old_prev;
+            let prev = *(*seg_ptr).prev.get();
+            let next = *(*seg_ptr).next.get();
+            *(*prev.as_ptr()).next.get() = next;
+            *(*next.as_ptr()).prev.get() = prev;
 
             // Attach to new list head.
-            let first = (*list_ptr).next;
-            (*seg_ptr).next = first;
-            (*seg_ptr).prev = list;
-            (*first.as_ptr()).prev = seg;
-            (*list_ptr).next = seg;
+            let first = *(*list_ptr).next.get();
+            *(*seg_ptr).prev.get() = list;
+            *(*seg_ptr).next.get() = first;
+            *(*first.as_ptr()).prev.get() = seg;
+            *(*list_ptr).next.get() = seg;
         }
     }
 
@@ -814,17 +653,17 @@ impl Link {
         let seg_ptr = seg.as_ptr();
         unsafe {
             // Patch old list.
-            let old_prev = (*seg_ptr).prev;
-            let old_next = (*seg_ptr).next;
-            (*old_prev.as_ptr()).next = old_next;
-            (*old_next.as_ptr()).prev = old_prev;
+            let old_prev = *(*seg_ptr).prev.get();
+            let old_next = *(*seg_ptr).next.get();
+            *(*old_prev.as_ptr()).next.get() = old_next;
+            *(*old_next.as_ptr()).prev.get() = old_prev;
 
             // Attach to new list tail.
-            let last = (*list_ptr).prev;
-            (*seg_ptr).next = list;
-            (*seg_ptr).prev = last;
-            (*last.as_ptr()).next = seg;
-            (*list_ptr).prev = seg;
+            let last = *(*list_ptr).prev.get();
+            *(*seg_ptr).prev.get() = last;
+            *(*seg_ptr).next.get() = list;
+            *(*last.as_ptr()).next.get() = seg;
+            *(*list_ptr).prev.get() = seg;
         }
     }
 
@@ -838,11 +677,11 @@ impl Link {
         let list_ptr = list.as_ptr();
         let seg_ptr = seg.as_ptr();
         unsafe {
-            let first = (*list_ptr).next;
-            (*seg_ptr).next = first;
-            (*seg_ptr).prev = list;
-            (*first.as_ptr()).prev = seg;
-            (*list_ptr).next = seg;
+            let first = *(*list_ptr).next.get();
+            *(*seg_ptr).prev.get() = list;
+            *(*seg_ptr).next.get() = first;
+            *(*first.as_ptr()).prev.get() = seg;
+            *(*list_ptr).next.get() = seg;
         }
     }
 
@@ -859,9 +698,9 @@ impl Link {
             if Self::is_empty(list) {
                 return None;
             }
-            let first = (*list.as_ptr()).next;
-            Self::unlink(first);
-            Some(first)
+            let first_link = *(*list.as_ptr()).next.get();
+            Self::unlink(first_link);
+            Some(first_link)
         }
     }
 } // impl Links
@@ -944,7 +783,6 @@ impl<T> SegmentHeader<T> {
             rc: Pad::new(0.into()),
             bump_index: Pad::new(0.into()),
             reserved: Sleeplock::new(0),
-            // TODO: Init this
             list_link: Link::uninit(),
             // prev: None.into(),
             // next: None.into(),
@@ -983,26 +821,24 @@ impl<T> SegmentHeader<T> {
     ///
     /// `header` must be valid to dereference.
     #[inline]
-    unsafe fn lock_reserve(header: NonNull<Self>) /* -> bool */
-    {
+    unsafe fn lock_reserve(header: NonNull<Self>) {
         let header_ptr = header.as_ptr();
         unsafe {
             let mut segment_lock = (*header_ptr).reserved.lock();
+
             // This path assumes the slot has something available, otherwise the acquisition should
             // have been rejected.
             debug_assert!(*segment_lock < (*header_ptr).cap);
-            // if *segment_lock == (*header_ptr).cap {
-            //     // Segment has no capacity.
-            //     return false;
-            // }
+
             *segment_lock += 1;
             if *segment_lock == (*header_ptr).cap {
                 // This reservation exhausted the segment, move it to full.
                 let inner_ptr = (*header_ptr).pool_inner.as_ptr();
-                (*inner_ptr).lists.lock().move_partial_to_full(header);
+                let mut lists_lock = (*inner_ptr).lists.lock();
+                let lists = NonNull::new_unchecked(&raw mut (*lists_lock));
+                Lists::move_partial_to_full(lists, header);
             }
         }
-        // true
     }
 
     /// Returns a slot to the segment.
@@ -1022,28 +858,30 @@ impl<T> SegmentHeader<T> {
         }
     }
 
-    /// Attaches `slot` to an array partition. This effectively makes the slot allocatable again,
-    /// so it should only be called when finished handling the slot. Slot must be allocated from
-    /// the header.
+    /// Attaches `slot` to an array partition in `header`. This effectively makes the slot
+    /// allocatable again, so it should only be called when finished handling the slot.
+    /// Slot must be allocated from the header.
     ///
     /// # Safety
     ///
     /// `header` and `slot` must be valid to dereference, and `slot` must be allocated from `header`.
     #[inline]
     unsafe fn lock_push_partition(header: NonNull<Self>, slot: NonNull<Slot<T>>) {
-        let header_ptr = header.as_ptr();
+        let ptr = header.as_ptr();
         unsafe {
             let index = Self::natural_index(header, slot);
-            let (mut lock, index) = (0..(*header_ptr).partitions.len())
+            let num_partitions = (*ptr).partitions.len();
+
+            let (mut lock, index) = (0..num_partitions)
                 .find_map(|offset| {
-                    let index = (index + offset) % (*header_ptr).partitions.len();
-                    (*header_ptr).partitions[index].value.try_lock().map(|lock| (lock, index))
+                    let index = (index + offset) % (*ptr).partitions.len();
+                    (*ptr).partitions[index].value.try_lock().map(|lock| (lock, index))
                 })
-                .unwrap_or_else(|| ((*header_ptr).partitions[index].value.lock(), index));
+                .unwrap_or_else(|| ((*ptr).partitions[index].value.lock(), index));
 
             (*slot.as_ptr()).payload.next = *lock;
             *lock = Some(slot);
-            (*header_ptr).partitions_bm.value.fetch_or(1u32 << index, Release);
+            (*ptr).partitions_bm.value.fetch_or(1u32 << index, Release);
         }
     }
 
@@ -1054,33 +892,34 @@ impl<T> SegmentHeader<T> {
     /// `header` must be valid to dereference.
     #[inline]
     unsafe fn lock_release_unreserve(header: NonNull<Self>) {
-        let header_ptr = header.as_ptr();
+        let ptr = header.as_ptr();
         // SAFETY: `header_ptr` is valid to dereference, so it is okay to grab `inner_ptr` and
         // dereference that too, because `PoolInner` lives as long as the pool.
         unsafe {
-            let inner_ptr = (*header_ptr).pool_inner.as_ptr();
-            let mut segment_lock = (*header_ptr).reserved.lock();
+            let inner_ptr = (*ptr).pool_inner.as_ptr();
+            let mut segment_lock = (*ptr).reserved.lock();
+
             debug_assert!(*segment_lock > 0);
+
             // If the segment is no longer full, move it off the full list.
             *segment_lock -= 1;
-            if *segment_lock == (*header_ptr).cap - 1 {
+            if *segment_lock == (*ptr).cap - 1 {
                 let mut lists_lock = (*inner_ptr).lists.lock();
-                lists_lock.move_full_to_partial_tail(header);
+                let lists = NonNull::new_unchecked(&raw mut (*lists_lock));
+                Lists::move_full_to_partial_tail(lists, header);
             }
 
             // Reference release and opportunistic freeze attempt.
-            if (*header_ptr).rc.value.fetch_sub(1, Release) == 1
-                && (*header_ptr)
-                    .rc
-                    .value
-                    .compare_exchange(0, Self::FROZEN, Acquire, Relaxed)
-                    .is_ok()
+            if (*ptr).rc.value.fetch_sub(1, Release) == 1
+                && (*ptr).rc.value.compare_exchange(0, Self::FROZEN, Acquire, Relaxed).is_ok()
             {
                 let mut lists_lock = (*inner_ptr).lists.lock();
+                let lists = NonNull::new_unchecked(&raw mut (*lists_lock));
+
                 // Frozen list requires no aliasing on its segments. Move the segment over and
                 // release the lists lock when all reads/writes to the segment are done.
                 drop(segment_lock);
-                lists_lock.move_partial_to_frozen(header);
+                Lists::move_partial_to_frozen(lists, header);
             }
         }
     }
@@ -1119,6 +958,7 @@ impl<T> SegmentHeader<T> {
         // This thread has exclusive access to it for the duration of the call.
         unsafe {
             let reserved_ptr = *(*header_ptr).reserved.data_ptr();
+
             #[rustfmt::skip]
             debug_assert_eq!(reserved_ptr, 0, "Expected segment to be unreserved, has {} reservations", reserved_ptr);
 
@@ -1170,10 +1010,12 @@ impl PoolStats {
         }
     }
 
+    /// Increments the allocating counter and returns a guard to decrement it on drop.
     fn is_allocating<'a>(&'a self) -> AtomicIncrementGuard<'a> {
         AtomicIncrementGuard::new(&self.in_flight_allocs.value)
     }
 
+    /// Increments the deallocating counter and returns a guard to decrement it on drop.
     fn is_deallocating<'a>(&'a self) -> AtomicIncrementGuard<'a> {
         AtomicIncrementGuard::new(&self.in_flight_deallocs.value)
     }
@@ -1199,8 +1041,9 @@ impl<T, const CAP: usize> Segment<T, CAP> {
     /// `inner` must be valid to dereference.
     unsafe fn new_on_heap(inner: NonNull<PoolInner<T>>) -> NonNull<Self> {
         let layout = Layout::new::<Self>();
-
         // SAFETY: This block allocates some memory and initializes it.
+        // Remaining unsafety comes from pointer dereferences, but since this block allocates the
+        // memory and checks it, it should be safe.
         unsafe {
             let header_ptr: *mut SegmentHeader<T> = alloc(layout).cast();
             if header_ptr.is_null() {
@@ -1231,17 +1074,17 @@ impl<T, const CAP: usize> Segment<T, CAP> {
     /// `seg` must be valid to dereference.
     #[inline]
     fn alloc_reserved(seg: NonNull<Self>, value: T) -> NonNull<Slot<T>> {
-        let seg_ptr = seg.as_ptr();
+        let ptr = seg.as_ptr();
         // SAFETY: `seg_ptr` is valid to dereference.
         // Segment memory is never deallocated while threads hold acquired references.
         unsafe {
-            debug_assert!((*seg_ptr).header.rc.value.load(Acquire) > 0);
+            debug_assert!((*ptr).header.rc.value.load(Acquire) > 0);
 
-            let bump_index = (*seg_ptr).header.bump_index.value.fetch_add(1, Acquire);
+            let bump_index = (*ptr).header.bump_index.value.fetch_add(1, Acquire);
             debug_assert_ne!(bump_index, u64::MAX);
 
             let slot = if bump_index < (CAP as u64) {
-                let slot = (*seg_ptr).slots[bump_index as usize].get();
+                let slot = (*ptr).slots[bump_index as usize].get();
                 debug_assert!(!slot.is_null());
                 // It is okay to make a `NonNull` here because the pointer is definitely non-null,
                 // see safety comment above.
@@ -1262,12 +1105,12 @@ impl<T, const CAP: usize> Segment<T, CAP> {
     /// `seg` must be valid to dereference.
     #[inline]
     unsafe fn alloc_reserved_from_partition(seg: NonNull<Self>) -> NonNull<Slot<T>> {
-        let seg_ptr = seg.as_ptr();
+        let ptr = seg.as_ptr();
         // SAFETY: `seg_ptr` is a valid pointer to allocated and initialized memory.
         // Segment memory is never deallocated while threads hold acquired references.
         unsafe {
             let mut partition_head_lock = {
-                let mut partition_head_lock = (*seg_ptr).header.partition_head.value.lock();
+                let mut partition_head_lock = (*ptr).header.partition_head.value.lock();
                 if let Some(head) = *partition_head_lock {
                     *partition_head_lock = (*head.as_ptr()).payload.next;
                     return head;
@@ -1277,7 +1120,7 @@ impl<T, const CAP: usize> Segment<T, CAP> {
 
             // Steal a list into the partition head.
             let list = 'steal: loop {
-                let mut map = (*seg_ptr).header.partitions_bm.value.load(Acquire);
+                let mut map = (*ptr).header.partitions_bm.value.load(Acquire);
                 debug_assert!(map != 0, "Bitmap must be >0 while holding lock");
 
                 while map != 0 {
@@ -1285,9 +1128,9 @@ impl<T, const CAP: usize> Segment<T, CAP> {
                     let mask = 1u32 << index;
                     map &= !mask;
 
-                    if let Some(mut guard) = (*seg_ptr).header.partitions[index].value.try_lock() {
+                    if let Some(mut guard) = (*ptr).header.partitions[index].value.try_lock() {
                         let head = guard.take();
-                        (*seg_ptr).header.partitions_bm.value.fetch_and(!mask, Release);
+                        (*ptr).header.partitions_bm.value.fetch_and(!mask, Release);
                         if let Some(list) = head {
                             break 'steal list;
                         }
@@ -1312,32 +1155,29 @@ mod pool_tests {
     use super::*;
 
     #[test]
+    #[rustfmt::skip]
     fn test_pool_segment_lifecycle() {
         let pool = ArrayPool::<u32, 4>::new(2);
         unsafe {
-            let partial =
-                NonNull::new_unchecked(&raw mut (*pool.inner.as_ptr()).lists.get_mut().partial);
-            let full = NonNull::new_unchecked(&raw mut (*pool.inner.as_ptr()).lists.get_mut().full);
-            let frozen =
-                NonNull::new_unchecked(&raw mut (*pool.inner.as_ptr()).lists.get_mut().frozen);
+            let lists_ptr = (*pool.inner.as_ptr()).lists.data_ptr();
 
             // Returns the number of items in `list`.
             let count_list = |list: NonNull<Link>| -> usize {
                 let mut count = 0;
 
                 let ptr = list.as_ptr();
-                let mut curr = (*ptr).next;
+                let mut curr = *(*ptr).next.get();
                 while curr != list {
                     count += 1;
-                    curr = (*curr.as_ptr()).next;
+                    curr = *(*curr.as_ptr()).next.get();
                 }
 
                 count
             };
 
-            assert_eq!(count_list(partial), 2, "Expected 2 segments in partial");
-            assert_eq!(count_list(full), 0, "Expected empty full list");
-            assert_eq!(count_list(frozen), 0, "Expected empty frozen list");
+            assert_eq!(count_list((*lists_ptr).partial), 2, "Expected 2 segments in partial");
+            assert_eq!(count_list((*lists_ptr).full), 0, "Expected empty full list");
+            assert_eq!(count_list((*lists_ptr).frozen), 0, "Expected empty frozen list");
 
             // The pool started with 2 segments and cap of 4, so 8 total slots.
             // Allocating 12 items means the pool will need to grow once, and then all 3
@@ -1348,21 +1188,21 @@ mod pool_tests {
                 orcs.push(slot);
             }
 
-            assert_eq!(count_list(partial), 0, "Expected empty partial list after allocating");
-            assert_eq!(count_list(full), 3, "Expected 3 segments in full list after allocating");
+            assert_eq!(count_list((*lists_ptr).partial), 0, "Expected empty partial list after allocating");
+            assert_eq!(count_list((*lists_ptr).full), 3, "Expected 3 segments in full list after allocating");
 
             drop(orcs);
 
-            assert_eq!(count_list(partial), 0, "Expected empty partial list after deallocating");
-            assert_eq!(count_list(full), 0, "Expected empty full list after deallocating");
-            assert_eq!(count_list(frozen), 3, "Expected 3 segments in frozen after deallocating");
+            assert_eq!(count_list((*lists_ptr).partial), 0, "Expected empty partial list after deallocating");
+            assert_eq!(count_list((*lists_ptr).full), 0, "Expected empty full list after deallocating");
+            assert_eq!(count_list((*lists_ptr).frozen), 3, "Expected 3 segments in frozen after deallocating");
 
             // The partial list is empty, but the frozen list still contains some segments.
             // Allocating again should recycle a frozen segment instead of growing.
             let _orc = pool.alloc(999);
 
-            assert_eq!(count_list(partial), 1, "Expected a segment to be recycled from frozen");
-            assert_eq!(count_list(frozen), 2, "Expected a segment to be popped from frozen");
+            assert_eq!(count_list((*lists_ptr).partial), 1, "Expected a segment to be recycled from frozen");
+            assert_eq!(count_list((*lists_ptr).frozen), 2, "Expected a segment to be popped from frozen");
         }
     }
 
@@ -1375,8 +1215,8 @@ mod pool_tests {
             Link::init(list);
             // `init` should make it point to itself.
             assert!(Link::is_empty(list));
-            assert_eq!(link.next, list);
-            assert_eq!(link.prev, list);
+            assert_eq!(*link.next.get(), list);
+            assert_eq!(*link.prev.get(), list);
         }
     }
 
@@ -1430,37 +1270,37 @@ mod pool_tests {
             Link::push_head(list1, n3);
 
             // Head should not equal the tail because the list has more than one item.
-            assert_eq!(list1.as_ref().next, n3);
-            assert_eq!(list1.as_ref().prev, n1);
+            assert_eq!(*list1.as_ref().next.get(), n3);
+            assert_eq!(*list1.as_ref().prev.get(), n1);
 
             Link::move_head(list2, n3);
 
             // An item was moved out of list1, but list1 should still have two items left in it.
             // Make sure everything still links together correctly.
-            assert_eq!(list1.as_ref().next, n2);
-            assert_eq!(list1.as_ref().prev, n1);
+            assert_eq!(*list1.as_ref().next.get(), n2);
+            assert_eq!(*list1.as_ref().prev.get(), n1);
 
-            assert_eq!(n2.as_ref().prev, list1);
-            assert_eq!(n1.as_ref().next, list1);
+            assert_eq!(*n2.as_ref().prev.get(), list1);
+            assert_eq!(*n1.as_ref().next.get(), list1);
 
-            assert_eq!(n2.as_ref().next, n1);
-            assert_eq!(n1.as_ref().prev, n2);
+            assert_eq!(*n2.as_ref().next.get(), n1);
+            assert_eq!(*n1.as_ref().prev.get(), n2);
 
-            assert_eq!(list2.as_ref().next, n3);
-            assert_eq!(list2.as_ref().prev, n3);
+            assert_eq!(*list2.as_ref().next.get(), n3);
+            assert_eq!(*list2.as_ref().prev.get(), n3);
 
             Link::move_tail(list2, n1);
 
             // Now list1 should have a single item.
-            assert_eq!(list1.as_ref().next, n2);
-            assert_eq!(list1.as_ref().prev, n2);
-            assert_eq!(n2.as_ref().next, list1);
-            assert_eq!(n2.as_ref().prev, list1);
+            assert_eq!(*list1.as_ref().next.get(), n2);
+            assert_eq!(*list1.as_ref().prev.get(), n2);
+            assert_eq!(*n2.as_ref().next.get(), list1);
+            assert_eq!(*n2.as_ref().prev.get(), list1);
 
-            assert_eq!(list2.as_ref().next, n3);
-            assert_eq!(list2.as_ref().prev, n1);
-            assert_eq!(n3.as_ref().next, n1);
-            assert_eq!(n1.as_ref().prev, n3);
+            assert_eq!(*list2.as_ref().next.get(), n3);
+            assert_eq!(*list2.as_ref().prev.get(), n1);
+            assert_eq!(*n3.as_ref().next.get(), n1);
+            assert_eq!(*n1.as_ref().prev.get(), n3);
         }
     }
 
