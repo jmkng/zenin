@@ -92,7 +92,6 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
         // SAFETY: `inner_ptr` is non-null and valid to dereference.
         // Initializing the lists here is fine because it is heap allocated and will not move again.
         unsafe {
-            // (*inner_ptr) = PoolInner::uninit(min);
             (*inner_ptr).stats = Pad::new(PoolStats::new());
             (*inner_ptr).stats.value.allocated_bytes.value = allocated_bytes;
             (*inner_ptr).lists = Sleeplock::new(Lists::uninit(min));
@@ -101,18 +100,11 @@ impl<T, const CAP: usize> ArrayPool<T, CAP> {
             // now `init` the links.
             let lists = NonNull::new_unchecked((*inner_ptr).lists.data_ptr());
             Lists::init_to_self(lists);
-            // (*lists).init();
-
-            // (*inner_ptr).stats.allocated_bytes = allocated_bytes;
-
-            // The memory is heap allocated, so it can be initialized now.
-            // lists.init();
 
             let inner_nn = NonNull::new_unchecked(inner_ptr);
             for _ in 0..min {
                 let seg: NonNull<Segment<T, CAP>> = Segment::new_on_heap(inner_nn);
                 Lists::push_to_partial_head(lists, seg.cast());
-                // lists.push_to_partial_head(seg.cast());
             }
 
             let grow_lock = Sleeplock::new(0);
@@ -332,14 +324,6 @@ struct PoolInner<T> {
     stats: Pad<PoolStats>,
 }
 
-// impl<T> PoolInner<T> {
-//     /// Returns a new uninitialized `PoolInner` that must be initialized before use.
-//     pub unsafe fn uninit(min: u32) -> Self {
-//         // Self { lists: Sleeplock::new(Lists::new(min)), stats: Pad::new(PoolStats::new()) }
-//         Self { lists: Sleeplock::new(Lists::uninit(min)), stats: Pad::new(PoolStats::new()) }
-//     }
-// }
-
 /// Manages the intrusive linked lists of segments that form the pool. Lists are circular and
 /// organized by capacity state. The three fields `partial`, `full`, and `frozen` are "dummy" links.
 /// When a list is empty, the dummy `prev` and `next` point to itself. When it has exactly one item,
@@ -349,10 +333,6 @@ struct Lists<T> {
     partial: NonNull<Link>,
     full: NonNull<Link>,
     frozen: NonNull<Link>,
-    // partial_head: Option<NonNull<SegmentHeader<T>>>,
-    // partial_tail: Option<NonNull<SegmentHeader<T>>>,
-    // full: Option<NonNull<SegmentHeader<T>>>,
-    // frozen: Option<NonNull<SegmentHeader<T>>>,
     /// Number of allocated segments across all lists.
     num_segments: u32,
     /// Minimum segments to keep allocated.
@@ -784,8 +764,6 @@ impl<T> SegmentHeader<T> {
             bump_index: Pad::new(0.into()),
             reserved: Sleeplock::new(0),
             list_link: Link::uninit(),
-            // prev: None.into(),
-            // next: None.into(),
             partitions_bm: Pad::new(0.into()),
         }
     }

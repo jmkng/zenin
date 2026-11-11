@@ -88,20 +88,6 @@ impl<T> Pad<T> {
     }
 }
 
-// impl<T> Deref for Pad<T> {
-//     type Target = T;
-//
-//     fn deref(&self) -> &T {
-//         &self.value
-//     }
-// }
-//
-// impl<T> DerefMut for Pad<T> {
-//     fn deref_mut(&mut self) -> &mut T {
-//         &mut self.value
-//     }
-// }
-
 impl<T: fmt::Debug> fmt::Debug for Pad<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Pad").field("value", &self.value).finish()
